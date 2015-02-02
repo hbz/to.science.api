@@ -24,7 +24,6 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import models.Globals;
 import models.Message;
 import models.Transformer;
 

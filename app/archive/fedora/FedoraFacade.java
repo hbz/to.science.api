@@ -491,6 +491,7 @@ class FedoraFacade implements FedoraInterface {
 	link.setPredicate(IS_PART_OF);
 	link.setObject(parentPid, false);
 	node.addRelation(link);
+	node.setParentPid(parentPid);
 	updateNode(node);
     }
 

@@ -30,24 +30,41 @@ public class ApplicationProfile {
     public final static String prefLabel = "http://www.w3.org/2004/02/skos/core#prefLabel";
 
     /**
-     * icon predicate will be analysed
+     * icon predicate will be analyzed
      */
     public final static String icon = "http://www.w3.org/1999/xhtml/vocab#icon";
 
     /**
-     * A map with URIs as key and lables as values
+     * name predicate will be analyzed
+     */
+    public final static String name = "http://hbz-nrw.de/regal#jsonName";
+
+    /**
+     * A map with URIs as key and labels,icons, shortnames as values
      */
     public Map<String, MapEntry> pMap = new HashMap<String, MapEntry>();
+
+    /**
+     * A map with Shortnames as key and labels,icons, uris as values
+     */
+    public Map<String, MapEntry> nMap = new HashMap<String, MapEntry>();
 
     private final String defaultMap = "/tmp/regal-default.ntriple";
 
     /**
-     * Associates lables to rdf predicates or known objects
+     * Associates labels to rdf predicates or known objects
      */
     public ApplicationProfile() {
 	loadDefaultConfig();
 	loadToMap("regal.turtle");
 	loadToMap("rpb.turtle");
+	loadNMap();
+    }
+
+    private void loadNMap() {
+	for (Entry<String, MapEntry> e : pMap.entrySet()) {
+	    nMap.put(e.getValue().name, e.getValue());
+	}
     }
 
     private void loadDefaultConfig() {
@@ -84,6 +101,11 @@ public class ApplicationProfile {
 		String iconStr = st.getObject().stringValue();
 		addIcon(key, iconStr);
 	    }
+	    if (name.equals(st.getPredicate().stringValue())) {
+		String key = st.getSubject().stringValue();
+		String nameStr = st.getObject().stringValue();
+		addName(key, nameStr);
+	    }
 	}
     }
 
@@ -102,6 +124,16 @@ public class ApplicationProfile {
 	    e = pMap.get(key);
 	}
 	e.icon = iconStr;
+	pMap.put(key, e);
+    }
+
+    void addName(String key, String nameStr) {
+	MapEntry e = new MapEntry();
+	if (pMap.containsKey(key)) {
+	    e = pMap.get(key);
+	}
+	e.uri = key;
+	e.name = nameStr;
 	pMap.put(key, e);
     }
 
