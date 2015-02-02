@@ -39,6 +39,7 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import models.Pair;
+import models.RegalObject;
 import models.Transformer;
 
 import org.openrdf.model.Statement;
@@ -524,6 +525,30 @@ public class Modify extends RegalAction {
 	return apply(nodes, n -> lobidify(n));
     }
 
+    /**
+     * @param node
+     *            links the node to it's parents parent.
+     * @return the updated node
+     */
+    public Node moveUp(Node node) {
+	String recentParent = node.getParentPid();
+	Node parent = new Read().readNode(recentParent);
+	String destinyPid = parent.getParentPid();
+	if (destinyPid == null || destinyPid.isEmpty())
+	    throw new UpdateNodeException(
+		    "Can't find valid destiny for move operation. "
+			    + node.getParentPid() + " parent of "
+			    + node.getPid() + " has no further parent.");
+	RegalObject object = new RegalObject();
+	object.setParentPid(destinyPid);
+	node = new Create().patchResource(node, object);
+
+	play.Logger.info("Move " + node.getPid() + " to new parent "
+		+ node.getParentPid() + ". Recent Parent was " + recentParent
+		+ ". Calculated destiny was " + destinyPid);
+	return node;
+    }
+
     @SuppressWarnings({ "serial", "javadoc" })
     public class MetadataNotFoundException extends RuntimeException {
 	public MetadataNotFoundException(Throwable e) {
@@ -535,6 +560,10 @@ public class Modify extends RegalAction {
     private class UpdateNodeException extends RuntimeException {
 	public UpdateNodeException(Throwable cause) {
 	    super(cause);
+	}
+
+	public UpdateNodeException(String msg) {
+	    super(msg);
 	}
     }
 

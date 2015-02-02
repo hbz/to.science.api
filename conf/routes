@@ -55,6 +55,7 @@ POST /resource/:pid/parts			controllers.Resource.updateSeq(pid)
 POST /resource/:pid/metadata		controllers.Resource.updateMetadata(pid)
 POST /resource/:pid/data			controllers.Resource.updateData(pid,md5?="")
 POST /resource/:pid/dc				controllers.Resource.updateDc(pid)
+POST /resource/:pid/moveUp			controllers.Resource.moveUp(pid)
 POST /resource/:namespace			controllers.Resource.createResource(namespace)
 
 

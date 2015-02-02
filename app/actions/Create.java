@@ -17,13 +17,9 @@
 package actions;
 
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
-import helper.HttpArchiveException;
 
 import java.util.List;
 
-import org.openrdf.rio.RDFFormat;
-
-import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Node;
 import models.RegalObject;
@@ -148,10 +144,23 @@ public class Create extends RegalAction {
     }
 
     private void linkWithParent(String parentPid, Node node) {
-	Globals.fedora.unlinkParent(node);
-	Globals.fedora.linkToParent(node, parentPid);
-	Globals.fedora.linkParentToNode(parentPid, node.getPid());
-	updateIndexAndCache(node);
+	try {
+	    play.Logger.debug("New parentPid " + parentPid);
+	    play.Logger.debug("Unlink " + node.getParentPid() + " from parent "
+		    + node.getParentPid());
+	    Globals.fedora.unlinkParent(node);
+	    play.Logger.debug("Link " + node.getParentPid() + " to parent "
+		    + parentPid);
+	    Globals.fedora.linkToParent(node, parentPid);
+	    play.Logger.debug("Link " + parentPid + " to child "
+		    + node.getPid());
+	    Globals.fedora.linkParentToNode(parentPid, node.getPid());
+	    play.Logger.debug("Ready!" + node.getPid() + " has parent "
+		    + node.getParentPid());
+	    updateIndexAndCache(node);
+	} catch (Exception e) {
+	    play.Logger.debug("", e);
+	}
     }
 
     private void updateTransformer(List<String> transformers, Node node) {
