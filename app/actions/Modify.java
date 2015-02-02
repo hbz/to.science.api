@@ -535,7 +535,7 @@ public class Modify extends RegalAction {
 	Node parent = new Read().readNode(recentParent);
 	String destinyPid = parent.getParentPid();
 	if (destinyPid == null || destinyPid.isEmpty())
-	    throw new UpdateNodeException(
+	    throw new HttpArchiveException(406,
 		    "Can't find valid destiny for move operation. "
 			    + node.getParentPid() + " parent of "
 			    + node.getPid() + " has no further parent.");
@@ -546,6 +546,31 @@ public class Modify extends RegalAction {
 	play.Logger.info("Move " + node.getPid() + " to new parent "
 		+ node.getParentPid() + ". Recent Parent was " + recentParent
 		+ ". Calculated destiny was " + destinyPid);
+	return node;
+    }
+
+    public Node copyMetadata(Node node, String field, String copySource) {
+	if (copySource.isEmpty()) {
+	    copySource = node.getParentPid();
+	}
+	Node parent = new Read().readNode(copySource);
+	String subject = node.getPid();
+	play.Logger.debug("Try to enrich " + node.getPid() + " with "
+		+ parent.getPid() + " . Looking for field " + field);
+	String pred = Globals.profile.nMap.get(field).uri;
+	List<String> value = RdfUtils.findRdfObjects(subject, pred,
+		parent.getMetadata(), RDFFormat.NTRIPLES);
+	String metadata = node.getMetadata();
+	if (metadata == null)
+	    metadata = "";
+	if (value != null && !value.isEmpty()) {
+	    metadata = RdfUtils.replaceTriple(subject, pred, value.get(0),
+		    true, metadata);
+	} else {
+	    throw new HttpArchiveException(406, "Source object " + copySource
+		    + " has no field: " + field);
+	}
+	updateMetadata(node, metadata);
 	return node;
     }
 

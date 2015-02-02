@@ -665,4 +665,17 @@ public class Resource extends MyController {
 	});
     }
 
+    @ApiOperation(produces = "application/json", nickname = "moveUp", value = "moveUp", notes = "Moves the resource to the parents parent. If parent has no parent, a HTTP 406 will be replied.", response = String.class, httpMethod = "POST")
+    public static Promise<Result> copyMetadata(@PathParam("pid") String pid,
+	    @QueryParam("field") String field,
+	    @QueryParam("copySource") String copySource) {
+	return new ModifyAction().call(pid, node -> {
+	    try {
+		Node result = modify.copyMetadata(node, field, copySource);
+		return getJsonResult(result);
+	    } catch (Exception e) {
+		return JsonMessage(new Message(e, 500));
+	    }
+	});
+    }
 }

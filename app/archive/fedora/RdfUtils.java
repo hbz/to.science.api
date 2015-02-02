@@ -504,7 +504,6 @@ public class RdfUtils {
     public static String replaceTriple(String subject, String predicate,
 	    String object, boolean isLiteral, final String metadata) {
 	try {
-
 	    InputStream is = new ByteArrayInputStream(
 		    metadata.getBytes("UTF-8"));
 	    RepositoryConnection con = readRdfInputStreamToRepository(is,
