@@ -1,6 +1,6 @@
 language: java
 env:
-  - PLAY_VERSION=2.2.3
+  - PLAY_VERSION=2.4.2
 jdk: oraclejdk8
 install:
   - mvn org.nanoko.playframework:play2-maven-plugin:install-play -Dplay2version=2.2.3 -Dplay2basedir=${HOME}/local/opt/regal

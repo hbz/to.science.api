@@ -1,12 +1,9 @@
-import com.github.play2war.plugin._
 
 name := "regal-api"
 
 version := "0.8.0-SNAPSHOT"
 
-Play2WarPlugin.play2WarSettings
-
-Play2WarKeys.servletVersion := "2.5"
+scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
   cache,
@@ -53,7 +50,7 @@ libraryDependencies ++= Seq(
   "org.openrdf.sesame" % "sesame-sail-memory" % "2.7.10",
   "org.openrdf.sesame" % "sesame-sail-nativerdf" % "2.7.10",
   "com.github.jsonld-java" % "jsonld-java-sesame" % "0.3" ,
-  "com.wordnik" %% "swagger-play2" % "1.3.5",
+  "pl.matisoft" %% "swagger-play24" % "1.4",
   "com.yourmediashelf.fedora.client" % "fedora-client" % "0.7",
   "com.yourmediashelf.fedora.client" % "fedora-client-core" % "0.7",
   "org.elasticsearch" % "elasticsearch" % "1.1.0",
@@ -65,7 +62,9 @@ libraryDependencies ++= Seq(
   "org.apache.ws.xmlschema" % "xmlschema" % "2.0.2"
 )
 
-play.Project.playJavaSettings
+val root = (project in file(".")).enablePlugins(PlayJava)
+
+ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers := Seq(Resolver.mavenLocal,"Maven Central Server" at "http://repo1.maven.org/maven2","edoweb releases" at "http://edoweb.github.com/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "http://maven.ontotext.com/content/repositories/aduna/" ,
 "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "http://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "http://m2.duraspace.org/content/repositories/thirdparty"
