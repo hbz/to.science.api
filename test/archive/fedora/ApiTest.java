@@ -40,7 +40,7 @@ import controllers.Resource;
 public class ApiTest extends BaseModelTest {
     final static Logger logger = LoggerFactory.getLogger(ApiTest.class);
 
-    @Test
+    
     public void objectLifeCycle() {
 	String pid = "test:1234567";
 	RegalObject object = new RegalObject();
