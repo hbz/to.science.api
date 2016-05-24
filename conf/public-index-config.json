@@ -6,11 +6,6 @@
 					"snowball":{
 						"type":"snowball",
 						"language":"German2"
-					},
-					"ngram":{
-						"type":"edgeNGram",
-						"min_gram":"1",
-						"max_gram":"40"
 					}
 					
 				},
@@ -24,23 +19,11 @@
 					"german_analyzer":{
 						"type":"custom",
 						"filter":[
-							"lowercase",
-							"stop",
-							"snowball"
+							"snowball",
+							"icu_folding"
 						],
-						"tokenizer":"standard"
-					},
-					"ngram_analyzer":{
-						"type":"custom",
-						"filter":[
-							"lowercase",
-							"stop",
-							"ngram",
-							"snowball"
-						],
-						"tokenizer":"letter"
+						"tokenizer":"icu_tokenizer"
 					}
-					
 				}
 				
 			}
@@ -80,10 +63,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -121,10 +112,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -162,10 +161,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -203,10 +210,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -244,10 +259,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -285,10 +308,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -326,10 +357,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -367,10 +406,18 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
 					
 				}
 				
@@ -388,6 +435,7 @@
 						}
 						
 					}
+					
 				},
 				{
 					"dates":{
@@ -399,6 +447,7 @@
 						}
 						
 					}
+					
 				},
 				{
 					"all":{
@@ -406,11 +455,21 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
+					
 				}
+				
 			]
 			
 		},
@@ -425,6 +484,7 @@
 						}
 						
 					}
+					
 				},
 				{
 					"dates":{
@@ -436,6 +496,7 @@
 						}
 						
 					}
+					
 				},
 				{
 					"all":{
@@ -443,11 +504,21 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
+					
 				}
+				
 			]
 			
 		},
@@ -462,6 +533,7 @@
 						}
 						
 					}
+					
 				},
 				{
 					"dates":{
@@ -473,6 +545,7 @@
 						}
 						
 					}
+					
 				},
 				{
 					"all":{
@@ -480,11 +553,21 @@
 						"match_mapping_type":"string",
 						"mapping":{
 							"type":"string",
-							"index":"not_analyzed"
+							"index":"german_analyzer"
 						}
 						
 					}
+					
+				},
+				{
+					"@id":{
+						"index_analyzer":"id_analyzer",
+						"type":"string",
+						"search_analyzer":"id_analyzer"
+					},
+					
 				}
+				
 			]
 			
 		}
