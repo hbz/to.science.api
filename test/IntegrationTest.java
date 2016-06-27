@@ -20,74 +20,74 @@ import org.junit.Test;
  */
 @SuppressWarnings("javadoc")
 public class IntegrationTest {
-    @Test
-    public void serverStarts() {
+	@Test
+	public void serverStarts() {
 
-    }
+	}
 
-    @Test
-    public void asksForAuthorization() {
+	@Test
+	public void asksForAuthorization() {
 
-    }
+	}
 
-    @Test
-    public void createObject() {
+	@Test
+	public void createObject() {
 
-    }
+	}
 
-    @Test
-    public void moveObject() {
+	@Test
+	public void moveObject() {
 
-    }
+	}
 
-    @Test
-    public void listObject() {
+	@Test
+	public void listObject() {
 
-    }
+	}
 
-    @Test
-    public void deleteObject() {
+	@Test
+	public void deleteObject() {
 
-    }
+	}
 
-    @Test
-    public void listObjects() {
+	@Test
+	public void listObjects() {
 
-    }
+	}
 
-    @Test
-    public void accessObject_fail() {
+	@Test
+	public void accessObject_fail() {
 
-    }
+	}
 
-    @Test
-    public void accessObject_succeed() {
+	@Test
+	public void accessObject_succeed() {
 
-    }
+	}
 
-    @Test
-    public void addUrn() {
+	@Test
+	public void addUrn() {
 
-    }
+	}
 
-    @Test
-    public void createTransformer() {
+	@Test
+	public void createTransformer() {
 
-    }
+	}
 
-    @Test
-    public void addAndRemoveTransformer() {
+	@Test
+	public void addAndRemoveTransformer() {
 
-    }
+	}
 
-    @Test
-    public void checksum_fail() {
+	@Test
+	public void checksum_fail() {
 
-    }
+	}
 
-    @Test
-    public void checksum_succeed() {
+	@Test
+	public void checksum_succeed() {
 
-    }
+	}
 
 }

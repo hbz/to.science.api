@@ -51,231 +51,211 @@ import converter.mab.RegalToMabMapper;
  */
 public class Transform {
 
-    /**
-     * @param node
-     *            pid with namespace:pid
-     * @return a aleph mab xml representation
-     * @throws UnsupportedEncodingException
-     */
-    public MabRecord aleph(Node node) {
-	try {
-	    RegalToMabMapper mapper = new RegalToMabMapper();
-	    MabRecord record;
-	    record = mapper.map(new ByteArrayInputStream(node.getMetadata()
-		    .getBytes("utf-8")), node.getPid());
-	    record.httpAdresse = Globals.urnbase + node.getPid();
-	    record.doi = node.getDoi();
-	    if (node.hasUrn())
-		record.urn = node.getUrn();
-	    else if (node.hasUrnInMetadata())
-		record.urn = node.getUrnFromMetadata();
-	    return record;
-	} catch (UnsupportedEncodingException e) {
-	    throw new HttpArchiveException(500, e);
-	}
-    }
-
-    /**
-     * @param pid
-     *            pid with namespace:pid
-     * @return a aleph mab xml representation
-     * @throws UnsupportedEncodingException
-     */
-    public MabRecord aleph(String pid) {
-	return aleph(new Read().readNode(pid));
-    }
-
-    /**
-     * @param pid
-     *            pid with namespace:pid
-     * @return a URL to a pdfa conversion
-     */
-    public String getPdfaUrl(String pid) {
-	return getPdfaUrl(new Read().readNode(pid));
-    }
-
-    /**
-     * @param node
-     *            a node with a pdf data stream
-     * @return a URL to a PDF/A Conversion
-     */
-    public String getPdfaUrl(Node node) {
-	String redirectUrl = null;
-	try {
-	    String dataUri = getHttpDataUri(node);
-	    URL pdfaConverter = new URL(
-		    "http://nyx.hbz-nrw.de/pdfa/api/convertFromUrl?inputFile="
-			    + dataUri);
-	    HttpURLConnection connection = (HttpURLConnection) pdfaConverter
-		    .openConnection();
-	    connection.setRequestMethod("POST");
-	    connection.setRequestProperty("Accept", "application/xml");
-	    Element root = XmlUtils.getDocument(connection.getInputStream());
-	    List<Element> elements = XmlUtils.getElements("//resultFileUrl",
-		    root, null);
-	    if (elements.size() != 1) {
-		throw new HttpArchiveException(500,
-			"PDFa conversion returns wrong numbers of resultFileUrls: "
-				+ elements.size());
-	    }
-	    redirectUrl = elements.get(0).getTextContent();
-	    return redirectUrl;
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
-	}
-
-    }
-
-    private String getHttpDataUri(Node node) {
-	return Globals.useHttpUris ? node.getDataUri() : Globals.protocol
-		+ Globals.server + "/resource/" + node.getDataUri();
-    }
-
-    private String getInternalDataUri(Node node) {
-	return "http://localhost:" + Globals.getPort() + "/resource/"
-		+ node.getDataUri();
-    }
-
-    /**
-     * @param node
-     * @return a epicur display for the pid
-     */
-    public String epicur(Node node) {
-	String url = Globals.urnbase + node.getPid();
-
-	String urn = null;
-	if (node.hasUrn())
-	    urn = node.getUrn();
-	else if (node.hasUrnInMetadata())
-	    urn = node.getUrnFromMetadata();
-	String status = "urn_new";
-	String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<epicur xmlns=\"urn:nbn:de:1111-2004033116\" xsi:schemaLocation=\"urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd\">\n"
-		+ "\t<administrative_data>\n"
-		+ "\t\t<delivery>\n"
-		+ "\t\t\t<update_status type=\""
-		+ status
-		+ "\"></update_status>\n"
-		+ "\t\t\t<transfer type=\"oai\"></transfer>\n"
-		+ "\t\t</delivery>\n"
-		+ "\t</administrative_data>\n"
-		+ "<record>\n"
-		+ "\t<identifier scheme=\"urn:nbn:de\">"
-		+ urn
-		+ "</identifier>\n"
-		+ "\t<resource>\n"
-		+ "\t\t<identifier origin=\"original\" role=\"primary\" scheme=\"url\" type=\"frontpage\">"
-		+ url
-		+ "</identifier>\n"
-		+ "\t\t<format scheme=\"imt\">text/html</format>\n"
-		+ "\t</resource>" + "</record>\n" + "</epicur> ";
-	return result;
-    }
-
-    /**
-     * @param pid
-     *            The pid of an object
-     * @return a dc mapping
-     */
-    public DublinCoreData oaidc(String pid) {
-	Node node = new Read().readNode(pid);
-	String uri = Globals.urnbase + node.getPid();
-	DublinCoreData data = new OaiDcMapper(node).getData().addIdentifier(
-		uri, "dcterms-Uri");
-	return data;
-    }
-
-    /**
-     * @param pid
-     *            the pid of a node with pdf data
-     * @return the plain text content of the pdf
-     */
-    public Node pdfbox(String pid) {
-	return pdfbox(new Read().readNode(pid));
-    }
-
-    /**
-     * @param node
-     *            the node with pdf data
-     * @return the plain text content of the pdf
-     */
-    public Node pdfbox(final Node node) {
-	Node result = node;
-	String pid = node.getPid();
-	String mimeType = node.getMimeType();
-	if (mimeType == null)
-	    throw new HttpArchiveException(404, "The node " + pid
-		    + " does not provide a mime type. No data found!");
-	if (mimeType.compareTo("application/pdf") != 0)
-	    throw new HttpArchiveException(406,
-		    "Wrong mime type. Cannot extract text from " + mimeType);
-	InputStream content = null;
-
-	try {
-	    URL url = new URL(getInternalDataUri(node));
-	    String authStr = "edoweb-anonymous:nopwd";
-	    String authEncoded = Base64.encodeBase64String(authStr.getBytes());
-	    HttpURLConnection connection = (HttpURLConnection) url
-		    .openConnection();
-	    connection.setRequestProperty("Authorization", "Basic "
-		    + authEncoded);
-	    PdfText pdf = new PdfText();
-	    result.addFulltext(pdf.toString(connection.getInputStream()));
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
-	} finally {
-	    if (content != null)
+	/**
+	 * @param node pid with namespace:pid
+	 * @return a aleph mab xml representation
+	 * @throws UnsupportedEncodingException
+	 */
+	public MabRecord aleph(Node node) {
 		try {
-		    content.close();
-		} catch (IOException e) {
-		    play.Logger.warn("", e);
+			RegalToMabMapper mapper = new RegalToMabMapper();
+			MabRecord record;
+			record = mapper.map(
+					new ByteArrayInputStream(node.getMetadata().getBytes("utf-8")),
+					node.getPid());
+			record.httpAdresse = Globals.urnbase + node.getPid();
+			record.doi = node.getDoi();
+			if (node.hasUrn())
+				record.urn = node.getUrn();
+			else if (node.hasUrnInMetadata())
+				record.urn = node.getUrnFromMetadata();
+			return record;
+		} catch (UnsupportedEncodingException e) {
+			throw new HttpArchiveException(500, e);
 		}
 	}
-	return result;
-    }
 
-    /**
-     * @param node
-     *            the node with pdf data
-     * @return the plain text content of the pdf
-     */
-    public String itext(Node node) {
-	String pid = node.getPid();
-
-	String mimeType = node.getMimeType();
-	if (mimeType == null)
-	    throw new HttpArchiveException(
-		    404,
-		    "The node "
-			    + pid
-			    + " does not provide a mime type. It may not even contain data at all!");
-	if (mimeType.compareTo("application/pdf") != 0)
-	    throw new HttpArchiveException(406,
-		    "Wrong mime type. Cannot extract text from " + mimeType);
-	URL content = null;
-	try {
-	    content = new URL(getHttpDataUri(node));
-	    File pdfFile = CopyUtils.download(content);
-	    PdfText pdf = new PdfText();
-	    return pdf.itext(pdfFile);
-	} catch (MalformedURLException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
+	/**
+	 * @param pid pid with namespace:pid
+	 * @return a aleph mab xml representation
+	 * @throws UnsupportedEncodingException
+	 */
+	public MabRecord aleph(String pid) {
+		return aleph(new Read().readNode(pid));
 	}
-    }
 
-    /**
-     * @param node
-     * @return an xml string for datacite
-     */
-    public String datacite(Node node, String doi) {
-	DataciteRecord dc = DataciteMapper.getDataciteRecord(doi,
-		new JsonMapper(node).getLd());
-	return dc.toString();
-    }
+	/**
+	 * @param pid pid with namespace:pid
+	 * @return a URL to a pdfa conversion
+	 */
+	public String getPdfaUrl(String pid) {
+		return getPdfaUrl(new Read().readNode(pid));
+	}
+
+	/**
+	 * @param node a node with a pdf data stream
+	 * @return a URL to a PDF/A Conversion
+	 */
+	public String getPdfaUrl(Node node) {
+		String redirectUrl = null;
+		try {
+			String dataUri = getHttpDataUri(node);
+			URL pdfaConverter = new URL(
+					"http://nyx.hbz-nrw.de/pdfa/api/convertFromUrl?inputFile=" + dataUri);
+			HttpURLConnection connection =
+					(HttpURLConnection) pdfaConverter.openConnection();
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Accept", "application/xml");
+			Element root = XmlUtils.getDocument(connection.getInputStream());
+			List<Element> elements =
+					XmlUtils.getElements("//resultFileUrl", root, null);
+			if (elements.size() != 1) {
+				throw new HttpArchiveException(500,
+						"PDFa conversion returns wrong numbers of resultFileUrls: "
+								+ elements.size());
+			}
+			redirectUrl = elements.get(0).getTextContent();
+			return redirectUrl;
+		} catch (MalformedURLException e) {
+			throw new HttpArchiveException(500, e);
+		} catch (IOException e) {
+			throw new HttpArchiveException(500, e);
+		}
+
+	}
+
+	private String getHttpDataUri(Node node) {
+		return Globals.useHttpUris ? node.getDataUri()
+				: Globals.protocol + Globals.server + "/resource/" + node.getDataUri();
+	}
+
+	private String getInternalDataUri(Node node) {
+		return "http://localhost:" + Globals.getPort() + "/resource/"
+				+ node.getDataUri();
+	}
+
+	/**
+	 * @param node
+	 * @return a epicur display for the pid
+	 */
+	public String epicur(Node node) {
+		String url = Globals.urnbase + node.getPid();
+
+		String urn = null;
+		if (node.hasUrn())
+			urn = node.getUrn();
+		else if (node.hasUrnInMetadata())
+			urn = node.getUrnFromMetadata();
+		String status = "urn_new";
+		String result =
+				"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<epicur xmlns=\"urn:nbn:de:1111-2004033116\" xsi:schemaLocation=\"urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd\">\n"
+						+ "\t<administrative_data>\n" + "\t\t<delivery>\n"
+						+ "\t\t\t<update_status type=\"" + status + "\"></update_status>\n"
+						+ "\t\t\t<transfer type=\"oai\"></transfer>\n" + "\t\t</delivery>\n"
+						+ "\t</administrative_data>\n" + "<record>\n"
+						+ "\t<identifier scheme=\"urn:nbn:de\">" + urn + "</identifier>\n"
+						+ "\t<resource>\n"
+						+ "\t\t<identifier origin=\"original\" role=\"primary\" scheme=\"url\" type=\"frontpage\">"
+						+ url + "</identifier>\n"
+						+ "\t\t<format scheme=\"imt\">text/html</format>\n"
+						+ "\t</resource>" + "</record>\n" + "</epicur> ";
+		return result;
+	}
+
+	/**
+	 * @param pid The pid of an object
+	 * @return a dc mapping
+	 */
+	public DublinCoreData oaidc(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		DublinCoreData data =
+				new OaiDcMapper(node).getData().addIdentifier(uri, "dcterms-Uri");
+		return data;
+	}
+
+	/**
+	 * @param pid the pid of a node with pdf data
+	 * @return the plain text content of the pdf
+	 */
+	public Node pdfbox(String pid) {
+		return pdfbox(new Read().readNode(pid));
+	}
+
+	/**
+	 * @param node the node with pdf data
+	 * @return the plain text content of the pdf
+	 */
+	public Node pdfbox(final Node node) {
+		Node result = node;
+		String pid = node.getPid();
+		String mimeType = node.getMimeType();
+		if (mimeType == null)
+			throw new HttpArchiveException(404,
+					"The node " + pid + " does not provide a mime type. No data found!");
+		if (mimeType.compareTo("application/pdf") != 0)
+			throw new HttpArchiveException(406,
+					"Wrong mime type. Cannot extract text from " + mimeType);
+		InputStream content = null;
+
+		try {
+			URL url = new URL(getInternalDataUri(node));
+			String authStr = "edoweb-anonymous:nopwd";
+			String authEncoded = Base64.encodeBase64String(authStr.getBytes());
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestProperty("Authorization", "Basic " + authEncoded);
+			PdfText pdf = new PdfText();
+			result.addFulltext(pdf.toString(connection.getInputStream()));
+		} catch (MalformedURLException e) {
+			throw new HttpArchiveException(500, e);
+		} catch (IOException e) {
+			throw new HttpArchiveException(500, e);
+		} finally {
+			if (content != null)
+				try {
+					content.close();
+				} catch (IOException e) {
+					play.Logger.warn("", e);
+				}
+		}
+		return result;
+	}
+
+	/**
+	 * @param node the node with pdf data
+	 * @return the plain text content of the pdf
+	 */
+	public String itext(Node node) {
+		String pid = node.getPid();
+
+		String mimeType = node.getMimeType();
+		if (mimeType == null)
+			throw new HttpArchiveException(404, "The node " + pid
+					+ " does not provide a mime type. It may not even contain data at all!");
+		if (mimeType.compareTo("application/pdf") != 0)
+			throw new HttpArchiveException(406,
+					"Wrong mime type. Cannot extract text from " + mimeType);
+		URL content = null;
+		try {
+			content = new URL(getHttpDataUri(node));
+			File pdfFile = CopyUtils.download(content);
+			PdfText pdf = new PdfText();
+			return pdf.itext(pdfFile);
+		} catch (MalformedURLException e) {
+			throw new HttpArchiveException(500, e);
+		} catch (IOException e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
+	 * @param node
+	 * @return an xml string for datacite
+	 */
+	public String datacite(Node node, String doi) {
+		DataciteRecord dc =
+				DataciteMapper.getDataciteRecord(doi, new JsonMapper(node).getLd());
+		return dc.toString();
+	}
 
 }

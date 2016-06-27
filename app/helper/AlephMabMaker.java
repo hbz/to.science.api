@@ -28,40 +28,37 @@ import converter.mab.MabConverter;
  */
 public class AlephMabMaker {
 
-    @SuppressWarnings({ "javadoc", "serial" })
-    public class AlephException extends RuntimeException {
+	@SuppressWarnings({ "javadoc", "serial" })
+	public class AlephException extends RuntimeException {
 
-	public AlephException(String message, Throwable cause) {
-	    super(message, cause);
+		public AlephException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public AlephException(String message) {
+			super(message);
+		}
+
 	}
 
-	public AlephException(String message) {
-	    super(message);
+	/**
+	 * @param node the node to create a mab xml entry for
+	 * @param uriPrefix server host
+	 * @return a string containing mab xml for the obeject
+	 */
+	public String aleph(Node node, String uriPrefix) {
+		try {
+			String pid = node.getPid();
+			String metadata = uriPrefix + "/resource/" + pid + "/metadata";
+			try (InputStream input =
+					new URL(metadata).openConnection().getInputStream()) {
+				MabConverter converter = new MabConverter(node.getPid());
+				return new String(converter.convert(input).toByteArray(), "utf-8");
+			}
+
+		} catch (Exception e) {
+			throw new AlephException("Conversion Problem!", e);
+		}
 	}
-
-    }
-
-    /**
-     * @param node
-     *            the node to create a mab xml entry for
-     * @param uriPrefix
-     *            server host
-     * @return a string containing mab xml for the obeject
-     */
-    public String aleph(Node node, String uriPrefix) {
-	try {
-	    String pid = node.getPid();
-	    String metadata = uriPrefix + "/resource/" + pid + "/metadata";
-	    try (InputStream input = new URL(metadata).openConnection()
-		    .getInputStream()) {
-		MabConverter converter = new MabConverter(node.getPid());
-		return new String(converter.convert(input).toByteArray(),
-			"utf-8");
-	    }
-
-	} catch (Exception e) {
-	    throw new AlephException("Conversion Problem!", e);
-	}
-    }
 
 }

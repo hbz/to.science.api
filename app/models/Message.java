@@ -32,73 +32,73 @@ import com.wordnik.swagger.core.util.JsonUtil;
 @SuppressWarnings("javadoc")
 @XmlRootElement(name = "message")
 public class Message {
-    String error;
-    String text;
-    int code;
+	String error;
+	String text;
+	int code;
 
-    public Message(String text) {
-	this.text = text;
-	this.code = 200;
-    }
-
-    public Message(String text, int code) {
-	this.text = text;
-	this.code = code;
-    }
-
-    public Message(String text, Throwable t, int code) {
-	this.error = getStackTrace(t);
-	this.text = text;
-	this.code = code;
-    }
-
-    public Message(Throwable t, int code) {
-	this.error = getStackTrace(t);
-	text = t.getMessage();
-	this.code = code;
-    }
-
-    public String getText() {
-	return text;
-    }
-
-    public void setText(String text) {
-	this.text = text;
-    }
-
-    public int getCode() {
-	return code;
-    }
-
-    public void setCode(int code) {
-	this.code = code;
-    }
-
-    public String getError() {
-	return error;
-    }
-
-    public void setError(String error) {
-	this.error = error;
-    }
-
-    private String getStackTrace(Throwable t) {
-	StringWriter sw = new StringWriter();
-	t.printStackTrace(new PrintWriter(sw));
-	return sw.toString();
-    }
-
-    @Override
-    public String toString() {
-	ObjectMapper mapper = JsonUtil.mapper();
-	StringWriter w = new StringWriter();
-	try {
-	    mapper.writeValue(w, this);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    return super.toString();
+	public Message(String text) {
+		this.text = text;
+		this.code = 200;
 	}
-	return w.toString();
-    }
+
+	public Message(String text, int code) {
+		this.text = text;
+		this.code = code;
+	}
+
+	public Message(String text, Throwable t, int code) {
+		this.error = getStackTrace(t);
+		this.text = text;
+		this.code = code;
+	}
+
+	public Message(Throwable t, int code) {
+		this.error = getStackTrace(t);
+		text = t.getMessage();
+		this.code = code;
+	}
+
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+	public int getCode() {
+		return code;
+	}
+
+	public void setCode(int code) {
+		this.code = code;
+	}
+
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+
+	private String getStackTrace(Throwable t) {
+		StringWriter sw = new StringWriter();
+		t.printStackTrace(new PrintWriter(sw));
+		return sw.toString();
+	}
+
+	@Override
+	public String toString() {
+		ObjectMapper mapper = JsonUtil.mapper();
+		StringWriter w = new StringWriter();
+		try {
+			mapper.writeValue(w, this);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return super.toString();
+		}
+		return w.toString();
+	}
 
 }

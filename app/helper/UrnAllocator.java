@@ -38,31 +38,29 @@ import play.Logger;
  *
  */
 public class UrnAllocator implements Runnable {
-	
+
 	private static final Logger.ALogger addUrnLogger = Logger.of("addurn");
 
-    @Override
-    public void run() {
-	Calendar cal = Calendar.getInstance();
-	cal.add(Calendar.DATE, -6);
-	Date until = cal.getTime();
+	@Override
+	public void run() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -6);
+		Date until = cal.getTime();
 
-	cal = Calendar.getInstance();
-	cal.add(Calendar.DATE, -14);
-	Date from = cal.getTime();
+		cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -14);
+		Date from = cal.getTime();
 
-	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	String d = dateFormat.format(until);
-	addUrnLogger
-		.info("-XPOST /utils/addUrnToAll?namespace=edoweb&snid=hbz:929:02&dateBefore="
-			+ d);
-	List<SearchHit> hits = new Read().list(Globals.namespaces[0], from,
-		until);
-	List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
-		.collect(Collectors.toList());
-	List<Node> nodes = new Read().getNodes(ids);
-	nodes.stream().forEach(n -> n.setLastModifiedBy("UrnAllocator"));
-	addUrnLogger.info(new Modify()
-		.addUrnToAll(nodes, Globals.urnSnid, until));
-    }
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String d = dateFormat.format(until);
+		addUrnLogger.info(
+				"-XPOST /utils/addUrnToAll?namespace=edoweb&snid=hbz:929:02&dateBefore="
+						+ d);
+		List<SearchHit> hits = new Read().list(Globals.namespaces[0], from, until);
+		List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
+				.collect(Collectors.toList());
+		List<Node> nodes = new Read().getNodes(ids);
+		nodes.stream().forEach(n -> n.setLastModifiedBy("UrnAllocator"));
+		addUrnLogger.info(new Modify().addUrnToAll(nodes, Globals.urnSnid, until));
+	}
 }

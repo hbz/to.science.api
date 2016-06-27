@@ -23,12 +23,11 @@ import models.Node;
  *
  */
 public interface ProcessNode {
-    /**
-     * Applys something to a nodes
-     * 
-     * @param node
-     *            a node
-     * @return a message
-     */
-    public String process(Node node);
+	/**
+	 * Applys something to a nodes
+	 * 
+	 * @param node a node
+	 * @return a message
+	 */
+	public String process(Node node);
 }

@@ -38,59 +38,56 @@ import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
  */
 public class PdfText {
 
-    final static Logger logger = LoggerFactory.getLogger(PdfText.class);
+	final static Logger logger = LoggerFactory.getLogger(PdfText.class);
 
-    /**
-     * @param pdfFile
-     *            this file will be extracted.
-     * @return the plain text of the pdf
-     */
-    public String toString(InputStream pdfFile) {
-	PDDocument doc = null;
-	try {
-
-	    doc = PDDocument.load(pdfFile);
-	    PDFTextStripper stripper = new PDFTextStripper();
-	    String text = stripper.getText(doc);
-	    return text;
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
-	} finally {
-	    if (doc != null) {
+	/**
+	 * @param pdfFile this file will be extracted.
+	 * @return the plain text of the pdf
+	 */
+	public String toString(InputStream pdfFile) {
+		PDDocument doc = null;
 		try {
-		    doc.close();
+
+			doc = PDDocument.load(pdfFile);
+			PDFTextStripper stripper = new PDFTextStripper();
+			String text = stripper.getText(doc);
+			return text;
 		} catch (IOException e) {
-		    logger.warn("", e);
+			throw new HttpArchiveException(500, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		} finally {
+			if (doc != null) {
+				try {
+					doc.close();
+				} catch (IOException e) {
+					logger.warn("", e);
+				}
+			}
 		}
-	    }
-	}
-    }
-
-    /**
-     * @param pdfFile
-     *            this file will be extracted.
-     * @return the plain text of the pdf
-     */
-    public String itext(File pdfFile) {
-
-	PdfReader reader;
-	try {
-	    reader = new PdfReader(pdfFile.getAbsolutePath());
-	    PdfReaderContentParser parser = new PdfReaderContentParser(reader);
-	    StringBuffer buf = new StringBuffer();
-	    TextExtractionStrategy strategy;
-	    for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-		strategy = parser.processContent(i,
-			new SimpleTextExtractionStrategy());
-		buf.append(strategy.getResultantText());
-	    }
-
-	    return buf.toString();
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
 	}
 
-    }
+	/**
+	 * @param pdfFile this file will be extracted.
+	 * @return the plain text of the pdf
+	 */
+	public String itext(File pdfFile) {
+
+		PdfReader reader;
+		try {
+			reader = new PdfReader(pdfFile.getAbsolutePath());
+			PdfReaderContentParser parser = new PdfReaderContentParser(reader);
+			StringBuffer buf = new StringBuffer();
+			TextExtractionStrategy strategy;
+			for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+				strategy = parser.processContent(i, new SimpleTextExtractionStrategy());
+				buf.append(strategy.getResultantText());
+			}
+
+			return buf.toString();
+		} catch (IOException e) {
+			throw new HttpArchiveException(500, e);
+		}
+
+	}
 }

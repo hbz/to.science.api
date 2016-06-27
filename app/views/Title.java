@@ -32,33 +32,38 @@ import models.Globals;
 @SuppressWarnings("unchecked")
 public class Title {
 
-    public static String getTitle(Map<String, Object> hit) {
-	Set<String> title = (Set<String>) hit.get("title");
-	return title != null && !title.isEmpty() ? String.join("<br/> ", title) : "";
-    }
-
-    public static String getAuthorNames(Map<String, Object> hit) {
-	Collection<Map<String, Object>> authorList = (Collection<Map<String, Object>>) hit.get("creator");
-	if (authorList == null || authorList.isEmpty()){
-	     authorList = getContributorList(hit);
-	    if(authorList == null || authorList.isEmpty()){
-		return "";
-	    }
+	public static String getTitle(Map<String, Object> hit) {
+		Set<String> title = (Set<String>) hit.get("title");
+		return title != null && !title.isEmpty() ? String.join("<br/> ", title)
+				: "";
 	}
-	List<String> authorNames = new ArrayList<String>();
-	for (Map<String, Object> author : authorList) {
-	    String authorName = (String) author.get(Globals.profile.getLabelKey());
-	    authorNames.add(authorName);
+
+	public static String getAuthorNames(Map<String, Object> hit) {
+		Collection<Map<String, Object>> authorList =
+				(Collection<Map<String, Object>>) hit.get("creator");
+		if (authorList == null || authorList.isEmpty()) {
+			authorList = getContributorList(hit);
+			if (authorList == null || authorList.isEmpty()) {
+				return "";
+			}
+		}
+		List<String> authorNames = new ArrayList<String>();
+		for (Map<String, Object> author : authorList) {
+			String authorName = (String) author.get(Globals.profile.getLabelKey());
+			authorNames.add(authorName);
+		}
+		return authorNames != null && !authorNames.isEmpty()
+				? String.join(" | ", authorNames) + " . " : "";
 	}
-	return authorNames != null && !authorNames.isEmpty() ? String.join(" | ", authorNames) + " . " : "";
-    }
 
-    private static List<Map<String, Object>> getContributorList(Map<String, Object> hit) {
-	return (List<Map<String, Object>>) hit.get("contributor");
-    }
+	private static List<Map<String, Object>> getContributorList(
+			Map<String, Object> hit) {
+		return (List<Map<String, Object>>) hit.get("contributor");
+	}
 
-    public static String getIssued(Map<String, Object> hit) {
-	Set<String> issued = (Set<String>) hit.get("issued");
-	return issued != null && !issued.isEmpty() ? String.join("<br/> ", issued) : "";
-    }
+	public static String getIssued(Map<String, Object> hit) {
+		Set<String> issued = (Set<String>) hit.get("issued");
+		return issued != null && !issued.isEmpty() ? String.join("<br/> ", issued)
+				: "";
+	}
 }

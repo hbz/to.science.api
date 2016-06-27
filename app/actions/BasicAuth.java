@@ -28,8 +28,9 @@ import play.mvc.With;
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
- * @see <a
- *      href="http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation/http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation">digitalsanctum</a>
+ * @see <a href=
+ *      "http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation/http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation">
+ *      digitalsanctum</a>
  */
 @With(BasicAuthAction.class)
 @Retention(RetentionPolicy.RUNTIME)

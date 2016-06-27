@@ -54,260 +54,250 @@ import archive.fedora.CopyUtils;
  */
 public class Search {
 
-    @SuppressWarnings("serial")
-    class InvalidRangeException extends RuntimeException {
-	// It is just there to be thrown
-    }
-
-    @SuppressWarnings("serial")
-    class SearchException extends RuntimeException {
-	public SearchException(Throwable e) {
-	    super(e);
+	@SuppressWarnings("serial")
+	class InvalidRangeException extends RuntimeException {
+		// It is just there to be thrown
 	}
 
-	public SearchException(String msg, Throwable e) {
-	    super(msg, e);
+	@SuppressWarnings("serial")
+	class SearchException extends RuntimeException {
+		public SearchException(Throwable e) {
+			super(e);
+		}
+
+		public SearchException(String msg, Throwable e) {
+			super(msg, e);
+		}
 	}
-    }
 
-    Client client = null;
+	Client client = null;
 
-    Search(Client client) {
-	this.client = client;
-    }
-
-    void init(String[] index, String config) {
-	try {
-	    String indexConfig = CopyUtils.copyToString(Play.application()
-		    .resourceAsStream(config), "utf-8");
-	    for (String i : index) {
-		client.admin().indices().prepareCreate(i)
-			.setSource(indexConfig).execute().actionGet();
-	    }
-	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    play.Logger.warn("", e);
-	} catch (Exception e) {
-	    play.Logger.warn("", e);
+	Search(Client client) {
+		this.client = client;
 	}
-    }
 
-    void init(String[] index) {
-	for (String i : index) {
-	    play.Logger.info("Init elasticsearch index " + i);
-	    init(i);
+	void init(String[] index, String config) {
+		try {
+			String indexConfig = CopyUtils
+					.copyToString(Play.application().resourceAsStream(config), "utf-8");
+			for (String i : index) {
+				client.admin().indices().prepareCreate(i).setSource(indexConfig)
+						.execute().actionGet();
+			}
+		} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
+			play.Logger.warn("", e);
+		} catch (Exception e) {
+			play.Logger.warn("", e);
+		}
 	}
-    }
 
-    void init(String index) {
-	try {
-	    play.Logger.debug("Configure " + index);
-	    String indexConfig = CopyUtils.copyToString(Play.application()
-		    .resourceAsStream(Globals.elasticsearchSettings), "utf-8");
-
-	    client.admin().indices().prepareCreate(index)
-		    .setSource(indexConfig).execute().actionGet();
-	} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
-	    play.Logger.debug("Index already exists!");
-	} catch (Exception e) {
-	    play.Logger.warn("Problems when creating " + index + " :"
-		    + e.getMessage());
+	void init(String[] index) {
+		for (String i : index) {
+			play.Logger.info("Init elasticsearch index " + i);
+			init(i);
+		}
 	}
-    }
 
-    ActionResponse index(String index, String type, String id, String data) {
-	try {
-	    if (!indexExists(index)) {
-		play.Logger.info("Create new Index " + index);
+	void init(String index) {
+		try {
+			play.Logger.debug("Configure " + index);
+			String indexConfig = CopyUtils.copyToString(
+					Play.application().resourceAsStream(Globals.elasticsearchSettings),
+					"utf-8");
+
+			client.admin().indices().prepareCreate(index).setSource(indexConfig)
+					.execute().actionGet();
+		} catch (org.elasticsearch.indices.IndexAlreadyExistsException e) {
+			play.Logger.debug("Index already exists!");
+		} catch (Exception e) {
+			play.Logger
+					.warn("Problems when creating " + index + " :" + e.getMessage());
+		}
+	}
+
+	ActionResponse index(String index, String type, String id, String data) {
+		try {
+			if (!indexExists(index)) {
+				play.Logger.info("Create new Index " + index);
+				init(index);
+			}
+			ActionResponse response = client.prepareIndex(index, type, id)
+					.setSource(data).execute().actionGet();
+			refresh();
+			return response;
+		} catch (Exception e) {
+			throw new SearchException(
+					"Failed to index " + index + "," + type + "," + id, e);
+		}
+	}
+
+	private boolean indexExists(String index) {
+		refresh();
+		return client.admin().indices().exists(new IndicesExistsRequest(index))
+				.actionGet().isExists();
+	}
+
+	SearchHits listResources(String index, String type, int from, int until) {
+		if (from >= until)
+			throw new InvalidRangeException();
+		SearchRequestBuilder builder = null;
+		refresh();
+		if (index == null || index.equals(""))
+			builder = client.prepareSearch();
+		else
+			builder = client.prepareSearch(index);
+		if (type != null && !type.equals(""))
+			builder.setTypes(type);
+		builder.setFrom(from).setSize(until - from);
+		SearchResponse response = builder.execute().actionGet();
+		return response.getHits();
+	}
+
+	List<String> list(String index, String type, int from, int until) {
+		SearchHits hits = listResources(index, type, from, until);
+		Iterator<SearchHit> it = hits.iterator();
+		List<String> list = new Vector<String>();
+		while (it.hasNext()) {
+			SearchHit hit = it.next();
+			list.add(hit.getId());
+		}
+		return list;
+	}
+
+	ActionResponse delete(String id, String index, String type) {
+		if (!indexExists(index)) {
+			init(index);
+		}
+		ActionResponse response =
+				client.prepareDelete(index, type, id).execute().actionGet();
+		refresh();
+		return response;
+	}
+
+	SearchHits query(String index, String fieldName, String fieldValue) {
+		refresh();
+		QueryBuilder query = QueryBuilders.boolQuery()
+				.must(QueryBuilders.matchQuery(fieldName, fieldValue));
+		SearchResponse response =
+				client.prepareSearch(index).setQuery(query).execute().actionGet();
+		return response.getHits();
+	}
+
+	SearchHits query(String[] index, String queryString, int from, int until) {
+		refresh();
+		play.Logger.debug("Search for " + queryString);
+		QueryBuilder query = QueryBuilders.queryString(queryString);
+		return query(index, query, from, until);
+	}
+
+	SearchHits query(String[] index, QueryBuilder query, int from, int until) {
+		refresh();
+		SearchResponse response = client.prepareSearch(index).setQuery(query)
+				.setFrom(from).setSize(until - from).execute().actionGet();
+		return response.getHits();
+	}
+
+	Map<String, Object> getSettings(String index, String type) {
+		try {
+			refresh();
+			ClusterState clusterState = client.admin().cluster().prepareState()
+					.setIndices(index).execute().actionGet().getState();
+			IndexMetaData inMetaData = clusterState.getMetaData().index(index);
+			MappingMetaData metad = inMetaData.mapping(type);
+			return metad.getSourceAsMap();
+		} catch (IOException e) {
+			throw new SearchException(e);
+		}
+	}
+
+	/**
+	 * @param pid a pid of a node
+	 * @return a map that represents the node
+	 */
+	public Map<String, Object> get(String pid) {
+		refresh();
+		GetResponse response =
+				client.prepareGet(pid.split(":")[0], "_all", pid).execute().actionGet();
+		return response.getSource();
+
+	}
+
+	/**
+	 * @param list list of nodes to index
+	 * @param index name of a index
+	 * @return list of messages
+	 */
+	public List<String> indexAll(List<Node> list, String index) {
 		init(index);
-	    }
-	    ActionResponse response = client.prepareIndex(index, type, id)
-		    .setSource(data).execute().actionGet();
-	    refresh();
-	    return response;
-	} catch (Exception e) {
-	    throw new SearchException("Failed to index " + index + "," + type
-		    + "," + id, e);
-	}
-    }
+		init(Globals.PUBLIC_INDEX_PREF + index);
+		List<String> result = new ArrayList<String>();
+		BulkRequestBuilder internalIndexBulk = client.prepareBulk();
+		BulkRequestBuilder publicIndexBulk = client.prepareBulk();
 
-    private boolean indexExists(String index) {
-	refresh();
-	return client.admin().indices().exists(new IndicesExistsRequest(index))
-		.actionGet().isExists();
-    }
+		for (Node node : list) {
+			try {
+				play.Logger.debug("Going to add " + node.getPid() + " to bulk action");
+				StringBuffer msg = new StringBuffer("Index " + node.getPid() + " to ");
+				String source = node.toString();
+				internalIndexBulk.add(
+						client.prepareIndex(index, node.getContentType(), node.getPid())
+								.setSource(source));
 
-    SearchHits listResources(String index, String type, int from, int until) {
-	if (from >= until)
-	    throw new InvalidRangeException();
-	SearchRequestBuilder builder = null;
-	refresh();
-	if (index == null || index.equals(""))
-	    builder = client.prepareSearch();
-	else
-	    builder = client.prepareSearch(index);
-	if (type != null && !type.equals(""))
-	    builder.setTypes(type);
-	builder.setFrom(from).setSize(until - from);
-	SearchResponse response = builder.execute().actionGet();
-	return response.getHits();
-    }
+				msg.append(index);
+				if ("public".equals(node.getPublishScheme())) {
+					if ("monograph".equals(node.getContentType())
+							|| "journal".equals(node.getContentType())
+							|| "webpage".equals(node.getContentType())) {
 
-    List<String> list(String index, String type, int from, int until) {
-	SearchHits hits = listResources(index, type, from, until);
-	Iterator<SearchHit> it = hits.iterator();
-	List<String> list = new Vector<String>();
-	while (it.hasNext()) {
-	    SearchHit hit = it.next();
-	    list.add(hit.getId());
-	}
-	return list;
-    }
+						publicIndexBulk
+								.add(client
+										.prepareIndex(Globals.PUBLIC_INDEX_PREF + index,
+												node.getContentType(), node.getPid())
+										.setSource(source));
+						msg.append(" and " + Globals.PUBLIC_INDEX_PREF + index);
+					}
 
-    ActionResponse delete(String id, String index, String type) {
-	if (!indexExists(index)) {
-	    init(index);
-	}
-	ActionResponse response = client.prepareDelete(index, type, id)
-		.execute().actionGet();
-	refresh();
-	return response;
-    }
-
-    SearchHits query(String index, String fieldName, String fieldValue) {
-	refresh();
-	QueryBuilder query = QueryBuilders.boolQuery().must(
-		QueryBuilders.matchQuery(fieldName, fieldValue));
-	SearchResponse response = client.prepareSearch(index).setQuery(query)
-		.execute().actionGet();
-	return response.getHits();
-    }
-
-    SearchHits query(String[] index, String queryString, int from, int until) {
-	refresh();
-	play.Logger.debug("Search for " + queryString);
-	QueryBuilder query = QueryBuilders.queryString(queryString);
-	return query(index,query,from,until);
-    }
-    
-    SearchHits query(String[] index, QueryBuilder query, int from, int until) {
-   	refresh();
-   	SearchResponse response = client.prepareSearch(index).setQuery(query)
-   		.setFrom(from).setSize(until - from).execute().actionGet();
-   	return response.getHits();
-       }
-
-    Map<String, Object> getSettings(String index, String type) {
-	try {
-	    refresh();
-	    ClusterState clusterState = client.admin().cluster().prepareState()
-		    .setIndices(index).execute().actionGet().getState();
-	    IndexMetaData inMetaData = clusterState.getMetaData().index(index);
-	    MappingMetaData metad = inMetaData.mapping(type);
-	    return metad.getSourceAsMap();
-	} catch (IOException e) {
-	    throw new SearchException(e);
-	}
-    }
-
-    /**
-     * @param pid
-     *            a pid of a node
-     * @return a map that represents the node
-     */
-    public Map<String, Object> get(String pid) {
-	refresh();
-	GetResponse response = client
-		.prepareGet(pid.split(":")[0], "_all", pid).execute()
-		.actionGet();
-	return response.getSource();
-
-    }
-
-    /**
-     * @param list
-     *            list of nodes to index
-     * @param index
-     *            name of a index
-     * @return list of messages
-     */
-    public List<String> indexAll(List<Node> list, String index) {
-	init(index);
-	init(Globals.PUBLIC_INDEX_PREF + index);
-	List<String> result = new ArrayList<String>();
-	BulkRequestBuilder internalIndexBulk = client.prepareBulk();
-	BulkRequestBuilder publicIndexBulk = client.prepareBulk();
-
-	for (Node node : list) {
-	    try {
-		play.Logger.debug("Going to add " + node.getPid()
-			+ " to bulk action");
-		StringBuffer msg = new StringBuffer("Index " + node.getPid()
-			+ " to ");
-		String source = node.toString();
-		internalIndexBulk
-			.add(client.prepareIndex(index, node.getContentType(),
-				node.getPid()).setSource(source));
-
-		msg.append(index);
-		if ("public".equals(node.getPublishScheme())) {
-		    if ("monograph".equals(node.getContentType())
-			    || "journal".equals(node.getContentType())
-			    || "webpage".equals(node.getContentType())) {
-
-			publicIndexBulk.add(client.prepareIndex(
-				Globals.PUBLIC_INDEX_PREF + index,
-				node.getContentType(), node.getPid())
-				.setSource(source));
-			msg.append(" and " + Globals.PUBLIC_INDEX_PREF + index);
-		    }
-
+				}
+				if ("public".equals(node.getAccessScheme())) {
+					if ("file".equals(node.getContentType())) {
+						publicIndexBulk.add(client
+								.prepareIndex(Globals.PDFBOX_OCR_INDEX_PREF + index,
+										node.getContentType(), node.getPid())
+								.setSource(new Transform().pdfbox(node).toString()));
+						msg.append(" and " + Globals.PDFBOX_OCR_INDEX_PREF + index);
+					}
+				}
+				msg.append("\n");
+				result.add(msg.toString());
+				play.Logger.debug("Add " + node.getPid() + " to bulk action");
+			} catch (Exception e) {
+				play.Logger.warn("", e);
+				result.add("A problem occured: " + e.getMessage());
+			}
 		}
-		if ("public".equals(node.getAccessScheme())) {
-		    if ("file".equals(node.getContentType())) {
-			publicIndexBulk
-				.add(client.prepareIndex(
-					Globals.PDFBOX_OCR_INDEX_PREF + index,
-					node.getContentType(), node.getPid())
-					.setSource(
-						new Transform().pdfbox(node)
-							.toString()));
-			msg.append(" and " + Globals.PDFBOX_OCR_INDEX_PREF
-				+ index);
-		    }
+		try {
+			play.Logger.debug("Start building internal Index " + index);
+			BulkResponse bulkResponse = internalIndexBulk.execute().actionGet();
+			if (bulkResponse.hasFailures()) {
+				result.add(bulkResponse.buildFailureMessage());
+				play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
+			}
+
+			play.Logger.debug("Start building public Index " + index);
+
+			bulkResponse = publicIndexBulk.execute().actionGet();
+			if (bulkResponse.hasFailures()) {
+				result.add(bulkResponse.buildFailureMessage());
+				play.Logger.debug("FAIL: " + bulkResponse.buildFailureMessage());
+			}
+		} catch (Exception e) {
+			play.Logger.warn("", e);
 		}
-		msg.append("\n");
-		result.add(msg.toString());
-		play.Logger.debug("Add " + node.getPid() + " to bulk action");
-	    } catch (Exception e) {
-		play.Logger.warn("", e);
-		result.add("A problem occured: " + e.getMessage());
-	    }
+		return result;
 	}
-	try {
-	    play.Logger.debug("Start building internal Index " + index);
-	    BulkResponse bulkResponse = internalIndexBulk.execute().actionGet();
-	    if (bulkResponse.hasFailures()) {
-		result.add(bulkResponse.buildFailureMessage());
-		play.Logger
-			.debug("FAIL: " + bulkResponse.buildFailureMessage());
-	    }
 
-	    play.Logger.debug("Start building public Index " + index);
-
-	    bulkResponse = publicIndexBulk.execute().actionGet();
-	    if (bulkResponse.hasFailures()) {
-		result.add(bulkResponse.buildFailureMessage());
-		play.Logger
-			.debug("FAIL: " + bulkResponse.buildFailureMessage());
-	    }
-	} catch (Exception e) {
-	    play.Logger.warn("", e);
+	private void refresh() {
+		client.admin().indices().refresh(new RefreshRequest()).actionGet();
 	}
-	return result;
-    }
-
-    private void refresh() {
-	client.admin().indices().refresh(new RefreshRequest()).actionGet();
-    }
 
 }

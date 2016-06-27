@@ -38,87 +38,86 @@ import controllers.Resource;
  */
 @SuppressWarnings("javadoc")
 public class ApiTest extends BaseModelTest {
-    final static Logger logger = LoggerFactory.getLogger(ApiTest.class);
+	final static Logger logger = LoggerFactory.getLogger(ApiTest.class);
 
-    @Test
-    public void objectLifeCycle() {
-	String pid = "test:1234567";
-	RegalObject object = new RegalObject();
-	object.setContentType("monograph");
-	createObject(pid, object, 200);
-	readObject(pid, 200);
-	purgeObject(pid, 200);
-	readObject(pid, 404);
-    }
-
-    @Test
-    public void addParent() {
-	String pid = "test:1234567";
-	RegalObject object = new RegalObject();
-	object.setContentType("monograph");
-	object.setParentPid("test:1234568");
-
-	String parentPid = "test:1234568";
-	RegalObject parentObject = new RegalObject();
-	parentObject.setContentType("monograph");
-
-	createObject(parentPid, parentObject, 200);
-	createObject(pid, object, 200);
-
-	purgeObject(pid, 200);
-	purgeObject(parentPid, 200);
-
-	readObject(pid, 404);
-	readObject(parentPid, 404);
-    }
-
-    @Test
-    public void deleteHierarchy() {
-	String pid = "test:1234567";
-	RegalObject object = new RegalObject();
-	object.setContentType("monograph");
-	object.setParentPid("test:1234568");
-
-	String parentPid = "test:1234568";
-	RegalObject parentObject = new RegalObject();
-	object.setContentType("monograph");
-
-	createObject(parentPid, parentObject, 200);
-	createObject(pid, object, 200);
-
-	purgeObject(parentPid, 200);
-
-	readObject(pid, 404);
-	readObject(parentPid, 404);
-    }
-
-    private Result purgeObject(String pid, int httpStatus) {
-	Result result = controllerCall(() -> Resource.deleteResource(pid,
-		"true"));
-	Assert.assertEquals(httpStatus, result.status());
-	return result;
-    }
-
-    private Result readObject(String pid, int httpStatus) {
-	Result result = controllerCall(() -> Resource.listResource(pid));
-	Assert.assertEquals(httpStatus, result.status());
-	return result;
-    }
-
-    private Result createObject(String pid, RegalObject object, int httpStatus) {
-	JsonNode body = JsonUtil.mapper().convertValue(object, JsonNode.class);
-	Result result = controllerCall(() -> Resource.updateResource(pid), body);
-	Assert.assertEquals(httpStatus, result.status());
-	return result;
-    }
-
-    @SuppressWarnings("unused")
-    private JsonNode asJson(Result result) {
-	try {
-	    return JsonUtil.mapper().readTree(Helpers.contentAsString(result));
-	} catch (Exception e) {
-	    throw new RuntimeException(e);
+	@Test
+	public void objectLifeCycle() {
+		String pid = "test:1234567";
+		RegalObject object = new RegalObject();
+		object.setContentType("monograph");
+		createObject(pid, object, 200);
+		readObject(pid, 200);
+		purgeObject(pid, 200);
+		readObject(pid, 404);
 	}
-    }
+
+	@Test
+	public void addParent() {
+		String pid = "test:1234567";
+		RegalObject object = new RegalObject();
+		object.setContentType("monograph");
+		object.setParentPid("test:1234568");
+
+		String parentPid = "test:1234568";
+		RegalObject parentObject = new RegalObject();
+		parentObject.setContentType("monograph");
+
+		createObject(parentPid, parentObject, 200);
+		createObject(pid, object, 200);
+
+		purgeObject(pid, 200);
+		purgeObject(parentPid, 200);
+
+		readObject(pid, 404);
+		readObject(parentPid, 404);
+	}
+
+	@Test
+	public void deleteHierarchy() {
+		String pid = "test:1234567";
+		RegalObject object = new RegalObject();
+		object.setContentType("monograph");
+		object.setParentPid("test:1234568");
+
+		String parentPid = "test:1234568";
+		RegalObject parentObject = new RegalObject();
+		object.setContentType("monograph");
+
+		createObject(parentPid, parentObject, 200);
+		createObject(pid, object, 200);
+
+		purgeObject(parentPid, 200);
+
+		readObject(pid, 404);
+		readObject(parentPid, 404);
+	}
+
+	private Result purgeObject(String pid, int httpStatus) {
+		Result result = controllerCall(() -> Resource.deleteResource(pid, "true"));
+		Assert.assertEquals(httpStatus, result.status());
+		return result;
+	}
+
+	private Result readObject(String pid, int httpStatus) {
+		Result result = controllerCall(() -> Resource.listResource(pid));
+		Assert.assertEquals(httpStatus, result.status());
+		return result;
+	}
+
+	private Result createObject(String pid, RegalObject object, int httpStatus) {
+		JsonNode body = JsonUtil.mapper().convertValue(object, JsonNode.class);
+		Result result = controllerCall(() -> Resource.updateResource(pid), body);
+		Assert.assertEquals(httpStatus, result.status());
+		return result;
+	}
+
+	@SuppressWarnings("unused")
+	private JsonNode asJson(Result result) {
+		try {
+			return JsonUtil.mapper().readTree(Helpers.contentAsString(result));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 }

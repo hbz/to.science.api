@@ -28,65 +28,64 @@ import play.cache.Cache;
  */
 public class RegalAction {
 
-    public Node updateIndex(String pid) {
-	removeNodeFromCache(pid);
-	Node node = new Read().readNode(pid);
-	new Index().index(node);
-	return node;
-    }
-
-    Node readNodeFromCache(String pid) {
-	return (Node) Cache.get(pid);
-    }
-
-    void writeNodeToCache(Node node) {
-	Cache.set(node.getPid(), node);
-    }
-
-    void removeNodeFromCache(String pid) {
-	Cache.remove(pid);
-    }
-
-    protected String createAggregationUri(String pid) {
-	return Globals.useHttpUris ? Globals.protocol + Globals.server + "/resource/" + pid : pid;
-    }
-
-    /**
-     * @param node
-     *            the node
-     * @return the http address of the resource
-     */
-    public String getHttpUriOfResource(Node node) {
-	return Globals.useHttpUris ? node.getAggregationUri()
-		: Globals.protocol + Globals.server + "/resource/" + node.getAggregationUri();
-    }
-
-    /**
-     * @param nodes
-     *            a list of nodes
-     * @param action
-     *            a action performed on each node
-     * @return a message
-     */
-    public String apply(List<Node> nodes, ProcessNode action) {
-	StringBuffer str = new StringBuffer();
-	str.append("Process " + nodes.size() + " nodes!\n");
-	for (Node n : nodes) {
-	    try {
-		str.append("\n Updated " + action.process(n));
-	    } catch (Exception e) {
-		str.append("\n Not updated " + n.getPid() + " " + e.getMessage());
-	    }
+	public Node updateIndex(String pid) {
+		removeNodeFromCache(pid);
+		Node node = new Read().readNode(pid);
+		new Index().index(node);
+		return node;
 	}
-	str.append("\n");
-	return str.toString();
-    }
 
-    protected String getUriFromJsonName(String name) {
-	return Globals.profile.getEtikettByName(name).getUri();
-    }
+	Node readNodeFromCache(String pid) {
+		return (Node) Cache.get(pid);
+	}
 
-    protected String getJsonName(String uri) {
-	return Globals.profile.getEtikett(uri).getName();
-    }
+	void writeNodeToCache(Node node) {
+		Cache.set(node.getPid(), node);
+	}
+
+	void removeNodeFromCache(String pid) {
+		Cache.remove(pid);
+	}
+
+	protected String createAggregationUri(String pid) {
+		return Globals.useHttpUris
+				? Globals.protocol + Globals.server + "/resource/" + pid : pid;
+	}
+
+	/**
+	 * @param node the node
+	 * @return the http address of the resource
+	 */
+	public String getHttpUriOfResource(Node node) {
+		return Globals.useHttpUris ? node.getAggregationUri()
+				: Globals.protocol + Globals.server + "/resource/"
+						+ node.getAggregationUri();
+	}
+
+	/**
+	 * @param nodes a list of nodes
+	 * @param action a action performed on each node
+	 * @return a message
+	 */
+	public String apply(List<Node> nodes, ProcessNode action) {
+		StringBuffer str = new StringBuffer();
+		str.append("Process " + nodes.size() + " nodes!\n");
+		for (Node n : nodes) {
+			try {
+				str.append("\n Updated " + action.process(n));
+			} catch (Exception e) {
+				str.append("\n Not updated " + n.getPid() + " " + e.getMessage());
+			}
+		}
+		str.append("\n");
+		return str.toString();
+	}
+
+	protected String getUriFromJsonName(String name) {
+		return Globals.profile.getEtikettByName(name).getUri();
+	}
+
+	protected String getJsonName(String uri) {
+		return Globals.profile.getEtikett(uri).getName();
+	}
 }

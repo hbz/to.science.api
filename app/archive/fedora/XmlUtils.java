@@ -63,332 +63,304 @@ import org.xml.sax.SAXParseException;
  */
 public class XmlUtils {
 
-    @SuppressWarnings({ "javadoc", "serial" })
-    public static class XPathException extends RuntimeException {
+	@SuppressWarnings({ "javadoc", "serial" })
+	public static class XPathException extends RuntimeException {
 
-	public XPathException(Throwable cause) {
-	    super(cause);
-	}
-    }
-
-    @SuppressWarnings({ "javadoc", "serial" })
-    public static class ReadException extends RuntimeException {
-	public ReadException(String message) {
-	    super(message);
+		public XPathException(Throwable cause) {
+			super(cause);
+		}
 	}
 
-	public ReadException(Throwable cause) {
-	    super(cause);
+	@SuppressWarnings({ "javadoc", "serial" })
+	public static class ReadException extends RuntimeException {
+		public ReadException(String message) {
+			super(message);
+		}
+
+		public ReadException(Throwable cause) {
+			super(cause);
+		}
 	}
-    }
 
-    @SuppressWarnings({ "javadoc", "serial" })
-    public static class StreamNotClosedException extends RuntimeException {
-	public StreamNotClosedException(String message) {
-	    super(message);
+	@SuppressWarnings({ "javadoc", "serial" })
+	public static class StreamNotClosedException extends RuntimeException {
+		public StreamNotClosedException(String message) {
+			super(message);
+		}
+
+		public StreamNotClosedException(Throwable cause) {
+			super(cause);
+		}
 	}
 
-	public StreamNotClosedException(Throwable cause) {
-	    super(cause);
-	}
-    }
+	final static Logger logger = LoggerFactory.getLogger(XmlUtils.class);
 
-    final static Logger logger = LoggerFactory.getLogger(XmlUtils.class);
-
-    /**
-     * @param digitalEntityFile
-     *            the xml file
-     * @return the root element as org.w3c.dom.Element
-     * @throws XmlException
-     *             RuntimeException if something goes wrong
-     */
-    public static Element getDocument(File digitalEntityFile) {
-	try {
-	    return getDocument(new FileInputStream(digitalEntityFile));
-	} catch (FileNotFoundException e) {
-	    throw new XmlException(e);
-	}
-    }
-
-    /**
-     * @param xmlString
-     *            a xml string
-     * @return the root element as org.w3c.dom.Element
-     * @throws XmlException
-     *             RuntimeException if something goes wrong
-     */
-    public static Element getDocument(String xmlString) {
-	return getDocument(new ByteArrayInputStream(xmlString.getBytes()));
-
-    }
-
-    /**
-     * @param file
-     *            file to store the string in
-     * @param str
-     *            the string will be stored in file
-     * @return a file containing the string
-     */
-    @Deprecated
-    public static File stringToFile(File file, String str) {
-	try {
-	    file.createNewFile();
-	    try (FileOutputStream writer = new FileOutputStream(file)) {
-		// TODO uhh prevent memory overload
-		writer.write(str.replace("\n", " ").replace("  ", " ")
-			.getBytes("utf-8"));
-	    }
-	} catch (IOException e) {
-	    throw new ReadException(e);
-	}
-	str = null;
-	return file;
-    }
-
-    /**
-     * @param file
-     *            file to store the string in
-     * @param str
-     *            the string will be stored in file
-     * @return a file containing the string
-     */
-    public static File newStringToFile(File file, String str) {
-	try {
-	    file.createNewFile();
-	    try (FileOutputStream writer = new FileOutputStream(file)) {
-		writer.write(str.getBytes("utf-8"));
-	    }
-	} catch (IOException e) {
-	    throw new ReadException(e);
-	}
-	str = null;
-	return file;
-    }
-
-    /**
-     * @param file
-     *            the contents of this file will be converted to a string
-     * @return a string with the content of the file
-     */
-    public static String fileToString(File file) {
-	if (file == null || !file.exists()) {
-	    throw new ReadException("");
-	}
-	byte[] buffer = new byte[(int) file.length()];
-	try (BufferedInputStream f = new BufferedInputStream(
-		new FileInputStream(file))) {
-	    f.read(buffer);
-	} catch (IOException e) {
-	    throw new ReadException(e);
-	}
-	return new String(buffer);
-    }
-
-    /**
-     * @param xPathStr
-     *            a xpath expression
-     * @param root
-     *            the xpath is applied to this element
-     * @param nscontext
-     *            a NamespaceContext
-     * @return a list of elements
-     */
-    public static List<Element> getElements(String xPathStr, Element root,
-	    NamespaceContext nscontext) {
-	XPathFactory xpathFactory = XPathFactory.newInstance();
-	XPath xpath = xpathFactory.newXPath();
-	if (nscontext != null)
-	    xpath.setNamespaceContext(nscontext);
-	NodeList elements;
-	try {
-	    elements = (NodeList) xpath.evaluate(xPathStr, root,
-		    XPathConstants.NODESET);
-	    List<Element> result = new Vector<Element>();
-	    for (int i = 0; i < elements.getLength(); i++) {
+	/**
+	 * @param digitalEntityFile the xml file
+	 * @return the root element as org.w3c.dom.Element
+	 * @throws XmlException RuntimeException if something goes wrong
+	 */
+	public static Element getDocument(File digitalEntityFile) {
 		try {
-		    Element element = (Element) elements.item(i);
-		    result.add(element);
-		} catch (ClassCastException e) {
-		    logger.warn(e.getMessage());
+			return getDocument(new FileInputStream(digitalEntityFile));
+		} catch (FileNotFoundException e) {
+			throw new XmlException(e);
 		}
-	    }
-	    return result;
-	} catch (XPathExpressionException e1) {
-	    throw new XPathException(e1);
 	}
 
-    }
+	/**
+	 * @param xmlString a xml string
+	 * @return the root element as org.w3c.dom.Element
+	 * @throws XmlException RuntimeException if something goes wrong
+	 */
+	public static Element getDocument(String xmlString) {
+		return getDocument(new ByteArrayInputStream(xmlString.getBytes()));
 
-    /**
-     * @param inputStream
-     *            the xml stream
-     * @return the root element as org.w3c.dom.Element
-     * @throws XmlException
-     *             RuntimeException if something goes wrong
-     */
-    public static Element getDocument(InputStream inputStream) {
-	try {
-	    DocumentBuilderFactory factory = DocumentBuilderFactory
-		    .newInstance();
-	    // factory.setNamespaceAware(true);
-	    // factory.isValidating();
-	    DocumentBuilder docBuilder = factory.newDocumentBuilder();
-	    Document doc = docBuilder
-		    .parse(new BufferedInputStream(inputStream));
-	    Element root = doc.getDocumentElement();
-	    root.normalize();
-	    return root;
-	} catch (FileNotFoundException e) {
-	    throw new XmlException(e);
-	} catch (SAXException e) {
-	    throw new XmlException(e);
-	} catch (IOException e) {
-	    throw new XmlException(e);
-	} catch (ParserConfigurationException e) {
-	    throw new XmlException(e);
 	}
 
-    }
+	/**
+	 * @param file file to store the string in
+	 * @param str the string will be stored in file
+	 * @return a file containing the string
+	 */
+	@Deprecated
+	public static File stringToFile(File file, String str) {
+		try {
+			file.createNewFile();
+			try (FileOutputStream writer = new FileOutputStream(file)) {
+				// TODO uhh prevent memory overload
+				writer
+						.write(str.replace("\n", " ").replace("  ", " ").getBytes("utf-8"));
+			}
+		} catch (IOException e) {
+			throw new ReadException(e);
+		}
+		str = null;
+		return file;
+	}
 
-    /**
-     * Validates an xml String
-     * 
-     * @param oaidc
-     *            xml String
-     * @param schema
-     *            a schema to validate against
-     */
-    public static void validate(InputStream oaidc, InputStream schema) {
-	try {
-	    DocumentBuilderFactory factory = DocumentBuilderFactory
-		    .newInstance();
-	    factory.setNamespaceAware(true);
-	    // "Valid" means valid to a DTD. We want to valid against a schema,
-	    // so we turn of dtd validation here
-	    factory.setValidating(false);
+	/**
+	 * @param file file to store the string in
+	 * @param str the string will be stored in file
+	 * @return a file containing the string
+	 */
+	public static File newStringToFile(File file, String str) {
+		try {
+			file.createNewFile();
+			try (FileOutputStream writer = new FileOutputStream(file)) {
+				writer.write(str.getBytes("utf-8"));
+			}
+		} catch (IOException e) {
+			throw new ReadException(e);
+		}
+		str = null;
+		return file;
+	}
 
-	    SchemaFactory schemaFactory = SchemaFactory
-		    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+	/**
+	 * @param file the contents of this file will be converted to a string
+	 * @return a string with the content of the file
+	 */
+	public static String fileToString(File file) {
+		if (file == null || !file.exists()) {
+			throw new ReadException("");
+		}
+		byte[] buffer = new byte[(int) file.length()];
+		try (BufferedInputStream f =
+				new BufferedInputStream(new FileInputStream(file))) {
+			f.read(buffer);
+		} catch (IOException e) {
+			throw new ReadException(e);
+		}
+		return new String(buffer);
+	}
 
-	    schemaFactory.setResourceResolver(new ResourceResolver());
-	    if (schema != null) {
-		Schema s = schemaFactory.newSchema(new StreamSource(schema));
-		factory.setSchema(s);
-	    }
-	    DocumentBuilder docBuilder = factory.newDocumentBuilder();
-	    docBuilder.setErrorHandler(new ErrorHandler() {
-		public void fatalError(SAXParseException exception)
-			throws SAXException {
-		    throw new XmlException(exception);
+	/**
+	 * @param xPathStr a xpath expression
+	 * @param root the xpath is applied to this element
+	 * @param nscontext a NamespaceContext
+	 * @return a list of elements
+	 */
+	public static List<Element> getElements(String xPathStr, Element root,
+			NamespaceContext nscontext) {
+		XPathFactory xpathFactory = XPathFactory.newInstance();
+		XPath xpath = xpathFactory.newXPath();
+		if (nscontext != null)
+			xpath.setNamespaceContext(nscontext);
+		NodeList elements;
+		try {
+			elements =
+					(NodeList) xpath.evaluate(xPathStr, root, XPathConstants.NODESET);
+			List<Element> result = new Vector<Element>();
+			for (int i = 0; i < elements.getLength(); i++) {
+				try {
+					Element element = (Element) elements.item(i);
+					result.add(element);
+				} catch (ClassCastException e) {
+					logger.warn(e.getMessage());
+				}
+			}
+			return result;
+		} catch (XPathExpressionException e1) {
+			throw new XPathException(e1);
 		}
 
-		public void error(SAXParseException exception)
-			throws SAXException {
-		    throw new XmlException(exception);
+	}
+
+	/**
+	 * @param inputStream the xml stream
+	 * @return the root element as org.w3c.dom.Element
+	 * @throws XmlException RuntimeException if something goes wrong
+	 */
+	public static Element getDocument(InputStream inputStream) {
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			// factory.setNamespaceAware(true);
+			// factory.isValidating();
+			DocumentBuilder docBuilder = factory.newDocumentBuilder();
+			Document doc = docBuilder.parse(new BufferedInputStream(inputStream));
+			Element root = doc.getDocumentElement();
+			root.normalize();
+			return root;
+		} catch (FileNotFoundException e) {
+			throw new XmlException(e);
+		} catch (SAXException e) {
+			throw new XmlException(e);
+		} catch (IOException e) {
+			throw new XmlException(e);
+		} catch (ParserConfigurationException e) {
+			throw new XmlException(e);
 		}
 
-		public void warning(SAXParseException exception)
-			throws SAXException {
-		    throw new XmlException(exception);
+	}
+
+	/**
+	 * Validates an xml String
+	 * 
+	 * @param oaidc xml String
+	 * @param schema a schema to validate against
+	 */
+	public static void validate(InputStream oaidc, InputStream schema) {
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			// "Valid" means valid to a DTD. We want to valid against a schema,
+			// so we turn of dtd validation here
+			factory.setValidating(false);
+
+			SchemaFactory schemaFactory =
+					SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+			schemaFactory.setResourceResolver(new ResourceResolver());
+			if (schema != null) {
+				Schema s = schemaFactory.newSchema(new StreamSource(schema));
+				factory.setSchema(s);
+			}
+			DocumentBuilder docBuilder = factory.newDocumentBuilder();
+			docBuilder.setErrorHandler(new ErrorHandler() {
+				public void fatalError(SAXParseException exception)
+						throws SAXException {
+					throw new XmlException(exception);
+				}
+
+				public void error(SAXParseException exception) throws SAXException {
+					throw new XmlException(exception);
+				}
+
+				public void warning(SAXParseException exception) throws SAXException {
+					throw new XmlException(exception);
+				}
+			});
+
+			// Try to parse with schema validation on
+			docBuilder.parse(oaidc);
+
+		} catch (Exception e) {
+			throw new XmlException(e);
 		}
-	    });
 
-	    // Try to parse with schema validation on
-	    docBuilder.parse(oaidc);
-
-	} catch (Exception e) {
-	    throw new XmlException(e);
 	}
 
-    }
+	/**
+	 * Creates a plain xml string of the node and of all it's children. The xml
+	 * string has no XML declaration.
+	 * 
+	 * @param node a org.w3c.dom.Node
+	 * @return a plain string representation of the node it's children
+	 */
+	public static String nodeToString(Node node) {
+		try {
+			TransformerFactory transFactory = TransformerFactory.newInstance();
+			Transformer transformer = transFactory.newTransformer();
+			StringWriter buffer = new StringWriter(1024);
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 
-    /**
-     * Creates a plain xml string of the node and of all it's children. The xml
-     * string has no XML declaration.
-     * 
-     * @param node
-     *            a org.w3c.dom.Node
-     * @return a plain string representation of the node it's children
-     */
-    public static String nodeToString(Node node) {
-	try {
-	    TransformerFactory transFactory = TransformerFactory.newInstance();
-	    Transformer transformer = transFactory.newTransformer();
-	    StringWriter buffer = new StringWriter(1024);
-	    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
-		    "yes");
-
-	    transformer
-		    .transform(new DOMSource(node), new StreamResult(buffer));
-	    String str = buffer.toString();
-	    return str;
-	} catch (Exception e) {
-	    e.printStackTrace();
-	} catch (Error error) {
-	    error.printStackTrace();
-	}
-	return "";
-    }
-
-    /**
-     * @param file
-     *            an xml file
-     * @return the root element in a namespace aware manner
-     */
-    public static Element getNamespaceAwareDocument(File file) {
-	try {
-	    return getNamespaceAwareDocument(new FileInputStream(file));
-	} catch (FileNotFoundException e) {
-	    throw new XmlException(e);
-	}
-    }
-
-    private static Element getNamespaceAwareDocument(InputStream inputStream) {
-	try {
-	    DocumentBuilderFactory factory = DocumentBuilderFactory
-		    .newInstance();
-	    factory.setNamespaceAware(true);
-	    factory.isValidating();
-	    DocumentBuilder docBuilder = factory.newDocumentBuilder();
-	    Document doc = docBuilder
-		    .parse(new BufferedInputStream(inputStream));
-	    Element root = doc.getDocumentElement();
-	    root.normalize();
-	    return root;
-	} catch (FileNotFoundException e) {
-	    throw new XmlException(e);
-	} catch (SAXException e) {
-	    throw new XmlException(e);
-	} catch (IOException e) {
-	    throw new XmlException(e);
-	} catch (ParserConfigurationException e) {
-	    throw new XmlException(e);
+			transformer.transform(new DOMSource(node), new StreamResult(buffer));
+			String str = buffer.toString();
+			return str;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} catch (Error error) {
+			error.printStackTrace();
+		}
+		return "";
 	}
 
-    }
-
-    /**
-     * @param doc
-     * @return a xml string representing the passed document
-     */
-    public static String docToString(Document doc) {
-	try {
-	    DOMSource domSource = new DOMSource(doc);
-	    StringWriter writer = new StringWriter();
-	    StreamResult result = new StreamResult(writer);
-	    TransformerFactory tf = TransformerFactory.newInstance();
-	    Transformer transformer = tf.newTransformer();
-	    transformer.transform(domSource, result);
-	    return writer.toString();
-	} catch (TransformerException e) {
-	    throw new XmlException(e);
+	/**
+	 * @param file an xml file
+	 * @return the root element in a namespace aware manner
+	 */
+	public static Element getNamespaceAwareDocument(File file) {
+		try {
+			return getNamespaceAwareDocument(new FileInputStream(file));
+		} catch (FileNotFoundException e) {
+			throw new XmlException(e);
+		}
 	}
-    }
 
-    public static List<Element> getElements(String xPathStr, InputStream in,
-	    NamespaceContext nscontext) {
-	return XmlUtils.getElements(xPathStr, XmlUtils.getDocument(in),
-		nscontext);
+	private static Element getNamespaceAwareDocument(InputStream inputStream) {
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			factory.isValidating();
+			DocumentBuilder docBuilder = factory.newDocumentBuilder();
+			Document doc = docBuilder.parse(new BufferedInputStream(inputStream));
+			Element root = doc.getDocumentElement();
+			root.normalize();
+			return root;
+		} catch (FileNotFoundException e) {
+			throw new XmlException(e);
+		} catch (SAXException e) {
+			throw new XmlException(e);
+		} catch (IOException e) {
+			throw new XmlException(e);
+		} catch (ParserConfigurationException e) {
+			throw new XmlException(e);
+		}
 
-    }
+	}
+
+	/**
+	 * @param doc
+	 * @return a xml string representing the passed document
+	 */
+	public static String docToString(Document doc) {
+		try {
+			DOMSource domSource = new DOMSource(doc);
+			StringWriter writer = new StringWriter();
+			StreamResult result = new StreamResult(writer);
+			TransformerFactory tf = TransformerFactory.newInstance();
+			Transformer transformer = tf.newTransformer();
+			transformer.transform(domSource, result);
+			return writer.toString();
+		} catch (TransformerException e) {
+			throw new XmlException(e);
+		}
+	}
+
+	public static List<Element> getElements(String xPathStr, InputStream in,
+			NamespaceContext nscontext) {
+		return XmlUtils.getElements(xPathStr, XmlUtils.getDocument(in), nscontext);
+
+	}
 }

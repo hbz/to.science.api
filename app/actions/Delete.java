@@ -30,139 +30,131 @@ import models.Node;
  */
 public class Delete extends RegalAction {
 
-    /**
-     * Deletes only this single node. Child objects will remain.
-     * 
-     * @param n
-     *            a node to delete
-     * @return a message
-     */
-    private String purge(Node n) {
-	StringBuffer message = new StringBuffer();
-	message.append(new Index().remove(n));
-	removeNodeFromCache(n.getPid());
-	String parentPid = n.getParentPid();
-	if (parentPid != null && !parentPid.isEmpty()) {
-	    try {
-		Globals.fedora.unlinkParent(n);
-		updateIndex(parentPid);
-	    } catch (HttpArchiveException e) {
-		message.append(e.getCode() + " parent " + parentPid
-			+ " already deleted.");
-	    }
-	}
-	Globals.fedora.purgeNode(n.getPid());
-	return message.toString() + "\n" + n.getPid() + " purged!";
-    }
-
-    /**
-     * Deletes only this single node. Child objects will remain.
-     * 
-     * @param n
-     *            a node to delete
-     * @return a message
-     */
-    private String delete(Node n) {
-	StringBuffer message = new StringBuffer();
-	message.append(new Index().remove(n));
-	removeNodeFromCache(n.getPid());
-	Globals.fedora.deleteNode(n.getPid());
-	return message.toString() + "\n" + n.getPid() + " deleted!";
-    }
-
-    /**
-     * Each node in the list will be deleted. Child objects will remain
-     * 
-     * @param nodes
-     *            a list of nodes to delete.
-     * @return a message
-     */
-    public String delete(List<Node> nodes) {
-	/*- 
-	 * Special case: if a single node should be deleted.
-	 *	- check whether the node has urn or doi
-	 *	- if not: purge!
-	 *	- if : mark as deleted!
+	/**
+	 * Deletes only this single node. Child objects will remain.
+	 * 
+	 * @param n a node to delete
+	 * @return a message
 	 */
-	if (nodes.size() == 1) {
-	    Node n = nodes.get(0);
-	    if (!nodesArePersistent(nodes)) {
-		return purge(n);
-	    } else {
-		return delete(n);
-	    }
-	} else {
-	    /*- 
-	     * Normal case: complexe object should be deleted.
-	     * 	- check whether all nodes have doi or urn
-	     * 	- if not: purge all!
-	     *  - if: throw exception!
-	     */
-	    if (!nodesArePersistent(nodes)) {
-		return purge(nodes);
-	    }
+	private String purge(Node n) {
+		StringBuffer message = new StringBuffer();
+		message.append(new Index().remove(n));
+		removeNodeFromCache(n.getPid());
+		String parentPid = n.getParentPid();
+		if (parentPid != null && !parentPid.isEmpty()) {
+			try {
+				Globals.fedora.unlinkParent(n);
+				updateIndex(parentPid);
+			} catch (HttpArchiveException e) {
+				message
+						.append(e.getCode() + " parent " + parentPid + " already deleted.");
+			}
+		}
+		Globals.fedora.purgeNode(n.getPid());
+		return message.toString() + "\n" + n.getPid() + " purged!";
 	}
 
-	throw new HttpArchiveError(405,
-		"At least one of the child objects has a urn or doi. Deletion aborted!");
-    }
-
-    /**
-     * @param nodes
-     *            a list of nodes to evaluate
-     * @return true if one node in list has a persistent identifier
-     */
-    public boolean nodesArePersistent(List<Node> nodes) {
-	for (Node n : nodes) {
-	    if (n.hasPersistentIdentifier())
-		return true;
-	    if (n.hasDoi())
-		return true;
+	/**
+	 * Deletes only this single node. Child objects will remain.
+	 * 
+	 * @param n a node to delete
+	 * @return a message
+	 */
+	private String delete(Node n) {
+		StringBuffer message = new StringBuffer();
+		message.append(new Index().remove(n));
+		removeNodeFromCache(n.getPid());
+		Globals.fedora.deleteNode(n.getPid());
+		return message.toString() + "\n" + n.getPid() + " deleted!";
 	}
-	return false;
-    }
 
-    /**
-     * Each node in the list will be deleted. Child objects will remain
-     * 
-     * @param nodes
-     *            a list of nodes to delete.
-     * @return a message
-     */
-    public String purge(List<Node> nodes) {
-	return apply(nodes, n -> purge(n));
-    }
+	/**
+	 * Each node in the list will be deleted. Child objects will remain
+	 * 
+	 * @param nodes a list of nodes to delete.
+	 * @return a message
+	 */
+	public String delete(List<Node> nodes) {
+		/*- 
+		 * Special case: if a single node should be deleted.
+		 *	- check whether the node has urn or doi
+		 *	- if not: purge!
+		 *	- if : mark as deleted!
+		 */
+		if (nodes.size() == 1) {
+			Node n = nodes.get(0);
+			if (!nodesArePersistent(nodes)) {
+				return purge(n);
+			} else {
+				return delete(n);
+			}
+		} else {
+			/*- 
+			 * Normal case: complexe object should be deleted.
+			 * 	- check whether all nodes have doi or urn
+			 * 	- if not: purge all!
+			 *  - if: throw exception!
+			 */
+			if (!nodesArePersistent(nodes)) {
+				return purge(nodes);
+			}
+		}
 
-    /**
-     * @param pid
-     *            the id of a resource.
-     * @return a message
-     */
-    public String deleteSeq(String pid) {
-	Globals.fedora.deleteDatastream(pid, "seq");
-	updateIndex(pid);
-	return pid + ": seq - datastream successfully deleted! ";
-    }
+		throw new HttpArchiveError(405,
+				"At least one of the child objects has a urn or doi. Deletion aborted!");
+	}
 
-    /**
-     * @param pid
-     *            a namespace qualified id
-     * @return a message
-     */
-    public String deleteMetadata(String pid) {
-	Globals.fedora.deleteDatastream(pid, "metadata");
-	updateIndex(pid);
-	return pid + ": metadata - datastream successfully deleted! ";
-    }
+	/**
+	 * @param nodes a list of nodes to evaluate
+	 * @return true if one node in list has a persistent identifier
+	 */
+	public boolean nodesArePersistent(List<Node> nodes) {
+		for (Node n : nodes) {
+			if (n.hasPersistentIdentifier())
+				return true;
+			if (n.hasDoi())
+				return true;
+		}
+		return false;
+	}
 
-    /**
-     * @param pid
-     *            the pid og the object
-     * @return a message
-     */
-    public String deleteData(String pid) {
-	Globals.fedora.deleteDatastream(pid, "data");
-	updateIndex(pid);
-	return pid + ": data - datastream successfully deleted! ";
-    }
+	/**
+	 * Each node in the list will be deleted. Child objects will remain
+	 * 
+	 * @param nodes a list of nodes to delete.
+	 * @return a message
+	 */
+	public String purge(List<Node> nodes) {
+		return apply(nodes, n -> purge(n));
+	}
+
+	/**
+	 * @param pid the id of a resource.
+	 * @return a message
+	 */
+	public String deleteSeq(String pid) {
+		Globals.fedora.deleteDatastream(pid, "seq");
+		updateIndex(pid);
+		return pid + ": seq - datastream successfully deleted! ";
+	}
+
+	/**
+	 * @param pid a namespace qualified id
+	 * @return a message
+	 */
+	public String deleteMetadata(String pid) {
+		Globals.fedora.deleteDatastream(pid, "metadata");
+		updateIndex(pid);
+		return pid + ": metadata - datastream successfully deleted! ";
+	}
+
+	/**
+	 * @param pid the pid og the object
+	 * @return a message
+	 */
+	public String deleteData(String pid) {
+		Globals.fedora.deleteDatastream(pid, "data");
+		updateIndex(pid);
+		return pid + ": data - datastream successfully deleted! ";
+	}
 }

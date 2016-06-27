@@ -30,106 +30,103 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("javadoc")
 public class Urn {
-    String resolver = Globals.urnResolverAddress;
-    String urn = null;
-    String resolvesTo = "NONE";
-    int resolverStatus = 404;
-    boolean success = false;
+	String resolver = Globals.urnResolverAddress;
+	String urn = null;
+	String resolvesTo = "NONE";
+	int resolverStatus = 404;
+	boolean success = false;
 
-    /**
-     * @param urn
-     * @param httpUriOfResource
-     */
-    public Urn(String urn) {
-	this.urn = urn;
-    }
+	/**
+	 * @param urn
+	 * @param httpUriOfResource
+	 */
+	public Urn(String urn) {
+		this.urn = urn;
+	}
 
-    public void init(String httpUriOfResource) {
-	try {
+	public void init(String httpUriOfResource) {
+		try {
 
-	    if (getFinalURL(resolver + urn).toString()
-		    .equals(httpUriOfResource)) {
-		success = true;
-	    } else {
-		URL url = new URL(resolver + urn);
-		HttpURLConnection con = (HttpURLConnection) url
-			.openConnection();
+			if (getFinalURL(resolver + urn).toString().equals(httpUriOfResource)) {
+				success = true;
+			} else {
+				URL url = new URL(resolver + urn);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+				con.setReadTimeout(1000 * 2);
+				HttpURLConnection.setFollowRedirects(true);
+				con.connect();
+				resolverStatus = con.getResponseCode();
+				resolvesTo =
+						parseAdressFromHtml(con.getInputStream(), httpUriOfResource);
+				if (resolvesTo.equals(httpUriOfResource))
+					success = true;
+			}
+		} catch (Exception e) {
+
+		}
+	}
+
+	public String getFinalURL(String url) throws IOException {
+		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
 		con.setReadTimeout(1000 * 2);
-		HttpURLConnection.setFollowRedirects(true);
+		con.setInstanceFollowRedirects(false);
 		con.connect();
+		con.getInputStream();
+		if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
+				|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
+				|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
+			String redirectUrl = con.getHeaderField("Location");
+
+			return getFinalURL(redirectUrl);
+		}
 		resolverStatus = con.getResponseCode();
-		resolvesTo = parseAdressFromHtml(con.getInputStream(),
-			httpUriOfResource);
-		if (resolvesTo.equals(httpUriOfResource))
-		    success = true;
-	    }
-	} catch (Exception e) {
-
+		resolvesTo = con.getURL().toString();
+		return url;
 	}
-    }
 
-    public String getFinalURL(String url) throws IOException {
-	HttpURLConnection con = (HttpURLConnection) new URL(url)
-		.openConnection();
-	con.setReadTimeout(1000 * 2);
-	con.setInstanceFollowRedirects(false);
-	con.connect();
-	con.getInputStream();
-	if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM
-		|| con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP
-		|| con.getResponseCode() == 307 || con.getResponseCode() == 303) {
-	    String redirectUrl = con.getHeaderField("Location");
+	private String parseAdressFromHtml(InputStream inputStream,
+			String httpUriOfResource) {
+		String pid =
+				httpUriOfResource.substring(httpUriOfResource.lastIndexOf('/'));
 
-	    return getFinalURL(redirectUrl);
+		try (Scanner scn = new Scanner(inputStream, "UTF-8")) {
+			String content = scn.useDelimiter("\\A").next();
+			Pattern pattern = Pattern.compile("\"(http://.*" + pid + ")\"");
+			Matcher matcher = pattern.matcher(content);
+			matcher.find();
+			return matcher.group(1);
+		}
 	}
-	resolverStatus = con.getResponseCode();
-	resolvesTo = con.getURL().toString();
-	return url;
-    }
 
-    private String parseAdressFromHtml(InputStream inputStream,
-	    String httpUriOfResource) {
-	String pid = httpUriOfResource.substring(httpUriOfResource
-		.lastIndexOf('/'));
-
-	try (Scanner scn = new Scanner(inputStream, "UTF-8")) {
-	    String content = scn.useDelimiter("\\A").next();
-	    Pattern pattern = Pattern.compile("\"(http://.*" + pid + ")\"");
-	    Matcher matcher = pattern.matcher(content);
-	    matcher.find();
-	    return matcher.group(1);
+	public String getUrn() {
+		return urn;
 	}
-    }
 
-    public String getUrn() {
-	return urn;
-    }
+	public String getResolvesTo() {
+		return resolvesTo;
+	}
 
-    public String getResolvesTo() {
-	return resolvesTo;
-    }
+	public void setResolvesTo(String resolvesTo) {
+		this.resolvesTo = resolvesTo;
+	}
 
-    public void setResolvesTo(String resolvesTo) {
-	this.resolvesTo = resolvesTo;
-    }
+	public void setUrn(String urn) {
+		this.urn = urn;
+	}
 
-    public void setUrn(String urn) {
-	this.urn = urn;
-    }
+	public String getResolver() {
+		return resolver;
+	}
 
-    public String getResolver() {
-	return resolver;
-    }
+	public int getResolverStatus() {
+		return resolverStatus;
+	}
 
-    public int getResolverStatus() {
-	return resolverStatus;
-    }
+	public void setResolverStatus(int responseCode) {
+		this.resolverStatus = responseCode;
+	}
 
-    public void setResolverStatus(int responseCode) {
-	this.resolverStatus = responseCode;
-    }
-
-    public boolean getSuccess() {
-	return success;
-    }
+	public boolean getSuccess() {
+		return success;
+	}
 }

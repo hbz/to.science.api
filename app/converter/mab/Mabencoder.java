@@ -35,61 +35,59 @@ import org.stringtemplate.v4.ST;
  * 
  */
 public class Mabencoder {
-    ST st = null;
+	ST st = null;
 
-    /**
-     * @param template
-     *            a StringTemplate template file
-     */
-    public Mabencoder(InputStream template) {
-	try {
-	    StringWriter st_writer = new StringWriter();
-	    IOUtils.copy(template, st_writer);
-	    String data = st_writer.toString();
-	    st = new ST(data, '$', '$');
+	/**
+	 * @param template a StringTemplate template file
+	 */
+	public Mabencoder(InputStream template) {
+		try {
+			StringWriter st_writer = new StringWriter();
+			IOUtils.copy(template, st_writer);
+			String data = st_writer.toString();
+			st = new ST(data, '$', '$');
 
-	} catch (IOException e) {
-	    throw new MabException("Couldn't read template file.", e);
+		} catch (IOException e) {
+			throw new MabException("Couldn't read template file.", e);
+		}
 	}
-    }
 
-    /**
-     * @param record
-     *            a MabRecord
-     * @return string output in binary form
-     */
-    public ByteArrayOutputStream render(MabRecord record) {
-	addFields(record);
-	addPersons(record);
-	return render();
-    }
-
-    private void addFields(MabRecord record) {
-	st.add("record", record);
-    }
-
-    private void addPersons(MabRecord record) {
-	Iterator<Person> persons = record.personen.values().iterator();
-	int cP = 1;
-	int cC = 1;
-	while (persons.hasNext()) {
-	    Person p = persons.next();
-	    if (PersonType.natuerlichePerson.equals(p.type)) {
-		st.add("person" + cP, p);
-		cP++;
-	    } else {
-		st.add("corporateBody" + cC, p);
-		cC++;
-	    }
+	/**
+	 * @param record a MabRecord
+	 * @return string output in binary form
+	 */
+	public ByteArrayOutputStream render(MabRecord record) {
+		addFields(record);
+		addPersons(record);
+		return render();
 	}
-    }
 
-    private ByteArrayOutputStream render() {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	try (PrintWriter writer = new PrintWriter(out)) {
-	    writer.append(st.render());
-	    return out;
+	private void addFields(MabRecord record) {
+		st.add("record", record);
 	}
-    }
+
+	private void addPersons(MabRecord record) {
+		Iterator<Person> persons = record.personen.values().iterator();
+		int cP = 1;
+		int cC = 1;
+		while (persons.hasNext()) {
+			Person p = persons.next();
+			if (PersonType.natuerlichePerson.equals(p.type)) {
+				st.add("person" + cP, p);
+				cP++;
+			} else {
+				st.add("corporateBody" + cC, p);
+				cC++;
+			}
+		}
+	}
+
+	private ByteArrayOutputStream render() {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try (PrintWriter writer = new PrintWriter(out)) {
+			writer.append(st.render());
+			return out;
+		}
+	}
 
 }

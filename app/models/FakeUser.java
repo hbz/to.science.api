@@ -21,22 +21,22 @@ package models;
  * 
  */
 public class FakeUser implements User {
-    String role = null;
+	String role = null;
 
-    @Override
-    public User authenticate(String username, String password) {
-	role = username;
-	return this;
-    }
+	@Override
+	public User authenticate(String username, String password) {
+		role = username;
+		return this;
+	}
 
-    @Override
-    public String getRole() {
-	return role;
-    }
+	@Override
+	public String getRole() {
+		return role;
+	}
 
-    @Override
-    public void setRole(String role) {
-	this.role = role;
-    }
+	@Override
+	public void setRole(String role) {
+		this.role = role;
+	}
 
 }

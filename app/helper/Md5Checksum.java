@@ -15,99 +15,93 @@ import java.security.MessageDigest;
  */
 public class Md5Checksum {
 
-    @SuppressWarnings("serial")
-    class Md5ChecksumException extends RuntimeException {
-	public Md5ChecksumException(Throwable cause) {
-	    super(cause);
-	}
-    }
-
-    /**
-     * @param file
-     *            the file you want to get the checksum from
-     * @return checksum as byte array
-     * @throws IOException
-     */
-    public byte[] createChecksum(File file) throws IOException {
-	try (InputStream fis = new FileInputStream(file)) {
-	    return createChecksum(fis);
-	} catch (FileNotFoundException e) {
-	    throw new Md5ChecksumException(e);
-	}
-    }
-
-    /**
-     * @param fis
-     *            a input stream
-     * @return a byte array containing a md5 checksum
-     */
-    public byte[] createChecksum(InputStream fis) {
-	try {
-	    byte[] buffer = new byte[1024];
-	    MessageDigest complete = MessageDigest.getInstance("MD5");
-	    int numRead;
-
-	    do {
-		numRead = fis.read(buffer);
-		if (numRead > 0) {
-		    complete.update(buffer, 0, numRead);
+	@SuppressWarnings("serial")
+	class Md5ChecksumException extends RuntimeException {
+		public Md5ChecksumException(Throwable cause) {
+			super(cause);
 		}
-	    } while (numRead != -1);
-
-	    return complete.digest();
-	} catch (Exception e) {
-	    throw new Md5ChecksumException(e);
-	} finally {
-	    try {
-		fis.close();
-	    } catch (IOException e) {
-		throw new Md5ChecksumException(e);
-	    }
 	}
-    }
 
-    /**
-     * @param filename
-     *            the filename of the file you want to get the checksum from
-     * @return checksum as string
-     */
-    public String getMd5Checksum(String filename) {
-	File file = new File(filename);
-	return getMd5Checksum(file);
-    }
-
-    /**
-     * @param file
-     *            the file you want to get the checksum from
-     * @return the checksum as string
-     */
-    public String getMd5Checksum(File file) {
-	try {
-	    byte[] b = createChecksum(file);
-	    String result = "";
-
-	    for (int i = 0; i < b.length; i++) {
-		result += Integer.toString((b[i] & 0xff) + 0x100, 16)
-			.substring(1);
-	    }
-	    return result;
-	} catch (IOException e) {
-	    throw new Md5ChecksumException(e);
+	/**
+	 * @param file the file you want to get the checksum from
+	 * @return checksum as byte array
+	 * @throws IOException
+	 */
+	public byte[] createChecksum(File file) throws IOException {
+		try (InputStream fis = new FileInputStream(file)) {
+			return createChecksum(fis);
+		} catch (FileNotFoundException e) {
+			throw new Md5ChecksumException(e);
+		}
 	}
-    }
 
-    /**
-     * @param in
-     *            the input stream you want to get the checksum from
-     * @return the checksum as string
-     */
-    public String getMd5Checksum(InputStream in) {
-	byte[] b = createChecksum(in);
-	String result = "";
+	/**
+	 * @param fis a input stream
+	 * @return a byte array containing a md5 checksum
+	 */
+	public byte[] createChecksum(InputStream fis) {
+		try {
+			byte[] buffer = new byte[1024];
+			MessageDigest complete = MessageDigest.getInstance("MD5");
+			int numRead;
 
-	for (int i = 0; i < b.length; i++) {
-	    result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+			do {
+				numRead = fis.read(buffer);
+				if (numRead > 0) {
+					complete.update(buffer, 0, numRead);
+				}
+			} while (numRead != -1);
+
+			return complete.digest();
+		} catch (Exception e) {
+			throw new Md5ChecksumException(e);
+		} finally {
+			try {
+				fis.close();
+			} catch (IOException e) {
+				throw new Md5ChecksumException(e);
+			}
+		}
 	}
-	return result;
-    }
+
+	/**
+	 * @param filename the filename of the file you want to get the checksum from
+	 * @return checksum as string
+	 */
+	public String getMd5Checksum(String filename) {
+		File file = new File(filename);
+		return getMd5Checksum(file);
+	}
+
+	/**
+	 * @param file the file you want to get the checksum from
+	 * @return the checksum as string
+	 */
+	public String getMd5Checksum(File file) {
+		try {
+			byte[] b = createChecksum(file);
+			String result = "";
+
+			for (int i = 0; i < b.length; i++) {
+				result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+			}
+			return result;
+		} catch (IOException e) {
+			throw new Md5ChecksumException(e);
+		}
+	}
+
+	/**
+	 * @param in the input stream you want to get the checksum from
+	 * @return the checksum as string
+	 */
+	public String getMd5Checksum(InputStream in) {
+		byte[] b = createChecksum(in);
+		String result = "";
+
+		for (int i = 0; i < b.length; i++) {
+			result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+		}
+		return result;
+	}
 }

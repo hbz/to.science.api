@@ -43,70 +43,70 @@ import archive.fedora.XmlUtils;
 @SuppressWarnings("javadoc")
 public class MabConverterTest {
 
-    @Test
-    public void transformTestfilesAndCompareXmlToExample() throws IOException {
+	@Test
+	public void transformTestfilesAndCompareXmlToExample() throws IOException {
 
-	transformTestfileAndCompareXmlToExample("HT015954381", "edoweb:3025500");
-	transformTestfileAndCompareXmlToExample("HT014997894", "edoweb:1750745");
-	transformTestfileAndCompareXmlToExample("HT015381429", "edoweb:2238512");
-	transformTestfileAndCompareXmlToExample("HT015780155", "edoweb:2708089");
-	transformTestfileAndCompareXmlToExample("HT017091204", "edoweb:4390058");
-	transformTestfileAndCompareXmlToExample("HT017297166", "edoweb:4575674");
-	transformTestfileAndCompareXmlToExample("HT015004325", "edoweb:1750774");
-    }
-
-    public void transformTestfileAndCompareXmlToExample(String id,
-	    String recordId) throws IOException {
-	try (InputStream in = getResourceAsStream(id + ".nt")) {
-
-	    ByteArrayOutputStream os = transformTestFile(in, recordId);
-	    String str = os.toString();
-	    System.out.println(str);
-	    File output = File.createTempFile("mabconverterOut", "xml");
-	    XmlUtils.newStringToFile(output, str);
-	    File expected = File.createTempFile("mabconverter", "xml");
-	    try (FileOutputStream out = new FileOutputStream(expected)) {
-		IOUtils.copy(getResourceAsStream(id + ".xml"), out);
-	    }
-
-	    // xmlCompare(output, expected);
+		transformTestfileAndCompareXmlToExample("HT015954381", "edoweb:3025500");
+		transformTestfileAndCompareXmlToExample("HT014997894", "edoweb:1750745");
+		transformTestfileAndCompareXmlToExample("HT015381429", "edoweb:2238512");
+		transformTestfileAndCompareXmlToExample("HT015780155", "edoweb:2708089");
+		transformTestfileAndCompareXmlToExample("HT017091204", "edoweb:4390058");
+		transformTestfileAndCompareXmlToExample("HT017297166", "edoweb:4575674");
+		transformTestfileAndCompareXmlToExample("HT015004325", "edoweb:1750774");
 	}
-    }
 
-    @SuppressWarnings("unused")
-    private void xmlCompare(File output, File expected)
-	    throws FileNotFoundException, SAXException, IOException {
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLUnit.setIgnoreAttributeOrder(true);
-	try (Reader e = new FileReader(expected);
-		Reader o = new FileReader(output)) {
-	    DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(e, o));
-	    List<?> allDifferences = diff.getAllDifferences();
-	    Assert.assertEquals("Differences found: " + diff.toString(), 0,
-		    allDifferences.size());
+	public void transformTestfileAndCompareXmlToExample(String id,
+			String recordId) throws IOException {
+		try (InputStream in = getResourceAsStream(id + ".nt")) {
+
+			ByteArrayOutputStream os = transformTestFile(in, recordId);
+			String str = os.toString();
+			System.out.println(str);
+			File output = File.createTempFile("mabconverterOut", "xml");
+			XmlUtils.newStringToFile(output, str);
+			File expected = File.createTempFile("mabconverter", "xml");
+			try (FileOutputStream out = new FileOutputStream(expected)) {
+				IOUtils.copy(getResourceAsStream(id + ".xml"), out);
+			}
+
+			// xmlCompare(output, expected);
+		}
 	}
-    }
 
-    private InputStream getResourceAsStream(String name) {
-	return Thread.currentThread().getContextClassLoader()
-		.getResourceAsStream(name);
-    }
-
-    @SuppressWarnings("unused")
-    private File initOutputFile(String output) throws IOException {
-	File file = new File(output);
-	if (file.exists()) {
-	    file.delete();
+	@SuppressWarnings("unused")
+	private void xmlCompare(File output, File expected)
+			throws FileNotFoundException, SAXException, IOException {
+		XMLUnit.setIgnoreWhitespace(true);
+		XMLUnit.setIgnoreAttributeOrder(true);
+		try (Reader e = new FileReader(expected);
+				Reader o = new FileReader(output)) {
+			DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(e, o));
+			List<?> allDifferences = diff.getAllDifferences();
+			Assert.assertEquals("Differences found: " + diff.toString(), 0,
+					allDifferences.size());
+		}
 	}
-	if (!file.exists()) {
-	    file.createNewFile();
-	}
-	return file;
-    }
 
-    private ByteArrayOutputStream transformTestFile(InputStream input,
-	    String topic) throws IOException {
-	MabConverter converter = new MabConverter(topic);
-	return converter.convert(input);
-    }
+	private InputStream getResourceAsStream(String name) {
+		return Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream(name);
+	}
+
+	@SuppressWarnings("unused")
+	private File initOutputFile(String output) throws IOException {
+		File file = new File(output);
+		if (file.exists()) {
+			file.delete();
+		}
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+		return file;
+	}
+
+	private ByteArrayOutputStream transformTestFile(InputStream input,
+			String topic) throws IOException {
+		MabConverter converter = new MabConverter(topic);
+		return converter.convert(input);
+	}
 }

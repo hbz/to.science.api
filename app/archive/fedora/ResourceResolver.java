@@ -24,8 +24,8 @@ import org.w3c.dom.ls.LSResourceResolver;
  *
  */
 public class ResourceResolver implements LSResourceResolver {
-    public LSInput resolveResource(String type, String namespaceURI,
-	    String publicId, String systemId, String baseURI) {
-	return new Input(publicId, systemId);
-    }
+	public LSInput resolveResource(String type, String namespaceURI,
+			String publicId, String systemId, String baseURI) {
+		return new Input(publicId, systemId);
+	}
 }

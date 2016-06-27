@@ -26,11 +26,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "key", "value" })
 public class KeyValue {
 
-    public KeyValue() {
-	key = null;
-	value = null;
-    }
+	public KeyValue() {
+		key = null;
+		value = null;
+	}
 
-    public String key;
-    public String value;
+	public String key;
+	public String value;
 }

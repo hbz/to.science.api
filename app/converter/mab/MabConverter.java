@@ -30,51 +30,47 @@ import org.openrdf.rio.RDFFormat;
  */
 public class MabConverter {
 
-    static MabConverter me = null;
-    Mabencoder encoder = null;
-    private String topic;
+	static MabConverter me = null;
+	Mabencoder encoder = null;
+	private String topic;
 
-    /**
-     * @author jan
-     * 
-     */
-    public enum Format {
 	/**
-	 * mabxml for hbz-"Schnittstelle Metadaten"
+	 * @author jan
+	 * 
 	 */
-	mabxml
-    }
-
-    /**
-     * @param topic
-     *            the id of a resource we are talking about.
-     * @throws IOException
-     *             if template file for encoder is not avail.
-     */
-    public MabConverter(String topic) throws IOException {
-	this.topic = topic;
-	try (InputStream template = Thread.currentThread()
-		.getContextClassLoader()
-		.getResourceAsStream("mabxml-string-template-on-record.xml")) {
-	    encoder = new Mabencoder(template);
+	public enum Format {
+		/**
+		 * mabxml for hbz-"Schnittstelle Metadaten"
+		 */
+		mabxml
 	}
-    }
 
-    /**
-     * @param in
-     *            An n-triple rdf Inputstream
-     * @return the n-triples converted to mabxml
-     */
-    public ByteArrayOutputStream convert(InputStream in) {
+	/**
+	 * @param topic the id of a resource we are talking about.
+	 * @throws IOException if template file for encoder is not avail.
+	 */
+	public MabConverter(String topic) throws IOException {
+		this.topic = topic;
+		try (InputStream template = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("mabxml-string-template-on-record.xml")) {
+			encoder = new Mabencoder(template);
+		}
+	}
 
-	return convert(in, RDFFormat.NTRIPLES, Format.mabxml);
-    }
+	/**
+	 * @param in An n-triple rdf Inputstream
+	 * @return the n-triples converted to mabxml
+	 */
+	public ByteArrayOutputStream convert(InputStream in) {
 
-    private ByteArrayOutputStream convert(InputStream in,
-	    RDFFormat inputFormat, Format output) {
-	RegalToMabMapper mapper = new RegalToMabMapper();
-	MabRecord record = mapper.map(in, topic);
-	return encoder.render(record);
-    }
+		return convert(in, RDFFormat.NTRIPLES, Format.mabxml);
+	}
+
+	private ByteArrayOutputStream convert(InputStream in, RDFFormat inputFormat,
+			Format output) {
+		RegalToMabMapper mapper = new RegalToMabMapper();
+		MabRecord record = mapper.map(in, topic);
+		return encoder.render(record);
+	}
 
 }

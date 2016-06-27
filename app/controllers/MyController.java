@@ -57,531 +57,502 @@ import com.wordnik.swagger.core.util.JsonUtil;
  */
 public class MyController extends Controller {
 
-    /**
-     * The admin can do everything
-     */
-    public final static String ADMIN_ROLE = "edoweb-admin";
-    /**
-     * The editor sees everything but cannot run some batch processes
-     */
-    public final static String EDITOR_ROLE = "edoweb-editor";
-    /**
-     * The reader can read all data flagged with "public","restricted","remote"
-     * The reader is not able to perform modifying, creating, or deleting
-     * operations
-     */
-    public final static String READER_ROLE = "edoweb-reader";
-    /**
-     * The subscriber behaves like the reader but can als access date flagged
-     * with "single"
-     */
-    public final static String SUBSCRIBER_ROLE = "edoweb-subscriber";
-    /**
-     * The remote user behaves like the reader
-     */
-    public final static String REMOTE_ROLE = "edoweb-remote";
+	/**
+	 * The admin can do everything
+	 */
+	public final static String ADMIN_ROLE = "edoweb-admin";
+	/**
+	 * The editor sees everything but cannot run some batch processes
+	 */
+	public final static String EDITOR_ROLE = "edoweb-editor";
+	/**
+	 * The reader can read all data flagged with "public","restricted","remote"
+	 * The reader is not able to perform modifying, creating, or deleting
+	 * operations
+	 */
+	public final static String READER_ROLE = "edoweb-reader";
+	/**
+	 * The subscriber behaves like the reader but can als access date flagged with
+	 * "single"
+	 */
+	public final static String SUBSCRIBER_ROLE = "edoweb-subscriber";
+	/**
+	 * The remote user behaves like the reader
+	 */
+	public final static String REMOTE_ROLE = "edoweb-remote";
 
-    /**
-     * The anonymous user can read everything flagged with "public".
-     */
-    public final static String ANONYMOUS_ROLE = "edoweb-anonymous";
+	/**
+	 * The anonymous user can read everything flagged with "public".
+	 */
+	public final static String ANONYMOUS_ROLE = "edoweb-anonymous";
 
-    /**
-     * private metadata is only visible to admins and editors
-     */
-    public final static String METADATA_ACCESSOR_PRIVATE = "private";
-    /**
-     * public metadata is visible to everyone
-     */
-    public final static String METADATA_ACCESSOR_PUBLIC = "public";
+	/**
+	 * private metadata is only visible to admins and editors
+	 */
+	public final static String METADATA_ACCESSOR_PRIVATE = "private";
+	/**
+	 * public metadata is visible to everyone
+	 */
+	public final static String METADATA_ACCESSOR_PUBLIC = "public";
 
-    /**
-     * public data is visible to everyone
-     */
-    public final static String DATA_ACCESSOR_PUBLIC = "public";
-    /**
-     * private data is visible to admins and editors
-     */
-    public final static String DATA_ACCESSOR_PRIVATE = "private";
-    /**
-     * restricted data is visible to admins, editors, readers, subscribers and
-     * remotes
-     */
-    public final static String DATA_ACCESSOR_RESTRICTED = "restricted";
-    /**
-     * single data is visible to admins, editors, and subscribers
-     */
-    public final static String DATA_ACCESSOR_SINGLE = "single";
-    /**
-     * remote data is visible to admins, editors, readers, subscribers and
-     * remotes
-     */
-    public final static String DATA_ACCESSOR_REMOTE = "remote";
+	/**
+	 * public data is visible to everyone
+	 */
+	public final static String DATA_ACCESSOR_PUBLIC = "public";
+	/**
+	 * private data is visible to admins and editors
+	 */
+	public final static String DATA_ACCESSOR_PRIVATE = "private";
+	/**
+	 * restricted data is visible to admins, editors, readers, subscribers and
+	 * remotes
+	 */
+	public final static String DATA_ACCESSOR_RESTRICTED = "restricted";
+	/**
+	 * single data is visible to admins, editors, and subscribers
+	 */
+	public final static String DATA_ACCESSOR_SINGLE = "single";
+	/**
+	 * remote data is visible to admins, editors, readers, subscribers and remotes
+	 */
+	public final static String DATA_ACCESSOR_REMOTE = "remote";
 
-    /**
-     * a mapper for all
-     */
-    public static ObjectMapper mapper = JsonUtil.mapper();
+	/**
+	 * a mapper for all
+	 */
+	public static ObjectMapper mapper = JsonUtil.mapper();
 
-    static Read read = new Read();
-    static Create create = new Create();
-    static Index index = new Index();
-    static Modify modify = new Modify();
-    static Delete delete = new Delete();
-    static Transform transform = new Transform();
+	static Read read = new Read();
+	static Create create = new Create();
+	static Index index = new Index();
+	static Modify modify = new Modify();
+	static Delete delete = new Delete();
+	static Transform transform = new Transform();
 
-    /**
-     * @return Html or Json Output
-     */
-    public static Result AccessDenied() {
-	Message msg = new Message("Access Denied!", 401);
-	play.Logger.debug("\nResponse: " + msg.toString());
-	if (request().accepts("text/html")) {
-	    return HtmlMessage(msg);
-	} else {
-	    return JsonMessage(msg);
-	}
-    }
-
-    private static void setJsonHeader() {
-	response().setHeader("Access-Control-Allow-Origin", "*");
-	response().setContentType("application/json");
-    }
-
-    protected static Node readNodeOrNull(String pid) {
-	try {
-	    return read.readNode(pid);
-	} catch (Exception e) {
-	    return null;
-	}
-    }
-
-    /**
-     * @param obj
-     *            an arbitrary object
-     * @return json serialization of obj
-     */
-    public static Result getJsonResult(Object obj) {
-	setJsonHeader();
-	try {
-	    return ok(json(obj));
-	} catch (Exception e) {
-	    play.Logger.error("", e);
-	    return internalServerError("Not able to create response!");
-	}
-    }
-
-    protected static String json(Object obj) {
-	try {
-	    StringWriter w = new StringWriter();
-	    mapper.writeValue(w, obj);
-	    String result = w.toString();
-	    return result;
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
-	}
-    }
-
-    /**
-     * @param msg
-     *            the msg will be rendered as html using message view
-     * @return a html rendering of msg
-     */
-    public static Result HtmlMessage(Message msg) {
-	play.Logger.debug("\nResponse: " + msg.toString());
-	response().setContentType("text/html");
-	return status(msg.getCode(), message.render(msg.toString()));
-    }
-
-    /**
-     * @param msg
-     *            the msg will be rendered as json
-     * @return a json rendering of msg
-     */
-    public static Result JsonMessage(Message msg) {
-	response().setHeader("Access-Control-Allow-Methods",
-		"POST, GET, PUT, DELETE");
-	response().setHeader("Access-Control-Max-Age", "3600");
-	response()
-		.setHeader("Access-Control-Allow-Headers",
-			"Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
-	response().setHeader("Access-Control-Allow-Credentials", "true");
-	response().setHeader("Content-Type", "application/json; charset=utf-8");
-	return status(msg.getCode(), msg.toString());
-    }
-
-    /**
-     * @param accessScheme
-     *            the accessScheme of the object
-     * @param role
-     *            the role of the user
-     * @return true if the user is allowed to read the object
-     */
-    public static boolean readData_accessIsAllowed(String accessScheme,
-	    String role) {
-	if (!ADMIN_ROLE.equals(role)) {
-	    if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
-		return true;
-	    } else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
-		if (isWhitelisted(request().remoteAddress())) {
-		    play.Logger
-			    .info("IP "
-				    + request().remoteAddress()
-				    + " is white listed. Access to restricted data granted.");
-		    return true;
+	/**
+	 * @return Html or Json Output
+	 */
+	public static Result AccessDenied() {
+		Message msg = new Message("Access Denied!", 401);
+		play.Logger.debug("\nResponse: " + msg.toString());
+		if (request().accepts("text/html")) {
+			return HtmlMessage(msg);
+		} else {
+			return JsonMessage(msg);
 		}
-		if (READER_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)
-			|| REMOTE_ROLE.equals(role)) {
-		    if (isWhitelisted(request().getHeader("UserIp"))) {
-			play.Logger
-				.info("IP "
-					+ request().getHeader("UserIp")
-					+ " is white listed. Access to restricted data granted.");
-			return true;
-		    }
-		}
-		if (EDITOR_ROLE.equals(role)) {
-		    return true;
-		}
-	    } else if (DATA_ACCESSOR_PRIVATE.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role))
-		    return true;
-	    } else if (DATA_ACCESSOR_SINGLE.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role)) {// ||
-					       // SUBSCRIBER_ROLE.equals(role))
-					       // {
-		    return true;
-		}
-	    } else if (DATA_ACCESSOR_REMOTE.equals(accessScheme)) {
-		if (EDITOR_ROLE.equals(role)) { // || REMOTE_ROLE.equals(role)
-						// || READER_ROLE.equals(role)
-						// ||
-						// SUBSCRIBER_ROLE.equals(role))
-						// {
-		    return true;
-		}
-	    }
-	} else {// if enter here you are admin
-	    return true;
 	}
-	return false;
-    }
 
-    private static boolean isWhitelisted(String remoteAddress) {
-	return Globals.ipWhiteList.containsKey(remoteAddress);
-    }
-
-    /**
-     * @param publishScheme
-     *            the publishScheme of the object
-     * @param role
-     *            the role of the user
-     * @return true if the user is allowed to read the object
-     */
-    public static boolean readMetadata_accessIsAllowed(String publishScheme,
-	    String role) {
-	if (!ADMIN_ROLE.equals(role)) {
-	    if (METADATA_ACCESSOR_PUBLIC.equals(publishScheme)) {
-		return true;
-	    } else if (METADATA_ACCESSOR_PRIVATE.equals(publishScheme)) {
-		if (EDITOR_ROLE.equals(role)) {
-		    return true;
-		}
-	    }
-	} else {// if enter here you are admin
-	    return true;
+	private static void setJsonHeader() {
+		response().setHeader("Access-Control-Allow-Origin", "*");
+		response().setContentType("application/json");
 	}
-	return false;
-    }
 
-    /**
-     * @param role
-     *            the role of the user
-     * @return true if the user is allowed to modify the object
-     */
-    public static boolean modifyingAccessIsAllowed(String role) {
-	if (ADMIN_ROLE.equals(role) || EDITOR_ROLE.equals(role))
-	    return true;
-	return false;
-    }
-
-    interface NodeAction {
-	Result exec(Node node);
-    }
-
-    interface Action {
-	Result exec(String userId);
-    }
-
-    /**
-     * @author Jan Schnasse
-     *
-     */
-    public static class ReadMetadataAction {
-	Promise<Result> call(String pid, NodeAction ca) {
-	    return Promise
-		    .promise(() -> {
-			try {
-			    Node node = null;
-			    if (pid != null) {
-				node = read.readNode(pid);
-				String role = (String) Http.Context.current().args
-					.get("role");
-				String publishScheme = node.getPublishScheme();
-				if (!readMetadata_accessIsAllowed(
-					publishScheme, role)) {
-				    return AccessDenied();
-				}
-			    }
-			    return ca.exec(node);
-			} catch (HttpArchiveException e) {
-			    if (request().accepts("text/html")) {
-				return HtmlMessage(new Message(e, e.getCode()));
-			    }
-			    return JsonMessage(new Message(e, e.getCode()));
-			} catch (HttpArchiveError e) {
-			    if (request().accepts("text/html")) {
-				return HtmlMessage(new Message(e, e.getCode()));
-			    }
-			    return JsonMessage(new Message(e, e.getCode()));
-			} catch (Exception e) {
-			    if (request().accepts("text/html")) {
-				return HtmlMessage(new Message(e, 500));
-			    }
-			    return JsonMessage(new Message(e, 500));
-			}
-		    });
-	}
-    }
-
-    /**
-     * @author Jan Schnasse
-     *
-     */
-    public static class ReadDataAction {
-	Promise<Result> call(String pid, NodeAction ca) {
-	    return Promise.promise(() -> {
+	protected static Node readNodeOrNull(String pid) {
 		try {
-		    Node node = null;
-		    if (pid != null) {
-			node = read.readNode(pid);
-			String role = (String) Http.Context.current().args
-				.get("role");
-			String accessScheme = node.getAccessScheme();
-			if (!readData_accessIsAllowed(accessScheme, role)) {
-			    return AccessDenied();
-			}
-		    }
-		    return ca.exec(node);
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (HttpArchiveError e) {
-		    return JsonMessage(new Message(e, e.getCode()));
+			return read.readNode(pid);
 		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
+			return null;
 		}
-	    });
 	}
 
-    }
-
-    /**
-     * @author Jan Schnasse
-     *
-     */
-    public static class ListAction {
-	Promise<Result> call(Action ca) {
-	    return Promise.promise(() -> {
+	/**
+	 * @param obj an arbitrary object
+	 * @return json serialization of obj
+	 */
+	public static Result getJsonResult(Object obj) {
+		setJsonHeader();
 		try {
-		    String role = (String) Http.Context.current().args
-			    .get("role");
-		    if (!readMetadata_accessIsAllowed("private", role)) {
-			return AccessDenied();
-		    }
-		    return ca.exec(request().getHeader("UserId"));
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (HttpArchiveError e) {
-		    return JsonMessage(new Message(e, e.getCode()));
+			return ok(json(obj));
 		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
+			play.Logger.error("", e);
+			return internalServerError("Not able to create response!");
 		}
-	    });
 	}
-    }
 
-    /**
-     * @author Jan Schnasse
-     *
-     */
-    public static class ModifyAction {
-	Promise<Result> call(String pid, Action ca) {
-	    return Promise.promise(() -> {
+	protected static String json(Object obj) {
 		try {
-		    String role = (String) Http.Context.current().args
-			    .get("role");
-		    String userId = request().getHeader("UserId");
-		    play.Logger.debug("Try to access with role: " + role
-			    + " and userId " + userId);
-		    if (!modifyingAccessIsAllowed(role)) {
-			return AccessDenied();
-		    } else {
-			Result result = ca.exec(userId);
-			if (userId != null && !userId.equals("0")
-				&& !userId.equals("1")
-				&& !userId.equals("UrnAllocator")) {
-			    play.Logger.info(json(modify.setObjectTimestamp(
-				    read.readNode(pid), new Date(), userId)));
-			}
+			StringWriter w = new StringWriter();
+			mapper.writeValue(w, obj);
+			String result = w.toString();
 			return result;
-		    }
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
+		} catch (IOException e) {
+			throw new HttpArchiveException(500, e);
 		}
-	    });
 	}
-    }
 
-    /**
-     * @author Jan Schnasse
-     *
-     */
-    public static class IndexAction {
-	Promise<Result> call(String pid, NodeAction ca) {
-	    return Promise
-		    .promise(() -> {
-			try {
-			    String role = (String) Http.Context.current().args
-				    .get("role");
-			    play.Logger.debug("Try to access with role: "
-				    + role + ".");
-			    if (!modifyingAccessIsAllowed(role)) {
-				return AccessDenied();
-			    }
-			    Node node = null;
-			    try {
-				node = read.readNode(pid);
-			    } catch (Exception e) {
-				play.Logger
-					.debug("Try to modify resource that can not be read!",
-						e);
-			    }
-			    return ca.exec(node);
-			} catch (HttpArchiveException e) {
-			    return JsonMessage(new Message(e, e.getCode()));
-			} catch (Exception e) {
-			    return JsonMessage(new Message(e, 500));
+	/**
+	 * @param msg the msg will be rendered as html using message view
+	 * @return a html rendering of msg
+	 */
+	public static Result HtmlMessage(Message msg) {
+		play.Logger.debug("\nResponse: " + msg.toString());
+		response().setContentType("text/html");
+		return status(msg.getCode(), message.render(msg.toString()));
+	}
+
+	/**
+	 * @param msg the msg will be rendered as json
+	 * @return a json rendering of msg
+	 */
+	public static Result JsonMessage(Message msg) {
+		response().setHeader("Access-Control-Allow-Methods",
+				"POST, GET, PUT, DELETE");
+		response().setHeader("Access-Control-Max-Age", "3600");
+		response().setHeader("Access-Control-Allow-Headers",
+				"Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
+		response().setHeader("Access-Control-Allow-Credentials", "true");
+		response().setHeader("Content-Type", "application/json; charset=utf-8");
+		return status(msg.getCode(), msg.toString());
+	}
+
+	/**
+	 * @param accessScheme the accessScheme of the object
+	 * @param role the role of the user
+	 * @return true if the user is allowed to read the object
+	 */
+	public static boolean readData_accessIsAllowed(String accessScheme,
+			String role) {
+		if (!ADMIN_ROLE.equals(role)) {
+			if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
+				return true;
+			} else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
+				if (isWhitelisted(request().remoteAddress())) {
+					play.Logger.info("IP " + request().remoteAddress()
+							+ " is white listed. Access to restricted data granted.");
+					return true;
+				}
+				if (READER_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)
+						|| REMOTE_ROLE.equals(role)) {
+					if (isWhitelisted(request().getHeader("UserIp"))) {
+						play.Logger.info("IP " + request().getHeader("UserIp")
+								+ " is white listed. Access to restricted data granted.");
+						return true;
+					}
+				}
+				if (EDITOR_ROLE.equals(role)) {
+					return true;
+				}
+			} else if (DATA_ACCESSOR_PRIVATE.equals(accessScheme)) {
+				if (EDITOR_ROLE.equals(role))
+					return true;
+			} else if (DATA_ACCESSOR_SINGLE.equals(accessScheme)) {
+				if (EDITOR_ROLE.equals(role)) {// ||
+					// SUBSCRIBER_ROLE.equals(role))
+					// {
+					return true;
+				}
+			} else if (DATA_ACCESSOR_REMOTE.equals(accessScheme)) {
+				if (EDITOR_ROLE.equals(role)) { // || REMOTE_ROLE.equals(role)
+					// || READER_ROLE.equals(role)
+					// ||
+					// SUBSCRIBER_ROLE.equals(role))
+					// {
+					return true;
+				}
 			}
-		    });
-	}
-    }
-
-    /**
-     * @author Jan Schnasse
-     *
-     */
-    public static class CreateAction {
-	Promise<Result> call(Action ca) {
-	    return Promise.promise(() -> {
-		try {
-		    String role = (String) Http.Context.current().args
-			    .get("role");
-		    if (!modifyingAccessIsAllowed(role)) {
-			return AccessDenied();
-		    }
-		    return ca.exec(request().getHeader("UserId"));
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (HttpArchiveError e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
+		} else {// if enter here you are admin
+			return true;
 		}
-	    });
+		return false;
 	}
-    }
 
-    /**
-     * @author Jan Schnasse
-     *
-     */
-    public static class BulkActionAccessor {
-	Promise<Result> call(Action ca) {
-	    return Promise.promise(() -> {
-		try {
-		    String role = (String) Http.Context.current().args
-			    .get("role");
-		    if (!modifyingAccessIsAllowed(role)) {
-			return AccessDenied();
-		    }
-		    return ca.exec(request().getHeader("UserId"));
-		} catch (HttpArchiveException e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (HttpArchiveError e) {
-		    return JsonMessage(new Message(e, e.getCode()));
-		} catch (Exception e) {
-		    return JsonMessage(new Message(e, 500));
+	private static boolean isWhitelisted(String remoteAddress) {
+		return Globals.ipWhiteList.containsKey(remoteAddress);
+	}
+
+	/**
+	 * @param publishScheme the publishScheme of the object
+	 * @param role the role of the user
+	 * @return true if the user is allowed to read the object
+	 */
+	public static boolean readMetadata_accessIsAllowed(String publishScheme,
+			String role) {
+		if (!ADMIN_ROLE.equals(role)) {
+			if (METADATA_ACCESSOR_PUBLIC.equals(publishScheme)) {
+				return true;
+			} else if (METADATA_ACCESSOR_PRIVATE.equals(publishScheme)) {
+				if (EDITOR_ROLE.equals(role)) {
+					return true;
+				}
+			}
+		} else {// if enter here you are admin
+			return true;
 		}
-	    });
+		return false;
 	}
-    }
 
-    /**
-     * @param map
-     * @return a pritn of the map
-     */
-    public static String mapToString(Map<String, String> map) {
-	StringBuilder sb = new StringBuilder();
-	Iterator<Entry<String, String>> iter = map.entrySet().iterator();
-	while (iter.hasNext()) {
-	    Entry<String, String> entry = iter.next();
-	    sb.append(entry.getKey());
-	    sb.append('=').append('"').append(entry.getValue()).append('"');
-	    if (iter.hasNext()) {
-		sb.append("\n\t'");
-	    }
+	/**
+	 * @param role the role of the user
+	 * @return true if the user is allowed to modify the object
+	 */
+	public static boolean modifyingAccessIsAllowed(String role) {
+		if (ADMIN_ROLE.equals(role) || EDITOR_ROLE.equals(role))
+			return true;
+		return false;
 	}
-	return sb.toString();
 
-    }
-
-    /**
-     * @param d
-     *            a string in format "yyyyy-mm-dd"
-     * @return a Date representation of the String passed as param
-     */
-    public static Date createDateFromString(String d) {
-	try {
-	    SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd");
-	    Date date = dt.parse(d);
-	    return date;
-	} catch (ParseException e) {
-	    throw new HttpArchiveException(400, e);
-	} catch (Exception e) {
-	    throw new HttpArchiveException(500, e);
+	interface NodeAction {
+		Result exec(Node node);
 	}
-    }
 
-    protected static String getCurrentDate() {
-	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	Date date = new Date();
-	return dateFormat.format(date);
-    }
-
-    public static void validate(String xml, String schema) {
-	try {
-	    if (schema != null) {
-		XmlUtils.validate(
-			new ByteArrayInputStream(xml.getBytes("utf-8")), Play
-				.application().resourceAsStream(schema));
-	    } else {
-		XmlUtils.validate(
-			new ByteArrayInputStream(xml.getBytes("utf-8")), null);
-	    }
-	} catch (Exception e) {
-	    throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
+	interface Action {
+		Result exec(String userId);
 	}
-    }
+
+	/**
+	 * @author Jan Schnasse
+	 *
+	 */
+	public static class ReadMetadataAction {
+		Promise<Result> call(String pid, NodeAction ca) {
+			return Promise.promise(() -> {
+				try {
+					Node node = null;
+					if (pid != null) {
+						node = read.readNode(pid);
+						String role = (String) Http.Context.current().args.get("role");
+						String publishScheme = node.getPublishScheme();
+						if (!readMetadata_accessIsAllowed(publishScheme, role)) {
+							return AccessDenied();
+						}
+					}
+					return ca.exec(node);
+				} catch (HttpArchiveException e) {
+					if (request().accepts("text/html")) {
+						return HtmlMessage(new Message(e, e.getCode()));
+					}
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (HttpArchiveError e) {
+					if (request().accepts("text/html")) {
+						return HtmlMessage(new Message(e, e.getCode()));
+					}
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (Exception e) {
+					if (request().accepts("text/html")) {
+						return HtmlMessage(new Message(e, 500));
+					}
+					return JsonMessage(new Message(e, 500));
+				}
+			});
+		}
+	}
+
+	/**
+	 * @author Jan Schnasse
+	 *
+	 */
+	public static class ReadDataAction {
+		Promise<Result> call(String pid, NodeAction ca) {
+			return Promise.promise(() -> {
+				try {
+					Node node = null;
+					if (pid != null) {
+						node = read.readNode(pid);
+						String role = (String) Http.Context.current().args.get("role");
+						String accessScheme = node.getAccessScheme();
+						if (!readData_accessIsAllowed(accessScheme, role)) {
+							return AccessDenied();
+						}
+					}
+					return ca.exec(node);
+				} catch (HttpArchiveException e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (HttpArchiveError e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (Exception e) {
+					return JsonMessage(new Message(e, 500));
+				}
+			});
+		}
+
+	}
+
+	/**
+	 * @author Jan Schnasse
+	 *
+	 */
+	public static class ListAction {
+		Promise<Result> call(Action ca) {
+			return Promise.promise(() -> {
+				try {
+					String role = (String) Http.Context.current().args.get("role");
+					if (!readMetadata_accessIsAllowed("private", role)) {
+						return AccessDenied();
+					}
+					return ca.exec(request().getHeader("UserId"));
+				} catch (HttpArchiveException e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (HttpArchiveError e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (Exception e) {
+					return JsonMessage(new Message(e, 500));
+				}
+			});
+		}
+	}
+
+	/**
+	 * @author Jan Schnasse
+	 *
+	 */
+	public static class ModifyAction {
+		Promise<Result> call(String pid, Action ca) {
+			return Promise.promise(() -> {
+				try {
+					String role = (String) Http.Context.current().args.get("role");
+					String userId = request().getHeader("UserId");
+					play.Logger.debug(
+							"Try to access with role: " + role + " and userId " + userId);
+					if (!modifyingAccessIsAllowed(role)) {
+						return AccessDenied();
+					} else {
+						Result result = ca.exec(userId);
+						if (userId != null && !userId.equals("0") && !userId.equals("1")
+								&& !userId.equals("UrnAllocator")) {
+							play.Logger.info(json(modify
+									.setObjectTimestamp(read.readNode(pid), new Date(), userId)));
+						}
+						return result;
+					}
+				} catch (HttpArchiveException e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (Exception e) {
+					return JsonMessage(new Message(e, 500));
+				}
+			});
+		}
+	}
+
+	/**
+	 * @author Jan Schnasse
+	 *
+	 */
+	public static class IndexAction {
+		Promise<Result> call(String pid, NodeAction ca) {
+			return Promise.promise(() -> {
+				try {
+					String role = (String) Http.Context.current().args.get("role");
+					play.Logger.debug("Try to access with role: " + role + ".");
+					if (!modifyingAccessIsAllowed(role)) {
+						return AccessDenied();
+					}
+					Node node = null;
+					try {
+						node = read.readNode(pid);
+					} catch (Exception e) {
+						play.Logger.debug("Try to modify resource that can not be read!",
+								e);
+					}
+					return ca.exec(node);
+				} catch (HttpArchiveException e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (Exception e) {
+					return JsonMessage(new Message(e, 500));
+				}
+			});
+		}
+	}
+
+	/**
+	 * @author Jan Schnasse
+	 *
+	 */
+	public static class CreateAction {
+		Promise<Result> call(Action ca) {
+			return Promise.promise(() -> {
+				try {
+					String role = (String) Http.Context.current().args.get("role");
+					if (!modifyingAccessIsAllowed(role)) {
+						return AccessDenied();
+					}
+					return ca.exec(request().getHeader("UserId"));
+				} catch (HttpArchiveException e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (HttpArchiveError e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (Exception e) {
+					return JsonMessage(new Message(e, 500));
+				}
+			});
+		}
+	}
+
+	/**
+	 * @author Jan Schnasse
+	 *
+	 */
+	public static class BulkActionAccessor {
+		Promise<Result> call(Action ca) {
+			return Promise.promise(() -> {
+				try {
+					String role = (String) Http.Context.current().args.get("role");
+					if (!modifyingAccessIsAllowed(role)) {
+						return AccessDenied();
+					}
+					return ca.exec(request().getHeader("UserId"));
+				} catch (HttpArchiveException e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (HttpArchiveError e) {
+					return JsonMessage(new Message(e, e.getCode()));
+				} catch (Exception e) {
+					return JsonMessage(new Message(e, 500));
+				}
+			});
+		}
+	}
+
+	/**
+	 * @param map
+	 * @return a pritn of the map
+	 */
+	public static String mapToString(Map<String, String> map) {
+		StringBuilder sb = new StringBuilder();
+		Iterator<Entry<String, String>> iter = map.entrySet().iterator();
+		while (iter.hasNext()) {
+			Entry<String, String> entry = iter.next();
+			sb.append(entry.getKey());
+			sb.append('=').append('"').append(entry.getValue()).append('"');
+			if (iter.hasNext()) {
+				sb.append("\n\t'");
+			}
+		}
+		return sb.toString();
+
+	}
+
+	/**
+	 * @param d a string in format "yyyyy-mm-dd"
+	 * @return a Date representation of the String passed as param
+	 */
+	public static Date createDateFromString(String d) {
+		try {
+			SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = dt.parse(d);
+			return date;
+		} catch (ParseException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	protected static String getCurrentDate() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		Date date = new Date();
+		return dateFormat.format(date);
+	}
+
+	public static void validate(String xml, String schema) {
+		try {
+			if (schema != null) {
+				XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
+						Play.application().resourceAsStream(schema));
+			} else {
+				XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
+						null);
+			}
+		} catch (Exception e) {
+			throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
+		}
+	}
 }

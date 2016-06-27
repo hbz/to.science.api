@@ -30,63 +30,59 @@ import scala.concurrent.duration.FiniteDuration;
  *
  */
 public class ScheduledTask implements Cancellable {
-    private CronExpression cronExpression;
-    private String name;
-    private boolean isCanceled;
-    private Runnable task;
+	private CronExpression cronExpression;
+	private String name;
+	private boolean isCanceled;
+	private Runnable task;
 
-    /**
-     * @param name
-     *            a name for the task
-     * @param cronExpr
-     *            a cron expr as described in
-     *            https://www.playframework.com/documentation
-     *            /2.3.x/api/java/play/libs/Time.CronExpression.html
-     * @param task
-     *            a runnable, that will be executed at specified time
-     * @throws ParseException
-     */
-    public ScheduledTask(String name, String cronExpr, Runnable task)
-	    throws ParseException {
-	cronExpression = new CronExpression(cronExpr);
-	this.name = name;
-	this.task = task;
-    }
-
-    /**
-     * will execute the actual task and schedule the next execution
-     */
-    public void schedule() {
-	if (!isCanceled) {
-	    try {
-		Date nextValidTimeAfter = cronExpression
-			.getNextValidTimeAfter(new Date());
-		FiniteDuration d = FiniteDuration.create(
-			nextValidTimeAfter.getTime()
-				- System.currentTimeMillis(),
-			TimeUnit.MILLISECONDS);
-
-		play.Logger.info(name + " next run at " + nextValidTimeAfter);
-
-		Akka.system().scheduler().scheduleOnce(d, () -> {
-		    task.run();
-		    schedule();
-		}, Akka.system().dispatcher());
-	    } catch (Exception e) {
-		play.Logger.error("", e);
-	    }
+	/**
+	 * @param name a name for the task
+	 * @param cronExpr a cron expr as described in
+	 *          https://www.playframework.com/documentation
+	 *          /2.3.x/api/java/play/libs/Time.CronExpression.html
+	 * @param task a runnable, that will be executed at specified time
+	 * @throws ParseException
+	 */
+	public ScheduledTask(String name, String cronExpr, Runnable task)
+			throws ParseException {
+		cronExpression = new CronExpression(cronExpr);
+		this.name = name;
+		this.task = task;
 	}
-    }
 
-    @Override
-    public boolean cancel() {
-	isCanceled = true;
-	return isCanceled;
-    }
+	/**
+	 * will execute the actual task and schedule the next execution
+	 */
+	public void schedule() {
+		if (!isCanceled) {
+			try {
+				Date nextValidTimeAfter =
+						cronExpression.getNextValidTimeAfter(new Date());
+				FiniteDuration d = FiniteDuration.create(
+						nextValidTimeAfter.getTime() - System.currentTimeMillis(),
+						TimeUnit.MILLISECONDS);
 
-    @Override
-    public boolean isCancelled() {
-	return isCanceled;
-    }
+				play.Logger.info(name + " next run at " + nextValidTimeAfter);
+
+				Akka.system().scheduler().scheduleOnce(d, () -> {
+					task.run();
+					schedule();
+				} , Akka.system().dispatcher());
+			} catch (Exception e) {
+				play.Logger.error("", e);
+			}
+		}
+	}
+
+	@Override
+	public boolean cancel() {
+		isCanceled = true;
+		return isCanceled;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return isCanceled;
+	}
 
 }

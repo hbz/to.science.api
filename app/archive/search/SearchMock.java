@@ -32,74 +32,72 @@ import org.elasticsearch.search.SearchHits;
  */
 class SearchMock {
 
-    Search search;
-    Node node = null;
-    Client client = null;
+	Search search;
+	Node node = null;
+	Client client = null;
 
-    /**
-     * Used for testing
-     * 
-     * @param indexName
-     *            es index
-     * @param configName
-     *            name of a config file in classpath
-     */
-    public SearchMock(String indexName, String configName) {
-	node = nodeBuilder().local(true).node();
-	client = node.client();
-	client.admin().indices().prepareDelete("_all").execute().actionGet();
-	search = new Search(client);
-	search.init(new String[] { indexName }, configName);
-    }
+	/**
+	 * Used for testing
+	 * 
+	 * @param indexName es index
+	 * @param configName name of a config file in classpath
+	 */
+	public SearchMock(String indexName, String configName) {
+		node = nodeBuilder().local(true).node();
+		client = node.client();
+		client.admin().indices().prepareDelete("_all").execute().actionGet();
+		search = new Search(client);
+		search.init(new String[] { indexName }, configName);
+	}
 
-    /**
-     * Used for testing. Clean up!
-     */
-    public void down() {
-	client.admin().indices().prepareDelete("_all").execute().actionGet();
-	node.close();
-    }
+	/**
+	 * Used for testing. Clean up!
+	 */
+	public void down() {
+		client.admin().indices().prepareDelete("_all").execute().actionGet();
+		node.close();
+	}
 
-    public int hashCode() {
-	return search.hashCode();
-    }
+	public int hashCode() {
+		return search.hashCode();
+	}
 
-    public void init(String[] index, String config) {
-	search.init(index, config);
-    }
+	public void init(String[] index, String config) {
+		search.init(index, config);
+	}
 
-    public ActionResponse index(String index, String type, String id,
-	    String data) {
-	return search.index(index, type, id, data);
-    }
+	public ActionResponse index(String index, String type, String id,
+			String data) {
+		return search.index(index, type, id, data);
+	}
 
-    public SearchHits listResources(String index, String type, int from,
-	    int until) {
-	return search.listResources(index, type, from, until);
-    }
+	public SearchHits listResources(String index, String type, int from,
+			int until) {
+		return search.listResources(index, type, from, until);
+	}
 
-    public boolean equals(Object obj) {
-	return search.equals(obj);
-    }
+	public boolean equals(Object obj) {
+		return search.equals(obj);
+	}
 
-    public List<String> listIds(String index, String type, int from, int until) {
-	return search.list(index, type, from, until);
-    }
+	public List<String> listIds(String index, String type, int from, int until) {
+		return search.list(index, type, from, until);
+	}
 
-    public ActionResponse delete(String id, String index, String type) {
-	return search.delete(id, index, type);
-    }
+	public ActionResponse delete(String id, String index, String type) {
+		return search.delete(id, index, type);
+	}
 
-    public SearchHits query(String index, String fieldName, String fieldValue) {
-	return search.query(index, fieldName, fieldValue);
-    }
+	public SearchHits query(String index, String fieldName, String fieldValue) {
+		return search.query(index, fieldName, fieldValue);
+	}
 
-    public Map<String, Object> getSettings(String index, String type) {
-	return search.getSettings(index, type);
-    }
+	public Map<String, Object> getSettings(String index, String type) {
+		return search.getSettings(index, type);
+	}
 
-    public String toString() {
-	return search.toString();
-    }
+	public String toString() {
+		return search.toString();
+	}
 
 }

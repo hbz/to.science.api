@@ -23,28 +23,28 @@ package helper;
 @SuppressWarnings({ "serial", "javadoc" })
 public class HttpArchiveException extends RuntimeException {
 
-    int code = 500;
+	int code = 500;
 
-    public HttpArchiveException(int httpCode, String message) {
-	super(message);
-	code = httpCode;
-    }
+	public HttpArchiveException(int httpCode, String message) {
+		super(message);
+		code = httpCode;
+	}
 
-    public HttpArchiveException(int httpCode, Exception e) {
-	super(e);
-	code = httpCode;
-    }
+	public HttpArchiveException(int httpCode, Exception e) {
+		super(e);
+		code = httpCode;
+	}
 
-    public HttpArchiveException(int httpCode) {
-	code = httpCode;
-    }
+	public HttpArchiveException(int httpCode) {
+		code = httpCode;
+	}
 
-    public int getCode() {
-	return code;
-    }
+	public int getCode() {
+		return code;
+	}
 
-    public void setCode(int code) {
-	this.code = code;
-    }
+	public void setCode(int code) {
+		this.code = code;
+	}
 
 }

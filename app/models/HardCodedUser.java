@@ -24,78 +24,77 @@ import play.Play;
  * 
  */
 public class HardCodedUser implements User {
-    String role = null;
+	String role = null;
 
-    /**
-     * Creates a new HardCoded-User and checks if passwords are set
-     * 
-     */
-    public HardCodedUser() {
-	String adminPwd;
-	String editorPwd;
-	String readerPwd;
-	String subscriberPwd;
-	String remotePwd;
-	adminPwd = Play.application().configuration()
-		.getString("regal-api.admin-password");
-	editorPwd = Play.application().configuration()
-		.getString("regal-api.editor-password");
-	readerPwd = Play.application().configuration()
-		.getString("regal-api.reader-password");
-	subscriberPwd = Play.application().configuration()
-		.getString("regal-api.subscriber-password");
-	remotePwd = Play.application().configuration()
-		.getString("regal-api.remote-password");
+	/**
+	 * Creates a new HardCoded-User and checks if passwords are set
+	 * 
+	 */
+	public HardCodedUser() {
+		String adminPwd;
+		String editorPwd;
+		String readerPwd;
+		String subscriberPwd;
+		String remotePwd;
+		adminPwd = Play.application().configuration()
+				.getString("regal-api.admin-password");
+		editorPwd = Play.application().configuration()
+				.getString("regal-api.editor-password");
+		readerPwd = Play.application().configuration()
+				.getString("regal-api.reader-password");
+		subscriberPwd = Play.application().configuration()
+				.getString("regal-api.subscriber-password");
+		remotePwd = Play.application().configuration()
+				.getString("regal-api.remote-password");
 
-	if (adminPwd == null || editorPwd == null || readerPwd == null
-		|| subscriberPwd == null || remotePwd == null)
-	    throw new RuntimeException(
-		    "Please set passwords for all roles in application.conf");
-    }
-
-    @Override
-    public User authenticate(String username, String password) {
-	role = null;
-	if (username == null || username.isEmpty()) {
-	    role = MyController.ANONYMOUS_ROLE;
-	} else if (MyController.ANONYMOUS_ROLE.equals(username)) {
-	    role = MyController.ANONYMOUS_ROLE;
-	} else if (password == null || password.isEmpty()) {
-	    role = MyController.ANONYMOUS_ROLE;
-	} else if (MyController.ADMIN_ROLE.equals(username)
-		&& password.equals(Play.application().configuration()
-			.getString("regal-api.admin-password"))) {
-	    role = MyController.ADMIN_ROLE;
-	} else if (MyController.EDITOR_ROLE.equals(username)
-		&& password.equals(Play.application().configuration()
-			.getString("regal-api.editor-password"))) {
-	    role = MyController.EDITOR_ROLE;
-	} else if (MyController.READER_ROLE.equals(username)
-		&& password.equals(Play.application().configuration()
-			.getString("regal-api.reader-password"))) {
-	    role = MyController.READER_ROLE;
-	} else if (MyController.SUBSCRIBER_ROLE.equals(username)
-		&& password.equals(Play.application().configuration()
-			.getString("regal-api.subscriber-password"))) {
-	    role = MyController.SUBSCRIBER_ROLE;
-	} else if (MyController.REMOTE_ROLE.equals(username)
-		&& password.equals(Play.application().configuration()
-			.getString("regal-api.remote-password"))) {
-	    role = MyController.REMOTE_ROLE;
+		if (adminPwd == null || editorPwd == null || readerPwd == null
+				|| subscriberPwd == null || remotePwd == null)
+			throw new RuntimeException(
+					"Please set passwords for all roles in application.conf");
 	}
-	if (role == null)
-	    throw new RuntimeException("No valid credentials!");
-	play.Logger.debug("You are authorized with role " + role);
-	return this;
-    }
 
-    @Override
-    public String getRole() {
-	return role;
-    }
+	@Override
+	public User authenticate(String username, String password) {
+		role = null;
+		if (username == null || username.isEmpty()) {
+			role = MyController.ANONYMOUS_ROLE;
+		} else if (MyController.ANONYMOUS_ROLE.equals(username)) {
+			role = MyController.ANONYMOUS_ROLE;
+		} else if (password == null || password.isEmpty()) {
+			role = MyController.ANONYMOUS_ROLE;
+		} else if (MyController.ADMIN_ROLE.equals(username) && password.equals(Play
+				.application().configuration().getString("regal-api.admin-password"))) {
+			role = MyController.ADMIN_ROLE;
+		} else if (MyController.EDITOR_ROLE.equals(username)
+				&& password.equals(Play.application().configuration()
+						.getString("regal-api.editor-password"))) {
+			role = MyController.EDITOR_ROLE;
+		} else if (MyController.READER_ROLE.equals(username)
+				&& password.equals(Play.application().configuration()
+						.getString("regal-api.reader-password"))) {
+			role = MyController.READER_ROLE;
+		} else if (MyController.SUBSCRIBER_ROLE.equals(username)
+				&& password.equals(Play.application().configuration()
+						.getString("regal-api.subscriber-password"))) {
+			role = MyController.SUBSCRIBER_ROLE;
+		} else if (MyController.REMOTE_ROLE.equals(username)
+				&& password.equals(Play.application().configuration()
+						.getString("regal-api.remote-password"))) {
+			role = MyController.REMOTE_ROLE;
+		}
+		if (role == null)
+			throw new RuntimeException("No valid credentials!");
+		play.Logger.debug("You are authorized with role " + role);
+		return this;
+	}
 
-    @Override
-    public void setRole(String role) {
-	this.role = role;
-    }
+	@Override
+	public String getRole() {
+		return role;
+	}
+
+	@Override
+	public void setRole(String role) {
+		this.role = role;
+	}
 }

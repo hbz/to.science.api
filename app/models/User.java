@@ -22,24 +22,21 @@ package models;
  */
 public interface User {
 
-    /**
-     * @param username
-     *            username
-     * @param password
-     *            password
-     * @return null if credentials are not valid
-     */
-    public abstract User authenticate(String username, String password);
+	/**
+	 * @param username username
+	 * @param password password
+	 * @return null if credentials are not valid
+	 */
+	public abstract User authenticate(String username, String password);
 
-    /**
-     * @return the role of the user
-     */
-    public abstract String getRole();
+	/**
+	 * @return the role of the user
+	 */
+	public abstract String getRole();
 
-    /**
-     * @param role
-     *            a user role that exists in the system
-     */
-    public abstract void setRole(String role);
+	/**
+	 * @param role a user role that exists in the system
+	 */
+	public abstract void setRole(String role);
 
 }

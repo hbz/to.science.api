@@ -23,28 +23,28 @@ package helper;
 @SuppressWarnings({ "serial", "javadoc" })
 public class HttpArchiveError extends Error {
 
-    int code = 500;
+	int code = 500;
 
-    public HttpArchiveError(int httpCode, String message) {
-	super(message);
-	code = httpCode;
-    }
+	public HttpArchiveError(int httpCode, String message) {
+		super(message);
+		code = httpCode;
+	}
 
-    public HttpArchiveError(int httpCode, Exception e) {
-	super(e);
-	code = httpCode;
-    }
+	public HttpArchiveError(int httpCode, Exception e) {
+		super(e);
+		code = httpCode;
+	}
 
-    public HttpArchiveError(int httpCode) {
-	code = httpCode;
-    }
+	public HttpArchiveError(int httpCode) {
+		code = httpCode;
+	}
 
-    public int getCode() {
-	return code;
-    }
+	public int getCode() {
+		return code;
+	}
 
-    public void setCode(int code) {
-	this.code = code;
-    }
+	public void setCode(int code) {
+		this.code = code;
+	}
 
 }

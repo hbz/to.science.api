@@ -33,204 +33,187 @@ import play.mvc.Results.StringChunks;
  */
 public class BulkAction {
 
-    Chunks.Out<String> messageOut;
-    Chunks<String> chunks;
-    Read read = new Read();
-    List<Throwable> errors = new ArrayList<Throwable>();
+	Chunks.Out<String> messageOut;
+	Chunks<String> chunks;
+	Read read = new Read();
+	List<Throwable> errors = new ArrayList<Throwable>();
 
-    /**
-     * @param namespace
-     *            a namespace to retrieve all pids from
-     * @param userId
-     *            id of user who modifies
-     * @param proc
-     *            a function to apply to all pids
-     */
-    public void execute(String namespace, String userId, ProcessNodes proc) {
-	chunks = new StringChunks() {
-	    public void onReady(Chunks.Out<String> out) {
-		setMessageQueue(out);
-		ExecutorService executorService = Executors
-			.newSingleThreadExecutor();
-		executorService.execute(new Runnable() {
-		    public void run() {
-			bulk(namespace, proc);
-		    }
-		});
-		executorService.shutdown();
-	    }
-	};
-    }
-
-    /**
-     * @param nodes
-     *            a list of node pids
-     * @param userId
-     *            id of a user who modifies
-     * @param proc
-     *            a function to apply to all nodes
-     */
-    public void executeOnPids(List<String> nodes, String userId,
-	    ProcessNodes proc) {
-	chunks = new StringChunks() {
-	    public void onReady(Chunks.Out<String> out) {
-		setMessageQueue(out);
-		ExecutorService executorService = Executors
-			.newSingleThreadExecutor();
-		executorService.execute(new Runnable() {
-		    public void run() {
-			bulkOnPids(nodes, proc);
-		    }
-		});
-		executorService.shutdown();
-	    }
-	};
-    }
-
-    /**
-     * @param nodes
-     *            a list of nodes
-     * @param userId
-     *            id of user who modifies
-     * @param proc
-     *            a function to apply to all nodes
-     */
-    public void executeOnNodes(List<Node> nodes, String userId,
-	    ProcessNodes proc) {
-	chunks = new StringChunks() {
-	    public void onReady(Chunks.Out<String> out) {
-		nodes.stream().forEach(n -> n.setLastModifiedBy(userId));
-		setMessageQueue(out);
-		ExecutorService executorService = Executors
-			.newSingleThreadExecutor();
-		executorService.execute(new Runnable() {
-		    public void run() {
-			bulkOnNodes(nodes, proc);
-		    }
-		});
-		executorService.shutdown();
-	    }
-	};
-    }
-
-    private void bulk(String namespace, ProcessNodes proc) {
-	List<String> nodes = read.listRepoNamespace(namespace);
-	play.Logger.info("Going to process: " + nodes);
-	bulkOnPids(nodes, proc);
-    }
-
-    private void bulkOnPids(List<String> nodes, ProcessNodes proc) {
-	try {
-	    int until = 0;
-	    int stepSize = 100;
-	    int from = 0 - stepSize;
-	    messageOut.write("size: " + nodes.size() + "\n");
-	    do {
-		until += stepSize;
-		from += stepSize;
-		if (nodes.isEmpty())
-		    break;
-		if (until > nodes.size())
-		    until = nodes.size();
-
-		messageOut.write("Process: from: " + from + " until " + until
-			+ "\n");
-		try {
-		    messageOut.write(proc.process(read.getNodes(nodes.subList(
-			    from, until))));
-		} catch (Exception e) {
-		    play.Logger.warn("", e);
-		    errors.add(e);
-		} catch (HttpArchiveError e) {
-		    play.Logger.warn("", e);
-		    errors.add(e);
-		}
-	    } while (until < nodes.size());
-	    messageOut.write("Process " + nodes.size() + " nodes!\n");
-	    if (!errors.isEmpty()) {
-		messageOut.write(errors.size() + " errors occured!\n" + errors
-			+ "\n");
-	    } else {
-		messageOut.write("\nSuccessfully Finished\n");
-	    }
-
-	} catch (Exception e) {
-	    play.Logger.error("", e);
-	    errors.add(e);
-	} catch (HttpArchiveError e) {
-	    play.Logger.warn("", e);
-	    errors.add(e);
-	} finally {
-	    messageOut.close();
+	/**
+	 * @param namespace a namespace to retrieve all pids from
+	 * @param userId id of user who modifies
+	 * @param proc a function to apply to all pids
+	 */
+	public void execute(String namespace, String userId, ProcessNodes proc) {
+		chunks = new StringChunks() {
+			public void onReady(Chunks.Out<String> out) {
+				setMessageQueue(out);
+				ExecutorService executorService = Executors.newSingleThreadExecutor();
+				executorService.execute(new Runnable() {
+					public void run() {
+						bulk(namespace, proc);
+					}
+				});
+				executorService.shutdown();
+			}
+		};
 	}
-    }
 
-    private void bulkOnNodes(final List<Node> nodes, ProcessNodes proc) {
-	try {
-	    int until = 0;
-	    int stepSize = 100;
-	    int from = 0 - stepSize;
-	    messageOut.write("size: " + nodes.size() + "\n");
-	    do {
-		until += stepSize;
-		from += stepSize;
-		if (nodes.isEmpty())
-		    break;
-		if (until > nodes.size())
-		    until = nodes.size();
-		messageOut.write("Process: from: " + from + " until " + until
-			+ "\n");
-		try {
-		    List<Node> sublist = nodes.subList(from, until);
-		    play.Logger.info("Going to Process: " + sublist);
-		    messageOut.write(proc.process(sublist));
-		} catch (Exception e) {
-		    play.Logger.warn("", e);
-		    errors.add(e);
-		} catch (HttpArchiveError e) {
-		    play.Logger.warn("", e);
-		    errors.add(e);
-		}
-	    } while (until < nodes.size());
-	    messageOut.write("Process " + nodes.size() + " nodes!\n");
-	    if (!errors.isEmpty()) {
-		messageOut.write(errors.size() + " errors occured!\n" + errors
-			+ "\n");
-	    } else {
-		messageOut.write("\nSuccessfully Finished\n");
-	    }
-	} catch (Exception e) {
-	    play.Logger.error("", e);
-	    errors.add(e);
-	} catch (HttpArchiveError e) {
-	    play.Logger.warn("", e);
-	    errors.add(e);
-	} finally {
-	    messageOut.close();
+	/**
+	 * @param nodes a list of node pids
+	 * @param userId id of a user who modifies
+	 * @param proc a function to apply to all nodes
+	 */
+	public void executeOnPids(List<String> nodes, String userId,
+			ProcessNodes proc) {
+		chunks = new StringChunks() {
+			public void onReady(Chunks.Out<String> out) {
+				setMessageQueue(out);
+				ExecutorService executorService = Executors.newSingleThreadExecutor();
+				executorService.execute(new Runnable() {
+					public void run() {
+						bulkOnPids(nodes, proc);
+					}
+				});
+				executorService.shutdown();
+			}
+		};
 	}
-    }
 
-    /**
-     * @param out
-     *            messages for chunked responses
-     */
-    public void setMessageQueue(Chunks.Out<String> out) {
-	messageOut = out;
-    }
+	/**
+	 * @param nodes a list of nodes
+	 * @param userId id of user who modifies
+	 * @param proc a function to apply to all nodes
+	 */
+	public void executeOnNodes(List<Node> nodes, String userId,
+			ProcessNodes proc) {
+		chunks = new StringChunks() {
+			public void onReady(Chunks.Out<String> out) {
+				nodes.stream().forEach(n -> n.setLastModifiedBy(userId));
+				setMessageQueue(out);
+				ExecutorService executorService = Executors.newSingleThreadExecutor();
+				executorService.execute(new Runnable() {
+					public void run() {
+						bulkOnNodes(nodes, proc);
+					}
+				});
+				executorService.shutdown();
+			}
+		};
+	}
 
-    /**
-     * Close messageQueue for chunked responses
-     * 
-     */
-    public void closeMessageQueue() {
-	if (messageOut != null)
-	    messageOut.close();
-    }
+	private void bulk(String namespace, ProcessNodes proc) {
+		List<String> nodes = read.listRepoNamespace(namespace);
+		play.Logger.info("Going to process: " + nodes);
+		bulkOnPids(nodes, proc);
+	}
 
-    /**
-     * @return chunks to be returned by the actual controller action
-     */
-    public Chunks<String> getChunks() {
-	return chunks;
-    }
+	private void bulkOnPids(List<String> nodes, ProcessNodes proc) {
+		try {
+			int until = 0;
+			int stepSize = 100;
+			int from = 0 - stepSize;
+			messageOut.write("size: " + nodes.size() + "\n");
+			do {
+				until += stepSize;
+				from += stepSize;
+				if (nodes.isEmpty())
+					break;
+				if (until > nodes.size())
+					until = nodes.size();
+
+				messageOut.write("Process: from: " + from + " until " + until + "\n");
+				try {
+					messageOut
+							.write(proc.process(read.getNodes(nodes.subList(from, until))));
+				} catch (Exception e) {
+					play.Logger.warn("", e);
+					errors.add(e);
+				} catch (HttpArchiveError e) {
+					play.Logger.warn("", e);
+					errors.add(e);
+				}
+			} while (until < nodes.size());
+			messageOut.write("Process " + nodes.size() + " nodes!\n");
+			if (!errors.isEmpty()) {
+				messageOut.write(errors.size() + " errors occured!\n" + errors + "\n");
+			} else {
+				messageOut.write("\nSuccessfully Finished\n");
+			}
+
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			errors.add(e);
+		} catch (HttpArchiveError e) {
+			play.Logger.warn("", e);
+			errors.add(e);
+		} finally {
+			messageOut.close();
+		}
+	}
+
+	private void bulkOnNodes(final List<Node> nodes, ProcessNodes proc) {
+		try {
+			int until = 0;
+			int stepSize = 100;
+			int from = 0 - stepSize;
+			messageOut.write("size: " + nodes.size() + "\n");
+			do {
+				until += stepSize;
+				from += stepSize;
+				if (nodes.isEmpty())
+					break;
+				if (until > nodes.size())
+					until = nodes.size();
+				messageOut.write("Process: from: " + from + " until " + until + "\n");
+				try {
+					List<Node> sublist = nodes.subList(from, until);
+					play.Logger.info("Going to Process: " + sublist);
+					messageOut.write(proc.process(sublist));
+				} catch (Exception e) {
+					play.Logger.warn("", e);
+					errors.add(e);
+				} catch (HttpArchiveError e) {
+					play.Logger.warn("", e);
+					errors.add(e);
+				}
+			} while (until < nodes.size());
+			messageOut.write("Process " + nodes.size() + " nodes!\n");
+			if (!errors.isEmpty()) {
+				messageOut.write(errors.size() + " errors occured!\n" + errors + "\n");
+			} else {
+				messageOut.write("\nSuccessfully Finished\n");
+			}
+		} catch (Exception e) {
+			play.Logger.error("", e);
+			errors.add(e);
+		} catch (HttpArchiveError e) {
+			play.Logger.warn("", e);
+			errors.add(e);
+		} finally {
+			messageOut.close();
+		}
+	}
+
+	/**
+	 * @param out messages for chunked responses
+	 */
+	public void setMessageQueue(Chunks.Out<String> out) {
+		messageOut = out;
+	}
+
+	/**
+	 * Close messageQueue for chunked responses
+	 * 
+	 */
+	public void closeMessageQueue() {
+		if (messageOut != null)
+			messageOut.close();
+	}
+
+	/**
+	 * @return chunks to be returned by the actual controller action
+	 */
+	public Chunks<String> getChunks() {
+		return chunks;
+	}
 }

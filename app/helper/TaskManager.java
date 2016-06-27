@@ -29,63 +29,63 @@ import models.Globals;
  */
 public class TaskManager {
 
-    private List<ScheduledTask> scheduledTasks = new ArrayList<ScheduledTask>();
+	private List<ScheduledTask> scheduledTasks = new ArrayList<ScheduledTask>();
 
-    /**
-     * register all jobs
-     */
-    public void init() {
-	play.Logger.info("Taskmanager initialized!");
-	if (Globals.heartbeatTask != null && !Globals.heartbeatTask.isEmpty()) {
-	    play.Logger.info("Register Job: heartbeat. Will run every "
-		    + Globals.heartbeatTask);
-	    addTask("heartbeat",
-		    () -> play.Logger.debug("Boom: " + new Date().toString()),
-		    Globals.heartbeatTask);
+	/**
+	 * register all jobs
+	 */
+	public void init() {
+		play.Logger.info("Taskmanager initialized!");
+		if (Globals.heartbeatTask != null && !Globals.heartbeatTask.isEmpty()) {
+			play.Logger.info(
+					"Register Job: heartbeat. Will run every " + Globals.heartbeatTask);
+			addTask("heartbeat",
+					() -> play.Logger.debug("Boom: " + new Date().toString()),
+					Globals.heartbeatTask);
+		}
+
+		if (Globals.webgatherTask != null && !Globals.webgatherTask.isEmpty()) {
+			play.Logger.info(
+					"Register Job: wabgatherer. Will run every " + Globals.webgatherTask);
+			addTask("web gatherer", new Webgatherer(), Globals.webgatherTask);
+		}
+
+		if (Globals.urnTask != null && !Globals.urnTask.isEmpty()) {
+			play.Logger.info(
+					"Register Job: urn allocator. Will run every " + Globals.urnTask);
+			addTask("urn allocator", new UrnAllocator(), Globals.urnTask);
+		}
+
+		if (Globals.doiTask != null && !Globals.doiTask.isEmpty()) {
+			play.Logger.info(
+					"Register Job: doi allocator. Will run every " + Globals.doiTask);
+			addTask("doi allocator", new DoiAllocator(), Globals.doiTask);
+		}
 	}
 
-	if (Globals.webgatherTask != null && !Globals.webgatherTask.isEmpty()) {
-	    play.Logger.info("Register Job: wabgatherer. Will run every "
-		    + Globals.webgatherTask);
-	    addTask("web gatherer", new Webgatherer(), Globals.webgatherTask);
+	private void addTask(String name, Runnable r, String cronExpression) {
+		try {
+			scheduledTasks.add(new ScheduledTask(name, cronExpression, r));
+		} catch (Exception e) {
+			play.Logger.error("Not able to schedule \"" + name + "\" task", e);
+		}
 	}
 
-	if (Globals.urnTask != null && !Globals.urnTask.isEmpty()) {
-	    play.Logger.info("Register Job: urn allocator. Will run every "
-		    + Globals.urnTask);
-	    addTask("urn allocator", new UrnAllocator(), Globals.urnTask);
+	/**
+	 * activate all jobs
+	 */
+	public void execute() {
+		for (ScheduledTask c : scheduledTasks) {
+			c.schedule();
+		}
 	}
 
-	if (Globals.doiTask != null && !Globals.doiTask.isEmpty()) {
-	    play.Logger.info("Register Job: doi allocator. Will run every "
-		    + Globals.doiTask);
-	    addTask("doi allocator", new DoiAllocator(), Globals.doiTask);
+	/**
+	 * cancel execution of all jobs
+	 */
+	public void shutdown() {
+		for (ScheduledTask c : scheduledTasks) {
+			c.cancel();
+		}
 	}
-    }
-
-    private void addTask(String name, Runnable r, String cronExpression) {
-	try {
-	    scheduledTasks.add(new ScheduledTask(name, cronExpression, r));
-	} catch (Exception e) {
-	    play.Logger.error("Not able to schedule \"" + name + "\" task", e);
-	}
-    }
-
-    /**
-     * activate all jobs
-     */
-    public void execute() {
-	for (ScheduledTask c : scheduledTasks) {
-	    c.schedule();
-	}
-    }
-
-    /**
-     * cancel execution of all jobs
-     */
-    public void shutdown() {
-	for (ScheduledTask c : scheduledTasks) {
-	    c.cancel();
-	}
-    }
 }

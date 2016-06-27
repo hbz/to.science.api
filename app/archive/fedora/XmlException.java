@@ -23,23 +23,23 @@ package archive.fedora;
 @SuppressWarnings("serial")
 public class XmlException extends RuntimeException {
 
-    @SuppressWarnings("javadoc")
-    public XmlException() {
-    }
+	@SuppressWarnings("javadoc")
+	public XmlException() {
+	}
 
-    @SuppressWarnings("javadoc")
-    public XmlException(String message) {
-	super(message);
-    }
+	@SuppressWarnings("javadoc")
+	public XmlException(String message) {
+		super(message);
+	}
 
-    @SuppressWarnings("javadoc")
-    public XmlException(Throwable cause) {
-	super(cause);
-    }
+	@SuppressWarnings("javadoc")
+	public XmlException(Throwable cause) {
+		super(cause);
+	}
 
-    @SuppressWarnings("javadoc")
-    public XmlException(String message, Throwable cause) {
-	super(message, cause);
-    }
+	@SuppressWarnings("javadoc")
+	public XmlException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }

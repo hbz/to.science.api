@@ -26,64 +26,66 @@ import play.mvc.Result;
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
- * @see <a
- *      href="http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation/http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation">digitalsanctum</a>
+ * @see <a href=
+ *      "http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation/http://digitalsanctum.com/2012/06/07/basic-authentication-in-the-play-framework-using-custom-action-annotation">
+ *      digitalsanctum</a>
  */
 public class BasicAuthAction extends Action<BasicAuth> {
 
-    private static final String AUTHORIZATION = "authorization";
-    private static final String WWW_AUTHENTICATE = "WWW-Authenticate";
-    private static final String REALM = "Basic realm=\"Please enter edoweb-anonymous with any password for guest access\"";
+	private static final String AUTHORIZATION = "authorization";
+	private static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+	private static final String REALM =
+			"Basic realm=\"Please enter edoweb-anonymous with any password for guest access\"";
 
-    @Override
-    public F.Promise<Result> call(Http.Context context) throws Throwable {
+	@Override
+	public F.Promise<Result> call(Http.Context context) throws Throwable {
 
-	String authHeader = context.request().getHeader(AUTHORIZATION);
+		String authHeader = context.request().getHeader(AUTHORIZATION);
 
-	if (authHeader == null) {
-	    return unauthorized(context);
+		if (authHeader == null) {
+			return unauthorized(context);
+		}
+
+		String auth = authHeader.substring(6);
+		byte[] decodedAuth = new sun.misc.BASE64Decoder().decodeBuffer(auth);
+		String[] credString = new String(decodedAuth, "UTF-8").split(":");
+
+		if (credString == null || credString.length != 2) {
+			return unauthorized(context);
+		}
+
+		String username = credString[0];
+		String password = credString[1];
+
+		User authUser = getAuthenticatedUser(username, password);
+		if (authUser != null) {
+			context.args.put("role", authUser.getRole());
+			return delegate.call(context);
+		}
+		return unauthorized(context);
 	}
 
-	String auth = authHeader.substring(6);
-	byte[] decodedAuth = new sun.misc.BASE64Decoder().decodeBuffer(auth);
-	String[] credString = new String(decodedAuth, "UTF-8").split(":");
+	private User getAuthenticatedUser(String username, String password) {
+		try {
+			String userImpl =
+					Play.application().configuration().getString("regal-api.userImpl");
+			Class<?> cl = null;
+			cl = Class.forName(userImpl);
+			return ((User) cl.newInstance()).authenticate(username, password);
+		} catch (Throwable e) {
+			play.Logger.debug("", e);
+			return null;
+		}
 
-	if (credString == null || credString.length != 2) {
-	    return unauthorized(context);
 	}
 
-	String username = credString[0];
-	String password = credString[1];
-
-	User authUser = getAuthenticatedUser(username, password);
-	if (authUser != null) {
-	    context.args.put("role", authUser.getRole());
-	    return delegate.call(context);
+	private play.libs.F.Promise<Result> unauthorized(Http.Context context) {
+		context.response().setHeader(WWW_AUTHENTICATE, REALM);
+		return F.Promise.promise(new F.Function0<Result>() {
+			@Override
+			public Result apply() throws Throwable {
+				return unauthorized();
+			}
+		});
 	}
-	return unauthorized(context);
-    }
-
-    private User getAuthenticatedUser(String username, String password) {
-	try {
-	    String userImpl = Play.application().configuration()
-		    .getString("regal-api.userImpl");
-	    Class<?> cl = null;
-	    cl = Class.forName(userImpl);
-	    return ((User) cl.newInstance()).authenticate(username, password);
-	} catch (Throwable e) {
-	    play.Logger.debug("", e);
-	    return null;
-	}
-
-    }
-
-    private play.libs.F.Promise<Result> unauthorized(Http.Context context) {
-	context.response().setHeader(WWW_AUTHENTICATE, REALM);
-	return F.Promise.promise(new F.Function0<Result>() {
-	    @Override
-	    public Result apply() throws Throwable {
-		return unauthorized();
-	    }
-	});
-    }
 }

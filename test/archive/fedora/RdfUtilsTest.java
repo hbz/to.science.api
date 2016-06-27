@@ -36,17 +36,16 @@ import base.BaseModelTest;
 @SuppressWarnings("javadoc")
 public class RdfUtilsTest extends BaseModelTest {
 
-    @Test
-    public void testInputStreamToGraph() throws URISyntaxException, IOException {
-	try (InputStream in = Thread.currentThread().getContextClassLoader()
-		.getResourceAsStream("HT015954381.txt")) {
-	    File expected = new File(Thread.currentThread()
-		    .getContextClassLoader()
-		    .getResource("HT015954381_expected.txt").toURI().getPath());
-	    Graph graph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
-	    String actual = RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
-	    System.out.println(actual);
-	    Assert.assertEquals(XmlUtils.fileToString(expected), actual);
+	@Test
+	public void testInputStreamToGraph() throws URISyntaxException, IOException {
+		try (InputStream in = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("HT015954381.txt")) {
+			File expected = new File(Thread.currentThread().getContextClassLoader()
+					.getResource("HT015954381_expected.txt").toURI().getPath());
+			Graph graph = RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
+			String actual = RdfUtils.graphToString(graph, RDFFormat.NTRIPLES);
+			System.out.println(actual);
+			Assert.assertEquals(XmlUtils.fileToString(expected), actual);
+		}
 	}
-    }
 }

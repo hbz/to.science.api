@@ -21,68 +21,62 @@ package helper.oai;
  * 
  */
 public class OaiSet {
-    String name = null;
-    String spec = null;
-    String pid = null;
+	String name = null;
+	String spec = null;
+	String pid = null;
 
-    /**
-     * @param name
-     *            set name
-     * @param spec
-     *            set spec
-     * @param pid
-     *            set pid
-     */
-    public OaiSet(String name, String spec, String pid) {
-	super();
-	this.name = name;
-	this.spec = spec;
-	this.pid = pid;
-    }
+	/**
+	 * @param name set name
+	 * @param spec set spec
+	 * @param pid set pid
+	 */
+	public OaiSet(String name, String spec, String pid) {
+		super();
+		this.name = name;
+		this.spec = spec;
+		this.pid = pid;
+	}
 
-    /**
-     * @return the set name
-     */
-    public String getName() {
-	return name;
-    }
+	/**
+	 * @return the set name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @param name
-     *            the set name
-     */
-    public void setName(String name) {
-	this.name = name;
-    }
+	/**
+	 * @param name the set name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /**
-     * @return the set spec
-     */
-    public String getSpec() {
-	return spec;
-    }
+	/**
+	 * @return the set spec
+	 */
+	public String getSpec() {
+		return spec;
+	}
 
-    /**
-     * @param spec
-     *            the set spec
-     */
-    public void setSpec(String spec) {
-	this.spec = spec;
-    }
+	/**
+	 * @param spec the set spec
+	 */
+	public void setSpec(String spec) {
+		this.spec = spec;
+	}
 
-    /**
-     * @return the set pid
-     */
-    public String getPid() {
-	return pid;
-    }
+	/**
+	 * @return the set pid
+	 */
+	public String getPid() {
+		return pid;
+	}
 
-    /**
-     * @param pid
-     *            the pid for the set
-     */
-    protected void setPid(String pid) {
-	this.pid = pid;
-    }
+	/**
+	 * @param pid the pid for the set
+	 */
+	protected void setPid(String pid) {
+		this.pid = pid;
+	}
 
 }

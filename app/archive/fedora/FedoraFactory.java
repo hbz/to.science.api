@@ -20,17 +20,14 @@ package archive.fedora;
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  */
 public class FedoraFactory {
-    /**
-     * @param host
-     *            The webadress of the backend system
-     * @param user
-     *            A user to operate in the archive
-     * @param passwd
-     *            The users password
-     * @return An archive object implementing the ArchivInterface.java
-     */
-    public static FedoraFacade getFedoraImpl(String host, String user,
-	    String passwd) {
-	return FedoraFacade.getInstance(host, user, passwd);
-    }
+	/**
+	 * @param host The webadress of the backend system
+	 * @param user A user to operate in the archive
+	 * @param passwd The users password
+	 * @return An archive object implementing the ArchivInterface.java
+	 */
+	public static FedoraFacade getFedoraImpl(String host, String user,
+			String passwd) {
+		return FedoraFacade.getInstance(host, user, passwd);
+	}
 }

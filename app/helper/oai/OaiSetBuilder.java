@@ -26,55 +26,53 @@ import models.Globals;
  */
 public class OaiSetBuilder {
 
-    /**
-     * @param subject
-     *            the subject of rdf triple
-     * @param predicate
-     *            the predicate of rdf triple
-     * @param object
-     *            the object of rdf triple
-     * @return a OAISet associated with the statement made by the triple
-     */
-    public OaiSet getSet(String subject, String predicate, String object) {
-	String name = null;
-	String spec = null;
-	String pid = null;
+	/**
+	 * @param subject the subject of rdf triple
+	 * @param predicate the predicate of rdf triple
+	 * @param object the object of rdf triple
+	 * @return a OAISet associated with the statement made by the triple
+	 */
+	public OaiSet getSet(String subject, String predicate, String object) {
+		String name = null;
+		String spec = null;
+		String pid = null;
 
-	if (predicate.compareTo("http://purl.org/dc/terms/subject") == 0) {
-	    if (object.startsWith("http://dewey.info/class/")) {
-		String ddc = object.subSequence(object.length() - 4,
-			object.length() - 1).toString();
-		name = Globals.profile.getEtikett(object).getLabel();
-		spec = "ddc:" + ddc;
-		pid = "oai:" + ddc;
-	    } else {
-		return null;
-	    }
-	} else if (predicate.compareTo("http://hbz-nrw.de/regal#contentType") == 0) {
-	    String docType = object;
-	    name = docmap(docType);
-	    spec = "contentType:" + docType;
-	    pid = "oai:" + docType;
+		if (predicate.compareTo("http://purl.org/dc/terms/subject") == 0) {
+			if (object.startsWith("http://dewey.info/class/")) {
+				String ddc = object
+						.subSequence(object.length() - 4, object.length() - 1).toString();
+				name = Globals.profile.getEtikett(object).getLabel();
+				spec = "ddc:" + ddc;
+				pid = "oai:" + ddc;
+			} else {
+				return null;
+			}
+		} else if (predicate
+				.compareTo("http://hbz-nrw.de/regal#contentType") == 0) {
+			String docType = object;
+			name = docmap(docType);
+			spec = "contentType:" + docType;
+			pid = "oai:" + docType;
 
+		}
+
+		else {
+			return null;
+		}
+
+		return new OaiSet(name, spec, pid);
 	}
 
-	else {
-	    return null;
+	private String docmap(String type) {
+		if (type.compareTo("report") == 0) {
+			return "Monograph";
+		}
+		if (type.compareTo("webpage") == 0) {
+			return "Webpage";
+		}
+		if (type.compareTo("ejournal") == 0) {
+			return "EJournal";
+		}
+		return "";
 	}
-
-	return new OaiSet(name, spec, pid);
-    }
-
-    private String docmap(String type) {
-	if (type.compareTo("report") == 0) {
-	    return "Monograph";
-	}
-	if (type.compareTo("webpage") == 0) {
-	    return "Webpage";
-	}
-	if (type.compareTo("ejournal") == 0) {
-	    return "EJournal";
-	}
-	return "";
-    }
 }

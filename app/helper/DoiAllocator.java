@@ -36,26 +36,25 @@ import com.ibm.icu.util.Calendar;
  */
 public class DoiAllocator implements Runnable {
 
-    @Override
-    public void run() {
-	Calendar cal = Calendar.getInstance();
-	cal.add(Calendar.DATE, -7);
-	Date until = cal.getTime();
+	@Override
+	public void run() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -7);
+		Date until = cal.getTime();
 
-	cal = Calendar.getInstance();
-	cal.add(Calendar.DATE, -14);
-	Date from = cal.getTime();
+		cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -14);
+		Date from = cal.getTime();
 
-	// SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	// String d = dateFormat.format(until);
+		// SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		// String d = dateFormat.format(until);
 
-	List<SearchHit> hits = new Read().list(Globals.namespaces[0], from,
-		until);
-	List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
-		.collect(Collectors.toList());
-	List<Node> nodes = new Read().getNodes(ids);
-	nodes.stream().forEach(n -> n.setLastModifiedBy("DoiAllocator"));
-	play.Logger.info(new Modify().addDoiToAll(nodes, until));
-    }
+		List<SearchHit> hits = new Read().list(Globals.namespaces[0], from, until);
+		List<String> ids = hits.stream().map((SearchHit s) -> s.getId())
+				.collect(Collectors.toList());
+		List<Node> nodes = new Read().getNodes(ids);
+		nodes.stream().forEach(n -> n.setLastModifiedBy("DoiAllocator"));
+		play.Logger.info(new Modify().addDoiToAll(nodes, until));
+	}
 
 }

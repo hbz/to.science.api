@@ -26,17 +26,17 @@ import play.mvc.Result;
  */
 public class Application extends Controller {
 
-    /**
-     * @return the swagger-doc site
-     */
-    public static Result index() {
-	return ok(views.html.index.render());
-    }
+	/**
+	 * @return the swagger-doc site
+	 */
+	public static Result index() {
+		return ok(views.html.index.render());
+	}
 
-    /**
-     * @return the swagger docu
-     */
-    public static Result docs() {
-	return redirect("/public/docs/index.html");
-    }
+	/**
+	 * @return the swagger docu
+	 */
+	public static Result docs() {
+		return redirect("/public/docs/index.html");
+	}
 }

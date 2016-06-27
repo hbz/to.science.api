@@ -22,7 +22,7 @@ package archive.fedora;
  */
 @SuppressWarnings({ "javadoc", "serial" })
 public class UrlConnectionException extends RuntimeException {
-    public UrlConnectionException(Throwable arg0) {
-	super(arg0);
-    }
+	public UrlConnectionException(Throwable arg0) {
+		super(arg0);
+	}
 }

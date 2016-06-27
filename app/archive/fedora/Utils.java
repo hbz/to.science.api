@@ -119,853 +119,814 @@ import com.yourmediashelf.fedora.generated.access.DatastreamType;
  */
 public class Utils {
 
-    @SuppressWarnings({ "javadoc", "serial" })
-    public class ContentModelException extends RuntimeException {
-	public ContentModelException(Throwable e) {
-	    super(e);
-	}
-    }
-
-    @SuppressWarnings({ "javadoc", "serial" })
-    public class NoPidFoundException extends RuntimeException {
-
-	public NoPidFoundException() {
+	@SuppressWarnings({ "javadoc", "serial" })
+	public class ContentModelException extends RuntimeException {
+		public ContentModelException(Throwable e) {
+			super(e);
+		}
 	}
 
-	public NoPidFoundException(String arg0) {
-	    super(arg0);
-	}
+	@SuppressWarnings({ "javadoc", "serial" })
+	public class NoPidFoundException extends RuntimeException {
 
-	public NoPidFoundException(Throwable arg0) {
-	    super(arg0);
-	}
-
-	public NoPidFoundException(String arg0, Throwable arg1) {
-	    super(arg0, arg1);
-	}
-
-    }
-
-    ContentModelBuilder cmBuilder = new ContentModelBuilder();
-    private String user = null;
-
-    /**
-     * @param host
-     *            The fedora host.
-     * @param user
-     *            A valid fedora user.
-     */
-    public Utils(String host, String user) {
-	this.user = user;
-    }
-
-    /**
-     * Prefixes a pid with FEDORA_INFO_NAMESPACE
-     * 
-     * @param pid
-     *            The pid that must be prefixed
-     * @return FEDORA_INFO_NAMESPACE + pid
-     */
-    public String addUriPrefix(final String pid) {
-
-	if (pid.contains(INFO_NAMESPACE.toString()))
-	    return pid;
-	String pred = INFO_NAMESPACE.toString() + pid;
-	return pred;
-    }
-
-    void purgeRelationships(String pid, List<Link> list) {
-	for (Link link : list) {
-	    System.out.println("PURGE: " + addUriPrefix(pid) + " <"
-		    + link.getPredicate() + "> " + link.getObject());
-	    try {
-		new PurgeRelationship(pid).subject(addUriPrefix(pid))
-			.predicate(link.getPredicate())
-			.object(link.getObject(), link.isLiteral()).execute();
-	    } catch (FedoraClientException e) {
-		play.Logger.debug("", e);
-	    }
-	}
-    }
-
-    void addRelationships(String pid, List<Link> links) {
-
-	if (links != null)
-	    for (Link link : links) {
-
-		try {
-		    new AddRelationship(pid).predicate(link.getPredicate())
-			    .object(link.getObject(), link.isLiteral())
-			    .execute();
-		} catch (Exception e) {
-		    try {
-			new AddRelationship(pid).predicate(link.getPredicate())
-				.object(link.getObject(), true).execute();
-		    } catch (Exception e2) {
-
-			play.Logger.debug("", e2);
-		    }
-
+		public NoPidFoundException() {
 		}
 
-	    }
+		public NoPidFoundException(String arg0) {
+			super(arg0);
+		}
 
-    }
+		public NoPidFoundException(Throwable arg0) {
+			super(arg0);
+		}
 
-    /**
-     * @param pid
-     *            The pid of the fedora object.
-     * @param datastreamId
-     *            The datastream ID of the datastream
-     * @return true if the datastream exists, false if not.
-     */
-    public boolean dataStreamExists(String pid, String datastreamId) {
-	try {
+		public NoPidFoundException(String arg0, Throwable arg1) {
+			super(arg0, arg1);
+		}
 
-	    ListDatastreamsResponse response = new ListDatastreams(pid)
-		    .execute();
-
-	    for (DatastreamType ds : response.getDatastreams()) {
-		if (ds.getDsid().compareTo(datastreamId) == 0)
-		    return true;
-	    }
-
-	} catch (FedoraClientException e) {
-	    return false;
-	}
-	return false;
-    }
-
-    String removeUriPrefix(String pred) {
-	String pid = pred.replace(INFO_NAMESPACE, "");
-
-	return pid;
-    }
-
-    void createRelsExt(Node node) {
-	String pid = node.getPid();
-	if (!dataStreamExists(pid, "RELS-EXT")) {
-	    createFedoraXmlForRelsExt(pid);
-	}
-	List<Link> links = node.getRelsExt();
-	createRelsExt(pid, links);
-    }
-
-    boolean nodeExists(String pid) {
-	try {
-
-	    FindObjectsResponse response = new FindObjects().terms(pid).pid()
-		    .execute();
-	    for (String p : response.getPids()) {
-		if (p.compareTo(pid) == 0)
-		    return true;
-	    }
-
-	} catch (Exception e) {
-	    return false;
-	}
-	return false;
-    }
-
-    /**
-     * Description: Allows to ingest a local file as managed datastream of the
-     * object </p>
-     * 
-     * @param pid
-     *            of the object
-     * @param datastreamID
-     *            to identify the datastream
-     * @param fileLocation
-     *            to specify the managed content of the datastream
-     * @param mimeType
-     *            of the uploaded file
-     */
-    void createManagedStream(Node node) {
-
-	try {
-
-	    File file = new File(node.getUploadFile());
-	    UploadResponse response = new Upload(file).execute();
-
-	    String location = response.getUploadLocation();
-	    String label = node.getFileLabel();
-	    if (label == null || label.isEmpty())
-		label = file.getName();
-	    new AddDatastream(node.getPid(), "data").versionable(true)
-		    .dsLabel(label).dsState("A").controlGroup("M")
-		    .mimeType(node.getMimeType()).dsLocation(location)
-		    .execute();
-
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    void createUnManagedStream(Node node) {
-	try {
-	    String location = new URL(node.getUploadFile()).toString();
-	    String label = node.getFileLabel();
-	    if (label == null || label.isEmpty())
-		label = location.substring(location.lastIndexOf('/'));
-	    new AddDatastream(node.getPid(), "data").checksumType("DISABLED")
-		    .versionable(true).dsLabel(label).dsState("A")
-		    .controlGroup("E").mimeType(node.getMimeType())
-		    .dsLocation(location).execute();
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	} catch (Exception e) {
-	    throw new HttpArchiveException(400, e);
 	}
 
-    }
+	ContentModelBuilder cmBuilder = new ContentModelBuilder();
+	private String user = null;
 
-    @SuppressWarnings("javadoc")
-    public void createSeqStream(Node node) {
-	try {
-	    Upload request = new Upload(new File(node.getSeqFile()));
-	    UploadResponse response = request.execute();
-	    String location = response.getUploadLocation();
-	    new AddDatastream(node.getPid(), "seq").versionable(true)
-		    .dsState("A")
-		    .dsLabel("json array to define the order of child objects")
-		    .controlGroup("M").mimeType("application/json")
-		    .dsLocation(location).execute();
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
+	/**
+	 * @param host The fedora host.
+	 * @param user A valid fedora user.
+	 */
+	public Utils(String host, String user) {
+		this.user = user;
 	}
-    }
 
-    @SuppressWarnings("javadoc")
-    public void createConfStream(Node node) {
-	try {
-	    Upload request = new Upload(new File(node.getConfFile()));
-	    UploadResponse response = request.execute();
-	    String location = response.getUploadLocation();
-	    new AddDatastream(node.getPid(), "conf").versionable(true)
-		    .dsState("A").dsLabel("json file to configure webharvests")
-		    .controlGroup("M").mimeType("application/json")
-		    .dsLocation(location).execute();
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
+	/**
+	 * Prefixes a pid with FEDORA_INFO_NAMESPACE
+	 * 
+	 * @param pid The pid that must be prefixed
+	 * @return FEDORA_INFO_NAMESPACE + pid
+	 */
+	public String addUriPrefix(final String pid) {
+
+		if (pid.contains(INFO_NAMESPACE.toString()))
+			return pid;
+		String pred = INFO_NAMESPACE.toString() + pid;
+		return pred;
 	}
-    }
 
-    /**
-     * Sets a datastream objectTimestamp to the node
-     * 
-     * @param node
-     *            the node to update
-     */
-    public void updateObjectTimestampStream(Node node) {
-	try {
-	    File file = new File(node.getObjectTimestampFile());
-	    if (dataStreamExists(node.getPid(), "objectTimestamp")) {
-		new ModifyDatastream(node.getPid(), "objectTimestamp")
-			.versionable(true).dsState("A")
-			.dsLabel("a simple timestamp").mimeType("text/plain")
-			.controlGroup("M").content(file).execute();
-	    } else {
-		new AddDatastream(node.getPid(), "objectTimestamp")
-			.versionable(true).dsState("A").mimeType("text/plain")
-			.dsLabel("a simple timestamp").content(file)
-			.controlGroup("M").execute();
-	    }
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    /**
-     * creates a objectTimestamp on node
-     * 
-     * @param node
-     */
-    public void createObjectTimestampStream(Node node) {
-	try {
-	    Upload request = new Upload(new File(node.getObjectTimestampFile()));
-	    UploadResponse response = request.execute();
-	    String location = response.getUploadLocation();
-	    new AddDatastream(node.getPid(), "objectTimestamp")
-		    .versionable(true).dsState("A")
-		    .dsLabel("a simple timestamp").controlGroup("M")
-		    .mimeType("text/plain").dsLocation(location).execute();
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    void updateManagedStream(Node node) {
-
-	try {
-	    File file = new File(node.getUploadFile());
-	    if (dataStreamExists(node.getPid(), "data")) {
-		new ModifyDatastream(node.getPid(), "data").versionable(true)
-			.dsState("A").dsLabel(node.getFileLabel())
-			.mimeType(node.getMimeType()).controlGroup("M")
-			.content(file).execute();
-	    } else {
-		new AddDatastream(node.getPid(), "data").versionable(true)
-			.dsState("A").mimeType(node.getMimeType())
-			.dsLabel(node.getFileLabel()).content(file)
-			.controlGroup("M").execute();
-	    }
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    void updateUnManagedStream(Node node) {
-	try {
-	    play.Logger
-		    .debug("Update unmanaged datastream of " + node.getPid());
-	    String localpath = node.getUploadFile();
-
-	    if (dataStreamExists(node.getPid(), "data")) {
-		new ModifyDatastream(node.getPid(), "data")
-			.checksumType("DISABLED").versionable(true)
-			.dsState("A").dsLabel(node.getFileLabel())
-			.dsLocation(localpath).mimeType(node.getMimeType())
-			.controlGroup("E").execute();
-	    } else {
-		play.Logger.debug("Add datastream " + node.getPid()
-			+ "/data with unmanaged content" + localpath);
-		new AddDatastream(node.getPid(), "data")
-			.checksumType("DISABLED").versionable(true)
-			.dsState("A").mimeType(node.getMimeType())
-			.dsLabel(node.getFileLabel()).dsLocation(localpath)
-			.controlGroup("E").execute();
-	    }
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	} catch (Exception e) {
-	    throw new HttpArchiveException(400, e);
-	}
-    }
-
-    @SuppressWarnings("javadoc")
-    public void updateSeqStream(Node node) {
-	try {
-	    File file = new File(node.getSeqFile());
-	    if (dataStreamExists(node.getPid(), "seq")) {
-		new ModifyDatastream(node.getPid(), "seq")
-			.versionable(true)
-			.dsLabel(
-				"json array to define the order of child objects")
-			.dsState("A").controlGroup("M")
-			.mimeType("application/json").content(file).execute();
-	    } else {
-		new AddDatastream(node.getPid(), "seq")
-			.versionable(true)
-			.dsState("A")
-			.dsLabel(
-				"json array to define the order of child objects")
-			.controlGroup("M").mimeType("application/json")
-			.content(file).execute();
-	    }
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    @SuppressWarnings("javadoc")
-    public void updateConfStream(Node node) {
-	try {
-	    File file = new File(node.getConfFile());
-	    if (dataStreamExists(node.getPid(), "conf")) {
-		new ModifyDatastream(node.getPid(), "conf").versionable(true)
-			.dsLabel("json file to configure webharvests")
-			.dsState("A").controlGroup("M")
-			.mimeType("application/json").content(file).execute();
-	    } else {
-		new AddDatastream(node.getPid(), "conf").versionable(true)
-			.dsState("A")
-			.dsLabel("json file to configure webharvests")
-			.controlGroup("M").mimeType("application/json")
-			.content(file).execute();
-	    }
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    void updateMetadataStream(Node node) {
-	try {
-	    File file = new File(node.getMetadataFile());
-	    if (dataStreamExists(node.getPid(), "metadata")) {
-		new ModifyDatastream(node.getPid(), "metadata")
-			.versionable(true).dsLabel("n-triple rdf metadata")
-			.dsState("A").controlGroup("M").mimeType("text/plain")
-			.content(file).execute();
-	    } else {
-		new AddDatastream(node.getPid(), "metadata").versionable(true)
-			.dsState("A").dsLabel("n-triple rdf metadata")
-			.controlGroup("M").mimeType("text/plain").content(file)
-			.execute();
-	    }
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    void readRelsExt(Node node) throws FedoraClientException {
-	FedoraResponse response = new GetDatastreamDissemination(node.getPid(),
-		"RELS-EXT").download(true).execute();
-	try (InputStream ds = response.getEntityInputStream()) {
-	    Repository myRepository = new SailRepository(new MemoryStore());
-	    myRepository.initialize();
-	    RepositoryConnection con = myRepository.getConnection();
-	    String baseURI = "";
-	    try {
-		ValueFactory f = myRepository.getValueFactory();
-		URI objectId = f.createURI("info:fedora/" + node.getPid());
-		con.add(ds, baseURI, RDFFormat.RDFXML);
-		RepositoryResult<Statement> statements = con.getStatements(
-			objectId, null, null, true);
-		try {
-		    while (statements.hasNext()) {
-			Statement st = statements.next();
-			URI predUri = st.getPredicate();
-			Value objUri = st.getObject();
-			Link link = new Link();
-			link.setObject(objUri.stringValue(), false);
-			link.setPredicate(predUri.stringValue());
-
-			String pred = link.getPredicate();
-			if (REL_IS_NODE_TYPE.equals(pred)) {
-			    node.setType(link.getObject());
-			    continue;
-			} else if (REL_CONTENT_TYPE.equals(pred)) {
-			    node.setContentType(link.getObject());
-			    continue;
-			} else if (REL_HAS_MODEL.equals(pred)) {
-			    addContentModel(link, node);
-			    continue;
-			} else if (REL_ACCESS_SCHEME.equals(pred)) {
-			    node.setAccessScheme(link.getObject());
-			    continue;
-			} else if (REL_IMPORTED_FROM.equals(pred)) {
-			    node.setImportedFrom(link.getObject());
-			    continue;
-			} else if (REL_CREATED_BY.equals(pred)) {
-			    node.setCreatedBy(link.getObject());
-			    continue;
-			} else if (REL_PUBLISH_SCHEME.equals(pred)) {
-			    node.setPublishScheme(link.getObject());
-			    continue;
-			} else if (REL_IMPORTED_FROM.equals(pred)) {
-			    node.setImportedFrom(link.getObject());
-			    continue;
-			} else if (REL_CREATED_BY.equals(pred)) {
-			    node.setCreatedBy(link.getObject());
-			    continue;
-			} else if (REL_LAST_MODIFIED_BY.equals(pred)) {
-			    node.setLastModifiedBy(link.getObject());
-			    continue;
-			} else if (REL_LEGACY_ID.equals(pred)) {
-			    node.setLegacyId(link.getObject());
-			    continue;
-			} else if (REL_NAME.equals(pred)) {
-			    node.setName(link.getObject());
-			    continue;
-			} else if (REL_CATALOG_ID.equals(pred)) {
-			    node.setCatalogId(link.getObject());
-			    continue;
-			} else if (IS_PART_OF.equals(pred)) {
-			    node.setParentPid(link.getObject());
-			    continue;
-			} else if (REL_HAS_DOI.equals(pred)) {
-			    node.setDoi(link.getObject());
-			    continue;
-			} else if (REL_HAS_URN.equals(pred)) {
-			    node.setUrn(link.getObject());
-			    continue;
+	void purgeRelationships(String pid, List<Link> list) {
+		for (Link link : list) {
+			System.out.println("PURGE: " + addUriPrefix(pid) + " <"
+					+ link.getPredicate() + "> " + link.getObject());
+			try {
+				new PurgeRelationship(pid).subject(addUriPrefix(pid))
+						.predicate(link.getPredicate())
+						.object(link.getObject(), link.isLiteral()).execute();
+			} catch (FedoraClientException e) {
+				play.Logger.debug("", e);
 			}
-			link.setLiteral(objUri instanceof Literal);
-			node.addRelation(link);
-		    }
-		} catch (Exception e) {
-		    throw new HttpArchiveException(500, e);
-		} finally {
-		    statements.close();
 		}
-
-	    } finally {
-		con.close();
-	    }
-
-	} catch (RepositoryException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (RemoteException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (RDFParseException e) {
-	    throw new HttpArchiveException(500, e);
-	} catch (IOException e) {
-	    throw new HttpArchiveException(500, e);
 	}
-    }
 
-    /**
-     * Creates new Rels-Ext datastream in object 'pid' </p>
-     * 
-     * @param pid
-     *            of the object
-     * 
-     */
-    void createFedoraXmlForRelsExt(String pid) {
-	try {
-	    String initialContent = "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:rel=\"info:fedora/fedora-system:def/relations-external#\">"
-		    + "    <rdf:Description rdf:about=\"info:fedora/"
-		    + pid
-		    + "\">" + "    </rdf:Description>" + "</rdf:RDF>";
+	void addRelationships(String pid, List<Link> links) {
 
-	    new AddDatastream(pid, "RELS-EXT").mimeType("application/rdf+xml")
-		    .formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
-		    .versionable(true).content(initialContent).execute();
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
+		if (links != null)
+			for (Link link : links) {
+
+				try {
+					new AddRelationship(pid).predicate(link.getPredicate())
+							.object(link.getObject(), link.isLiteral()).execute();
+				} catch (Exception e) {
+					try {
+						new AddRelationship(pid).predicate(link.getPredicate())
+								.object(link.getObject(), true).execute();
+					} catch (Exception e2) {
+
+						play.Logger.debug("", e2);
+					}
+
+				}
+
+			}
+
 	}
-    }
 
-    void updateFedoraXmlForRelsExt(String pid, List<Link> statements) {
-	String initialContent = null;
-	try {
-	    initialContent = RdfUtils.getFedoraRelsExt(pid, statements);
-	    new ModifyDatastream(pid, "RELS-EXT")
-		    .mimeType("application/rdf+xml")
-		    .formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
-		    .versionable(true).content(initialContent).execute();
-	} catch (FedoraClientException e) {
-	    throw new HttpArchiveException(e.getStatus(), e);
-	}
-    }
-
-    List<String> findPidsSimple(String rdfQuery) {
-	FindObjectsResponse response = null;
-	List<String> result = null;
-	try {
-	    response = new FindObjects().maxResults(50).resultFormat("xml")
-		    .pid().terms(rdfQuery).execute();
-	} catch (FedoraClientException e) {
-	    return new Vector<String>();
-	}
-	try {
-	    if (!response.hasNext())
-		return response.getPids();
-	    result = response.getPids();
-	    while (response.hasNext()) {
-
-		response = new FindObjects().pid()
-			.sessionToken(response.getToken()).maxResults(50)
-			.resultFormat("xml").execute();
-		result.addAll(response.getPids());
-
-	    }
-	} catch (FedoraClientException e) {
-	    throw new NoPidFoundException(rdfQuery, e);
-	}
-	return result;
-    }
-
-    String setOwnerToXMLString(String objXML) {
-	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	try {
-	    DocumentBuilder docBuilder = factory.newDocumentBuilder();
-	    Document doc = docBuilder.parse(new BufferedInputStream(
-		    new ByteArrayInputStream(objXML.getBytes())));
-	    Element root = doc.getDocumentElement();
-	    root.normalize();
-	    NodeList properties = root.getElementsByTagName("foxml:property");
-	    for (int i = 0; i < properties.getLength(); i++) {
-		Element n = (Element) properties.item(i);
-		String attribute = n.getAttribute("NAME");
-		if (attribute
-			.compareTo("info:fedora/fedora-system:def/model#ownerId") == 0) {
-		    n.setAttribute("VALUE", user);
-		    break;
-		}
-	    }
-
-	    try {
-		doc.normalize();
-		Source source = new DOMSource(doc);
-		StringWriter stringWriter = new StringWriter();
-		Result result = new StreamResult(stringWriter);
-		TransformerFactory fac = TransformerFactory.newInstance();
-		javax.xml.transform.Transformer transformer = fac
-			.newTransformer();
-		transformer.transform(source, result);
-		return stringWriter.toString();
-	    } catch (TransformerConfigurationException e) {
-		e.printStackTrace();
-	    } catch (TransformerException e) {
-		e.printStackTrace();
-	    }
-
-	} catch (ParserConfigurationException e) {
-	    e.printStackTrace();
-	} catch (SAXException e) {
-
-	    e.printStackTrace();
-	} catch (IOException e) {
-
-	    e.printStackTrace();
-	}
-	return null;
-    }
-
-    private void createRelsExt(String pid, List<Link> links) {
-	if (links != null)
-	    for (Link curHBZLink : links) {
-		if (curHBZLink == null)
-		    return;
+	/**
+	 * @param pid The pid of the fedora object.
+	 * @param datastreamId The datastream ID of the datastream
+	 * @return true if the datastream exists, false if not.
+	 */
+	public boolean dataStreamExists(String pid, String datastreamId) {
 		try {
-		    if (curHBZLink.isLiteral()) {
 
-			new AddRelationship(pid)
-				.predicate(curHBZLink.getPredicate())
-				.object(curHBZLink.getObject(),
-					curHBZLink.isLiteral()).execute();
+			ListDatastreamsResponse response = new ListDatastreams(pid).execute();
 
-		    } else {
+			for (DatastreamType ds : response.getDatastreams()) {
+				if (ds.getDsid().compareTo(datastreamId) == 0)
+					return true;
+			}
 
-			new AddRelationship(pid)
-				.predicate(curHBZLink.getPredicate())
-				.object(addUriPrefix(curHBZLink.getObject()),
-					curHBZLink.isLiteral()).execute();
-		    }
-		} catch (Exception e) {
-		    play.Logger.debug("", e);
+		} catch (FedoraClientException e) {
+			return false;
 		}
-	    }
-    }
-
-    void updateRelsExt(Node node) {
-	String pid = node.getPid();
-	// String type = node.getContentType();
-	if (!dataStreamExists(pid, "RELS-EXT")) {
-	    createFedoraXmlForRelsExt(pid);
-	}
-	Link link = new Link();
-	link.setObject(node.getContentType(), true);
-	link.setPredicate(REL_CONTENT_TYPE);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getNodeType(), true);
-	link.setPredicate(REL_IS_NODE_TYPE);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getAccessScheme(), true);
-	link.setPredicate(REL_ACCESS_SCHEME);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getPublishScheme(), true);
-	link.setPredicate(REL_PUBLISH_SCHEME);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getImportedFrom(), true);
-	link.setPredicate(REL_IMPORTED_FROM);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getCreatedBy(), true);
-	link.setPredicate(REL_CREATED_BY);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getLastModifiedBy(), true);
-	link.setPredicate(REL_LAST_MODIFIED_BY);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getLegacyId(), true);
-	link.setPredicate(REL_LEGACY_ID);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getName(), true);
-	link.setPredicate(REL_NAME);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getCatalogId(), true);
-	link.setPredicate(REL_CATALOG_ID);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getParentPid(), true);
-	link.setPredicate(IS_PART_OF);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getDoi(), true);
-	link.setPredicate(REL_HAS_DOI);
-	node.addRelation(link);
-	link = new Link();
-	link.setObject(node.getUrn(), true);
-	link.setPredicate(REL_HAS_URN);
-	node.addRelation(link);
-
-	updateFedoraXmlForRelsExt(pid, node.getRelsExt());
-    }
-
-    void createContentModels(List<Transformer> models) {
-	for (Transformer m : models) {
-	    try {
-		createContentModel(m);
-	    } catch (FedoraClientException e) {
-		throw new ContentModelException(e);
-	    }
-	}
-    }
-
-    /**
-     * @param models
-     *            a list of Transformers/ContentModels
-     */
-    public void updateContentModels(List<Transformer> models) {
-	for (Transformer m : models) {
-	    updateContentModel(m);
+		return false;
 	}
 
-    }
+	String removeUriPrefix(String pred) {
+		String pid = pred.replace(INFO_NAMESPACE, "");
 
-    private void updateContentModel(Transformer m) {
-
-	try {
-	    deleteContentModel(m);
-	} catch (FedoraClientException e) {
-	    // throw new ContentModelException(e);
-	}
-	try {
-	    createContentModel(m);
-	} catch (FedoraClientException e) {
-	    throw new ContentModelException(e);
+		return pid;
 	}
 
-    }
-
-    private void deleteContentModel(Transformer m) throws FedoraClientException {
-	if (nodeExists(m.getContentModelPID()))
-	    new PurgeObject(m.getContentModelPID()).execute();
-	if (nodeExists(m.getServiceDefinitionPID()))
-	    new PurgeObject(m.getServiceDefinitionPID()).execute();
-	if (nodeExists(m.getServiceDeploymentPID()))
-	    new PurgeObject(m.getServiceDeploymentPID()).execute();
-    }
-
-    /**
-     * Links a list of contentModels to a node
-     * 
-     * @param contentModels
-     *            the ContentModels
-     * @param node
-     *            the node
-     */
-    public void linkContentModels(List<Transformer> contentModels, Node node) {
-	for (Transformer t : contentModels) {
-	    Link link = new Link();
-	    link.setPredicate(REL_HAS_MODEL);
-	    link.setObject(addUriPrefix(t.getContentModelPID()), false);
-	    node.addRelation(link);
-	}
-    }
-
-    void createContentModel(Transformer cm) throws FedoraClientException {
-	String foCMPid = cm.getContentModelPID();
-	String foSDefPid = cm.getServiceDefinitionPID();
-	String foSDepPid = cm.getServiceDeploymentPID();
-
-	if (!nodeExists(foCMPid))
-	    new Ingest(foCMPid).label("Content Model").execute();
-	if (!nodeExists(foSDefPid))
-	    new Ingest(foSDefPid).label("ServiceDefinition").execute();
-	if (!nodeExists(foSDepPid))
-	    new Ingest(foSDepPid).label("ServiceDeployment").execute();
-
-	// Add Relations
-	Vector<Link> cmHBZLinks = new Vector<Link>();
-	Link cmHBZLink1 = new Link();
-	cmHBZLink1.setPredicate(REL_HAS_SERVICE);
-	cmHBZLink1.setObject(addUriPrefix(foSDefPid), false);
-
-	cmHBZLinks.add(cmHBZLink1);
-
-	Link cmHBZLink2 = new Link();
-	cmHBZLink2.setPredicate(REL_HAS_MODEL);
-	cmHBZLink2.setObject(addUriPrefix(CM_CONTENTMODEL), false);
-	cmHBZLinks.add(cmHBZLink2);
-
-	Link typeLink = new Link();
-	typeLink.setPredicate(REL_CONTENT_TYPE);
-	typeLink.setObject("transformer", true);
-	cmHBZLinks.add(typeLink);
-
-	addRelationships(foCMPid, cmHBZLinks);
-
-	Vector<Link> sDefHBZLinks = new Vector<Link>();
-	Link sDefHBZLink = new Link();
-	sDefHBZLink.setPredicate(REL_HAS_MODEL);
-	sDefHBZLink.setObject(addUriPrefix(SDEF_CONTENTMODEL), false);
-	sDefHBZLinks.add(sDefHBZLink);
-
-	addRelationships(foSDefPid, sDefHBZLinks);
-
-	Vector<Link> sDepHBZLinks = new Vector<Link>();
-	Link sDepHBZLink1 = new Link();
-	sDepHBZLink1.setPredicate(REL_IS_DEPLOYMENT_OF);
-	sDepHBZLink1.setObject(addUriPrefix(foSDefPid), false);
-	sDepHBZLinks.add(sDepHBZLink1);
-
-	Link sDepHBZLink2 = new Link();
-	sDepHBZLink2.setPredicate(REL_IS_CONTRACTOR_OF);
-	sDepHBZLink2.setObject(addUriPrefix(foCMPid), false);
-	sDepHBZLinks.add(sDepHBZLink2);
-
-	Link sDepHBZLink3 = new Link();
-	sDepHBZLink3.setPredicate(REL_HAS_MODEL);
-	sDepHBZLink3.setObject(addUriPrefix(SDEP_CONTENTMODEL), false);
-	sDepHBZLinks.add(sDepHBZLink3);
-
-	addRelationships(foSDepPid, sDepHBZLinks);
-	if (!dataStreamExists(foCMPid, DS_COMPOSITE_MODEL))
-	    new AddDatastream(foCMPid, DS_COMPOSITE_MODEL)
-		    .dsLabel("DS-Composite-Stream").versionable(true)
-		    .formatURI(DS_COMPOSITE_MODEL_URI).dsState("A")
-		    .controlGroup("X").mimeType("text/xml")
-		    .content(cmBuilder.getDsCompositeModel(cm)).execute();
-	if (!dataStreamExists(foSDefPid, DS_METHODMAP))
-	    new AddDatastream(foSDefPid, DS_METHODMAP)
-		    .dsLabel("Methodmap-Stream").versionable(true)
-		    .formatURI(DS_METHODMAP_URI).dsState("A").controlGroup("X")
-		    .mimeType("text/xml").content(cmBuilder.getMethodMap(cm))
-		    .execute();
-	if (!dataStreamExists(foSDepPid, DS_METHODMAP_WSDL))
-	    new AddDatastream(foSDepPid, DS_METHODMAP_WSDL)
-		    .dsLabel("Methodmap-Stream").versionable(true)
-		    .formatURI(DS_METHODMAP_WSDL_URI).dsState("A")
-		    .controlGroup("X").mimeType("text/xml")
-		    .content(cmBuilder.getMethodMapToWsdl(cm)).execute();
-	if (!dataStreamExists(foSDepPid, DS_INPUTSPEC))
-	    new AddDatastream(foSDepPid, DS_INPUTSPEC)
-		    .dsLabel("DSINPUTSPEC-Stream").versionable(true)
-		    .formatURI(DS_INPUTSPEC_URI).dsState("A").controlGroup("X")
-		    .mimeType("text/xml").content(cmBuilder.getDSInputSpec())
-		    .execute();
-	if (!dataStreamExists(foSDepPid, DS_WSDL))
-	    new AddDatastream(foSDepPid, DS_WSDL).dsLabel("WSDL-Stream")
-		    .versionable(true).formatURI(DS_WSDL_URI).dsState("A")
-		    .controlGroup("X").mimeType("text/xml")
-		    .content(cmBuilder.getWsdl(cm)).execute();
-    }
-
-    private void addContentModel(Link link, Node node) {
-	try {
-	    Transformer t = readTransformer(link.getObject());
-	    node.addTransformer(t);
-	} catch (ContentModelException e) {
-	    play.Logger.debug("", e);
+	void createRelsExt(Node node) {
+		String pid = node.getPid();
+		if (!dataStreamExists(pid, "RELS-EXT")) {
+			createFedoraXmlForRelsExt(pid);
+		}
+		List<Link> links = node.getRelsExt();
+		createRelsExt(pid, links);
 	}
 
-    }
+	boolean nodeExists(String pid) {
+		try {
 
-    private Transformer readTransformer(String prefixedPid) {
-	String pid = removeUriPrefix(prefixedPid);
-	String id = pid.substring(pid.indexOf(":") + 1);
-	Transformer t = new Transformer(id);
-	return t;
-    }
+			FindObjectsResponse response =
+					new FindObjects().terms(pid).pid().execute();
+			for (String p : response.getPids()) {
+				if (p.compareTo(pid) == 0)
+					return true;
+			}
+
+		} catch (Exception e) {
+			return false;
+		}
+		return false;
+	}
+
+	/**
+	 * Description: Allows to ingest a local file as managed datastream of the
+	 * object
+	 * </p>
+	 * 
+	 * @param pid of the object
+	 * @param datastreamID to identify the datastream
+	 * @param fileLocation to specify the managed content of the datastream
+	 * @param mimeType of the uploaded file
+	 */
+	void createManagedStream(Node node) {
+
+		try {
+
+			File file = new File(node.getUploadFile());
+			UploadResponse response = new Upload(file).execute();
+
+			String location = response.getUploadLocation();
+			String label = node.getFileLabel();
+			if (label == null || label.isEmpty())
+				label = file.getName();
+			new AddDatastream(node.getPid(), "data").versionable(true).dsLabel(label)
+					.dsState("A").controlGroup("M").mimeType(node.getMimeType())
+					.dsLocation(location).execute();
+
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	void createUnManagedStream(Node node) {
+		try {
+			String location = new URL(node.getUploadFile()).toString();
+			String label = node.getFileLabel();
+			if (label == null || label.isEmpty())
+				label = location.substring(location.lastIndexOf('/'));
+			new AddDatastream(node.getPid(), "data").checksumType("DISABLED")
+					.versionable(true).dsLabel(label).dsState("A").controlGroup("E")
+					.mimeType(node.getMimeType()).dsLocation(location).execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(400, e);
+		}
+
+	}
+
+	@SuppressWarnings("javadoc")
+	public void createSeqStream(Node node) {
+		try {
+			Upload request = new Upload(new File(node.getSeqFile()));
+			UploadResponse response = request.execute();
+			String location = response.getUploadLocation();
+			new AddDatastream(node.getPid(), "seq").versionable(true).dsState("A")
+					.dsLabel("json array to define the order of child objects")
+					.controlGroup("M").mimeType("application/json").dsLocation(location)
+					.execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	@SuppressWarnings("javadoc")
+	public void createConfStream(Node node) {
+		try {
+			Upload request = new Upload(new File(node.getConfFile()));
+			UploadResponse response = request.execute();
+			String location = response.getUploadLocation();
+			new AddDatastream(node.getPid(), "conf").versionable(true).dsState("A")
+					.dsLabel("json file to configure webharvests").controlGroup("M")
+					.mimeType("application/json").dsLocation(location).execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	/**
+	 * Sets a datastream objectTimestamp to the node
+	 * 
+	 * @param node the node to update
+	 */
+	public void updateObjectTimestampStream(Node node) {
+		try {
+			File file = new File(node.getObjectTimestampFile());
+			if (dataStreamExists(node.getPid(), "objectTimestamp")) {
+				new ModifyDatastream(node.getPid(), "objectTimestamp").versionable(true)
+						.dsState("A").dsLabel("a simple timestamp").mimeType("text/plain")
+						.controlGroup("M").content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "objectTimestamp").versionable(true)
+						.dsState("A").mimeType("text/plain").dsLabel("a simple timestamp")
+						.content(file).controlGroup("M").execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	/**
+	 * creates a objectTimestamp on node
+	 * 
+	 * @param node
+	 */
+	public void createObjectTimestampStream(Node node) {
+		try {
+			Upload request = new Upload(new File(node.getObjectTimestampFile()));
+			UploadResponse response = request.execute();
+			String location = response.getUploadLocation();
+			new AddDatastream(node.getPid(), "objectTimestamp").versionable(true)
+					.dsState("A").dsLabel("a simple timestamp").controlGroup("M")
+					.mimeType("text/plain").dsLocation(location).execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	void updateManagedStream(Node node) {
+
+		try {
+			File file = new File(node.getUploadFile());
+			if (dataStreamExists(node.getPid(), "data")) {
+				new ModifyDatastream(node.getPid(), "data").versionable(true)
+						.dsState("A").dsLabel(node.getFileLabel())
+						.mimeType(node.getMimeType()).controlGroup("M").content(file)
+						.execute();
+			} else {
+				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
+						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
+						.content(file).controlGroup("M").execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	void updateUnManagedStream(Node node) {
+		try {
+			play.Logger.debug("Update unmanaged datastream of " + node.getPid());
+			String localpath = node.getUploadFile();
+
+			if (dataStreamExists(node.getPid(), "data")) {
+				new ModifyDatastream(node.getPid(), "data").checksumType("DISABLED")
+						.versionable(true).dsState("A").dsLabel(node.getFileLabel())
+						.dsLocation(localpath).mimeType(node.getMimeType())
+						.controlGroup("E").execute();
+			} else {
+				play.Logger.debug("Add datastream " + node.getPid()
+						+ "/data with unmanaged content" + localpath);
+				new AddDatastream(node.getPid(), "data").checksumType("DISABLED")
+						.versionable(true).dsState("A").mimeType(node.getMimeType())
+						.dsLabel(node.getFileLabel()).dsLocation(localpath)
+						.controlGroup("E").execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(400, e);
+		}
+	}
+
+	@SuppressWarnings("javadoc")
+	public void updateSeqStream(Node node) {
+		try {
+			File file = new File(node.getSeqFile());
+			if (dataStreamExists(node.getPid(), "seq")) {
+				new ModifyDatastream(node.getPid(), "seq").versionable(true)
+						.dsLabel("json array to define the order of child objects")
+						.dsState("A").controlGroup("M").mimeType("application/json")
+						.content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "seq").versionable(true).dsState("A")
+						.dsLabel("json array to define the order of child objects")
+						.controlGroup("M").mimeType("application/json").content(file)
+						.execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	@SuppressWarnings("javadoc")
+	public void updateConfStream(Node node) {
+		try {
+			File file = new File(node.getConfFile());
+			if (dataStreamExists(node.getPid(), "conf")) {
+				new ModifyDatastream(node.getPid(), "conf").versionable(true)
+						.dsLabel("json file to configure webharvests").dsState("A")
+						.controlGroup("M").mimeType("application/json").content(file)
+						.execute();
+			} else {
+				new AddDatastream(node.getPid(), "conf").versionable(true).dsState("A")
+						.dsLabel("json file to configure webharvests").controlGroup("M")
+						.mimeType("application/json").content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	void updateMetadataStream(Node node) {
+		try {
+			File file = new File(node.getMetadataFile());
+			if (dataStreamExists(node.getPid(), "metadata")) {
+				new ModifyDatastream(node.getPid(), "metadata").versionable(true)
+						.dsLabel("n-triple rdf metadata").dsState("A").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "metadata").versionable(true)
+						.dsState("A").dsLabel("n-triple rdf metadata").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	void readRelsExt(Node node) throws FedoraClientException {
+		FedoraResponse response =
+				new GetDatastreamDissemination(node.getPid(), "RELS-EXT").download(true)
+						.execute();
+		try (InputStream ds = response.getEntityInputStream()) {
+			Repository myRepository = new SailRepository(new MemoryStore());
+			myRepository.initialize();
+			RepositoryConnection con = myRepository.getConnection();
+			String baseURI = "";
+			try {
+				ValueFactory f = myRepository.getValueFactory();
+				URI objectId = f.createURI("info:fedora/" + node.getPid());
+				con.add(ds, baseURI, RDFFormat.RDFXML);
+				RepositoryResult<Statement> statements =
+						con.getStatements(objectId, null, null, true);
+				try {
+					while (statements.hasNext()) {
+						Statement st = statements.next();
+						URI predUri = st.getPredicate();
+						Value objUri = st.getObject();
+						Link link = new Link();
+						link.setObject(objUri.stringValue(), false);
+						link.setPredicate(predUri.stringValue());
+
+						String pred = link.getPredicate();
+						if (REL_IS_NODE_TYPE.equals(pred)) {
+							node.setType(link.getObject());
+							continue;
+						} else if (REL_CONTENT_TYPE.equals(pred)) {
+							node.setContentType(link.getObject());
+							continue;
+						} else if (REL_HAS_MODEL.equals(pred)) {
+							addContentModel(link, node);
+							continue;
+						} else if (REL_ACCESS_SCHEME.equals(pred)) {
+							node.setAccessScheme(link.getObject());
+							continue;
+						} else if (REL_IMPORTED_FROM.equals(pred)) {
+							node.setImportedFrom(link.getObject());
+							continue;
+						} else if (REL_CREATED_BY.equals(pred)) {
+							node.setCreatedBy(link.getObject());
+							continue;
+						} else if (REL_PUBLISH_SCHEME.equals(pred)) {
+							node.setPublishScheme(link.getObject());
+							continue;
+						} else if (REL_IMPORTED_FROM.equals(pred)) {
+							node.setImportedFrom(link.getObject());
+							continue;
+						} else if (REL_CREATED_BY.equals(pred)) {
+							node.setCreatedBy(link.getObject());
+							continue;
+						} else if (REL_LAST_MODIFIED_BY.equals(pred)) {
+							node.setLastModifiedBy(link.getObject());
+							continue;
+						} else if (REL_LEGACY_ID.equals(pred)) {
+							node.setLegacyId(link.getObject());
+							continue;
+						} else if (REL_NAME.equals(pred)) {
+							node.setName(link.getObject());
+							continue;
+						} else if (REL_CATALOG_ID.equals(pred)) {
+							node.setCatalogId(link.getObject());
+							continue;
+						} else if (IS_PART_OF.equals(pred)) {
+							node.setParentPid(link.getObject());
+							continue;
+						} else if (REL_HAS_DOI.equals(pred)) {
+							node.setDoi(link.getObject());
+							continue;
+						} else if (REL_HAS_URN.equals(pred)) {
+							node.setUrn(link.getObject());
+							continue;
+						}
+						link.setLiteral(objUri instanceof Literal);
+						node.addRelation(link);
+					}
+				} catch (Exception e) {
+					throw new HttpArchiveException(500, e);
+				} finally {
+					statements.close();
+				}
+
+			} finally {
+				con.close();
+			}
+
+		} catch (RepositoryException e) {
+			throw new HttpArchiveException(500, e);
+		} catch (RemoteException e) {
+			throw new HttpArchiveException(500, e);
+		} catch (RDFParseException e) {
+			throw new HttpArchiveException(500, e);
+		} catch (IOException e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
+	 * Creates new Rels-Ext datastream in object 'pid'
+	 * </p>
+	 * 
+	 * @param pid of the object
+	 * 
+	 */
+	void createFedoraXmlForRelsExt(String pid) {
+		try {
+			String initialContent =
+					"<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:rel=\"info:fedora/fedora-system:def/relations-external#\">"
+							+ "    <rdf:Description rdf:about=\"info:fedora/" + pid + "\">"
+							+ "    </rdf:Description>" + "</rdf:RDF>";
+
+			new AddDatastream(pid, "RELS-EXT").mimeType("application/rdf+xml")
+					.formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
+					.versionable(true).content(initialContent).execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	void updateFedoraXmlForRelsExt(String pid, List<Link> statements) {
+		String initialContent = null;
+		try {
+			initialContent = RdfUtils.getFedoraRelsExt(pid, statements);
+			new ModifyDatastream(pid, "RELS-EXT").mimeType("application/rdf+xml")
+					.formatURI("info:fedora/fedora-system:FedoraRELSExt-1.0")
+					.versionable(true).content(initialContent).execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	List<String> findPidsSimple(String rdfQuery) {
+		FindObjectsResponse response = null;
+		List<String> result = null;
+		try {
+			response = new FindObjects().maxResults(50).resultFormat("xml").pid()
+					.terms(rdfQuery).execute();
+		} catch (FedoraClientException e) {
+			return new Vector<String>();
+		}
+		try {
+			if (!response.hasNext())
+				return response.getPids();
+			result = response.getPids();
+			while (response.hasNext()) {
+
+				response = new FindObjects().pid().sessionToken(response.getToken())
+						.maxResults(50).resultFormat("xml").execute();
+				result.addAll(response.getPids());
+
+			}
+		} catch (FedoraClientException e) {
+			throw new NoPidFoundException(rdfQuery, e);
+		}
+		return result;
+	}
+
+	String setOwnerToXMLString(String objXML) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		try {
+			DocumentBuilder docBuilder = factory.newDocumentBuilder();
+			Document doc = docBuilder.parse(
+					new BufferedInputStream(new ByteArrayInputStream(objXML.getBytes())));
+			Element root = doc.getDocumentElement();
+			root.normalize();
+			NodeList properties = root.getElementsByTagName("foxml:property");
+			for (int i = 0; i < properties.getLength(); i++) {
+				Element n = (Element) properties.item(i);
+				String attribute = n.getAttribute("NAME");
+				if (attribute
+						.compareTo("info:fedora/fedora-system:def/model#ownerId") == 0) {
+					n.setAttribute("VALUE", user);
+					break;
+				}
+			}
+
+			try {
+				doc.normalize();
+				Source source = new DOMSource(doc);
+				StringWriter stringWriter = new StringWriter();
+				Result result = new StreamResult(stringWriter);
+				TransformerFactory fac = TransformerFactory.newInstance();
+				javax.xml.transform.Transformer transformer = fac.newTransformer();
+				transformer.transform(source, result);
+				return stringWriter.toString();
+			} catch (TransformerConfigurationException e) {
+				e.printStackTrace();
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
+
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+
+			e.printStackTrace();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private void createRelsExt(String pid, List<Link> links) {
+		if (links != null)
+			for (Link curHBZLink : links) {
+				if (curHBZLink == null)
+					return;
+				try {
+					if (curHBZLink.isLiteral()) {
+
+						new AddRelationship(pid).predicate(curHBZLink.getPredicate())
+								.object(curHBZLink.getObject(), curHBZLink.isLiteral())
+								.execute();
+
+					} else {
+
+						new AddRelationship(pid).predicate(curHBZLink.getPredicate())
+								.object(addUriPrefix(curHBZLink.getObject()),
+										curHBZLink.isLiteral())
+								.execute();
+					}
+				} catch (Exception e) {
+					play.Logger.debug("", e);
+				}
+			}
+	}
+
+	void updateRelsExt(Node node) {
+		String pid = node.getPid();
+		// String type = node.getContentType();
+		if (!dataStreamExists(pid, "RELS-EXT")) {
+			createFedoraXmlForRelsExt(pid);
+		}
+		Link link = new Link();
+		link.setObject(node.getContentType(), true);
+		link.setPredicate(REL_CONTENT_TYPE);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getNodeType(), true);
+		link.setPredicate(REL_IS_NODE_TYPE);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getAccessScheme(), true);
+		link.setPredicate(REL_ACCESS_SCHEME);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getPublishScheme(), true);
+		link.setPredicate(REL_PUBLISH_SCHEME);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getImportedFrom(), true);
+		link.setPredicate(REL_IMPORTED_FROM);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getCreatedBy(), true);
+		link.setPredicate(REL_CREATED_BY);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getLastModifiedBy(), true);
+		link.setPredicate(REL_LAST_MODIFIED_BY);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getLegacyId(), true);
+		link.setPredicate(REL_LEGACY_ID);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getName(), true);
+		link.setPredicate(REL_NAME);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getCatalogId(), true);
+		link.setPredicate(REL_CATALOG_ID);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getParentPid(), true);
+		link.setPredicate(IS_PART_OF);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getDoi(), true);
+		link.setPredicate(REL_HAS_DOI);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getUrn(), true);
+		link.setPredicate(REL_HAS_URN);
+		node.addRelation(link);
+
+		updateFedoraXmlForRelsExt(pid, node.getRelsExt());
+	}
+
+	void createContentModels(List<Transformer> models) {
+		for (Transformer m : models) {
+			try {
+				createContentModel(m);
+			} catch (FedoraClientException e) {
+				throw new ContentModelException(e);
+			}
+		}
+	}
+
+	/**
+	 * @param models a list of Transformers/ContentModels
+	 */
+	public void updateContentModels(List<Transformer> models) {
+		for (Transformer m : models) {
+			updateContentModel(m);
+		}
+
+	}
+
+	private void updateContentModel(Transformer m) {
+
+		try {
+			deleteContentModel(m);
+		} catch (FedoraClientException e) {
+			// throw new ContentModelException(e);
+		}
+		try {
+			createContentModel(m);
+		} catch (FedoraClientException e) {
+			throw new ContentModelException(e);
+		}
+
+	}
+
+	private void deleteContentModel(Transformer m) throws FedoraClientException {
+		if (nodeExists(m.getContentModelPID()))
+			new PurgeObject(m.getContentModelPID()).execute();
+		if (nodeExists(m.getServiceDefinitionPID()))
+			new PurgeObject(m.getServiceDefinitionPID()).execute();
+		if (nodeExists(m.getServiceDeploymentPID()))
+			new PurgeObject(m.getServiceDeploymentPID()).execute();
+	}
+
+	/**
+	 * Links a list of contentModels to a node
+	 * 
+	 * @param contentModels the ContentModels
+	 * @param node the node
+	 */
+	public void linkContentModels(List<Transformer> contentModels, Node node) {
+		for (Transformer t : contentModels) {
+			Link link = new Link();
+			link.setPredicate(REL_HAS_MODEL);
+			link.setObject(addUriPrefix(t.getContentModelPID()), false);
+			node.addRelation(link);
+		}
+	}
+
+	void createContentModel(Transformer cm) throws FedoraClientException {
+		String foCMPid = cm.getContentModelPID();
+		String foSDefPid = cm.getServiceDefinitionPID();
+		String foSDepPid = cm.getServiceDeploymentPID();
+
+		if (!nodeExists(foCMPid))
+			new Ingest(foCMPid).label("Content Model").execute();
+		if (!nodeExists(foSDefPid))
+			new Ingest(foSDefPid).label("ServiceDefinition").execute();
+		if (!nodeExists(foSDepPid))
+			new Ingest(foSDepPid).label("ServiceDeployment").execute();
+
+		// Add Relations
+		Vector<Link> cmHBZLinks = new Vector<Link>();
+		Link cmHBZLink1 = new Link();
+		cmHBZLink1.setPredicate(REL_HAS_SERVICE);
+		cmHBZLink1.setObject(addUriPrefix(foSDefPid), false);
+
+		cmHBZLinks.add(cmHBZLink1);
+
+		Link cmHBZLink2 = new Link();
+		cmHBZLink2.setPredicate(REL_HAS_MODEL);
+		cmHBZLink2.setObject(addUriPrefix(CM_CONTENTMODEL), false);
+		cmHBZLinks.add(cmHBZLink2);
+
+		Link typeLink = new Link();
+		typeLink.setPredicate(REL_CONTENT_TYPE);
+		typeLink.setObject("transformer", true);
+		cmHBZLinks.add(typeLink);
+
+		addRelationships(foCMPid, cmHBZLinks);
+
+		Vector<Link> sDefHBZLinks = new Vector<Link>();
+		Link sDefHBZLink = new Link();
+		sDefHBZLink.setPredicate(REL_HAS_MODEL);
+		sDefHBZLink.setObject(addUriPrefix(SDEF_CONTENTMODEL), false);
+		sDefHBZLinks.add(sDefHBZLink);
+
+		addRelationships(foSDefPid, sDefHBZLinks);
+
+		Vector<Link> sDepHBZLinks = new Vector<Link>();
+		Link sDepHBZLink1 = new Link();
+		sDepHBZLink1.setPredicate(REL_IS_DEPLOYMENT_OF);
+		sDepHBZLink1.setObject(addUriPrefix(foSDefPid), false);
+		sDepHBZLinks.add(sDepHBZLink1);
+
+		Link sDepHBZLink2 = new Link();
+		sDepHBZLink2.setPredicate(REL_IS_CONTRACTOR_OF);
+		sDepHBZLink2.setObject(addUriPrefix(foCMPid), false);
+		sDepHBZLinks.add(sDepHBZLink2);
+
+		Link sDepHBZLink3 = new Link();
+		sDepHBZLink3.setPredicate(REL_HAS_MODEL);
+		sDepHBZLink3.setObject(addUriPrefix(SDEP_CONTENTMODEL), false);
+		sDepHBZLinks.add(sDepHBZLink3);
+
+		addRelationships(foSDepPid, sDepHBZLinks);
+		if (!dataStreamExists(foCMPid, DS_COMPOSITE_MODEL))
+			new AddDatastream(foCMPid, DS_COMPOSITE_MODEL)
+					.dsLabel("DS-Composite-Stream").versionable(true)
+					.formatURI(DS_COMPOSITE_MODEL_URI).dsState("A").controlGroup("X")
+					.mimeType("text/xml").content(cmBuilder.getDsCompositeModel(cm))
+					.execute();
+		if (!dataStreamExists(foSDefPid, DS_METHODMAP))
+			new AddDatastream(foSDefPid, DS_METHODMAP).dsLabel("Methodmap-Stream")
+					.versionable(true).formatURI(DS_METHODMAP_URI).dsState("A")
+					.controlGroup("X").mimeType("text/xml")
+					.content(cmBuilder.getMethodMap(cm)).execute();
+		if (!dataStreamExists(foSDepPid, DS_METHODMAP_WSDL))
+			new AddDatastream(foSDepPid, DS_METHODMAP_WSDL)
+					.dsLabel("Methodmap-Stream").versionable(true)
+					.formatURI(DS_METHODMAP_WSDL_URI).dsState("A").controlGroup("X")
+					.mimeType("text/xml").content(cmBuilder.getMethodMapToWsdl(cm))
+					.execute();
+		if (!dataStreamExists(foSDepPid, DS_INPUTSPEC))
+			new AddDatastream(foSDepPid, DS_INPUTSPEC).dsLabel("DSINPUTSPEC-Stream")
+					.versionable(true).formatURI(DS_INPUTSPEC_URI).dsState("A")
+					.controlGroup("X").mimeType("text/xml")
+					.content(cmBuilder.getDSInputSpec()).execute();
+		if (!dataStreamExists(foSDepPid, DS_WSDL))
+			new AddDatastream(foSDepPid, DS_WSDL).dsLabel("WSDL-Stream")
+					.versionable(true).formatURI(DS_WSDL_URI).dsState("A")
+					.controlGroup("X").mimeType("text/xml").content(cmBuilder.getWsdl(cm))
+					.execute();
+	}
+
+	private void addContentModel(Link link, Node node) {
+		try {
+			Transformer t = readTransformer(link.getObject());
+			node.addTransformer(t);
+		} catch (ContentModelException e) {
+			play.Logger.debug("", e);
+		}
+
+	}
+
+	private Transformer readTransformer(String prefixedPid) {
+		String pid = removeUriPrefix(prefixedPid);
+		String id = pid.substring(pid.indexOf(":") + 1);
+		Transformer t = new Transformer(id);
+		return t;
+	}
 
 }

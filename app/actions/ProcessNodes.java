@@ -25,12 +25,11 @@ import models.Node;
  *
  */
 public interface ProcessNodes {
-    /**
-     * Applys something to a list of nodes
-     * 
-     * @param nodes
-     *            list of nodes
-     * @return a message
-     */
-    public String process(List<Node> nodes);
+	/**
+	 * Applys something to a list of nodes
+	 * 
+	 * @param nodes list of nodes
+	 * @return a message
+	 */
+	public String process(List<Node> nodes);
 }
