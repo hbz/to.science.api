@@ -21,9 +21,6 @@ import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
-import helper.HttpArchiveException;
-import helper.JsonMapper;
-import helper.Webgatherer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +36,22 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.openrdf.rio.RDFFormat;
+import org.w3c.dom.Element;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
+
+import archive.fedora.FedoraVocabulary;
+import archive.fedora.RdfUtils;
+import archive.fedora.UrlConnectionException;
+import archive.fedora.XmlUtils;
+import helper.HttpArchiveException;
+import helper.JsonMapper;
+import helper.Webgatherer;
 import models.DublinCoreData;
 import models.Gatherconf;
 import models.Globals;
@@ -46,21 +59,7 @@ import models.Link;
 import models.Node;
 import models.Pair;
 import models.Urn;
-
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.openrdf.rio.RDFFormat;
-import org.w3c.dom.Element;
-
 import play.Logger;
-import archive.fedora.FedoraVocabulary;
-import archive.fedora.RdfUtils;
-import archive.fedora.UrlConnectionException;
-import archive.fedora.XmlUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
  * 
@@ -784,9 +783,9 @@ public class Read extends RegalAction {
     }
 
     String getIdOfParallelEdition(Node node) {
-	    String alephid;
-	    alephid = new Read().readMetadata(node, "parallelEdition");
-	    alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
-	    return alephid;
+	String alephid;
+	alephid = new Read().readMetadata(node, "parallelEdition");
+	alephid = alephid.substring(alephid.lastIndexOf('/') + 1, alephid.length());
+	return alephid;
     }
 }

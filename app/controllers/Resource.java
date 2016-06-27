@@ -17,9 +17,6 @@
 package controllers;
 
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import helper.HttpArchiveException;
-import helper.JsonMapper;
-import helper.oai.OaiDispatcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -38,6 +35,24 @@ import java.util.stream.Collectors;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.openrdf.rio.RDFFormat;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiImplicitParam;
+import com.wordnik.swagger.annotations.ApiImplicitParams;
+import com.wordnik.swagger.annotations.ApiOperation;
+
+import actions.BasicAuth;
+import actions.BulkAction;
+import archive.fedora.RdfUtils;
+import helper.HttpArchiveException;
+import helper.JsonMapper;
+import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
 import models.Gatherconf;
 import models.Globals;
@@ -46,16 +61,6 @@ import models.MabRecord;
 import models.Message;
 import models.Node;
 import models.RegalObject;
-
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.rio.RDFFormat;
-
 import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
@@ -68,17 +73,6 @@ import views.html.oaidc;
 import views.html.resource;
 import views.html.search;
 import views.html.status;
-import actions.BasicAuth;
-import actions.BulkAction;
-import archive.fedora.RdfUtils;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiImplicitParam;
-import com.wordnik.swagger.annotations.ApiImplicitParams;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * 
@@ -213,8 +207,23 @@ public class Resource extends MyController {
 	return new ReadMetadataAction().call(pid, node -> {
 	    response().setHeader("Access-Control-Allow-Origin", "*");
 	    String result = read.readMetadata(node, field);
-	    return ok(result);
-
+	    RDFFormat format = null;
+	    if (request().accepts("application/rdf+xml")) {
+		format = RDFFormat.RDFXML;
+		response().setContentType("application/rdf+xml");
+	    } else if (request().accepts("text/turtle")) {
+		format = RDFFormat.TURTLE;
+		response().setContentType("text/turtle");
+	    } else if (request().accepts("text/plain")) {
+		format = RDFFormat.NTRIPLES;
+		response().setContentType("text/plain");
+	    }
+	    try (InputStream in = new ByteArrayInputStream(result.getBytes("utf-8"))) {
+		String rdf = RdfUtils.readRdfToString(in, RDFFormat.NTRIPLES, format, "");
+		return ok(rdf);
+	    } catch (Exception e) {
+		throw new RuntimeException(e);
+	    }
 	});
     }
 
@@ -918,7 +927,5 @@ public class Resource extends MyController {
 	    return JsonMessage(new Message(json(result)));
 	});
     }
-
-    
 
 }
