@@ -63,18 +63,39 @@ case fileMap : Map[String,Object] =>{
 			<div class="fileView" id=@fileMap.get( "@id")>
 				<table>
 					<tr class="accessScheme">
-						<td class="downloadIcon" rowspan="6">
+						<td class="downloadIcon" rowspan="6">					
 							<a href="/resource/@fileMap.get("@id")"><img
 								src="/public/images/folder.png" width="40pt"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
 								<div class="dc:label">
 								@views.Helper.getTitle(fileMap)
 								</div>
+								<span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								<span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
 						   </a>
 						</td>
 					</tr>
 				</table>
-				
+				<div class="fileDetails" style="display:none;visibility:hide;">
+				<table>
+					<tr class="publishScheme">
+						<td>Metadata</td>
+						<td><span class="publishScheme @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+							@fileMap.get("publishScheme")</td>
+					</tr>
+					<tr>
+							<td>Data</td>
+							<td><span class="accessScheme @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+								@fileMap.get("accessScheme")</td>
+					</tr>
+					<tr class="identifier">
+						<td>Details</td>
+						<td><div class="dc:identifier">
+								<a href="/resource/@fileMap.get("@id")">@fileMap.get("@id")</a>
+							</div></td>
+					</tr>
+					</table>
+				</div>
 			</div>
 			</p>
 		} 
