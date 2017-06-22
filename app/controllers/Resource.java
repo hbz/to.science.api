@@ -554,9 +554,12 @@ public class Resource extends MyController {
 				List<Node> result = read.getNodes(nodeIds);
 
 				if (request().accepts("text/html")) {
-					return ok(resource.render(result.stream()
-							.map(n -> new JsonMapper(n).getLd()).collect(Collectors.toList()),
-							Globals.namespaces[0]));
+					return ok(
+							resource
+									.render(
+											result.stream().map(n -> new JsonMapper(n).getLd())
+													.collect(Collectors.toList()),
+											Globals.namespaces[0]));
 				} else {
 					return getJsonResult(result);
 				}
@@ -972,6 +975,16 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			Node result = create.createWebpageVersion(node);
+			return getJsonResult(result);
+		});
+	}
+
+	public static Promise<Result> importVersion(@PathParam("pid") String pid,
+			@QueryParam("versionPid") String versionPid,
+			@QueryParam("label") String label) {
+		return new ModifyAction().call(pid, userId -> {
+			Node node = readNodeOrNull(pid);
+			Node result = create.importWebpageVersion(node, versionPid, label);
 			return getJsonResult(result);
 		});
 	}

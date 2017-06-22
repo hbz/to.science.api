@@ -39,6 +39,8 @@ import play.Logger;
  */
 public class Create extends RegalAction {
 
+	private static final Logger.ALogger ApplicationLogger =
+			Logger.of("application");
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -299,6 +301,70 @@ public class Create extends RegalAction {
 		} catch (Exception e) {
 			// verschickt E-Mail "Crawlen der Website fehlgeschlagen..."
 			WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * @param n must be of type webpage
+	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch)
+	 * @param label Label für die Version im Format YYYY-MM-DD
+	 * @return a new version pointing to an imported crawl. The imported crawl is
+	 *         in wget-data/ and indexed in openwayback
+	 */
+	public Node importWebpageVersion(Node n, String versionPid, String label) {
+		Gatherconf conf = null;
+		try {
+			if (!"webpage".equals(n.getContentType())) {
+				throw new HttpArchiveException(400, n.getContentType()
+						+ " is not supported. Operation works only on regalType:\"webpage\"");
+			}
+			ApplicationLogger.debug("Import webpageVersion PID" + n.getPid());
+			conf = Gatherconf.create(n.getConf());
+			ApplicationLogger.debug("Import webpageVersion Conf" + conf.toString());
+			conf.setName(n.getPid());
+
+			// hier auf ein bestehendes WARC in wget-data/ verweisen
+			String crawlDateTimestamp = label.substring(0, 4) + label.substring(5, 7)
+					+ label.substring(8, 10); // crawl-Datum im Format yyyymmdd
+			File crawlDir = new File(Globals.wgetDataDir + "/" + conf.getName() + "/"
+					+ crawlDateTimestamp);
+			ApplicationLogger.debug("crawlDir=" + crawlDir.toString());
+			File warcDir = new File(crawlDir.getAbsolutePath() + "/warcs");
+			String warcPath = warcDir.listFiles()[0].getAbsolutePath();
+			ApplicationLogger.debug("Path to WARC " + warcPath);
+
+			// create fedora object with unmanaged content pointing to
+			// the respective warc container
+			RegalObject regalObject = new RegalObject();
+			regalObject.setContentType("version");
+			Provenience prov = regalObject.getIsDescribedBy();
+			prov.setCreatedBy("webgatherer");
+			prov.setName(conf.getName()); // name=parentPid
+			prov.setImportedFrom(conf.getUrl());
+			regalObject.setIsDescribedBy(prov);
+			regalObject.setParentPid(n.getPid());
+			Node webpageVersion =
+					createResource(versionPid, n.getNamespace(), regalObject);
+			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
+					"<" + webpageVersion.getPid()
+							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
+			webpageVersion.setMimeType("application/warc");
+			webpageVersion.setFileLabel(label);
+			webpageVersion.setAccessScheme(n.getAccessScheme());
+			webpageVersion.setPublishScheme(n.getPublishScheme());
+			webpageVersion = updateResource(webpageVersion);
+
+			conf.setLocalDir(crawlDir.getAbsolutePath());
+			String msg = new Modify().updateConf(webpageVersion, conf.toString());
+
+			ApplicationLogger.info(msg);
+
+			return webpageVersion;
+		} catch (Exception e) {
+			WebgatherLogger.error(
+					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
+					versionPid, n.getPid());
 			throw new RuntimeException(e);
 		}
 	}

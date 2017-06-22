@@ -260,6 +260,9 @@ public class Globals {
 	public static String etikettPwd =
 			Play.application().configuration().getString("regal-api.etikett.pwd");
 
+	public static final String wgetDataDir =
+			Play.application().configuration().getString("regal-api.wget.dataDir");
+
 	/**
 	 * @param ipWhiteList
 	 * @return a Map with ips
