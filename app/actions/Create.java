@@ -254,16 +254,20 @@ public class Create extends RegalAction {
 			}
 			boolean success = Globals.heritrix.teardown(conf.getName());
 			WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
-			Globals.heritrix.launch(conf.getName());
 
+			Globals.heritrix.launch(conf.getName());
+			WebgatherLogger.debug("Launched " + conf.getName());
 			Thread.currentThread().sleep(10000);
 
 			Globals.heritrix.unpause(conf.getName());
-
+			WebgatherLogger.debug("Unpaused " + conf.getName());
 			Thread.currentThread().sleep(10000);
 
 			File crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
 			String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
+			if (warcPath == null) {
+				throw new RuntimeException("Keinen WARC-Pfad gefunden!");
+			}
 			String uriPath = Globals.heritrix.getUriPath(warcPath);
 
 			String localpath =
@@ -304,9 +308,11 @@ public class Create extends RegalAction {
 		} catch (Exception e) {
 			// verschickt E-Mail "Crawlen der Website fehlgeschlagen..."
 			// WebgatherExceptionMail.sendMail(n.getPid(), conf.getUrl());
+			WebgatherLogger.error(e.toString());
 			WebgatherLogger.error("Crawl of Webpage " + n.getPid() + ","
 					+ conf.getUrl() + " has failed !");
-			throw new RuntimeException(e);
+			return null;
+			// throw new RuntimeException(e);
 		}
 	}
 

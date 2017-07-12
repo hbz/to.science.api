@@ -83,7 +83,8 @@ public class Webgatherer implements Runnable {
 			} catch (WebgathererTooBusyException e) {
 				WebgatherLogger.error("Webgatherer stopped! Heritrix is too busy.");
 			} catch (Exception e) {
-				WebgatherLogger.error("", e);
+				WebgatherLogger
+						.error("Couldn't create webpage version for " + n.getPid(), e);
 			}
 			if (count >= limit)
 				break;
@@ -114,10 +115,13 @@ public class Webgatherer implements Runnable {
 			return true;
 		}
 		try {
-			File latest = Globals.heritrix.getCurrentCrawlDir(n.getPid());
+			File latest = Globals.heritrix.getLatestCrawlDir(n.getPid());
+			if (latest == null) {
+				return true;
+			}
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			SimpleDateFormat sdf_hr = new SimpleDateFormat("yyyy-MM-dd");
-			Date latestDate = sdf.parse(latest.getAbsolutePath().substring(0, 8));
+			Date latestDate = sdf.parse(latest.getName().substring(0, 8));
 			Calendar latestCalendar = Calendar.getInstance();
 			latestCalendar.setTime(latestDate);
 			if (conf.getInterval().equals(models.Gatherconf.Interval.once)) {
