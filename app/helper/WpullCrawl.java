@@ -136,7 +136,12 @@ public class WpullCrawl {
 	/**
 	 * Builds a shell executable command which starts a wpull crawl
 	 * 
-	 * @return the shell executable command as a String
+	 * the shell executable command as a String For parameters in use see:
+	 * http://wpull.readthedocs.io/en/master/options.html if marked as mandatory,
+	 * parameter is needed for running smoothly in edoweb context. So only remove
+	 * them if reasonable.
+	 * 
+	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
 		String urlRaw = conf.getUrl().replaceAll("^http://", "")
@@ -161,6 +166,20 @@ public class WpullCrawl {
 			}
 			sb.append(".*");
 		}
+
+		int l = conf.getDeepness();
+		if (l != 0) {
+			sb.append(" --level=" + Integer.toString(l)); // number of recursions
+		}
+
+		int maxByte = conf.getMaxCrawlSize();
+		if (maxByte > 0) {
+			int qFactor = conf.getQuotaUnitSelectionSize();
+			if (qFactor > 0) {
+				sb.append(" --quota=" + Integer.toString(maxByte * qFactor));
+			}
+		}
+
 		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
 		sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
@@ -168,8 +187,10 @@ public class WpullCrawl {
 		sb.append(
 				" --no-host-directories --convert-links --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
-		sb.append(" --no-check-certificate --no-directories");
-		sb.append(" --delete-after");
+		sb.append(" --no-check-certificate");
+		sb.append(" --no-directories"); // mandatory to prevent runtime errors
+		sb.append(" --delete-after"); // mandatory for reducing required disc space
+		sb.append(" --convert-links"); // mandatory to rewrite relative urls
 		return sb.toString();
 	}
 
