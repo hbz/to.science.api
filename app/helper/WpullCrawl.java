@@ -17,6 +17,7 @@
 package helper;
 
 import models.Gatherconf;
+import models.Gatherconf.QuotaUnitSelection;
 import models.Globals;
 import play.Logger;
 import play.Play;
@@ -174,10 +175,9 @@ public class WpullCrawl {
 
 		int maxByte = conf.getMaxCrawlSize();
 		if (maxByte > 0) {
-			int qFactor = conf.getQuotaUnitSelectionSize();
-			if (qFactor > 0) {
-				sb.append(" --quota=" + Integer.toString(maxByte * qFactor));
-			}
+			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
+			// TODO implement select factor
+			sb.append(" --quota=" + Integer.toString(maxByte));
 		}
 
 		sb.append(" --link-extractors=javascript,html,css");

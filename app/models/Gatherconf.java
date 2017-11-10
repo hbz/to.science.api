@@ -52,12 +52,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum QuotaUnitSelection {
-		KB(1024), MB(1048576), GB(1073741824);
-		private final int size;
-
-		QuotaUnitSelection(int size) {
-			this.size = size;
-		}
+		Kilobyte, Megabyte, Gigabyte;
 	}
 
 	String name;
@@ -206,8 +201,8 @@ public class Gatherconf {
 	/**
 	 * @return the quotaUnitSelectionSize
 	 */
-	public int getQuotaUnitSelectionSize() {
-		return quotaUnitSelection.size;
+	public QuotaUnitSelection getQuotaUnitSelection() {
+		return quotaUnitSelection;
 	}
 
 	/**
