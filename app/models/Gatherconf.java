@@ -90,6 +90,7 @@ public class Gatherconf {
 		quotaUnitSelection = null;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
+		localDir = null;
 		name = null;
 		openWaybackLink = null;
 		id = null;
