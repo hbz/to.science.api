@@ -224,7 +224,7 @@ public class Gatherconf {
 	 */
 	public ArrayList<String> getUrlsExcluded() {
 		return urlsExcluded;
-	}int
+	}
 
 	/**
 	 * @return first harvest time
