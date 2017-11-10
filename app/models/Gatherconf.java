@@ -87,6 +87,7 @@ public class Gatherconf {
 		robotsPolicy = null;
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
+		quotaUnitSelection = null;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		name = null;

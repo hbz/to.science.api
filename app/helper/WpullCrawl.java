@@ -167,9 +167,9 @@ public class WpullCrawl {
 			sb.append(".*");
 		}
 
-		int l = conf.getDeepness();
-		if (l != 0) {
-			sb.append(" --level=" + Integer.toString(l)); // number of recursions
+		int level = conf.getDeepness();
+		if (level != 0) {
+			sb.append(" --level=" + Integer.toString(level)); // number of recursions
 		}
 
 		int maxByte = conf.getMaxCrawlSize();
