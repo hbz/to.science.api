@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.lang.ProcessBuilder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * a class to implement a wpull crawl
@@ -177,7 +178,14 @@ public class WpullCrawl {
 		if (maxByte > 0) {
 			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
 			// TODO implement select factor
-			sb.append(" --quota=" + Integer.toString(maxByte));
+			Hashtable<QuotaUnitSelection, Integer> sizeFactor =
+					new Hashtable<QuotaUnitSelection, Integer>();
+			sizeFactor.put(QuotaUnitSelection.KB, 1024);
+			sizeFactor.put(QuotaUnitSelection.MB, 1048576);
+			sizeFactor.put(QuotaUnitSelection.GB, 1073741824);
+
+			int size = maxByte * sizeFactor.get(qFactor);
+			sb.append(" --quota=" + Integer.toString(size));
 		}
 
 		sb.append(" --link-extractors=javascript,html,css");
