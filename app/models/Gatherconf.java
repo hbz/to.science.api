@@ -50,6 +50,11 @@ public class Gatherconf {
 		heritrix, wpull
 	}
 
+	@SuppressWarnings("javadoc")
+	public enum QuotaUnitSelection {
+		KB, MB, GB;
+	}
+
 	String name;
 	boolean active;
 	String url;
@@ -58,11 +63,13 @@ public class Gatherconf {
 	RobotsPolicy robotsPolicy;
 	Interval interval;
 	CrawlerSelection crawlerSelection;
+	QuotaUnitSelection quotaUnitSelection;
 	ArrayList<String> urlsExcluded;
 	Date startDate;
 	String localDir;
 	String openWaybackLink;
 	String id;
+	int maxCrawlSize;
 
 	/**
 	 * Create a new configuration for the webgatherer
@@ -75,11 +82,14 @@ public class Gatherconf {
 		robotsPolicy = null;
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
+		quotaUnitSelection = null;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
+		localDir = null;
 		name = null;
 		openWaybackLink = null;
 		id = null;
+		maxCrawlSize = 0;
 	}
 
 	public boolean isActive() {
@@ -133,6 +143,20 @@ public class Gatherconf {
 	}
 
 	/**
+	 * @return the maxCrawlSize
+	 */
+	public int getMaxCrawlSize() {
+		return maxCrawlSize;
+	}
+
+	/**
+	 * @param maxCrawlSize the maxCrawlSize to set
+	 */
+	public void setMaxCrawlSize(int maxCrawlSize) {
+		this.maxCrawlSize = maxCrawlSize;
+	}
+
+	/**
 	 * @return define how robots.txt will be treated
 	 */
 	public RobotsPolicy getRobotsPolicy() {
@@ -172,6 +196,20 @@ public class Gatherconf {
 	 */
 	public void setCrawlerSelection(CrawlerSelection crawlerSelection) {
 		this.crawlerSelection = crawlerSelection;
+	}
+
+	/**
+	 * @return the quotaUnitSelection
+	 */
+	public QuotaUnitSelection getQuotaUnitSelection() {
+		return quotaUnitSelection;
+	}
+
+	/**
+	 * @param quotaUnitSelection the quotaUnitSelection to set
+	 */
+	public void setQuotaUnitSelection(QuotaUnitSelection quotaUnitSelection) {
+		this.quotaUnitSelection = quotaUnitSelection;
 	}
 
 	/**
@@ -284,4 +322,5 @@ public class Gatherconf {
 	public void setId(String id) {
 		this.id = id;
 	}
+
 }
