@@ -174,18 +174,17 @@ public class WpullCrawl {
 			sb.append(" --level=" + Integer.toString(level)); // number of recursions
 		}
 
-		int maxByte = conf.getMaxCrawlSize();
+		long maxByte = conf.getMaxCrawlSize();
 		if (maxByte > 0) {
 			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
 			// TODO implement select factor
-			Hashtable<QuotaUnitSelection, Integer> sizeFactor =
-					new Hashtable<QuotaUnitSelection, Integer>();
+			Hashtable<QuotaUnitSelection, Integer> sizeFactor = new Hashtable<>();
 			sizeFactor.put(QuotaUnitSelection.KB, 1024);
 			sizeFactor.put(QuotaUnitSelection.MB, 1048576);
 			sizeFactor.put(QuotaUnitSelection.GB, 1073741824);
 
-			int size = maxByte * sizeFactor.get(qFactor);
-			sb.append(" --quota=" + Integer.toString(size));
+			long size = maxByte * sizeFactor.get(qFactor).longValue();
+			sb.append(" --quota=" + Long.toString(size));
 		}
 
 		sb.append(" --link-extractors=javascript,html,css");
