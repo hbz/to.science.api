@@ -52,6 +52,8 @@ public class WpullCrawl {
 	private String datetime = null;
 	private File crawlDir = null;
 	private String localpath = null;
+	private String urlRaw = null;
+	private String urlRawForFilename = null;
 	private String warcFilename = null;
 	private int exitState = 0;
 	private String msg = null;
@@ -83,6 +85,14 @@ public class WpullCrawl {
 	 */
 	public WpullCrawl(Gatherconf conf) {
 		this.conf = conf;
+		this.urlRaw = conf.getUrl().replaceAll("^http://", "")
+				.replaceAll("^https://", "").replaceAll("/$", "");
+		this.urlRawForFilename = urlRaw.replaceAll("/", "_");
+		this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+		this.datetime =
+				date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
+		this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
+		this.warcFilename = "WEB-" + urlRawForFilename + "-" + date;
 	}
 
 	/**
@@ -94,10 +104,6 @@ public class WpullCrawl {
 			if (conf.getName() == null) {
 				throw new RuntimeException("The configuration has no name !");
 			}
-			date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-			datetime =
-					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
-			crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			if (!crawlDir.exists()) {
 				// create job directory
 				WebgatherLogger.debug("Create job Directory " + jobDir + "/"
@@ -156,18 +162,15 @@ public class WpullCrawl {
 	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
-		String urlRaw = conf.getUrl().replaceAll("^http://", "")
-				.replaceAll("^https://", "").replaceAll("/$", "");
-		warcFilename = "WEB-" + urlRaw + "-" + date;
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + conf.getUrl());
 		ArrayList<String> domains = conf.getDomains();
 		if (domains.size() > 0) {
 			sb.append(" --span-hosts");
-		}
-		sb.append(" --domains=" + urlRaw);
-		for (int i = 0; i < domains.size(); i++) {
-			sb.append("," + domains.get(i));
+			sb.append(" --domains=" + urlRaw);
+			for (int i = 0; i < domains.size(); i++) {
+				sb.append("," + domains.get(i));
+			}
 		}
 		sb.append(" --recursive");
 		ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
