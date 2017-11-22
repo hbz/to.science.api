@@ -70,6 +70,10 @@ public class Gatherconf {
 	String openWaybackLink;
 	String id;
 	long maxCrawlSize;
+	int waitSecBtRequests;
+	boolean randomWait;
+	int tries;
+	int waitRetry;
 
 	/**
 	 * Create a new configuration for the webgatherer
@@ -90,6 +94,10 @@ public class Gatherconf {
 		openWaybackLink = null;
 		id = null;
 		maxCrawlSize = 0;
+		waitSecBtRequests = 2;
+		randomWait = true;
+		tries = 5;
+		int waitRetry = 10;
 	}
 
 	public boolean isActive() {
@@ -259,6 +267,62 @@ public class Gatherconf {
 	 */
 	public String getLocalDir() {
 		return localDir;
+	}
+
+	/**
+	 * @return the waitSecBtRequests
+	 */
+	public int getWaitSecBtRequests() {
+		return waitSecBtRequests;
+	}
+
+	/**
+	 * @param waitSecBtRequests the waitSecBtRequests to set
+	 */
+	public void setWaitSecBtRequests(int waitSecBtRequests) {
+		this.waitSecBtRequests = waitSecBtRequests;
+	}
+
+	/**
+	 * @return the randomWait
+	 */
+	public boolean isRandomWait() {
+		return randomWait;
+	}
+
+	/**
+	 * @param randomWait the randomWait to set
+	 */
+	public void setRandomWait(boolean randomWait) {
+		this.randomWait = randomWait;
+	}
+
+	/**
+	 * @return the tries
+	 */
+	public int getTries() {
+		return tries;
+	}
+
+	/**
+	 * @param tries the tries to set
+	 */
+	public void setTries(int tries) {
+		this.tries = tries;
+	}
+
+	/**
+	 * @return the waitRetry
+	 */
+	public int getWaitRetry() {
+		return waitRetry;
+	}
+
+	/**
+	 * @param waitRetry the waitRetry to set
+	 */
+	public void setWaitRetry(int waitRetry) {
+		this.waitRetry = waitRetry;
 	}
 
 	/**

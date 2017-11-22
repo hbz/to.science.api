@@ -197,12 +197,36 @@ public class WpullCrawl {
 			sb.append(" --quota=" + Long.toString(size));
 		}
 
+		int waitSec = conf.getWaitSecBtRequests();
+		if (waitSec != 0) {
+			sb.append(" --wait=" + Integer.toString(waitSec)); // number of second
+																													// wpull waits between
+																													// requests
+		}
+
+		int tries = conf.getTries();
+		if (tries != 0) {
+			sb.append(" --tries=" + Integer.toString(tries)); // number of requests
+																												// wpull performs on
+																												// transient errors
+		}
+
+		int waitRetry = conf.getWaitRetry();
+		if (waitRetry != 0) {
+			sb.append(" --waitretry=" + Integer.toString(waitRetry)); // wait between
+																																// re-tries
+		}
+
+		boolean random = conf.isRandomWait();
+		if (random == true) {
+			sb.append(" --random-wait"); // randomize wait times
+		}
+
 		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
 		sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
 		sb.append(" --escaped-fragment --strip-session-id");
-		sb.append(
-				" --no-host-directories --convert-links --page-requisites --no-parent");
+		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
 		sb.append(" --no-check-certificate");
 		sb.append(" --no-directories"); // mandatory to prevent runtime errors
