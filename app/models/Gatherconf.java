@@ -94,10 +94,10 @@ public class Gatherconf {
 		openWaybackLink = null;
 		id = null;
 		maxCrawlSize = 0;
-		waitSecBtRequests = 2;
+		waitSecBtRequests = 0;
 		randomWait = true;
 		tries = 5;
-		int waitRetry = 10;
+		int waitRetry = 20;
 	}
 
 	public boolean isActive() {
