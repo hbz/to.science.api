@@ -158,7 +158,7 @@ public class WpullCrawl {
 	private String buildExecCommand() {
 		String urlRaw = conf.getUrl().replaceAll("^http://", "")
 				.replaceAll("^https://", "").replaceAll("/$", "");
-		warcFilename = "WEB-" + urlRaw + "-" + date;
+		warcFilename = "WEB-" + urlRaw.replaceAll("/", "_") + "-" + date;
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + conf.getUrl());
 		ArrayList<String> domains = conf.getDomains();
