@@ -25,11 +25,10 @@ import play.Play;
 
 import java.io.*;
 import java.lang.ProcessBuilder;
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,10 +47,12 @@ public class WpullCrawl {
 	}
 
 	private Gatherconf conf = null;
+	private URI uri = null;
 	private String date = null;
 	private String datetime = null;
 	private File crawlDir = null;
 	private String localpath = null;
+	private String host = null;
 	private String warcFilename = null;
 	private int exitState = 0;
 	private String msg = null;
@@ -83,6 +84,19 @@ public class WpullCrawl {
 	 */
 	public WpullCrawl(Gatherconf conf) {
 		this.conf = conf;
+		try {
+			this.uri = new URI(conf.getUrl());
+			this.host = uri.getHost();
+			WebgatherLogger.debug("host=" + host);
+			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+			this.datetime =
+					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
+			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
+			this.warcFilename = "WEB-" + host + "-" + date;
+		} catch (URISyntaxException e) {
+			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -94,10 +108,6 @@ public class WpullCrawl {
 			if (conf.getName() == null) {
 				throw new RuntimeException("The configuration has no name !");
 			}
-			date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-			datetime =
-					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
-			crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			if (!crawlDir.exists()) {
 				// create job directory
 				WebgatherLogger.debug("Create job Directory " + jobDir + "/"
@@ -156,15 +166,12 @@ public class WpullCrawl {
 	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
-		String urlRaw = conf.getUrl().replaceAll("^http://", "")
-				.replaceAll("^https://", "").replaceAll("/$", "");
-		warcFilename = "WEB-" + urlRaw.replaceAll("/", "_") + "-" + date;
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + conf.getUrl());
 		ArrayList<String> domains = conf.getDomains();
 		if (domains.size() > 0) {
 			sb.append(" --span-hosts");
-			sb.append(" --domains=" + urlRaw);
+			sb.append(" --domains=" + host);
 			for (int i = 0; i < domains.size(); i++) {
 				sb.append("," + domains.get(i));
 			}
@@ -361,20 +368,19 @@ public class WpullCrawl {
 		Pattern pattern1 = Pattern.compile(regExp1);
 		Matcher matcher1 = null;
 		try {
-			String urlRaw =
-					Gatherconf.create(node.getConf()).getUrl().replaceAll("^http://", "")
-							.replaceAll("^https://", "").replaceAll("/$", "");
-			String regExp2 = "domains=" + urlRaw;
+			String regExp2 = Gatherconf.create(node.getConf()).getUrl();
 			Pattern pattern2 = Pattern.compile(regExp2);
 			Matcher matcher2 = null;
 			WebgatherLogger.debug("Setze Systemkommando ab: " + cmd);
-			WebgatherLogger.debug("Suche nach URL_RAW in wpull-Aufrufen: " + urlRaw);
+			WebgatherLogger.debug("Suche nach wpull-Aufrufen mit url " + regExp2);
 			String line;
 			Process proc = Runtime.getRuntime().exec(cmd);
 			buf = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			while ((line = buf.readLine()) != null) {
+				// WebgatherLogger.debug("found line: " + line);
 				matcher1 = pattern1.matcher(line);
 				if (matcher1.find()) {
+					// WebgatherLogger.debug("wpull3 found in line");
 					matcher2 = pattern2.matcher(line);
 					if (matcher2.find()) {
 						WebgatherLogger
