@@ -25,6 +25,8 @@ import play.Play;
 
 import java.io.*;
 import java.lang.ProcessBuilder;
+import com.google.common.base.CharMatcher;
+import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
@@ -47,6 +49,7 @@ public class WpullCrawl {
 	}
 
 	private Gatherconf conf = null;
+	private String urlAscii = null;
 	private URI uri = null;
 	private String date = null;
 	private String datetime = null;
@@ -85,7 +88,10 @@ public class WpullCrawl {
 	public WpullCrawl(Gatherconf conf) {
 		this.conf = conf;
 		try {
-			this.uri = new URI(conf.getUrl());
+			WebgatherLogger.debug("URL=" + conf.getUrl());
+			this.urlAscii = convertUnicodeURLToAscii(conf.getUrl());
+			WebgatherLogger.debug("urlAscii=" + urlAscii);
+			this.uri = new URI(urlAscii);
 			this.host = uri.getHost();
 			WebgatherLogger.debug("host=" + host);
 			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
@@ -167,7 +173,7 @@ public class WpullCrawl {
 	 */
 	private String buildExecCommand() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(crawler + " " + conf.getUrl());
+		sb.append(crawler + " " + urlAscii);
 		ArrayList<String> domains = conf.getDomains();
 		if (domains.size() > 0) {
 			sb.append(" --span-hosts");
@@ -368,7 +374,9 @@ public class WpullCrawl {
 		Pattern pattern1 = Pattern.compile(regExp1);
 		Matcher matcher1 = null;
 		try {
-			String regExp2 = Gatherconf.create(node.getConf()).getUrl();
+			String urlAscii =
+					convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
+			String regExp2 = urlAscii;
 			Pattern pattern2 = Pattern.compile(regExp2);
 			Matcher matcher2 = null;
 			WebgatherLogger.debug("Setze Systemkommando ab: " + cmd);
@@ -404,6 +412,58 @@ public class WpullCrawl {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * von hier kopiert:
+	 * https://nealvs.wordpress.com/2016/01/18/how-to-convert-unicode-url-to-ascii
+	 * -in-java/
+	 * 
+	 * @param url ein Uniform Resource Locator
+	 * @return ein URL in ASCII
+	 * @throws URISyntaxException
+	 */
+	public static String convertUnicodeURLToAscii(String url)
+			throws URISyntaxException {
+		if (url == null) {
+			return url;
+		}
+		String urlRet = url;
+		urlRet = url.trim();
+		// Handle international domains by detecting non-ascii and converting them
+		// to punycode
+		boolean isAscii = CharMatcher.ASCII.matchesAllOf(urlRet);
+		if (isAscii) {
+			return urlRet;
+		}
+		URI uri = new URI(urlRet);
+		boolean includeScheme = true;
+
+		// URI needs a scheme to work properly with authority parsing
+		if (uri.getScheme() == null) {
+			uri = new URI("http://" + urlRet);
+			includeScheme = false;
+		}
+
+		String scheme = uri.getScheme() != null ? uri.getScheme() + "://" : null;
+		/* authority includes domain and port */
+		String authority =
+				uri.getRawAuthority() != null ? uri.getRawAuthority() : "";
+		WebgatherLogger.debug("authority=" + authority);
+		String path = uri.getRawPath() != null ? uri.getRawPath() : "";
+		String queryString =
+				uri.getRawQuery() != null ? "?" + uri.getRawQuery() : "";
+
+		// Must convert domain to punycode separately from the path
+		urlRet = (includeScheme ? scheme : "") + IDN.toASCII(authority) + path
+				+ queryString;
+		WebgatherLogger.debug("urlRet=" + urlRet);
+
+		// Convert path from unicode to ascii encoding
+		urlRet = new URI(urlRet).toASCIIString();
+		WebgatherLogger.debug("urlRet.toASCIIString=" + urlRet);
+
+		return urlRet;
 	}
 
 }
