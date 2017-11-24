@@ -14,14 +14,15 @@
  * limitations under the License.
  *
  */
-package actions;
+package authenticate;
 
-import models.User;
+import models.Globals;
 import play.Play;
 import play.libs.F;
 import play.Logger;
 import play.mvc.Action;
 import play.mvc.Http;
+import play.mvc.Http.Session;
 import play.mvc.Result;
 
 /**
@@ -40,11 +41,20 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 	@Override
 	public F.Promise<Result> call(Http.Context context) throws Throwable {
+		if (models.Globals.users.isLoggedIn(context)) {
+			// User is already logged in
+			return delegate.call(context);
+		} else {
+			// Look for basic auth header for api calls
+			return basicAuth(context);
+		}
+	}
 
+	public F.Promise<Result> basicAuth(Http.Context context) throws Throwable {
 		String authHeader = context.request().getHeader(AUTHORIZATION);
 		if (authHeader == null) {
 			if (context.request().method().equals("GET")) {
-				context.args.put("role", "edoweb-anonymous");
+				context.session().put("role", Role.GUEST.toString());
 				return delegate.call(context);
 			} else {
 				return unauthorized(context);
@@ -64,7 +74,7 @@ public class BasicAuthAction extends Action<BasicAuth> {
 
 		User authUser = getAuthenticatedUser(username, password);
 		if (authUser != null) {
-			context.args.put("role", authUser.getRole());
+			context.session().put("role", authUser.getRole().toString());
 			return delegate.call(context);
 		}
 		play.Logger.info("Authentifizierung fehlgeschlagen !");
@@ -72,20 +82,18 @@ public class BasicAuthAction extends Action<BasicAuth> {
 	}
 
 	private User getAuthenticatedUser(String username, String password) {
-		try {
-			String userImpl =
-					Play.application().configuration().getString("regal-api.userImpl");
-			Class<?> cl = null;
-			cl = Class.forName(userImpl);
-			return ((User) cl.newInstance()).authenticate(username, password);
-		} catch (Throwable e) {
-			play.Logger.info(e.getMessage(), e);
-			play.Logger.debug("", e);
-			return null;
+		User user = Globals.users.getUser(username);
+		if (user != null && user.getPassword().equals(password)) {
+			return user;
 		}
-
+		return null;
 	}
 
+	/**
+	 * 
+	 * @param context
+	 * @return
+	 */
 	private play.libs.F.Promise<Result> unauthorized(Http.Context context) {
 		context.response().setHeader(WWW_AUTHENTICATE, REALM);
 		return F.Promise.promise(new F.Function0<Result>() {

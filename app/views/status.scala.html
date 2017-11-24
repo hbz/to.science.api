@@ -4,8 +4,10 @@
 @import play.api.libs.json._
 @import com.fasterxml.jackson.databind.JsonNode
 
+@import authenticate.User
 
-@main("",null) {
+@main("",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
 <table id=".resourceView" class="table table-striped table-bordered">
 <tr>
 <th>Title</th>

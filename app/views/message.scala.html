@@ -4,8 +4,8 @@
 @import play.api.libs.json._
 
 
-
-@main("Message",null) {
+@main("Regal",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
 	@defining(Json.parse(node)){js=>
 	<div class="message">
 	<pre>@((js \ "text").as[String])</pre>

@@ -514,8 +514,7 @@ public class Modify extends RegalAction {
 
 	}
 
-	private static String getLobid2DataAsNtripleString(Node node,
-			String alephid) {
+	public static String getLobid2DataAsNtripleString(Node node, String alephid) {
 		String pid = node.getPid();
 		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
 		play.Logger.info("GET " + lobidUri);

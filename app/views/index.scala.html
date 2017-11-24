@@ -1,7 +1,7 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
-@main("Regal",null) {
-
+@main("Regal",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
 	<div class="container">
 		<div class="row">
 		Standard installation of <a href="https://github.com/edoweb/regal-api"> Regal </a>. 
@@ -9,6 +9,4 @@
 		The http interface of Regal can be found <a href="/public/docs/">here</a>.
 		</div> 
 	</div>
-	
-
 }

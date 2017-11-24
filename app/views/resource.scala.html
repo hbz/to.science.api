@@ -4,15 +4,37 @@
 @import org.elasticsearch.search.aggregations.Aggregations
 
 @(hit:Map[String,Object],aggregations:Aggregations,namespace: String)
+@pid={@hit.get("@id")}
+@main(hit.get("title").toString(),aggregations,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
 
-
-@main(hit.get("title").toString(),aggregations) {
-
-		
-			@tags.getTitle(hit,namespace)
+					<ul class="nav nav-tabs">
+					 	<li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
+					  	<li><a href="#2a" data-toggle="tab">Download</a></li>
+					  	@if(models.Globals.users.isLoggedIn(ctx())){
+					  	<li><a href="#3a" data-toggle="tab">Upload</a></li>
+					  	<li><a href="./@pid/edit">Edit</a></li>
+					  	}
+					</ul> 
+					<div class="tab-content">
+				  		<div class="tab-pane active" id="1a">
+			        		@tags.getTitle(hit,namespace)
 			@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
-
-	
+			        	</div>
+				  		<div class="tab-pane" id="2a">
+		
+			        	</div>
+			        	
+		       			@if(models.Globals.users.isLoggedIn(ctx())){
+			        	<div class="tab-pane" id="3a">
+		
+			        	</div>
+			        	<div class="tab-pane" id="4a">
+		
+			        	</div>
+			        	}
+		        	</div>
+		
 }
 
 

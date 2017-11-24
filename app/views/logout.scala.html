@@ -1,0 +1,10 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
+@main("Regal",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
+<h2>Time to say goodbye? Press the button to logout</h2>
+@helper.form(action = routes.Forms.postLogout()){
+  <input type="submit" value="Logout!" class="btn btn-success" />
+}
+
+}

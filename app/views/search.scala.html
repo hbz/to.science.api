@@ -28,7 +28,8 @@
 </nav>
 }
 
-@main("Regal Suche",aggregations) {
+@main("Regal Suche",aggregations,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
 <div class="container">
 	<div class="row">
 		<div class="col-md-5">@pagination(totalNum,from,until)</div>

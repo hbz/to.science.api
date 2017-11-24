@@ -36,7 +36,6 @@ import models.Node;
 import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 import views.html.message;
 import actions.Create;
@@ -46,6 +45,7 @@ import actions.Modify;
 import actions.Read;
 import actions.Transform;
 import archive.fedora.XmlUtils;
+import authenticate.Role;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
@@ -56,35 +56,6 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * 
  */
 public class MyController extends Controller {
-
-	/**
-	 * The admin can do everything
-	 */
-	public final static String ADMIN_ROLE = "edoweb-admin";
-	/**
-	 * The editor sees everything but cannot run some batch processes
-	 */
-	public final static String EDITOR_ROLE = "edoweb-editor";
-	/**
-	 * The reader can read all data flagged with "public","restricted","remote"
-	 * The reader is not able to perform modifying, creating, or deleting
-	 * operations
-	 */
-	public final static String READER_ROLE = "edoweb-reader";
-	/**
-	 * The subscriber behaves like the reader but can als access date flagged with
-	 * "single"
-	 */
-	public final static String SUBSCRIBER_ROLE = "edoweb-subscriber";
-	/**
-	 * The remote user behaves like the reader
-	 */
-	public final static String REMOTE_ROLE = "edoweb-remote";
-
-	/**
-	 * The anonymous user can read everything flagged with "public".
-	 */
-	public final static String ANONYMOUS_ROLE = "edoweb-anonymous";
 
 	/**
 	 * private metadata is only visible to admins and editors
@@ -136,7 +107,8 @@ public class MyController extends Controller {
 		Message msg = new Message("Access Denied!", 401);
 		play.Logger.debug("\nResponse: " + msg.toString());
 		if (request().accepts("text/html")) {
-			return HtmlMessage(msg);
+			flash("message", "You must be logged in to perform this action!");
+			return redirect(routes.Forms.getLoginForm());
 		} else {
 			return JsonMessage(msg);
 		}
@@ -211,8 +183,8 @@ public class MyController extends Controller {
 	 * @return true if the user is allowed to read the object
 	 */
 	public static boolean readData_accessIsAllowed(String accessScheme,
-			String role) {
-		if (!ADMIN_ROLE.equals(role)) {
+			Role role) {
+		if (!Role.ADMIN.equals(role)) {
 			if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
 				return true;
 			} else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
@@ -221,29 +193,29 @@ public class MyController extends Controller {
 							+ " is white listed. Access to restricted data granted.");
 					return true;
 				}
-				if (READER_ROLE.equals(role) || SUBSCRIBER_ROLE.equals(role)
-						|| REMOTE_ROLE.equals(role)) {
+				if (Role.READER.equals(role) || Role.SUBSCRIBER.equals(role)
+						|| Role.REMOTE.equals(role)) {
 					if (isWhitelisted(request().getHeader("UserIp"))) {
 						play.Logger.info("IP " + request().getHeader("UserIp")
 								+ " is white listed. Access to restricted data granted.");
 						return true;
 					}
 				}
-				if (EDITOR_ROLE.equals(role)) {
+				if (Role.EDITOR.equals(role)) {
 					return true;
 				}
 			} else if (DATA_ACCESSOR_PRIVATE.equals(accessScheme)) {
-				if (EDITOR_ROLE.equals(role))
+				if (Role.EDITOR.equals(role))
 					return true;
 			} else if (DATA_ACCESSOR_SINGLE.equals(accessScheme)) {
-				if (EDITOR_ROLE.equals(role)) {// ||
+				if (Role.EDITOR.equals(role)) {// ||
 					// SUBSCRIBER_ROLE.equals(role))
 					// {
 					return true;
 				}
 			} else if (DATA_ACCESSOR_REMOTE.equals(accessScheme)) {
-				if (EDITOR_ROLE.equals(role)) { // || REMOTE_ROLE.equals(role)
-					// || READER_ROLE.equals(role)
+				if (Role.EDITOR.equals(role)) { // || REMOTE_ROLE.equals(role)
+					// || Role.Reader.equals(role)
 					// ||
 					// SUBSCRIBER_ROLE.equals(role))
 					// {
@@ -266,12 +238,12 @@ public class MyController extends Controller {
 	 * @return true if the user is allowed to read the object
 	 */
 	public static boolean readMetadata_accessIsAllowed(String publishScheme,
-			String role) {
-		if (!ADMIN_ROLE.equals(role)) {
+			Role role) {
+		if (!Role.ADMIN.equals(role)) {
 			if (METADATA_ACCESSOR_PUBLIC.equals(publishScheme)) {
 				return true;
 			} else if (METADATA_ACCESSOR_PRIVATE.equals(publishScheme)) {
-				if (EDITOR_ROLE.equals(role)) {
+				if (Role.EDITOR.equals(role)) {
 					return true;
 				}
 			}
@@ -285,8 +257,8 @@ public class MyController extends Controller {
 	 * @param role the role of the user
 	 * @return true if the user is allowed to modify the object
 	 */
-	public static boolean modifyingAccessIsAllowed(String role) {
-		if (ADMIN_ROLE.equals(role) || EDITOR_ROLE.equals(role))
+	public static boolean modifyingAccessIsAllowed(Role role) {
+		if (Role.ADMIN.equals(role) || Role.EDITOR.equals(role))
 			return true;
 		return false;
 	}
@@ -310,7 +282,7 @@ public class MyController extends Controller {
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
-						String role = (String) Http.Context.current().args.get("role");
+						Role role = Role.valueOf(ctx().session().get("role"));
 						String publishScheme = node.getPublishScheme();
 						if (!readMetadata_accessIsAllowed(publishScheme, role)) {
 							return AccessDenied();
@@ -345,10 +317,11 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, NodeAction ca) {
 			return Promise.promise(() -> {
 				try {
+					Role role = findRole();
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
-						String role = (String) Http.Context.current().args.get("role");
+
 						String accessScheme = node.getAccessScheme();
 						if (!readData_accessIsAllowed(accessScheme, role)) {
 							return AccessDenied();
@@ -364,7 +337,15 @@ public class MyController extends Controller {
 				}
 			});
 		}
+	}
 
+	private static Role findRole() {
+		String roleString = session().get("role");
+		if (roleString == null || roleString.isEmpty()) {
+			roleString = Role.GUEST.toString();
+		}
+		play.Logger.debug("Access with role " + roleString);
+		return Role.valueOf(roleString);
 	}
 
 	/**
@@ -375,7 +356,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					if (!readMetadata_accessIsAllowed("private", role)) {
 						return AccessDenied();
 					}
@@ -399,7 +380,7 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					String userId = request().getHeader("UserId");
 					play.Logger.debug(
 							"Try to access with role: " + role + " and userId " + userId);
@@ -431,7 +412,7 @@ public class MyController extends Controller {
 		Promise<Result> call(String pid, NodeAction ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					play.Logger.debug("Try to access with role: " + role + ".");
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
@@ -461,7 +442,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();
 					}
@@ -485,7 +466,7 @@ public class MyController extends Controller {
 		Promise<Result> call(Action ca) {
 			return Promise.promise(() -> {
 				try {
-					String role = (String) Http.Context.current().args.get("role");
+					Role role = findRole();
 					play.Logger.debug("role={}", role);
 					if (!modifyingAccessIsAllowed(role)) {
 						return AccessDenied();

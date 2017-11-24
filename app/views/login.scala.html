@@ -1,0 +1,29 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+
+@import authenticate.User
+@(myForm: Form[User])
+
+@main("Regal",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
+
+@helper.form(action = routes.LoginController.postLogin()){
+
+<label class="form-control-label" for="username">User</label>
+<br/>
+<input size="30" class="input-widget username-field" 
+					name="username" tabindex="0">
+<br/>	
+			
+<label class="form-control-label" for="username">Password</label>
+<br/>
+<input size="30" class="input-widget password-field" 
+					name="password" tabindex="1" type="password"/>
+<br/>
+
+<input type="submit" value="Send" class="btn btn-success" tabindex="2"/>
+<br/>
+}
+<p>
+New? Please <a href="/register">register here</a>! Forgot password? <a href="/resetPassword">Reset password here</a>!
+</p>
+}

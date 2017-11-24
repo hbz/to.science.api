@@ -5,7 +5,9 @@
 @import org.elasticsearch.search.aggregations.bucket.terms.Terms
 @import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket
 
-@(title: String,aggregations:Aggregations)(content: Html)
+@import authenticate.User
+
+@(title: String,aggregations:Aggregations,isLoggedIn: Boolean,userInfo:User)(content: Html)
 
 <!DOCTYPE html>
 
@@ -57,8 +59,10 @@
 		     	@tags.searchForm("*")
 		    </div>
 		    <ul class="nav navbar-nav navbar-right">
-		      <li><a href="#">Login</a></li>
-		      <li class="dropdown">
+		       @if(isLoggedIn) {
+            	<li><p class="navbar-text">@userInfo.getUsername()</p></li>
+            	<li><a href="@routes.Forms.getLogoutForm()">Logout</a></li>
+            	<li class="dropdown">
 		        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Add<b class="caret"></b></a>
 		        <ul class="dropdown-menu">
 		          <li><a href="/add/catalog">Catalog Object</a></li>
@@ -69,14 +73,31 @@
 		          <li class="divider"></li>
 		          <li><a href="/add/file">File</a></li>
 		        </ul>
-		      </li>
+		      	</li>
+          		} else {
+           		 <li><a href="@routes.Forms.getLoginForm()">Login</a></li>
+				}
 		    </ul>
 	  	</div><!-- /.navbar-collapse -->
 	</nav>
 		<div class="container-fluid" style="min-height:400px">	
-		
+			@if(flash.containsKey("message")) {
+				<div class="row">	
+					<div class=" col-md-1">
+				
+					</div>
+					<div class="col-md-2">
+					</div>
+					<div class="message alert alert-info col-md-7">	
+						
+							@flash.get("message")
+					
+					</div>
+					 <div class="col-md-2"></div>
+				</div>
+			}
 			<div class="row">
-			<div class="col-md-1">
+				<div class="col-md-1">
 				</div>
 				<div class="col-md-2">
 					<div class="row facets">
@@ -87,20 +108,9 @@
                 		
 					</div>
 				</div>
-				<div class="col-md-7">	
-					<ul class="nav nav-tabs">
-					 <li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
-					  <li><a href="#2a" data-toggle="tab">Download</a></li>
-					</ul> 
-					<div class="tab-content">
-				  		<div class="tab-pane active" id="1a">
-			        		@content
-			        	</div>
-		       
-				  		<div class="tab-pane" id="2a">
 		
-			        	</div>
-		        	</div>
+				<div class="col-md-7">	
+					@content
 		        </div>
 		        <div class="col-md-2"></div>
 	       </div>
@@ -132,10 +142,10 @@
 								<ol class="facets_nav" >
 					
 								@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
-									<li> <a href="">@b.getKey() (@b.getDocCount())</a></li>
+									<li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
 								}
 							
-				                <a class="more_facets_link" href="#more_facets_subject_exact" data-for="facets_subject_exact">
+				                <a class="more_facets_link" href="/facets/more_facets_subject_exact" data-for="facets_subject_exact">
 				                    <span class="more_facets_text">
 				                        All <span class="fa fa-caret-down"></i>
 				                    </span>

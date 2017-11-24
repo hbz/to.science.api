@@ -1,0 +1,30 @@
+@* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@ 
+@import views.Helper
+@import org.elasticsearch.search.aggregations.Aggregations
+
+@(hit:Map[String,Object],aggregations:Aggregations,namespace:
+String,alephId:String)
+
+@main(hit.get("title").toString(),aggregations,models.Globals.users.isLoggedIn(ctx()),
+models.Globals.users.getUser(ctx())){
+
+
+	<div class="tab-pane active" id="1a">
+		@tags.getTitle(hit,namespace)
+		@tags.resourceView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
+	</div>
+	<div class="tab-pane" id="2a"></div>
+
+@helper.form(action = routes.Resource.createObjectWithMetadata()){
+<input size="30" class="input-widget namespace-field" name="namespace"
+	tabindex="0" style="display: none;" value=@namespace>
+<input size="30" class="input-widget alephId-field" name="alephId"
+	tabindex="0" style="display: none;" value=@alephId>
+	
+<a href="/add" class="btn btn-default">Cancel</a>
+
+<input type="submit" value="Create" class="btn btn-success" tabindex="2" />
+<br />
+} }
+
+

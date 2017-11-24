@@ -2,10 +2,12 @@
 
 @import views.Helper
 
+@import authenticate.User
 @(hits: List[Map[String,Object]],namespace: String)
 
 
-@main("",null) {
+@main("",null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){ 
 
 		@for( hit <- hits){
 			@tags.getTitle(hit,namespace)

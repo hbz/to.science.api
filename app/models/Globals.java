@@ -30,6 +30,7 @@ import play.Play;
 import archive.fedora.FedoraFacade;
 import archive.fedora.FedoraFactory;
 import archive.search.SearchFacade;
+import authenticate.UserDB;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 
 import com.google.common.net.InetAddresses;
@@ -41,6 +42,8 @@ import com.google.common.net.InetAddresses;
  *
  */
 public class Globals {
+
+	public static UserDB users = UserDB.getInstance();
 
 	/**
 	 * the server that hosts this app

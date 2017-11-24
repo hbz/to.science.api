@@ -33,8 +33,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
 
-import actions.BasicAuth;
 import actions.Read;
+import authenticate.BasicAuth;
 import models.Globals;
 import models.Message;
 import play.libs.F.Promise;

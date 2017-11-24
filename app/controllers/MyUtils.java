@@ -34,8 +34,8 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import actions.BasicAuth;
 import actions.Create;
+import authenticate.BasicAuth;
 import helper.GatherconfImporter;
 import helper.Webgatherer;
 import helper.oai.OaiDispatcher;
