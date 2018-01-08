@@ -20,6 +20,7 @@
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
         <link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
 		<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/font-awesome.min.css")">
+		<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/listnav.css")">
 		<link rel="stylesheet" href="@controllers.routes.Assets.at("octicons/octicons.css")">
         <script src="@controllers.routes.Assets.at("javascripts/jquery-3.2.1.min.js")"></script>
         <script src="@controllers.routes.Assets.at("javascripts/jquery-ui.min.js")"></script>
@@ -27,6 +28,7 @@
 		<script src="@controllers.routes.Assets.at("javascripts/dataTables.bootstrap.js")"></script>
 		<script src="@controllers.routes.Assets.at("javascripts/jstree.min.js")"></script>
     	<script src="@controllers.routes.Assets.at("javascripts/jquery.dataTables.min.js")"></script>
+    	<script src="@controllers.routes.Assets.at("javascripts/jquery-listnav.min.js")"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
 	  <script type="text/javascript" charset="utf-8">
@@ -143,8 +145,8 @@
 								@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
 									<li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
 								}
-							
-				                <a class="more_facets_link" href="/facets/more_facets_subject_exact" data-for="facets_subject_exact">
+								</ol>
+				                <a class="more_facets_link" href="/browse/@agg.getName()" data-for="facets_subject_exact">
 				                    <span class="more_facets_text">
 				                        All <span class="fa fa-caret-down"></i>
 				                    </span>
