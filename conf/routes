@@ -145,4 +145,4 @@ GET /viewers/:type/:id/data			controllers.Viewers.getViewer(type,id)
 GET /resource/:pid/upload			controllers.Resource.getUploadForm(pid)
 
 POST /resource/:pid/activate		controllers.Resource.activateResource(pid)
-
+GET /browse/:facetName				controllers.Browse.browse(facetName:String)

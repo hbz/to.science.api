@@ -312,7 +312,7 @@ do not show separator before external links
 For development uncomment, but do not show to enduser yet
 **/
 .banner, nav, .nav, footer{
-	display:none;
+//	display:none;
 }
 
 
