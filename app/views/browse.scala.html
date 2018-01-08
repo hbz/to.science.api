@@ -16,7 +16,7 @@
 @loadFacet()={	
 			<ul id="facetList" style="list-style-type: none;" >
 				@for( b <- terms.getBuckets()) {
-				    <li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
+				    <li> <a href="/find?q=%22@java.net.URLEncoder.encode(b.getKey(),"utf-8")%22">@b.getKey() (@b.getDocCount())</a></li>
 				}
 			</ul>
 		  
