@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -25,8 +26,8 @@ import play.mvc.Result;
 public class Browse extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "listUrn", value = "listUrn", notes = "Returns infos about urn", httpMethod = "GET")
-	public static Promise<Result> browse(
-			@PathParam("facetName") String facetName) {
+	public static Promise<Result> browse(@PathParam("facetName") String facetName,
+			@QueryParam("design") String design) {
 		return Promise.promise(() -> {
 			Map<String, Object> aggregationConf = initAggregations();
 			Map<String, Object> facet =
@@ -41,6 +42,9 @@ public class Browse extends MyController {
 			Aggregations aggs = response.getAggregations();
 			Terms agg = aggs.get(facetName);
 			Collection<Bucket> b = agg.getBuckets();
+			if ("frl".equals(design)) {
+				return ok(views.html.frlBrowse.render(facetName, agg));
+			}
 			return ok(views.html.browse.render(facetName, agg));
 		});
 	}
