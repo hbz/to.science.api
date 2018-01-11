@@ -264,5 +264,5 @@ tr.volumeIn tr.rdftype, tr.volumeIn td.numbering, tr.volumeIn td.multiVolumeWork
 For development uncomment, but do not show to enduser yet
 **/
 .banner, nav, .nav, footer{
-//	display:none;
+	display:none;
 }
