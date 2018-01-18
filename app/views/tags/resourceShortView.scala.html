@@ -1,12 +1,13 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
+@import views.Helper;
+
 @(hit: Map[String,Object],context:List[String],namespace:String)
 @import views.Title 
 
 @displayCreators(id:String,label:String)={
 						@if(id != null && !id.isEmpty()){
 	                       @label
-	                               <span class="octicon-link-external"></span>
 	                       }else{
 	                       	@label
 	                       }
@@ -33,15 +34,13 @@
 		}
 	}
 }
-
-<div class="row">
 <a href="/resource/@hit.get("@id")">
 <div class="title">
-			<div class="col-md-8">
 					<div class="titlePre"></div>
-					
-					<h3 class="title" id="page-title">
+					<h3 class="title">
 					<span class="titleMain">
+					
+					@field(hit.get("rdftype"),"rdftype")
 							@Html(Title.getTitle(hit))
 					</span>
 					@if(hit.contains("corporateBodyForTitle")){
@@ -54,6 +53,12 @@
 						: @hit.get("P60493").asInstanceOf[Collection[String]].toArray()
 						</span>
 					 }
+					 @hit.get("publication") match {
+					    	case publication:Set[ Map[String,Object]] => {
+					    		@Html(Title.getIssued(publication)) 
+					    	}
+					    	case _ => {}
+					    }
 					</h3>
 					<h4 id="page-title-suffix" class="titlePost title-suffix">
 						@if(hit.contains("contribution")){
@@ -71,13 +76,53 @@
 								</ol>
 						}
 						
-						@Html(Title.getIssued(hit))
 					</h4>
-					
-			</div>
-			
 		</div>
-
-
 </a>
-</div>
+
+@field(values: Any,key: String)={
+			@values match {
+				case d if d == null =>{}
+				case _ =>{
+							
+									@values match {
+									
+										case d: List[Any] => {
+										
+											@for(field <- d){
+												@value(field,key)
+											}
+											
+										}										
+									}
+									
+				}				
+			}
+}
+
+@value(value: Any,key:String)= {
+			@value match {
+				case a: String => {
+					@if(Helper.getLinkAdressOrNull(a)!=null){
+						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
+					}else{
+						@a
+					}
+				}
+				case c : Map[String,Object] => {
+							@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
+				}
+				case _ => {
+				
+				}
+			}
+}
+
+@displayMap(value:Any,map:Map[String,Object],key:String)={
+	  @value match {
+			case a: String => {
+			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
+			}
+			
+		} 
+}
