@@ -17,7 +17,9 @@
 package views;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,9 +68,9 @@ public class Title {
 		return (Collection<Map<String, Object>>) hit.get("contributor");
 	}
 
-	public static String getIssued(Map<String, Object> hit) {
-		Collection<String> issued = (Collection<String>) hit.get("issued");
-		return issued != null && !issued.isEmpty() ? String.join("<br/> ", issued)
+	public static String getIssued(Collection<Map<String, Object>> hit) {
+		String issued = Helper.getPublicationMap(hit).get("regal:publishYear");
+		return issued != null && !issued.isEmpty() ? String.join(".<br/> ", issued)
 				: "";
 	}
 }

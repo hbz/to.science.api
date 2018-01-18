@@ -17,6 +17,7 @@
 				<link rel="shortcut icon" href="/public/images/favicon.ico" type="image/x-icon" /> 
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/bootstrap.min.css")">
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/edoweb_lbz.css")">
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
         <link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
 		<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/font-awesome.min.css")">
@@ -36,6 +37,17 @@
 				$('.resourceView').dataTable( {
     				"order": [0,'asc'],paging: false,searching: false
 				} );
+				$('.search').dataTable( {
+    				"order": [0,'asc'],paging: false,searching: false
+				} );
+				var tr = document.getElementsByTagName('.search tr');
+				for(i=0;i<tr.length;i++){
+				    if(i%2==0) {
+				    	tr[i].attribute("class","even");
+				    }else{
+				    	tr[i].attribute("class","odd");
+				    }
+				}
 			} );
 		</script>
     </head>
