@@ -129,42 +129,52 @@
 	       </div>
 	   </div>
 	
-	   <footer style="background-color:#f8f8f8;"/>
-		   <img src="/public/images/books.jpg"  width="100%" height="200%"/>
-		   <ul style="list-style:none;">
-		   <li>
-		   <a href="">About</a></li>
-		    <li>
-		   <a href="">Contact</a></li>
-		    <li>
-		    <li>
-		   <a href="">Software</a></li>
-		   <a href="/public/html/impressum.html">Impressum</a>
-		   </li></ul>
-	   </footer>
+		   <footer style="background-color:#f8f8f8;"/>
+			   <img src="/public/images/books.jpg"  width="100%" height="200%"/>
+		<div class="container" >	
+			   <ul style="list-style:none;">
+			   <li>
+			   <a href="">About</a></li>
+			    <li>
+			   <a href="">Contact</a></li>
+			    <li>
+			    <li>
+			   <a href="">Software</a></li>
+			   <a href="/public/html/impressum.html">Impressum</a>
+			   </li></ul>
+
+			      </div>
+		   </footer>
 	</body>
 </html>
 
 @loadFacets(aggs:Aggregations)={
-
-	@aggs match {
-		case a : Aggregations =>{
-			@for(agg  <- aggs.asList()) {
-							<h3 class="facets_header">@models.Globals.profile.getEtikettByName(agg.getName()).getLabel()</h1>
-							
-								<ol class="facets_nav" >
-					
-								@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
-									<li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
-								}
-								</ol>
-				                <a class="more_facets_link" href="/browse/@agg.getName()" data-for="facets_subject_exact">
-				                    <span class="more_facets_text">
-				                        All <span class="fa fa-caret-down"></i>
-				                    </span>
-		                		</a>
-			}
+ @aggs match {
+    case a : Aggregations =>{
+		@loadFacet(aggs,aggs.get("subject"))
+		@loadFacet(aggs,aggs.get("institution"))
+		@loadFacet(aggs,aggs.get("contribution"))
+		@if(models.Globals.users.isLoggedIn(ctx())){
+			@loadFacet(aggs,aggs.get("medium"))
+			@loadFacet(aggs,aggs.get("contentType"))
+			@loadFacet(aggs,aggs.get("createdBy"))
+			@loadFacet(aggs,aggs.get("lastModifiedBy"))
 		}
-		case _ =>{}	
 	}
+	case _ =>{}
+ }
+}
+
+@loadFacet(aggs:Aggregations,agg:Aggregation)={
+    <h3 class="facets_header">@models.Globals.profile.getEtikettByName(agg.getName()).getLabel()</h1>
+        <ol class="facets_nav" >
+			@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
+				<li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
+			}
+		</ol>
+		<a class="more_facets_link" href="/browse/@agg.getName()" data-for="facets_subject_exact">
+			<span class="more_facets_text">
+				 All <span class="fa fa-caret-down"></i>
+			</span>
+        </a>
 }
