@@ -24,7 +24,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.List;
 import java.util.Vector;
 
@@ -34,6 +36,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -47,15 +50,21 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.xerces.dom.DOMInputImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+
+import play.Play;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -237,48 +246,52 @@ public class XmlUtils {
 	/**
 	 * Validates an xml String
 	 * 
-	 * @param oaidc xml String
-	 * @param schema a schema to validate against
+	 * @param xmlStream xml String
+	 * @param schemaStream a schema to validate against
 	 */
-	public static void validate(InputStream oaidc, InputStream schema) {
+	public static void validate(InputStream xmlStream, InputStream schemaStream) {
 		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setNamespaceAware(true);
-			// "Valid" means valid to a DTD. We want to valid against a schema,
-			// so we turn of dtd validation here
-			factory.setValidating(false);
-
-			SchemaFactory schemaFactory =
+			Source xmlFile = new StreamSource(xmlStream);
+			SchemaFactory factory =
 					SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			factory.setResourceResolver(
+					(type, namespaceURI, publicId, systemId, baseURI) -> {
+						LSInput input = new DOMInputImpl();
+						input.setPublicId(publicId);
+						input.setSystemId(systemId);
+						input.setBaseURI("https://schema.datacite.org/meta/kernel-4.1/");
+						input.setCharacterStream(new InputStreamReader(getSchemaAsStream(
+								input.getSystemId(), input.getPublicId(), input.getBaseURI())));
+						return input;
+					});
+			Schema schema = factory.newSchema(new StreamSource(schemaStream));
+			javax.xml.validation.Validator validator = schema.newValidator();
+			validator.validate(xmlFile);
+		} catch (
 
-			schemaFactory.setResourceResolver(new ResourceResolver());
-			if (schema != null) {
-				Schema s = schemaFactory.newSchema(new StreamSource(schema));
-				factory.setSchema(s);
-			}
-			DocumentBuilder docBuilder = factory.newDocumentBuilder();
-			docBuilder.setErrorHandler(new ErrorHandler() {
-				public void fatalError(SAXParseException exception)
-						throws SAXException {
-					throw new XmlException(exception);
-				}
-
-				public void error(SAXParseException exception) throws SAXException {
-					throw new XmlException(exception);
-				}
-
-				public void warning(SAXParseException exception) throws SAXException {
-					throw new XmlException(exception);
-				}
-			});
-
-			// Try to parse with schema validation on
-			docBuilder.parse(oaidc);
-
-		} catch (Exception e) {
+		Exception e) {
 			throw new XmlException(e);
 		}
+	}
 
+	public static InputStream getSchemaAsStream(String systemId, String publicId,
+			String baseUri) {
+		play.Logger
+				.info("Load XML Resource with id " + systemId + " , " + publicId);
+		try {
+			URL url = new URL(systemId);
+			return RdfUtils.urlToInputStream(url, "text/xml");
+		} catch (Exception e1) {
+			try {
+				play.Logger.debug("", e1);
+				URL url = new URL(baseUri + systemId);
+				return RdfUtils.urlToInputStream(url, "text/xml");
+			} catch (Exception e2) {
+				play.Logger.debug("", e2);
+				return Play.application()
+						.resourceAsStream("public/schemas/datacite/kernel-4.1/" + systemId);
+			}
+		}
 	}
 
 	/**
@@ -294,7 +307,6 @@ public class XmlUtils {
 			Transformer transformer = transFactory.newTransformer();
 			StringWriter buffer = new StringWriter(1024);
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-
 			transformer.transform(new DOMSource(node), new StreamResult(buffer));
 			String str = buffer.toString();
 			return str;

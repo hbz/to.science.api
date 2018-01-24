@@ -108,11 +108,11 @@ public class DataciteRecord implements java.io.Serializable {
 			Document doc = docBuilder.newDocument();
 
 			Element root = doc.createElement("resource");
-			root.setAttribute("xmlns", "http://datacite.org/schema/kernel-2.2");
+			root.setAttribute("xmlns", "http://datacite.org/schema/kernel-4");
 			root.setAttribute("xmlns:xsi",
 					"http://www.w3.org/2001/XMLSchema-instance");
 			root.setAttribute("xsi:schemaLocation",
-					"http://datacite.org/schema/kernel-2.2 http://schema.datacite.org/meta/kernel-2.2/metadata.xsd");
+					"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.1/metadata.xsd");
 
 			if (doi != null) {
 				Element i = doc.createElement("identifier");

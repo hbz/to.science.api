@@ -1370,7 +1370,8 @@ public class Modify extends RegalAction {
 			// node.setDoi(doi);
 			String objectUrl = Globals.urnbase + node.getPid();
 			String xml = new Transform().datacite(node, doi);
-			MyController.validate(xml, "public/schemas/datacite.xsd");
+			MyController.validate(xml,
+					"public/schemas/datacite/kernel-4.1/metadata.xsd");
 			try {
 				DataciteClient client = new DataciteClient();
 				result.put("Metadata", xml);
