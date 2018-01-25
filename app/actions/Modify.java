@@ -1361,7 +1361,7 @@ public class Modify extends RegalAction {
 					+ " resource is of type " + contentType
 					+ ". It is not allowed to mint Dois for this type. Leave unmodified!");
 		}
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		String doi = node.getDoi();
 
 		if (doi == null || doi.isEmpty()) {
@@ -1371,7 +1371,9 @@ public class Modify extends RegalAction {
 			String objectUrl = Globals.urnbase + node.getPid();
 			String xml = new Transform().datacite(node, doi);
 			MyController.validate(xml,
-					"public/schemas/datacite/kernel-4.1/metadata.xsd");
+					"public/schemas/datacite/kernel-4.1/metadata.xsd",
+					"https://schema.datacite.org/meta/kernel-4.1/",
+					"public/schemas/datacite/kernel-4.1/");
 			try {
 				DataciteClient client = new DataciteClient();
 				result.put("Metadata", xml);
@@ -1427,7 +1429,10 @@ public class Modify extends RegalAction {
 		} else {
 			String objectUrl = Globals.urnbase + node.getPid();
 			String xml = new Transform().datacite(node, doi);
-			MyController.validate(xml, "public/schemas/datacite.xsd");
+			MyController.validate(xml,
+					"public/schemas/datacite/kernel-4.1/metadata.xsd",
+					"https://schema.datacite.org/meta/kernel-4.1/",
+					"public/schemas/datacite/kernel-4.1/");
 			DataciteClient client = new DataciteClient();
 			String registerMetadataResponse =
 					client.registerMetadataAtDatacite(node, xml);
