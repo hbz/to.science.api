@@ -40,7 +40,7 @@ public class Title {
 	public static String getTitle(Map<String, Object> hit) {
 		Collection<String> title = (Collection<String>) hit.get("title");
 		return title != null && !title.isEmpty() ? String.join("<br/> ", title)
-				: "";
+				: hit.get("@id").toString();
 	}
 
 	public static String getAuthorNames(Map<String, Object> hit) {

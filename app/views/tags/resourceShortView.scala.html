@@ -38,9 +38,8 @@
 <div class="title">
 					<div class="titlePre"></div>
 					<h3 class="title">
-					<span class="titleMain">
-					
-					@field(hit.get("rdftype"),"rdftype")
+					<span class="titleMain">			
+							@fieldIcon(hit.get("rdftype"),"rdftype")
 							@Html(Title.getTitle(hit))
 					</span>
 					@if(hit.contains("corporateBodyForTitle")){
@@ -80,7 +79,7 @@
 		</div>
 </a>
 
-@field(values: Any,key: String)={
+@fieldIcon(values: Any,key: String)={
 			@values match {
 				case d if d == null =>{}
 				case _ =>{
