@@ -155,6 +155,7 @@
 		@loadFacet(aggs,aggs.get("institution"))
 		@loadFacet(aggs,aggs.get("contribution"))
 		@if(models.Globals.users.isLoggedIn(ctx())){
+	    	@loadFacet(aggs,aggs.get("containedIn"))
 			@loadFacet(aggs,aggs.get("medium"))
 			@loadFacet(aggs,aggs.get("contentType"))
 			@loadFacet(aggs,aggs.get("createdBy"))

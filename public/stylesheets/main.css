@@ -376,6 +376,6 @@ padding-left:0px !important;
 /**
 For development uncomment, but do not show to enduser yet
 **/
-.banner, nav, .nav, footer{
+.banner,footer{
 	display:none;
 }

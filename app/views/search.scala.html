@@ -46,6 +46,9 @@
 			<th>
 				@models.Globals.profile.getEtikettByName("regal:publishYear").getLabel()
 			</th>
+			<th>
+				@models.Globals.profile.getEtikettByName("rdftype").getLabel()
+			</th>
 			 @if(models.Globals.users.isLoggedIn(ctx())){
 			<th>
 				@models.Globals.profile.getEtikettByName("created").getLabel()
@@ -68,6 +71,18 @@
 						    	case publication:Collection[ Map[String,Object]] => {
 						    	<span class="publicationYear">
 						    	@Html(Title.getIssued(publication)) 
+						    	</span>
+						    	}
+						    	case _ => {}
+						    }
+					 }
+				</td>
+				<td>
+				@if(hit.contains("rdftype")){
+						 @hit.get("rdftype") match {
+						    	case rdfType:Collection[Map[String,Object]] => {
+						    	<span class="rdftype">
+						    	@Html(Title.getRdfType(rdfType)) 
 						    	</span>
 						    	}
 						    	case _ => {}

@@ -73,4 +73,14 @@ public class Title {
 		return issued != null && !issued.isEmpty() ? String.join(".<br/> ", issued)
 				: "";
 	}
+
+	public static String getRdfType(Collection<Map<String, Object>> hit) {
+		try {
+			String issued = hit.iterator().next().get("prefLabel").toString();
+			return issued != null && !issued.isEmpty()
+					? String.join(".<br/> ", issued) : "";
+		} catch (Exception e) {
+			return "";
+		}
+	}
 }
