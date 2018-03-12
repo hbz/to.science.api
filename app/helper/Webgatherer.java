@@ -22,13 +22,18 @@ import play.Play;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.net.MalformedURLException;
+import java.net.UnknownHostException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.ibm.icu.util.Calendar;
 
 import models.Gatherconf;
@@ -36,6 +41,7 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import actions.Create;
+import actions.Modify;
 import actions.Create.WebgathererTooBusyException;
 import actions.Read;
 
@@ -49,6 +55,7 @@ public class Webgatherer implements Runnable {
 			Play.application().configuration().getString("regal-api.heritrix.jobDir");
 	final static String wpullJobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
+	private String msg = null;
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -67,15 +74,24 @@ public class Webgatherer implements Runnable {
 		int precount = 0;
 		int limit = play.Play.application().configuration()
 				.getInt("regal-api.heritrix.crawlsPerNight");
+		Gatherconf conf = null;
+		Node node = null;
 		// get all configs
 		for (Node n : webpages) {
 			try {
 				precount++;
+				node = n;
+				conf = null;
 				WebgatherLogger.info("Precount: " + precount);
 				WebgatherLogger.info("PID: " + n.getPid());
+				if (n.getConf() == null) {
+					WebgatherLogger.info("Webpage " + n.getPid()
+							+ " hat noch keine Crawler-Konfigration.");
+					continue;
+				}
 				WebgatherLogger.info(
 						"Config: " + n.getConf() + " is being created in Gatherconf.");
-				Gatherconf conf = Gatherconf.create(n.getConf());
+				conf = Gatherconf.create(n.getConf());
 				if (!conf.isActive()) {
 					WebgatherLogger.info("Site " + n.getPid() + " ist deaktiviert.");
 					continue;
@@ -83,20 +99,51 @@ public class Webgatherer implements Runnable {
 				WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
 				// find open jobs
 				if (isOutstanding(n, conf)) {
-					WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
-					new Create().createWebpageVersion(n);
-					count++; // count erst hier, so dass fehlgeschlagene Launches nicht
-										// mitgezählt werden
+					WebgatherLogger.info("Die Website soll jetzt eingesammelt werden.");
+					if (conf.hasUrlMoved()) {
+						if (conf.getUrlNew() == null) {
+							WebgatherLogger.info("De Sick is unbekannt vertrocke !");
+						} else {
+							WebgatherLogger
+									.info("De Sick is umjetrocke noh " + conf.getUrlNew() + " .");
+						}
+						WebgatherUtils.prepareWebpageMoving(n, conf);
+					} else {
+						WebgatherLogger
+								.info("HTTP Response Code = " + conf.getHttpResponseCode());
+						WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
+						new Create().createWebpageVersion(n);
+						count++; // count erst hier, so dass fehlgeschlagene Launches nicht
+											// mitgezählt werden
+					}
 				}
 
 			} catch (WebgathererTooBusyException e) {
 				WebgatherLogger.error("Webgatherer stopped! Heritrix is too busy.");
+			} catch (MalformedURLException | URISyntaxException e) {
+				setUnknownHost(node, conf);
+				WebgatherLogger.error("Fehlgeformte URL !");
+			} catch (UnknownHostException e) {
+				setUnknownHost(node, conf);
+				WebgatherLogger.error("Kein Host zur URL !");
 			} catch (Exception e) {
 				WebgatherLogger
 						.error("Couldn't create webpage version for " + n.getPid(), e);
 			}
 			if (count >= limit)
 				break;
+		}
+	}
+
+	private static void setUnknownHost(Node node, Gatherconf conf) {
+		if (conf != null && conf.getInvalidUrl() == false) {
+			conf.setInvalidUrl(true);
+			conf.setUrlNew((String) null);
+			String msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.info(msg);
+			WebgatherLogger
+					.info("URL wurde auf ungültig gesetzt. Neue URL unbekannt.");
+			WebgatherUtils.sendInvalidUrlEmail(node, conf);
 		}
 	}
 
@@ -111,7 +158,6 @@ public class Webgatherer implements Runnable {
 
 	/**
 	 * @param n a webpage
-	 * @param conf user definde config
 	 * @return nextLaunch
 	 * @throws Exception can be IOException or Json related Exceptions
 	 */
@@ -128,7 +174,7 @@ public class Webgatherer implements Runnable {
 		return nextTimeHarvest;
 	}
 
-	private boolean isOutstanding(Node n, Gatherconf conf) {
+	private static boolean isOutstanding(Node n, Gatherconf conf) {
 		if (new Date().before(conf.getStartDate()))
 			return false;
 		// if a crawl job is still running, never return with true !!

@@ -18,8 +18,16 @@ package models;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+
+import java.util.List;
+import java.util.Map.Entry;
+
 import java.util.Hashtable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +36,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
+
+import helper.WebgatherUtils;
 
 /**
  * @author Jan Schnasse
@@ -80,6 +90,9 @@ public class Gatherconf {
 	String name;
 	boolean active;
 	String url;
+	int httpResponseCode;
+	boolean invalidUrl;
+	String urlNew; // the new URL, yet to be confirmed
 	ArrayList<String> domains;
 	int deepness;
 	RobotsPolicy robotsPolicy;
@@ -103,6 +116,9 @@ public class Gatherconf {
 	 */
 	public Gatherconf() {
 		url = null;
+		httpResponseCode = 0;
+		invalidUrl = false;
+		urlNew = null;
 		domains = new ArrayList<String>();
 		active = true;
 		deepness = -1;
@@ -280,10 +296,24 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @param startDate
+	 * @param startDate the time the url is to be first harvested
 	 */
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
+	}
+
+	/**
+	 * @return ob die URL ungültig (auch: permanent umgezogen) ist
+	 */
+	public boolean getInvalidUrl() {
+		return invalidUrl;
+	}
+
+	/**
+	 * @param invalidUrl ob die URL ungültig (auch: permanent umgezogen) ist
+	 */
+	public void setInvalidUrl(boolean invalidUrl) {
+		this.invalidUrl = invalidUrl;
 	}
 
 	/**
@@ -424,4 +454,66 @@ public class Gatherconf {
 	public void setId(String id) {
 		this.id = id;
 	}
+
+	/**
+	 * @param urlNew the new URL of the website (Location on HTTP Response Code
+	 *          301)
+	 */
+	public void setUrlNew(String urlNew) {
+		this.urlNew = urlNew;
+	}
+
+	/**
+	 * @return the new URL of the website (Location on HTTP Response Code 301)
+	 */
+	public String getUrlNew() {
+		return urlNew;
+	}
+
+	/**
+	 * @return the HTTP Response Code of the URL of the website
+	 */
+	public int getHttpResponseCode() {
+		return this.httpResponseCode;
+	}
+
+	/**
+	 * @param httpResponseCode the new httpResponseCode
+	 */
+	public void setHttpResponseCode(int httpResponseCode) {
+		this.httpResponseCode = httpResponseCode;
+	}
+
+	/**
+	 * Stellt fest, ob die URL umgezogen ist.
+	 * 
+	 * @return ob die URL der Webpage umgezogen ist
+	 * @exception MalformedURLException
+	 * @exception IOException
+	 */
+	public boolean hasUrlMoved()
+			throws URISyntaxException, MalformedURLException, IOException {
+
+		if (invalidUrl) {
+			return true;
+		} // keine erneute Prüfung
+		HttpURLConnection httpConnection = (HttpURLConnection) new URL(
+				WebgatherUtils.convertUnicodeURLToAscii(url)).openConnection();
+		httpConnection.setRequestMethod("GET");
+		httpResponseCode = httpConnection.getResponseCode();
+		if (httpResponseCode != 301) {
+			return false;
+		}
+		// ermiitelt die neue URL (falls bekannt)
+		urlNew = null;
+		for (Entry<String, List<String>> header : httpConnection.getHeaderFields()
+				.entrySet()) {
+			if (header.getKey() != null && header.getKey().equals("Location")) {
+				urlNew = header.getValue().get(0);
+			}
+		}
+		httpConnection.disconnect();
+		return true;
+	}
+
 }

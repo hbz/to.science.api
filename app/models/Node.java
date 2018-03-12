@@ -66,6 +66,7 @@ public class Node implements java.io.Serializable {
 	private String metadata2File = null;
 	private String seqFile = null;
 	private String confFile = null;
+	private String urlHistFile = null;
 	private String uploadFile = null;
 	private String objectTimestampFile = null;
 	private List<Link> links = new Vector<Link>();
@@ -76,6 +77,7 @@ public class Node implements java.io.Serializable {
 	private String seq = null;
 
 	private String conf = null;
+	private String urlHist = null;
 
 	private Date objectTimestamp = null;
 
@@ -350,6 +352,21 @@ public class Node implements java.io.Serializable {
 	 */
 	public String getConfFile() {
 		return confFile;
+	}
+
+	/**
+	 * @param absolutePath to a webpages' URL history file
+	 */
+	public void setUrlHistFile(String absolutePath) {
+		this.urlHistFile = absolutePath;
+
+	}
+
+	/**
+	 * @return absolute path to a webpage's URL history file
+	 */
+	public String getUrlHistFile() {
+		return urlHistFile;
 	}
 
 	/**
@@ -651,6 +668,23 @@ public class Node implements java.io.Serializable {
 	@JsonIgnore()
 	public String getConf() {
 		return conf;
+	}
+
+	/**
+	 * @param urlHist datastream as string
+	 * @return this
+	 */
+	public Node setUrlHist(String urlHist) {
+		this.urlHist = urlHist;
+		return this;
+	}
+
+	/**
+	 * @return the content of webpage's URL history datastream in a string
+	 */
+	@JsonIgnore()
+	public String getUrlHist() {
+		return urlHist;
 	}
 
 	/**

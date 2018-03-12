@@ -46,6 +46,7 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import models.Pair;
+import models.UrlHist;
 import models.Urn;
 
 import org.elasticsearch.search.SearchHit;
@@ -526,6 +527,27 @@ public class Read extends RegalAction {
 						+ "/" + conf.getUrl());
 			}
 			return conf.toString();
+		} catch (UrlConnectionException e) {
+			throw new HttpArchiveException(404, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
+	 * read a webpage's url history
+	 * 
+	 * @param node the node of the webpage
+	 * @return an url history
+	 */
+	public String readUrlHist(Node node) {
+		try {
+			String urlHistString = node.getUrlHist();
+			if (urlHistString == null)
+				return "";
+			ObjectMapper mapper = JsonUtil.mapper();
+			UrlHist urlHist = mapper.readValue(urlHistString, UrlHist.class);
+			return urlHist.toString();
 		} catch (UrlConnectionException e) {
 			throw new HttpArchiveException(404, e);
 		} catch (Exception e) {

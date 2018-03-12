@@ -28,7 +28,7 @@
   "name" : "role",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "78",
+  "weight" : "82",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -69,7 +69,7 @@
   "name" : "ConferenceOrEvent",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "170",
+  "weight" : "173",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -80,7 +80,7 @@
   "name" : "CorporateBody",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "171",
+  "weight" : "174",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -91,7 +91,7 @@
   "name" : "DifferentiatedPerson",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "172",
+  "weight" : "175",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -102,7 +102,7 @@
   "name" : "Family",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "173",
+  "weight" : "176",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -113,7 +113,7 @@
   "name" : "Person",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "174",
+  "weight" : "177",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -124,7 +124,7 @@
   "name" : "PlaceOrGeographicName",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "175",
+  "weight" : "178",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -135,7 +135,7 @@
   "name" : "SubjectHeading",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "176",
+  "weight" : "179",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -146,7 +146,7 @@
   "name" : "Work",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "177",
+  "weight" : "180",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -157,7 +157,7 @@
   "name" : "dateOfBirth",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "87",
+  "weight" : "91",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -168,7 +168,7 @@
   "name" : "dateOfDeath",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "88",
+  "weight" : "92",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -179,7 +179,7 @@
   "name" : "preferredName",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "89",
+  "weight" : "93",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -187,7 +187,7 @@
   "label" : "",
   "name" : "preferredNameEntityForThePerson",
   "referenceType" : "String",
-  "weight" : "90",
+  "weight" : "94",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -195,7 +195,7 @@
   "label" : "",
   "name" : "preferredNameForTheConferenceOrEvent",
   "referenceType" : "String",
-  "weight" : "91",
+  "weight" : "95",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -206,7 +206,7 @@
   "name" : "preferredNameForTheCorporateBody",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "92",
+  "weight" : "96",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -214,7 +214,7 @@
   "label" : "",
   "name" : "preferredNameForTheFamily",
   "referenceType" : "String",
-  "weight" : "93",
+  "weight" : "97",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -225,7 +225,7 @@
   "name" : "preferredNameForThePerson",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "95",
+  "weight" : "99",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -233,7 +233,7 @@
   "label" : "",
   "name" : "preferredNameForThePlaceOrGeographicName",
   "referenceType" : "String",
-  "weight" : "96",
+  "weight" : "100",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -241,7 +241,7 @@
   "label" : "",
   "name" : "preferredNameForTheSubjectHeading",
   "referenceType" : "String",
-  "weight" : "97",
+  "weight" : "101",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -249,7 +249,7 @@
   "label" : "",
   "name" : "preferredNameForTheWork",
   "referenceType" : "String",
-  "weight" : "98",
+  "weight" : "102",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -260,7 +260,7 @@
   "name" : "gnd:publication",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "49",
+  "weight" : "45",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -278,7 +278,7 @@
   "name" : "institution",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "202",
+  "weight" : "61",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -5859,7 +5859,7 @@
   "name" : "checksum",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "99",
+  "weight" : "103",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -5867,7 +5867,7 @@
   "label" : "",
   "name" : "generator",
   "referenceType" : "@id",
-  "weight" : "100",
+  "weight" : "104",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -5875,7 +5875,7 @@
   "label" : "Größe",
   "name" : "size",
   "referenceType" : "String",
-  "weight" : "101",
+  "weight" : "105",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -5891,7 +5891,7 @@
   "name" : "hasURN",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "73",
+  "weight" : "77",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6144,7 +6144,7 @@
   "name" : "agrovoc",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "102",
+  "weight" : "106",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6165,7 +6165,7 @@
   "name" : "articleNumber",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "22",
+  "weight" : "19",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6176,7 +6176,7 @@
   "name" : "associatedDataset",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "32",
+  "weight" : "29",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6187,7 +6187,7 @@
   "name" : "associatedPublication",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "33",
+  "weight" : "30",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6198,7 +6198,7 @@
   "name" : "catalogLink",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "75",
+  "weight" : "79",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6209,7 +6209,7 @@
   "name" : "congressDuration",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "34",
+  "weight" : "31",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6220,7 +6220,7 @@
   "name" : "congressHost",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "20",
+  "weight" : "17",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6231,7 +6231,7 @@
   "name" : "congressLocation",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "35",
+  "weight" : "32",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6242,7 +6242,7 @@
   "name" : "congressNumber",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "21",
+  "weight" : "18",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6253,7 +6253,7 @@
   "name" : "congressShortTitle",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "36",
+  "weight" : "33",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6264,7 +6264,7 @@
   "name" : "congressTitle",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "37",
+  "weight" : "34",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6283,7 +6283,7 @@
   "label" : "Erstellt von",
   "name" : "createdBy",
   "referenceType" : "String",
-  "weight" : "103",
+  "weight" : "107",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6294,7 +6294,7 @@
   "name" : "dataOrigin",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "104",
+  "weight" : "108",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6305,7 +6305,7 @@
   "name" : "ddc",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "106",
+  "weight" : "109",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6316,7 +6316,7 @@
   "name" : "doi",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "107",
+  "weight" : "110",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6327,7 +6327,7 @@
   "name" : "embargoTime",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "65",
+  "weight" : "63",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6338,7 +6338,7 @@
   "name" : "funding",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "166",
+  "weight" : "169",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6349,7 +6349,7 @@
   "name" : "fundingProgram",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "168",
+  "weight" : "171",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6360,7 +6360,7 @@
   "name" : "hasData",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "108",
+  "weight" : "111",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6371,7 +6371,7 @@
   "name" : "hasTransformer",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "109",
+  "weight" : "112",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6379,7 +6379,7 @@
   "label" : "Import",
   "name" : "importedFrom",
   "referenceType" : "String",
-  "weight" : "110",
+  "weight" : "113",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6390,7 +6390,7 @@
   "name" : "externalParent",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "76",
+  "weight" : "80",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6401,7 +6401,7 @@
   "name" : "issue",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "28",
+  "weight" : "25",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6419,7 +6419,7 @@
   "label" : "Bearbeitet von",
   "name" : "lastModifiedBy",
   "referenceType" : "String",
-  "weight" : "111",
+  "weight" : "114",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6427,7 +6427,7 @@
   "label" : "Id Altsystem",
   "name" : "legacyId",
   "referenceType" : "String",
-  "weight" : "112",
+  "weight" : "115",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6446,7 +6446,7 @@
   "label" : "Interner Name",
   "name" : "name",
   "referenceType" : "String",
-  "weight" : "113",
+  "weight" : "116",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6457,7 +6457,7 @@
   "name" : "nextVersion",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "80",
+  "weight" : "84",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6468,7 +6468,7 @@
   "name" : "objectTimestamp",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "114",
+  "weight" : "117",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6489,7 +6489,7 @@
   "name" : "pages",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "44",
+  "weight" : "41",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6541,7 +6541,7 @@
   "name" : "previousVersion",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "81",
+  "weight" : "85",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6552,7 +6552,7 @@
   "name" : "professionalGroup",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "105",
+  "weight" : "73",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6563,7 +6563,7 @@
   "name" : "projectId",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "167",
+  "weight" : "170",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6574,7 +6574,7 @@
   "name" : "publicationStatus",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "17",
+  "weight" : "67",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6585,7 +6585,7 @@
   "name" : "publicationYear",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "19",
+  "weight" : "58",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6607,7 +6607,7 @@
   "name" : "recordingCoordinates",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "82",
+  "weight" : "86",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6618,7 +6618,7 @@
   "name" : "recordingLocation",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "83",
+  "weight" : "87",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6629,7 +6629,7 @@
   "name" : "recordingPeriod",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "84",
+  "weight" : "88",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6640,7 +6640,7 @@
   "name" : "reference",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "46",
+  "weight" : "43",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6651,7 +6651,7 @@
   "name" : "relatedResource",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "85",
+  "weight" : "89",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6662,7 +6662,7 @@
   "name" : "reviewStatus",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "18",
+  "weight" : "68",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6705,7 +6705,7 @@
   "name" : "volume",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "30",
+  "weight" : "27",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6716,7 +6716,7 @@
   "name" : "volumeIn",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "55",
+  "weight" : "52",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6727,7 +6727,7 @@
   "name" : "yearOfCopyright",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "63",
+  "weight" : "62",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6765,7 +6765,7 @@
   "name" : "extent",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "201",
+  "weight" : "204",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6776,7 +6776,7 @@
   "name" : "frequency",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "153",
+  "weight" : "156",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6798,7 +6798,7 @@
   "name" : "heldBy",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "197",
+  "weight" : "200",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6809,7 +6809,7 @@
   "name" : "itemOf",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "198",
+  "weight" : "201",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6831,7 +6831,7 @@
   "name" : "role",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "79",
+  "weight" : "83",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6842,7 +6842,7 @@
   "name" : "source",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "125",
+  "weight" : "128",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -6853,7 +6853,7 @@
   "name" : "supplement",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "199",
+  "weight" : "202",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -7918,7 +7918,12 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://id.loc.gov/vocabulary/relators/red",
+  "comment" : "",
   "label" : "Redaktion",
+  "icon" : "",
+  "name" : "loc:red",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -7941,7 +7946,7 @@
   "label" : "Gesamttitel",
   "name" : "P1004",
   "referenceType" : "String",
-  "weight" : "115",
+  "weight" : "118",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -7952,7 +7957,7 @@
   "name" : "P1006",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "116",
+  "weight" : "119",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -7963,7 +7968,7 @@
   "name" : "P1016",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "117",
+  "weight" : "120",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -7974,7 +7979,7 @@
   "name" : "P1053",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "43",
+  "weight" : "40",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -7982,7 +7987,7 @@
   "label" : "Kombination",
   "name" : "T1008",
   "referenceType" : "String",
-  "weight" : "118",
+  "weight" : "121",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8344,7 +8349,7 @@
   "name" : "coverage",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "119",
+  "weight" : "122",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8355,7 +8360,7 @@
   "name" : "creatorName",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "24",
+  "weight" : "21",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8366,7 +8371,7 @@
   "name" : "isPartOfName",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "165",
+  "weight" : "168",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8377,7 +8382,7 @@
   "name" : "publisher",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "70",
+  "weight" : "74",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8388,7 +8393,7 @@
   "name" : "subjectName",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "204",
+  "weight" : "72",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8406,7 +8411,7 @@
   "name" : "abstractText",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "69",
+  "weight" : "70",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8428,7 +8433,7 @@
   "name" : "bibliographicCitation",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "47",
+  "weight" : "60",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8439,7 +8444,7 @@
   "name" : "contributor",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "25",
+  "weight" : "22",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8450,7 +8455,7 @@
   "name" : "created",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "120",
+  "weight" : "123",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8461,7 +8466,7 @@
   "name" : "creator",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "23",
+  "weight" : "20",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8470,7 +8475,7 @@
   "name" : "description",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "121",
+  "weight" : "124",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8478,7 +8483,7 @@
   "label" : "Format",
   "name" : "format",
   "referenceType" : "String",
-  "weight" : "122",
+  "weight" : "125",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8487,7 +8492,7 @@
   "name" : "hasFormat",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "123",
+  "weight" : "126",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8498,7 +8503,7 @@
   "name" : "hasPart",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "169",
+  "weight" : "172",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8520,7 +8525,7 @@
   "name" : "primaryForm",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "186",
+  "weight" : "189",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8531,7 +8536,7 @@
   "name" : "parentPid",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "77",
+  "weight" : "81",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8542,7 +8547,7 @@
   "name" : "issued",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "53",
+  "weight" : "49",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8553,7 +8558,7 @@
   "name" : "language",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "68",
+  "weight" : "69",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8564,7 +8569,7 @@
   "name" : "medium",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "61",
+  "weight" : "56",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8575,7 +8580,7 @@
   "name" : "modified",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "124",
+  "weight" : "127",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8586,7 +8591,7 @@
   "name" : "source",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "126",
+  "weight" : "129",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8597,7 +8602,7 @@
   "name" : "spatial",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "127",
+  "weight" : "130",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8608,7 +8613,7 @@
   "name" : "subject",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "203",
+  "weight" : "71",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8619,7 +8624,7 @@
   "name" : "tableOfContents",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "128",
+  "weight" : "131",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8655,7 +8660,7 @@
   "name" : "Game",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "178",
+  "weight" : "181",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8718,7 +8723,7 @@
   "name" : "MultiVolumeWorkRelation",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "179",
+  "weight" : "182",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8729,7 +8734,7 @@
   "name" : "OfficialPublication",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "180",
+  "weight" : "183",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8740,7 +8745,7 @@
   "name" : "Schoolbook",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "181",
+  "weight" : "184",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8751,7 +8756,7 @@
   "name" : "SeriesRelation",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "182",
+  "weight" : "185",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8772,7 +8777,7 @@
   "name" : "containedIn",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "58",
+  "weight" : "59",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8783,7 +8788,7 @@
   "name" : "contributorOrder",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "129",
+  "weight" : "132",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8794,7 +8799,7 @@
   "name" : "fulltextOnline",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "130",
+  "weight" : "133",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8805,7 +8810,7 @@
   "name" : "hasSuperordinate",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "187",
+  "weight" : "190",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8816,7 +8821,7 @@
   "name" : "hbzId",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "38",
+  "weight" : "35",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8827,7 +8832,7 @@
   "name" : "inCollection",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "188",
+  "weight" : "191",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8838,7 +8843,7 @@
   "name" : "inSeries",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "56",
+  "weight" : "51",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8849,7 +8854,7 @@
   "name" : "lv:isPartOf",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "60",
+  "weight" : "55",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8858,7 +8863,7 @@
   "name" : "multiVolumeWork",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "131",
+  "weight" : "134",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8867,7 +8872,7 @@
   "name" : "contributingCorporateBodyLabel",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "132",
+  "weight" : "135",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8878,7 +8883,7 @@
   "name" : "numbering",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "133",
+  "weight" : "136",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8889,7 +8894,7 @@
   "name" : "nwbibspatial",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "134",
+  "weight" : "137",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8900,7 +8905,7 @@
   "name" : "nwbibsubject",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "135",
+  "weight" : "138",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8911,7 +8916,7 @@
   "name" : "rpbSubject",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "39",
+  "weight" : "36",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8922,7 +8927,7 @@
   "name" : "series",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "164",
+  "weight" : "167",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8944,7 +8949,7 @@
   "name" : "subjectChain",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "94",
+  "weight" : "98",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8964,7 +8969,7 @@
   "name" : "subjectLocation",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "136",
+  "weight" : "139",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8975,7 +8980,7 @@
   "name" : "subjectOrder",
   "referenceType" : "String",
   "container" : "@list",
-  "weight" : "137",
+  "weight" : "140",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8986,7 +8991,7 @@
   "name" : "titleKeyword",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "86",
+  "weight" : "90",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -8997,7 +9002,7 @@
   "name" : "urn",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "74",
+  "weight" : "78",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -9008,7 +9013,7 @@
   "name" : "lv:volumeIn",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "57",
+  "weight" : "53",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -9028,7 +9033,7 @@
   "name" : "zdbId",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "42",
+  "weight" : "39",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19889,7 +19894,7 @@
   "name" : "ReferenceSource",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "183",
+  "weight" : "186",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19900,7 +19905,7 @@
   "name" : "Report",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "184",
+  "weight" : "187",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19945,7 +19950,7 @@
   "name" : "bibo:doi",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "71",
+  "weight" : "75",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19956,7 +19961,7 @@
   "name" : "edition",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "29",
+  "weight" : "26",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19967,7 +19972,7 @@
   "name" : "editor",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "138",
+  "weight" : "141",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19978,7 +19983,7 @@
   "name" : "eissn",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "40",
+  "weight" : "37",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -19989,7 +19994,7 @@
   "name" : "Isbn",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "139",
+  "weight" : "142",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20000,7 +20005,7 @@
   "name" : "isbn",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "140",
+  "weight" : "143",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20011,7 +20016,7 @@
   "name" : "isbn13",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "141",
+  "weight" : "144",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20022,7 +20027,7 @@
   "name" : "issn",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "41",
+  "weight" : "38",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20030,7 +20035,7 @@
   "label" : "Lccn",
   "name" : "lccn",
   "referenceType" : "String",
-  "weight" : "142",
+  "weight" : "145",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20051,7 +20056,7 @@
   "name" : "shortTitle",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "26",
+  "weight" : "23",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20062,7 +20067,7 @@
   "name" : "translator",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "27",
+  "weight" : "24",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20073,7 +20078,7 @@
   "name" : "callNumber",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "143",
+  "weight" : "146",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20084,7 +20089,7 @@
   "name" : "collectedBy",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "144",
+  "weight" : "147",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20110,7 +20115,7 @@
   "name" : "ismn",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "145",
+  "weight" : "148",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20121,7 +20126,7 @@
   "name" : "wikipedia",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "146",
+  "weight" : "149",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20132,7 +20137,7 @@
   "name" : "Item",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "185",
+  "weight" : "188",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20147,7 +20152,7 @@
   "label" : "Exemplar",
   "name" : "exemplar",
   "referenceType" : "String",
-  "weight" : "147",
+  "weight" : "150",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20156,7 +20161,7 @@
   "name" : "exemplarOf",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "148",
+  "weight" : "151",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20165,7 +20170,7 @@
   "name" : "owner",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "149",
+  "weight" : "152",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20174,7 +20179,7 @@
   "name" : "isSupplementTo",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "150",
+  "weight" : "153",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20185,7 +20190,7 @@
   "name" : "predecessor",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "189",
+  "weight" : "192",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20196,7 +20201,7 @@
   "name" : "successor",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "190",
+  "weight" : "193",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20205,7 +20210,7 @@
   "name" : "hasSupplement",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "151",
+  "weight" : "154",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20216,7 +20221,7 @@
   "name" : "corporateBodyForTitle",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "191",
+  "weight" : "194",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20227,7 +20232,7 @@
   "name" : "P60489",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "152",
+  "weight" : "155",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20272,7 +20277,7 @@
   "name" : "frequency",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "154",
+  "weight" : "157",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20281,7 +20286,7 @@
   "name" : "longitudeAndLatitude",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "155",
+  "weight" : "158",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20303,7 +20308,7 @@
   "name" : "placeOfPublication",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "31",
+  "weight" : "28",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20314,7 +20319,7 @@
   "name" : "publicationStatement",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "45",
+  "weight" : "42",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20325,7 +20330,7 @@
   "name" : "statementOfResponsibility",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "54",
+  "weight" : "50",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20336,7 +20341,7 @@
   "name" : "workManifested",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "156",
+  "weight" : "159",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20388,7 +20393,7 @@
   "name" : "endDate",
   "referenceType" : "http://www.w3.org/2001/XMLSchema#gYear",
   "container" : "@set",
-  "weight" : "192",
+  "weight" : "195",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20399,7 +20404,7 @@
   "name" : "location",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "193",
+  "weight" : "196",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20410,7 +20415,7 @@
   "name" : "publication",
   "referenceType" : "@id",
   "container" : "@set",
-  "weight" : "48",
+  "weight" : "44",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20421,7 +20426,7 @@
   "name" : "publishedBy",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "200",
+  "weight" : "203",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20432,7 +20437,7 @@
   "name" : "startDate",
   "referenceType" : "http://www.w3.org/2001/XMLSchema#gYear",
   "container" : "@set",
-  "weight" : "194",
+  "weight" : "197",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20589,7 +20594,7 @@
   "name" : "componentList",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "195",
+  "weight" : "198",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20608,7 +20613,7 @@
   "label" : "beschreibt",
   "name" : "describes",
   "referenceType" : "@id",
-  "weight" : "157",
+  "weight" : "160",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20619,7 +20624,7 @@
   "name" : "isAggregatedBy",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "158",
+  "weight" : "161",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20660,7 +20665,7 @@
   "name" : "rdftype",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "62",
+  "weight" : "57",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20668,7 +20673,7 @@
   "label" : "",
   "name" : "inDataset",
   "referenceType" : "String",
-  "weight" : "159",
+  "weight" : "162",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20690,7 +20695,7 @@
   "name" : "seeAlso",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "160",
+  "weight" : "163",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20701,7 +20706,7 @@
   "name" : "xsd",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "161",
+  "weight" : "164",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20723,7 +20728,7 @@
   "name" : "altLabel",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "196",
+  "weight" : "199",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20732,7 +20737,7 @@
   "name" : "note",
   "referenceType" : "String",
   "container" : "@set",
-  "weight" : "162",
+  "weight" : "165",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -20743,7 +20748,7 @@
   "name" : "prefLabel",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "163",
+  "weight" : "166",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21184,7 +21189,7 @@
   "name" : "regal:publishLocation",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "50",
+  "weight" : "46",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21195,7 +21200,7 @@
   "name" : "regal:publishYear",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "52",
+  "weight" : "48",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21206,7 +21211,7 @@
   "name" : "regal:publishedBy",
   "referenceType" : "String",
   "container" : "",
-  "weight" : "51",
+  "weight" : "47",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21217,7 +21222,7 @@
   "name" : "additionalMaterial",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "67",
+  "weight" : "66",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21244,7 +21249,7 @@
   "name" : "collectionOne",
   "referenceType" : "@id",
   "container" : "",
-  "weight" : "59",
+  "weight" : "54",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21271,7 +21276,7 @@
   "name" : "fulltextVersion",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "72",
+  "weight" : "76",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
@@ -21615,7 +21620,7 @@
   "name" : "publisherVersion",
   "referenceType" : "@id",
   "container" : "@list",
-  "weight" : "66",
+  "weight" : "65",
   "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {

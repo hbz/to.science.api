@@ -178,18 +178,30 @@ public class Helper {
 			if (c.has("componentList")) {
 				result1.add(getComponentList(c));
 			} else {
-				String name = c.at("/label").asText();
-				if (name != null && !name.isEmpty()) {
+				String label = c.at("/label").asText();
+				if (label != null && !label.isEmpty()) {
 					String uri = c.at("/@id").asText();
-					if (uri.contains("rpb#nr"))
+					if (uri.contains("rpb#nr")) {
+						/**
+						 * Schlagworte mit diesem prefix kommen nicht zur Anzeige
+						 */
 						continue;
+					}
 					String sourceId = c.at("/source/0/@id").asText();
 					String source = c.at("/source/0/label").asText();
 					String notation = c.at("/notation").asText();
 
+					if (uri == null || uri.isEmpty()) {
+						/**
+						 * Wenn keine URI vorhanden ist, kann das label zur Suche benutzt
+						 * werden. Der Suchstring wird unter
+						 * views/tags/resourceView#displaySubject gebildet.
+						 */
+						uri = label;
+					}
 					Map<String, Object> subject = new HashMap<>();
 					subject.put("id", uri);
-					subject.put("label", name);
+					subject.put("label", label);
 					subject.put("source", source);
 					subject.put("sourceId", sourceId);
 					subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
@@ -375,12 +387,24 @@ public class Helper {
 	public static List<Map<String, Object>> listCreators(Map<String, Object> h) {
 		List<Map<String, Object>> result = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
+		String doNotLinkToAdhocUris = Globals.protocol + Globals.server + "/adhoc";
 		for (JsonNode c : hit.at("/creator")) {
 			String name = c.at("/prefLabel").asText();
 			String uri = c.at("/@id").asText();
-
 			Map<String, Object> contribution = new HashMap<>();
-			contribution.put("id", uri);
+			if (!uri.startsWith(doNotLinkToAdhocUris)) {
+				contribution.put("id", uri);
+			}
+			contribution.put("label", name);
+			result.add(contribution);
+		}
+		for (JsonNode c : hit.at("/contributor")) {
+			String name = c.at("/prefLabel").asText();
+			String uri = c.at("/@id").asText();
+			Map<String, Object> contribution = new HashMap<>();
+			if (!uri.startsWith(doNotLinkToAdhocUris)) {
+				contribution.put("id", uri);
+			}
 			contribution.put("label", name);
 			result.add(contribution);
 		}

@@ -339,6 +339,21 @@ public class Utils {
 		}
 	}
 
+	@SuppressWarnings("javadoc")
+	public void createUrlHistStream(Node node) {
+		try {
+			Upload request = new Upload(new File(node.getUrlHistFile()));
+			UploadResponse response = request.execute();
+			String location = response.getUploadLocation();
+			new AddDatastream(node.getPid(), "urlHist").versionable(true).dsState("A")
+					.dsLabel("json file to keep track of a webpage's URL changes")
+					.controlGroup("M").mimeType("application/json").dsLocation(location)
+					.execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
 	/**
 	 * Sets a datastream objectTimestamp to the node
 	 * 
@@ -456,6 +471,27 @@ public class Utils {
 				new AddDatastream(node.getPid(), "conf").versionable(true).dsState("A")
 						.dsLabel("json file to configure webharvests").controlGroup("M")
 						.mimeType("application/json").content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
+	@SuppressWarnings("javadoc")
+	public void updateUrlHistStream(Node node) {
+		try {
+			File file = new File(node.getUrlHistFile());
+			if (dataStreamExists(node.getPid(), "urlHist")) {
+				new ModifyDatastream(node.getPid(), "urlHist").versionable(true)
+						.dsLabel("json file to keep track of a webpage's URL history")
+						.dsState("A").controlGroup("M").mimeType("application/json")
+						.content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "urlHist").versionable(true)
+						.dsState("A")
+						.dsLabel("json file to keep track of a webpage's URL history")
+						.controlGroup("M").mimeType("application/json").content(file)
+						.execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);

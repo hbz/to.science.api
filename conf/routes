@@ -50,6 +50,7 @@ GET /resource/:pid/all.json			controllers.Resource.listAllPartsAsJson(pid,style?
 GET /resource/:pid/about			controllers.Resource.asRdf(pid)
 GET /resource/:pid/status			controllers.Resource.getStatus(pid)
 GET /resource/:pid/conf			    controllers.Resource.listConf(pid)
+GET /resource/:pid/urlHist			controllers.Resource.listUrlHist(pid)
 GET /resource/:pid/title		    controllers.Resource.listTitle(pid)
 
 PUT /resource/:pid/parts			controllers.Resource.updateSeq(pid)
@@ -78,6 +79,7 @@ POST /resource/:namespace			controllers.Resource.createResource(namespace)
 POST /resource/:pid/doi             controllers.Resource.addDoi(pid)
 POST /resource/:pid/doi/update      controllers.Resource.updateDoi(pid)
 POST /resource/:pid/doi/replace    controllers.Resource.replaceDoi(pid)
+POST /resource/:pid/confirmNewUrl   controllers.Resource.confirmNewUrl(pid)
 
 DELETE /resource/:pid/seq		    controllers.Resource.deleteSeq(pid)
 DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid,field)
@@ -121,7 +123,8 @@ DELETE /resource/:pid/removeFromIndex controllers.MyUtils.removeFromIndex(pid)
 POST /resource/:pid/metadata/lobidify	controllers.MyUtils.lobidify(pid,alephid?="")
 POST /resource/:pid/addObjectTimestamp	controllers.MyUtils.addObjectTimestamp(pid)
 
-GET /authors/:authorname controllers.AuthorsController.getAuthorsRdf(authorname)
+GET /authors/:authorname controllers.AdhocController.getAuthorsRdf(authorname)
+GET /adhoc/:type/:name   controllers.AdhocController.getAdhocRdf(type,name)
 GET /context.json controllers.Context.getContext()
 
 GET /add/catalog					controllers.Forms.getCatalogForm()

@@ -128,26 +128,6 @@
 			}
 			}		
 		}
-		case "containedIn"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{
-					<tr class="@key">
-						<td style="display:none;">@getWeight(key)</td>
-						<td class="field-label @key">@getLabel(key)</td>
-						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
-						@values match {
-								case d: Set[ Map[String,Object]] => {
-									@Html(views.Helper.getContainedIn(d))
-								}
-								case _ => {
-									@values
-								}
-						}				
-					</tr>
-				}
-			}		
-		}
 		case "subject"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}
@@ -235,6 +215,15 @@
 					</tr>
 				}
 			}
+		}
+		case "fulltextVersion"=>{
+			@showLinkList(values,"fulltextVersion")
+		}
+		case "publisherVersion"=>{
+			@showLinkList(values,"publisherVersion")
+		}
+		case "additionalMaterial"=>{
+			@showLinkList(values,"additionalMaterial")
 		}
 		case "lv:volumeIn"=>{
 		@values match {
@@ -358,7 +347,7 @@
 				}
 				}
 			}
-		}
+		}		
 		case _ =>{
 		
 			@values match {
@@ -370,7 +359,7 @@
 								<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
 									@values match {
 										case a: String => {
-													@value(a,key)
+											@value(a,key)
 								  		}
 										case b: Set[Any] => {
 										   <ul>
@@ -393,7 +382,6 @@
 													}
 											</table>
 										}
-										
 										case _ => {
 													@values
 										}
@@ -405,6 +393,66 @@
 			}
 		}
 	}
+}
+
+@showLinkList(values:Any,key:String)={
+		@values match {
+				case nullCase if nullCase == null =>{}
+				case a:List[Map[String,String]] =>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+									<ul class=@key+"List">
+									@for(map<-a){
+									<li class=@key+"ListEntry">
+					                       @map.get("prefLabel")
+					                    <span class="separator">|</span>
+							        <a href=@map.get("@id")  target="_blank">
+							            <span class="octicon-link-external"></span>
+							        </a>
+					                 </li>
+									}
+									</ul>
+											
+					</tr>
+				}
+			}
+}
+@showNoLink(values:Any,key:String)={
+		@values match {
+				case nullCase if nullCase == null =>{}
+				case a:Set[Map[String,String]] =>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+									<ul class=@key+"List">
+									@for(map<-a){
+										<li class=@key+"ListEntry">
+									    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@map.get("prefLabel")@models.Globals.rechercheUrlSuffix">
+					                        @map.get("prefLabel")
+					                    </a>
+					                 </li>
+									}
+									</ul>
+											
+					</tr>
+				}
+				case map:Map[String,String]=>{
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+									    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@map.get("prefLabel")@models.Globals.rechercheUrlSuffix">
+					                        @map.get("prefLabel")
+					                    </a>
+					              
+									</ul>
+											
+					</tr>
+				}
+			}
 }
 @createPublicationFields(fields:Map[String,String])={
 @if(fields.get("regal:publishLocation")!=null){

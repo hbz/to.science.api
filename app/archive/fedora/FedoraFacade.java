@@ -224,6 +224,9 @@ public class FedoraFacade {
 			if (node.getConfFile() != null) {
 				utils.createConfStream(node);
 			}
+			if (node.getUrlHistFile() != null) {
+				utils.createUrlHistStream(node);
+			}
 			if (node.getObjectTimestampFile() != null) {
 				utils.createObjectTimestampStream(node);
 			}
@@ -269,6 +272,7 @@ public class FedoraFacade {
 		getMetadata2FromFedora(node);
 		getDataFromFedora(pid, node);
 		getConfFromFedora(pid, node);
+		getUrlHistFromFedora(pid, node);
 		getObjectTimestampFromFedora(node);
 		return node;
 	}
@@ -303,7 +307,18 @@ public class FedoraFacade {
 			node.setConf(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
-			// datastream with name metadata is optional
+			// datastream with name conf is optional
+		}
+	}
+
+	private void getUrlHistFromFedora(String pid, Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(pid, "urlHist").execute();
+			node.setUrlHist(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// datastream with name urlHist is optional
 		}
 	}
 
@@ -389,6 +404,10 @@ public class FedoraFacade {
 		if (node.getConfFile() != null) {
 			play.Logger.info("Write conf file to fedora");
 			utils.updateConfStream(node);
+		}
+		if (node.getUrlHistFile() != null) {
+			play.Logger.info("Write URL history file to fedora");
+			utils.updateUrlHistStream(node);
 		}
 		if (node.getObjectTimestampFile() != null) {
 			utils.updateObjectTimestampStream(node);

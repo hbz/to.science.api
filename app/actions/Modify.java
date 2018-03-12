@@ -822,6 +822,12 @@ public class Modify extends RegalAction {
 				enrichStatements.addAll(getOrcidStatements(uri));
 			}
 
+			play.Logger.info("Enrich " + node.getPid() + " with adhoc keys.");
+			List<String> adhocIds = findAllAdhocIds(metadata);
+			for (String uri : adhocIds) {
+				enrichStatements.addAll(getAdhocStatements(uri));
+			}
+
 			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
 			List<String> agrovocIds = findAllAgrovocIds(metadata);
 			for (String uri : agrovocIds) {
@@ -911,6 +917,12 @@ public class Modify extends RegalAction {
 				enrichStatements.addAll(getOrcidStatements(uri));
 			}
 
+			play.Logger.info("Enrich " + node.getPid() + " with adhoc keys.");
+			List<String> adhocIds = findAllAdhocIds(metadata);
+			for (String uri : adhocIds) {
+				enrichStatements.addAll(getAdhocStatements(uri));
+			}
+
 			play.Logger.info("Enrich " + node.getPid() + " with agrovoc.");
 			List<String> agrovocIds = findAllAgrovocIds(metadata);
 			for (String uri : agrovocIds) {
@@ -967,18 +979,18 @@ public class Modify extends RegalAction {
 	}
 
 	private List<Statement> find(Node node, String metadata, String pred) {
-		List<Statement> catalogParents = new ArrayList<Statement>();
+		List<Statement> result = new ArrayList<Statement>();
 		// getIsPartOf
-		List<String> parents = RdfUtils.findRdfObjects(node.getPid(), pred,
+		List<String> statements = RdfUtils.findRdfObjects(node.getPid(), pred,
 				metadata, RDFFormat.NTRIPLES);
-		for (String p : parents) {
+		for (String p : statements) {
 			ValueFactory v = RdfUtils.valueFactory;
 			String label = getEtikett(p);
 			Statement st = v.createStatement(v.createIRI(p), v.createIRI(PREF_LABEL),
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC)));
-			catalogParents.add(st);
+			result.add(st);
 		}
-		return catalogParents;
+		return result;
 	}
 
 	private String getEtikett(String p) {
@@ -1061,15 +1073,9 @@ public class Modify extends RegalAction {
 			String str =
 					CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
 			JsonNode hit = new ObjectMapper().readValue(str, JsonNode.class);
-			String label =
-					hit.at("/orcid-profile/orcid-bio/personal-details/family-name/value")
-							.asText()
-							+ ", "
-							+ hit
-									.at("/orcid-profile/orcid-bio/personal-details/given-names/value")
-									.asText();
+			String label = hit.at("/person/name/family-name/value").asText() + ", "
+					+ hit.at("/person/name/given-names/value").asText();
 			ValueFactory v = RdfUtils.valueFactory;
-			;
 			Literal object =
 					v.createLiteral(Normalizer.normalize(label, Normalizer.Form.NFKC));
 			Statement newS =
@@ -1078,6 +1084,31 @@ public class Modify extends RegalAction {
 			filteredStatements.add(newS);
 		} catch (Exception e) {
 			play.Logger.warn("", e);
+		}
+		return filteredStatements;
+	}
+
+	private List<Statement> getAdhocStatements(String uri) {
+		play.Logger.info("GET " + uri);
+		List<Statement> filteredStatements = new ArrayList<Statement>();
+		try {
+			for (Statement s : RdfUtils.readRdfToGraph(new URL(uri), RDFFormat.RDFXML,
+					"application/rdf+xml")) {
+				boolean isLiteral = s.getObject() instanceof Literal;
+				if (!(s.getSubject() instanceof BNode)) {
+					if (isLiteral) {
+						ValueFactory v = RdfUtils.valueFactory;
+
+						play.Logger.trace("Get data from " + uri);
+						Statement newS = v.createStatement(v.createIRI(uri),
+								s.getPredicate(), v.createLiteral(Normalizer.normalize(
+										s.getObject().stringValue(), Normalizer.Form.NFKC)));
+						filteredStatements.add(newS);
+					}
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.warn("Not able to get data from" + uri, e);
 		}
 		return filteredStatements;
 	}
@@ -1246,6 +1277,18 @@ public class Modify extends RegalAction {
 	private List<String> findAllOrcidIds(String metadata) {
 		HashMap<String, String> result = new HashMap<>();
 		Matcher m = Pattern.compile("http://orcid.org/[^>]*").matcher(metadata);
+		while (m.find()) {
+			String id = m.group();
+			result.put(id, id);
+		}
+		return new Vector<String>(result.keySet());
+	}
+
+	private List<String> findAllAdhocIds(String metadata) {
+		HashMap<String, String> result = new HashMap<>();
+		Matcher m =
+				Pattern.compile(Globals.protocol + Globals.server + "/adhoc/[^>]*")
+						.matcher(metadata);
 		while (m.find()) {
 			String id = m.group();
 			result.put(id, id);
@@ -1426,6 +1469,35 @@ public class Modify extends RegalAction {
 			}
 			updateIndex(node.getPid());
 			return node.getPid() + " webgatherer conf updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
+	 * @param node the node to add an urlHist to
+	 * @param content json representation of conf
+	 * @return a message
+	 */
+	public String updateUrlHist(Node node, String content) {
+		try {
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						node.getPid() + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			play.Logger.debug("Schreibe nach URL-Historie: " + content);
+			File file = CopyUtils.copyStringToFile(content);
+			if (node != null) {
+				node.setUrlHistFile(file.getAbsolutePath());
+				play.Logger.info("Update node" + file.getAbsolutePath());
+				Globals.fedora.updateNode(node);
+			}
+			updateIndex(node.getPid());
+			return node.getPid() + " url history updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);
 		} catch (IOException e) {

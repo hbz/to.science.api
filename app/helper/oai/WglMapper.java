@@ -134,10 +134,12 @@ public class WglMapper {
 	}
 
 	private List<String> getCreator(JsonNode n) {
-		List<String> result = getList(n, "/contributorLabel");
+		List<String> result = new ArrayList<>();
 		if (result.isEmpty()) {
 			result.addAll(getComplexList(n, "/creator", "/prefLabel"));
 			result.addAll(getList(n, "/creatorName"));
+			result.addAll(getComplexList(n, "/contributor", "/prefLabel"));
+			result.addAll(getList(n, "/contributorName"));
 		}
 		return result;
 	}
