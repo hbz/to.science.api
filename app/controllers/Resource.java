@@ -614,13 +614,8 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(null, node -> {
 			List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
 			try {
-				SearchResponse response = Globals.search.query(
-						new String[] {
-								Globals.PUBLIC_INDEX_PREF + Globals.defaultNamespace + "2",
-								Globals.PDFBOX_OCR_INDEX_PREF + Globals.defaultNamespace },
-						queryString, from, until);
+				SearchResponse response = getSearchResult(queryString, from, until);
 				SearchHits hits = response.getHits();
-
 				Aggregations aggs = response.getAggregations();
 				List<SearchHit> list = Arrays.asList(hits.getHits());
 				hitMap = read.hitlistToMap(list);
@@ -634,6 +629,19 @@ public class Resource extends MyController {
 				return JsonMessage(new Message(e, 500));
 			}
 		});
+	}
+
+	private static SearchResponse getSearchResult(String queryString, int from,
+			int until) {
+		String metadataIndex =
+				Globals.PUBLIC_INDEX_PREF + Globals.defaultNamespace + "2";
+		if (Globals.users.isLoggedIn(ctx())) {
+			metadataIndex = Globals.defaultNamespace + "2";
+		}
+		return Globals.search.query(
+				new String[] { metadataIndex,
+						Globals.PDFBOX_OCR_INDEX_PREF + Globals.defaultNamespace },
+				queryString, from, until);
 	}
 
 	@ApiOperation(produces = "application/json,text/html", nickname = "listAllParts", value = "listAllParts", notes = "List resources linked with hasPart", response = play.mvc.Result.class, httpMethod = "GET")

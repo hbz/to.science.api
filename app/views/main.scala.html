@@ -17,9 +17,11 @@
 				<link rel="shortcut icon" href="/public/images/favicon.ico" type="image/x-icon" /> 
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/bootstrap.min.css")">
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/edoweb_lbz.css")">
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/octicons.css")">
         <link rel="shortcut icon" type="image/png" href="@controllers.routes.Assets.at("images/favicon.png")">
 		<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/font-awesome.min.css")">
+		<link rel="stylesheet" href="@controllers.routes.Assets.at("stylesheets/listnav.css")">
 		<link rel="stylesheet" href="@controllers.routes.Assets.at("octicons/octicons.css")">
         <script src="@controllers.routes.Assets.at("javascripts/jquery-3.2.1.min.js")"></script>
         <script src="@controllers.routes.Assets.at("javascripts/jquery-ui.min.js")"></script>
@@ -27,6 +29,7 @@
 		<script src="@controllers.routes.Assets.at("javascripts/dataTables.bootstrap.js")"></script>
 		<script src="@controllers.routes.Assets.at("javascripts/jstree.min.js")"></script>
     	<script src="@controllers.routes.Assets.at("javascripts/jquery.dataTables.min.js")"></script>
+    	<script src="@controllers.routes.Assets.at("javascripts/jquery-listnav.min.js")"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
 	  <script type="text/javascript" charset="utf-8">
@@ -34,6 +37,17 @@
 				$('.resourceView').dataTable( {
     				"order": [0,'asc'],paging: false,searching: false
 				} );
+				$('.search').dataTable( {
+    				"order": [0,'asc'],paging: false,searching: false
+				} );
+				var tr = document.getElementsByTagName('.search tr');
+				for(i=0;i<tr.length;i++){
+				    if(i%2==0) {
+				    	tr[i].attribute("class","even");
+				    }else{
+				    	tr[i].attribute("class","odd");
+				    }
+				}
 			} );
 		</script>
     </head>
@@ -115,42 +129,53 @@
 	       </div>
 	   </div>
 	
-	   <footer style="background-color:#f8f8f8;"/>
-		   <img src="/public/images/books.jpg"  width="100%" height="200%"/>
-		   <ul style="list-style:none;">
-		   <li>
-		   <a href="">About</a></li>
-		    <li>
-		   <a href="">Contact</a></li>
-		    <li>
-		    <li>
-		   <a href="">Software</a></li>
-		   <a href="/public/html/impressum.html">Impressum</a>
-		   </li></ul>
-	   </footer>
+		   <footer style="background-color:#f8f8f8;"/>
+			   <img src="/public/images/books.jpg"  width="100%" height="200%"/>
+		<div class="container" >	
+			   <ul style="list-style:none;">
+			   <li>
+			   <a href="">About</a></li>
+			    <li>
+			   <a href="">Contact</a></li>
+			    <li>
+			    <li>
+			   <a href="">Software</a></li>
+			   <a href="/public/html/impressum.html">Impressum</a>
+			   </li></ul>
+
+			      </div>
+		   </footer>
 	</body>
 </html>
 
 @loadFacets(aggs:Aggregations)={
-
-	@aggs match {
-		case a : Aggregations =>{
-			@for(agg  <- aggs.asList()) {
-							<h3 class="facets_header">@models.Globals.profile.getEtikettByName(agg.getName()).getLabel()</h1>
-							
-								<ol class="facets_nav" >
-					
-								@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
-									<li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
-								}
-							
-				                <a class="more_facets_link" href="/facets/more_facets_subject_exact" data-for="facets_subject_exact">
-				                    <span class="more_facets_text">
-				                        All <span class="fa fa-caret-down"></i>
-				                    </span>
-		                		</a>
-			}
+ @aggs match {
+    case a : Aggregations =>{
+		@loadFacet(aggs,aggs.get("subject"))
+		@loadFacet(aggs,aggs.get("institution"))
+		@loadFacet(aggs,aggs.get("contribution"))
+		@if(models.Globals.users.isLoggedIn(ctx())){
+	    	@loadFacet(aggs,aggs.get("containedIn"))
+			@loadFacet(aggs,aggs.get("medium"))
+			@loadFacet(aggs,aggs.get("contentType"))
+			@loadFacet(aggs,aggs.get("createdBy"))
+			@loadFacet(aggs,aggs.get("lastModifiedBy"))
 		}
-		case _ =>{}	
 	}
+	case _ =>{}
+ }
+}
+
+@loadFacet(aggs:Aggregations,agg:Aggregation)={
+    <h3 class="facets_header">@models.Globals.profile.getEtikettByName(agg.getName()).getLabel()</h1>
+        <ol class="facets_nav" >
+			@for( b <- aggs.get(agg.getName()).asInstanceOf[Terms].getBuckets()) {
+				<li> <a href="/find?q=@b.getKey()">@b.getKey() (@b.getDocCount())</a></li>
+			}
+		</ol>
+		<a class="more_facets_link" href="/browse/@agg.getName()" data-for="facets_subject_exact">
+			<span class="more_facets_text">
+				 All <span class="fa fa-caret-down"></i>
+			</span>
+        </a>
 }

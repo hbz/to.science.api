@@ -1,6 +1,7 @@
 @*Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
 @import views.Helper 
+@import views.Title 
 @import org.elasticsearch.search.aggregations.Aggregations
 
 @(hits: List[Map[String,Object]],aggregations:Aggregations,q: String,totalNum: Long,from: Int, until: Int,namespace:String)
@@ -36,18 +37,80 @@
 	</div>
 	<div class="container-fluid">
 <div class="row">
-	<div  class="col-md-11">
-			<ol class="searchResults">
-			@for( hit <- hits){
-			<li class="searchResult">
-			<div class="container">
-			@tags.resourceShortView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
-			</div>
-			</li>
-			<hr/>
+<table class="search table">
+	<thead>
+		<tr>
+			<th>
+				@models.Globals.profile.getEtikettByName("title").getLabel()
+			</th>
+			<th>
+				@models.Globals.profile.getEtikettByName("regal:publishYear").getLabel()
+			</th>
+			<th>
+				@models.Globals.profile.getEtikettByName("rdftype").getLabel()
+			</th>
+			 @if(models.Globals.users.isLoggedIn(ctx())){
+			<th>
+				@models.Globals.profile.getEtikettByName("created").getLabel()
+			</th>
+			<th>
+				@models.Globals.profile.getEtikettByName("catalogLink").getLabel()
+			</th>
 			}
-			</ol>
-		
+		</tr>
+</thead>
+<tbody>
+		@for( hit <- hits){
+			<tr>
+				<td>
+				@tags.resourceShortView(hit,Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]),namespace)
+				</td>
+				<td>
+				@if(hit.contains("publication")){
+						 @hit.get("publication") match {
+						    	case publication:Collection[ Map[String,Object]] => {
+						    	<span class="publicationYear">
+						    	@Html(Title.getIssued(publication)) 
+						    	</span>
+						    	}
+						    	case _ => {}
+						    }
+					 }
+				</td>
+				<td>
+				@if(hit.contains("rdftype")){
+						 @hit.get("rdftype") match {
+						    	case rdfType:Collection[Map[String,Object]] => {
+						    	<span class="rdftype">
+						    	@Html(Title.getRdfType(rdfType)) 
+						    	</span>
+						    	}
+						    	case _ => {}
+						    }
+					 }
+				</td>
+				@if(models.Globals.users.isLoggedIn(ctx())){
+				<td>
+				@if(hit.contains("isDescribedBy")){
+						 @hit.get("isDescribedBy") match {
+						    	case isDescribedBy:Map[String,Object] => {
+						    	<span class="isDescribedBy">
+						    		@isDescribedBy.get("created").toString().substring(0,10) 
+						    	</span>
+						    	}
+						    	case _ => {}
+						    }
+					 }
+				</td>
+				<td>
+				@field(hit.get("catalogLink"),"catalogLink")
+				</td>
+				}
+			</tr>
+		}
+</tbody>
+</table>
+	
 </div>
 </div>
 	<div class="row">
@@ -55,3 +118,62 @@
 	</div>
 </div>
 }
+
+
+
+
+
+
+@field(values: Any,key: String)={
+			@values match {
+				case d if d == null =>{}
+				case _ =>{
+							
+									@values match {
+									
+										case d: List[Any] => {
+										
+											@for(field <- d){
+												@value(field,key)
+											}
+											
+										}										
+									}
+									
+				}				
+			}
+}
+
+@value(value: Any,key:String)= {
+			@value match {
+				case a: String => {
+					@if(Helper.getLinkAdressOrNull(a)!=null){
+						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
+					}else{
+						@a
+					}
+				}
+				case c : Map[String,Object] => {
+							@displayMap(c.get(Globals.profile.getIdAlias()),c,key)
+				}
+				case _ => {
+				
+				}
+			}
+}
+
+@displayMap(value:Any,map:Map[String,Object],key:String)={
+	  @value match {
+			case a: String => {
+			 <span class="@models.Globals.profile.getEtikett(a).getIcon()"></span>
+			 			  
+<!-- 	                       <a href=@Helper.getLinkAdressOrNull(a)  target="_blank"> -->
+	                       @(map.get(Globals.profile.getLabelKey()))
+<!-- 	                       </a>  -->
+	                       <br/>
+			}
+			
+		} 
+}
+
+
