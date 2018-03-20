@@ -363,8 +363,6 @@ public class JsonMapper {
 			}
 
 			sortCreatorAndContributors(rdf);
-			postProcess(rdf, "institution");
-			postProcess(rdf, "creator");
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
 			postProcess(rdf, "contributor");
@@ -396,6 +394,7 @@ public class JsonMapper {
 			postProcess(rdf, "natureOfContent");
 			postProcess(rdf, "institution");
 			postProcessContribution(rdf);
+			postProcess(rdf, "creator");
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);
@@ -423,17 +422,31 @@ public class JsonMapper {
 
 	private void postProcessContribution(Map<String, Object> rdf) {
 		try {
+			List<Map<String, Object>> creator = new ArrayList<>();
 			Collection<Map<String, Object>> contributions =
 					(Collection<Map<String, Object>>) rdf.get("contribution");
 			for (Map<String, Object> contribution : contributions) {
 				Map<String, Object> agent =
-						(Map<String, Object>) contribution.get("agent");
+						((Collection<Map<String, Object>>) contribution.get("agent"))
+								.iterator().next();
 				if (agent != null) {
 					String prefLabel = findLabel(agent);
 					agent.put(PREF_LABEL, prefLabel);
+					String id = null;
+					if (agent.containsKey("@id")) {
+						id = agent.get("@id").toString();
+					}
+					if (id == null) {
+						id = Globals.protocol + Globals.server + "/adhoc/author/"
+								+ prefLabel;
+					}
+					Map<String, Object> cmap = new HashMap<>();
+					cmap.put(PREF_LABEL, prefLabel);
+					cmap.put("@id", id);
+					creator.add(cmap);
 				}
 			}
-
+			rdf.put("creator", creator);
 		} catch (Exception e) {
 			play.Logger.debug("Problem processing key contribution.agent", e);
 		}
