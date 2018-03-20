@@ -311,7 +311,7 @@ do not show separator before external links
 /**
 For development uncomment, but do not show to enduser yet
 **/
-.banner, nav, .nav, footer{
+.banner, .navbar-collapse, .navbar, footer{
 	display:none;
 }
 

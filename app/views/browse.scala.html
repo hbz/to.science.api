@@ -1,0 +1,30 @@
+@* Copyright 2018 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+@import views.Helper 
+@import org.elasticsearch.search.aggregations.Aggregation
+@import org.elasticsearch.search.aggregations.bucket.terms.Terms
+@import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket
+@(facetName:String,terms:Terms)
+
+@main("Browse "+facetName,null,models.Globals.users.isLoggedIn(ctx()),
+						models.Globals.users.getUser(ctx())){
+						
+	<h3 class="facets_header">@models.Globals.profile.getEtikettByName(facetName).getLabel()</h1>	
+	@loadFacet()
+				
+}
+
+@loadFacet()={	
+			<ul id="facetList" style="list-style-type: none;" >
+				@for( b <- terms.getBuckets()) {
+				    <li> <a href="/find?q=%22@java.net.URLEncoder.encode(b.getKey(),"utf-8")%22">@b.getKey() (@b.getDocCount())</a></li>
+				}
+			</ul>
+		  
+	
+}
+
+<script>
+	$("#facetList").listnav({
+		includeOther:true
+		});
+</script>

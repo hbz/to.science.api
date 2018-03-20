@@ -313,7 +313,6 @@ public class Search {
 	}
 
 	private void initAggregations() {
-
 		ObjectMapper mapper = new ObjectMapper();
 		try (InputStream in =
 				play.Play.application().resourceAsStream("aggregations.conf")) {
@@ -322,5 +321,15 @@ public class Search {
 		} catch (Exception e) {
 			aggregations = new HashMap<>();
 		}
+	}
+
+	public SearchResponse query(String[] index, String queryString, int from,
+			int until, Map<String, Object> aggregationConf) {
+		refresh();
+		SearchResponse response = client.prepareSearch(index)
+				.setQuery(QueryBuilders.queryString(queryString)).setFrom(from)
+				.setSize(until - from).setAggregations(aggregationConf).execute()
+				.actionGet();
+		return response;
 	}
 }

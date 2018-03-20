@@ -426,13 +426,11 @@ public class JsonMapper {
 			Collection<Map<String, Object>> contributions =
 					(Collection<Map<String, Object>>) rdf.get("contribution");
 			for (Map<String, Object> contribution : contributions) {
-				Collection<Map<String, Object>> agents =
-						(Collection<Map<String, Object>>) contribution.get("agent");
-				if (agents != null) {
-					for (Map<String, Object> agent : agents) {
-						String prefLabel = findLabel(agent);
-						agent.put(PREF_LABEL, prefLabel);
-					}
+				Map<String, Object> agent =
+						(Map<String, Object>) contribution.get("agent");
+				if (agent != null) {
+					String prefLabel = findLabel(agent);
+					agent.put(PREF_LABEL, prefLabel);
 				}
 			}
 
