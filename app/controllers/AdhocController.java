@@ -68,12 +68,8 @@ public class AdhocController extends MyController {
 		IRI subj = f.createIRI(Globals.protocol + Globals.server + "/adhoc/"
 				+ RdfUtils.urlEncode(type) + "/" + base64EncodedNameWithMod);
 		IRI pred = f.createIRI("http://www.w3.org/2004/02/skos/core#prefLabel");
-
-		String base64EncodedName =
-				base64EncodedNameWithMod.replaceAll("-", "/").replaceAll("_", "+");
-
-		Literal obj = f.createLiteral(
-				new String(Base64.getDecoder().decode(base64EncodedName)));
+		Literal obj =
+				f.createLiteral(helper.MyURLEncoding.decode(base64EncodedNameWithMod));
 		g.add(f.createStatement(subj, pred, obj));
 		return Promise.promise(() -> {
 			String body = "";
