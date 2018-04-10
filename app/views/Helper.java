@@ -477,7 +477,7 @@ public class Helper {
 	}
 
 	public static Map<String, String> getPublicationMap(
-			Set<Map<String, Object>> publ) {
+			Collection<Map<String, Object>> publ) {
 		Map<String, String> result = new HashMap<>();
 		for (Map<String, Object> p : publ) {
 			JsonNode hit = new ObjectMapper().valueToTree(p);

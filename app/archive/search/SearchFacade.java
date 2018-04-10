@@ -170,4 +170,9 @@ public class SearchFacade {
 	public List<String> indexAll(List<Node> list, String index) {
 		return search.indexAll(list, index);
 	}
+
+	public SearchResponse query(String[] index, String query, int from, int until,
+			Map<String, Object> aggregationConf) {
+		return search.query(index, query, from, until, aggregationConf);
+	}
 }
