@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -37,15 +36,11 @@ import java.util.stream.Collectors;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
-
-import org.eclipse.rdf4j.rio.RDFFormat;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -57,11 +52,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
-import actions.Modify;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
-import helper.JsonMapper;
 import helper.WebgatherUtils;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
@@ -82,15 +75,15 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import views.html.edit;
-import views.html.oai.mab;
-import views.html.oai.mets;
-import views.html.oai.oaidc;
-import views.html.oai.wgl;
+import views.html.frlResource;
 import views.html.resource;
 import views.html.resources;
 import views.html.search;
 import views.html.status;
-import views.html.frlResource;
+import views.html.oai.mab;
+import views.html.oai.mets;
+import views.html.oai.oaidc;
+import views.html.oai.wgl;
 import views.html.tags.getTitle;
 
 /**
@@ -783,7 +776,7 @@ public class Resource extends MyController {
 			Html result = oaidc.render(transform.oaidc(pid));
 			String xml = result.toString();
 			if (validate) {
-				validate(xml, "public/schemas/oai_dc.xsd");
+				validate(xml, "public/schemas/oai_dc.xsd", null, "public/schemas");
 			}
 			return ok(result);
 		});
@@ -797,7 +790,7 @@ public class Resource extends MyController {
 			Html result = wgl.render(transform.wgl(pid), node.getLd2());
 			String xml = result.toString();
 			if (validate) {
-				validate(xml, "public/schemas/oai_wgl.xsd");
+				validate(xml, "public/schemas/oai_wgl.xsd", null, "public/schemas");
 			}
 			return ok(result);
 		});
@@ -828,10 +821,17 @@ public class Resource extends MyController {
 			response().setContentType("application/xml");
 			String result = transform.datacite(node, node.getDoi());
 			if (validate) {
-				validate(result, "public/schemas/datacite.xsd");
+				try {
+					validate(result, "public/schemas/datacite/kernel-4.1/metadata.xsd",
+							"https://schema.datacite.org/meta/kernel-4.1/",
+							"public/schemas/datacite/kernel-4.1/");
+				} catch (Exception e) {
+					return JsonMessage(new Message(e, 400));
+				}
 			}
 			return ok(result);
 		});
+
 	}
 
 	@ApiOperation(produces = "application/xml", nickname = "asMets", value = "asMets", notes = "Returns a Mets display of the resource", response = Message.class, httpMethod = "GET")
@@ -843,7 +843,7 @@ public class Resource extends MyController {
 					mets.render(read.getPartsAsTree(node, "long"), transform.oaidc(pid));
 			String xml = result.toString();
 			if (validate) {
-				validate(xml, "public/schemas/mets.xsd");
+				validate(xml, "public/schemas/mets.xsd", null, "public/schemas/");
 			}
 			return ok(result);
 		});
