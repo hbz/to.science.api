@@ -28,7 +28,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,9 +38,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -53,15 +49,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
  * 
  */
 public class XmlUtils {
+
+	public static XmlSchemaValidator validator = new XmlSchemaValidator();
 
 	@SuppressWarnings({ "javadoc", "serial" })
 	public static class XPathException extends RuntimeException {
@@ -235,53 +231,6 @@ public class XmlUtils {
 	}
 
 	/**
-	 * Validates an xml String
-	 * 
-	 * @param oaidc xml String
-	 * @param schema a schema to validate against
-	 */
-	public static void validate(InputStream oaidc, InputStream schema) {
-		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setNamespaceAware(true);
-			// "Valid" means valid to a DTD. We want to valid against a schema,
-			// so we turn of dtd validation here
-			factory.setValidating(false);
-
-			SchemaFactory schemaFactory =
-					SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-
-			schemaFactory.setResourceResolver(new ResourceResolver());
-			if (schema != null) {
-				Schema s = schemaFactory.newSchema(new StreamSource(schema));
-				factory.setSchema(s);
-			}
-			DocumentBuilder docBuilder = factory.newDocumentBuilder();
-			docBuilder.setErrorHandler(new ErrorHandler() {
-				public void fatalError(SAXParseException exception)
-						throws SAXException {
-					throw new XmlException(exception);
-				}
-
-				public void error(SAXParseException exception) throws SAXException {
-					throw new XmlException(exception);
-				}
-
-				public void warning(SAXParseException exception) throws SAXException {
-					throw new XmlException(exception);
-				}
-			});
-
-			// Try to parse with schema validation on
-			docBuilder.parse(oaidc);
-
-		} catch (Exception e) {
-			throw new XmlException(e);
-		}
-
-	}
-
-	/**
 	 * Creates a plain xml string of the node and of all it's children. The xml
 	 * string has no XML declaration.
 	 * 
@@ -294,7 +243,6 @@ public class XmlUtils {
 			Transformer transformer = transFactory.newTransformer();
 			StringWriter buffer = new StringWriter(1024);
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-
 			transformer.transform(new DOMSource(node), new StreamResult(buffer));
 			String str = buffer.toString();
 			return str;

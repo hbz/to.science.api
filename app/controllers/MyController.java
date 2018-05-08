@@ -528,15 +528,12 @@ public class MyController extends Controller {
 		return dateFormat.format(date);
 	}
 
-	public static void validate(String xml, String schema) {
+	public static void validate(String xml, String schema, String baseUri,
+			String localPath) {
 		try {
-			if (schema != null) {
-				XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
-						Play.application().resourceAsStream(schema));
-			} else {
-				XmlUtils.validate(new ByteArrayInputStream(xml.getBytes("utf-8")),
-						null);
-			}
+			XmlUtils.validator.validate(
+					new ByteArrayInputStream(xml.getBytes("utf-8")),
+					Play.application().resourceAsStream(schema), baseUri, localPath);
 		} catch (Exception e) {
 			throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
 		}
