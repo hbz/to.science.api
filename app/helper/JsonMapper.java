@@ -388,7 +388,6 @@ public class JsonMapper {
 			postProcess(rdf, "recordingLocation");
 			postProcess(rdf, "recordingCoords");
 			postProcess(rdf, "collectionOne");
-			postProcess(rdf, "containedIn");
 			postProcess(rdf, "medium");
 			postProcess(rdf, "predecessor");
 			postProcess(rdf, "successor");
@@ -466,20 +465,20 @@ public class JsonMapper {
 		return result;
 	}
 
-	private static void postProcess(Map<String, Object> m, String role) {
+	private static void postProcess(Map<String, Object> m, String field) {
 		try {
-			Collection<Map<String, Object>> roles =
-					(Collection<Map<String, Object>>) m.get(role);
-			if (roles != null) {
-				play.Logger.trace("Found roles: " + roles);
-				for (Map<String, Object> r : roles) {
+			Collection<Map<String, Object>> fields =
+					(Collection<Map<String, Object>>) m.get(field);
+			if (fields != null) {
+				play.Logger.trace("Found roles: " + fields);
+				for (Map<String, Object> r : fields) {
 					String prefLabel = findLabel(r);
 					play.Logger.trace("Found label " + prefLabel + " for role " + r);
 					r.put(PREF_LABEL, prefLabel);
 				}
 			}
 		} catch (Exception e) {
-			play.Logger.debug("Problem processing key " + role, e);
+			play.Logger.debug("Problem processing key " + field, e);
 		}
 	}
 
