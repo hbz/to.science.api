@@ -21,8 +21,8 @@ public class Viewers extends MyController {
 							.render(Helper.getViewerInfo(node)));
 				}
 				if ("deepzoom".equals(type)) {
-
-					return ok(views.html.mediaViewers.deepzoomViewer.render());
+					return ok(
+							views.html.mediaViewers.deepzoomViewer.render(node.getPid()));
 				}
 				return redirect(routes.Resource.listData(pid));
 			} catch (Exception e) {

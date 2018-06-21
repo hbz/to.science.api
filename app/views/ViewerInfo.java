@@ -16,6 +16,7 @@ public class ViewerInfo {
 		VIDEO, AUDIO, DEEPZOOM, IMAGE, UNDEFINED
 	}
 
+	public String pid = null;
 	public String label = null;
 	public String dataLink = null;
 	public Style style = null;
@@ -28,6 +29,7 @@ public class ViewerInfo {
 	public String accessScheme = null;
 
 	public ViewerInfo(Node n) {
+		pid = n.getPid();
 		dataLink = "/resource/" + n.getPid() + "/data";
 		filesize = n.getFileSize();
 		viewertype = createViewerType(n);
@@ -106,5 +108,9 @@ public class ViewerInfo {
 			return "video";
 		}
 		return "video";
+	}
+
+	public String getViewerLink() {
+		return "/viewers/deepzoom/" + pid + "/data";
 	}
 }
