@@ -126,7 +126,7 @@ public class Gatherconf {
 		interval = null;
 		crawlerSelection = CrawlerSelection.heritrix;
 		quotaUnitSelection = null;
-		agentIdSelection = null;
+		agentIdSelection = AgentIdSelection.Undefined;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		localDir = null;
@@ -482,38 +482,6 @@ public class Gatherconf {
 	 */
 	public void setHttpResponseCode(int httpResponseCode) {
 		this.httpResponseCode = httpResponseCode;
-	}
-
-	/**
-	 * Stellt fest, ob die URL umgezogen ist.
-	 * 
-	 * @return ob die URL der Webpage umgezogen ist
-	 * @exception MalformedURLException
-	 * @exception IOException
-	 */
-	public boolean hasUrlMoved()
-			throws URISyntaxException, MalformedURLException, IOException {
-
-		if (invalidUrl) {
-			return true;
-		} // keine erneute Prüfung
-		HttpURLConnection httpConnection = (HttpURLConnection) new URL(
-				WebgatherUtils.convertUnicodeURLToAscii(url)).openConnection();
-		httpConnection.setRequestMethod("GET");
-		httpResponseCode = httpConnection.getResponseCode();
-		if (httpResponseCode != 301) {
-			return false;
-		}
-		// ermiitelt die neue URL (falls bekannt)
-		urlNew = null;
-		for (Entry<String, List<String>> header : httpConnection.getHeaderFields()
-				.entrySet()) {
-			if (header.getKey() != null && header.getKey().equals("Location")) {
-				urlNew = header.getValue().get(0);
-			}
-		}
-		httpConnection.disconnect();
-		return true;
 	}
 
 }
