@@ -370,6 +370,7 @@ public class JsonMapper {
 
 			sortCreatorAndContributors(rdf);
 			postProcessSubjectName(rdf);
+			postProcess(rdf, "rdftype");
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
 			postProcess(rdf, "contributor");
