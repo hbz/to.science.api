@@ -7908,7 +7908,12 @@
   "multilangLabel" : { }
 }, {
   "uri" : "http://id.loc.gov/vocabulary/relators/hnr",
-  "label" : "Gefeierte Person",
+  "comment" : "",
+  "label" : "Honoree",
+  "icon" : "",
+  "name" : "hnr",
+  "container" : "",
+  "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
 }, {
@@ -20532,6 +20537,17 @@
   "icon" : "fa fa-print",
   "name" : "1010",
   "type" : "STORE",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://schema.org/PublicationIssue ",
+  "comment" : "",
+  "label" : "Heft/Band",
+  "icon" : "",
+  "name" : "PublicationIssue ",
+  "referenceType" : "@id",
+  "container" : "",
+  "weight" : "300",
+  "type" : "CONTEXT",
   "multilangLabel" : { }
 }, {
   "uri" : "http://schema.org/endDate",
