@@ -16,9 +16,13 @@
  */
 package helper;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -209,22 +213,37 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 		return TYPE;
 	}
 
-	public static String getLabelFromEtikettWs(String uri) {
+	public static String getLabelFromEtikettWs(String uriPar) {
 		try {
-			uri = uri.replaceAll("#", "%23");
-			// play.Logger.debug(Globals.etikettUrl + "?url=" + uri +
-			// "&column=label");
-			WSResponse response = play.libs.ws.WS
-					.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
-					.setAuth(Globals.etikettUser, Globals.etikettPwd, WSAuthScheme.BASIC)
-					.setFollowRedirects(true).get().get(2000);
-			InputStream input = response.getBodyAsStream();
-			String content =
-					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
-			Closeables.closeQuietly(input);
-			return content;
+			String uri = uriPar.replaceAll("#", "%23");
+			play.Logger.debug(Globals.etikettUrl + "?url=" + uri + "&column=label");
+			String encoded = Base64.getEncoder()
+					.encodeToString((Globals.etikettUser + ":" + Globals.etikettPwd)
+							.getBytes(StandardCharsets.UTF_8));
+			Map<String, String> httpHeaders = new HashMap<>();
+			httpHeaders.put("User-Agent", "regal-api");
+			httpHeaders.put("Authorization", "Basic " + encoded);
+			try (InputStream input = URLUtil.urlToInputStream(
+					new URL(Globals.etikettUrl + "?url=" + uri + "&column=label"),
+					httpHeaders)) {
+				String content = inputStreamToString(input);
+				return content;
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static String inputStreamToString(InputStream inputStream)
+			throws IOException {
+		try (ByteArrayOutputStream result = new ByteArrayOutputStream()) {
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = inputStream.read(buffer)) != -1) {
+				result.write(buffer, 0, length);
+			}
+
+			return result.toString("UTF_8");
 		}
 	}
 }
