@@ -68,6 +68,8 @@ public class WpullCrawl {
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
+	final static String staticOptions = Play.application().configuration()
+			.getString("regal-api.wpull.staticOptions");
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
@@ -182,7 +184,7 @@ public class WpullCrawl {
 	 */
 	private String buildExecCommand() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(crawler + " " + urlAscii);
+		sb.append(crawler + " " + urlAscii + staticOptions);
 		ArrayList<String> domains = conf.getDomains();
 		if (domains.size() > 0) {
 			sb.append(" --span-hosts");
@@ -192,7 +194,6 @@ public class WpullCrawl {
 			}
 		}
 
-		sb.append(" --recursive");
 		ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
 		if (urlsExcluded.size() > 0) {
 			sb.append(" --reject-regex=.*" + urlsExcluded.get(0));
@@ -247,17 +248,9 @@ public class WpullCrawl {
 		// select agent-string for http-request
 		AgentIdSelection agentId = conf.getAgentIdSelection();
 		sb.append(" --user-agent=" + Gatherconf.agentTable.get(agentId));
-
-		sb.append(" --link-extractors=javascript,html,css");
 		sb.append(" --warc-file=" + warcFilename);
-		// sb.append(" --user-agent=\"InconspiciousWebBrowser/1.0\" --no-robots");
-		sb.append(" --escaped-fragment --strip-session-id");
-		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
-		sb.append(" --no-check-certificate");
-		sb.append(" --no-directories"); // mandatory to prevent runtime errors
-		sb.append(" --delete-after"); // mandatory for reducing required disc space
-		sb.append(" --convert-links"); // mandatory to rewrite relative urls
+
 		return sb.toString();
 	}
 

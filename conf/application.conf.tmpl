@@ -89,6 +89,8 @@ regal-api.webharvests.dataUrl="http://localhost/webharvests"
 #-------------wpull (Crawler)-----------------------                            
 regal-api.wpull.crawler="/usr/local/bin/wpull3"
 regal-api.wpull.jobDir="/opt/regal/wpull-data"
+regal-api.wpull.staticOptions=" --recursive --link-extractors=javascript,html,css --escaped-fragment --strip-session-id --no-host-directories --page-requisites --no-parent --no-check-certificate --no-directories --delete-after"
+regal-api.public.jobDir="/opt/regal/public-data"
 
 #------Swagger self documenting----------
 logger.swagger=ERROR
