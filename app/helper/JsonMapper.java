@@ -47,6 +47,7 @@ import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
+import play.Logger;
 import play.Play;
 
 /**
@@ -934,6 +935,8 @@ public class JsonMapper {
 		JsonNode types = rdf.at("/rdftype");
 		types.forEach(t -> {
 			String typeId = t.at("/" + ID2).asText();
+			Logger.info("Publikationtyp gefunden???????");
+			Logger.info(typeId);
 			if (!"http://purl.org/dc/terms/BibliographicResource".equals(typeId)) {
 				Map<String, Object> tmap = new HashMap<>();
 				tmap.put(PREF_LABEL, Globals.profile.getEtikett(typeId).getLabel());

@@ -236,8 +236,9 @@ public class OpenAireMapper {
 			resource.appendChild(source);
 		}
 
-		// generate subjects
+		// generate subjects from articles
 		Element subjects = doc.createElement("datacite:subjects");
+
 		jemList = jMapper.getElement("root.ddc");
 		for (int i = 0; i < jemList.size(); i++) {
 			Element sE = doc.createElement("datacite:subject");
@@ -247,24 +248,48 @@ public class OpenAireMapper {
 			sE.setAttribute("valueURI", jemList.get(i).get("@id"));
 
 			subjects.appendChild(sE);
-			resource.appendChild(subjects);
 		}
 
 		jemList = jMapper.getElement("root.subject");
 		for (int i = 0; i < jemList.size(); i++) {
-			Element sE = doc.createElement("datacite:subject");
-			sE.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
+			if (jemList.get(i).containsKey("prefLabel")) {
+				Element sE = doc.createElement("datacite:subject");
+				sE.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
 
-			// prevent record from displaying local id's
-			if (jemList.get(i).containsKey("@id")
-					&& !jemList.get(i).get("@id").startsWith("https://frl")
-					&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
-				sE.setAttribute("valueURI", jemList.get(i).get("@id"));
+				// prevent record from displaying local id's
+				if (jemList.get(i).containsKey("@id")
+						&& !jemList.get(i).get("@id").startsWith("https://frl")
+						&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
+					sE.setAttribute("valueURI", jemList.get(i).get("@id"));
+				}
+
+				subjects.appendChild(sE);
 			}
-
-			subjects.appendChild(sE);
-			resource.appendChild(subjects);
 		}
+
+		// generate subjects from monographs
+		jemList = jMapper.getElement("root.subject.source");
+		for (int i = 0; i < jemList.size(); i++) {
+			if (jemList.get(i).containsKey("prefLabel")) {
+				Element sE = doc.createElement("datacite:subject");
+				sE.appendChild(doc.createTextNode(jemList.get(i).get("prefLabel")));
+
+				if (jemList.get(i).containsKey("label") && jemList.get(i).get("label")
+						.equals("Dewey-Dezimalklassifikation")) {
+					sE.setAttribute("subjectScheme", "DDC");
+					sE.setAttribute("schemeURI", "http://dewey.info");
+					sE.setAttribute("valueURI", jemList.get(i).get("@id"));
+				} else {
+					if (jemList.get(i).containsKey("@id")
+							&& !jemList.get(i).get("@id").startsWith("https://frl")
+							&& !jemList.get(i).get("@id").startsWith("https://api.ellinet")) {
+						sE.setAttribute("valueURI", jemList.get(i).get("@id"));
+					}
+				}
+				subjects.appendChild(sE);
+			}
+		}
+		resource.appendChild(subjects);
 
 		// generate publisher
 		jemList = jMapper.getElement("root.containedIn");
@@ -375,7 +400,7 @@ public class OpenAireMapper {
 						doc.createTextNode("https://repository.publisso.de/resource/"
 								+ jemList.get(i).get("@id")));
 				rIdentifier.setAttribute("relatedIdentifierType", "PURL");
-				rIdentifier.setAttribute("relationType", "PURL");
+				rIdentifier.setAttribute("relationType", "HasPart");
 				relIdentifiers.appendChild(rIdentifier);
 			}
 			resource.appendChild(relIdentifiers);
