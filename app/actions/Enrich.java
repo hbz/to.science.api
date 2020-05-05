@@ -171,7 +171,8 @@ public class Enrich {
 					.info("Add label " + label.getObject().stringValue() + " to " + uri);
 			enrichStatements.add(label);
 		} catch (Exception e) {
-			play.Logger.debug("", e);
+			play.Logger.info(uri);
+			play.Logger.error(e.getMessage());
 		}
 	}
 
