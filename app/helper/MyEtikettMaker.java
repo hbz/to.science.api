@@ -211,6 +211,8 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 
 	public static String getLabelFromEtikettWs(String uri) {
 		try {
+			InputStream input = null;
+			String content = null;
 			uri = uri.replaceAll("#", "%23");
 			// play.Logger.debug(Globals.etikettUrl + "?url=" + uri +
 			// "&column=label");
@@ -218,9 +220,15 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 					.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
 					.setAuth(Globals.etikettUser, Globals.etikettPwd, WSAuthScheme.BASIC)
 					.setFollowRedirects(true).get().get(2000);
-			InputStream input = response.getBodyAsStream();
-			String content =
-					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
+			// fetch annoying errors from etikett service
+			if (response.getStatus() != 200) {
+				play.Logger.error("Etikett Service request fails for" + uri
+						+ "\nSet Label to uri now!");
+			} else {
+				input = response.getBodyAsStream();
+				content =
+						CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
+			}
 			Closeables.closeQuietly(input);
 			return content;
 		} catch (Exception e) {
