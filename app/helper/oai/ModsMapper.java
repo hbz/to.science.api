@@ -86,6 +86,9 @@ public class ModsMapper {
 		return value.replaceAll("\r\n", " ");
 	}
 
+	/**
+	 * @return
+	 */
 	public String getData() {
 
 		JsonNode jNode = new ObjectMapper().valueToTree(node.getLd2());

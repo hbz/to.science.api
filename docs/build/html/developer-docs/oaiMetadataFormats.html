@@ -1,17 +1,18 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="de">
   <head>
-    <meta charset="utf-8" />
-    <title>Neues Metadaten-Format in die OAI-Schnittstelle integrieren &#8212; regal-api  Dokumentation</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Neues MD-Format in OAI integrieren &#8212; regal-api  Dokumentation</title>
     <link rel="stylesheet" href="../_static/hbz.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
     <script type="text/javascript" src="../_static/translations.js"></script>
     <link rel="index" title="Stichwortverzeichnis" href="../genindex.html" />
     <link rel="search" title="Suche" href="../search.html" />
@@ -53,65 +54,65 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="neues-metadaten-format-in-die-oai-schnittstelle-integrieren">
-<h1>Neues Metadaten-Format in die OAI-Schnittstelle integrieren<a class="headerlink" href="#neues-metadaten-format-in-die-oai-schnittstelle-integrieren" title="Link zu dieser Überschrift">¶</a></h1>
+  <div class="section" id="neues-md-format-in-oai-integrieren">
+<h1>Neues MD-Format in OAI integrieren<a class="headerlink" href="#neues-md-format-in-oai-integrieren" title="Link zu dieser Überschrift">¶</a></h1>
 <p>Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Aktivitäten an mehreren Stellen.</p>
 <ol class="arabic simple">
-<li><p>Java-Klassen erweitern und anpassen</p></li>
-<li><p>Konfiguration der regal-api und des OAI-Providers anpassen</p></li>
-<li><p>Testen der Schnittstelle</p></li>
+<li>Java-Klassen erweitern und anpassen</li>
+<li>Konfiguration der regal-api und des OAI-Providers anpassen</li>
+<li>Testen der Schnittstelle</li>
 </ol>
-<div class="section" id="java-klassen-erweitern-und-anpassen">
-<h2>Java-Klassen erweitern und anpassen<a class="headerlink" href="#java-klassen-erweitern-und-anpassen" title="Link zu dieser Überschrift">¶</a></h2>
+<div class="section" id="java-klassen-erweitern">
+<h2>Java-Klassen erweitern<a class="headerlink" href="#java-klassen-erweitern" title="Link zu dieser Überschrift">¶</a></h2>
 <p>Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind die folgenden Dateien relevant.</p>
 <ul class="simple">
-<li><p>regal-api.app.helper.oai/OaiDispatcher.java</p></li>
-<li><p>regal-api.app.actions/Transform.java</p></li>
-<li><p>regal-api.app.controllers/Resource.java</p></li>
+<li>regal-api.app.helper.oai/OaiDispatcher.java</li>
+<li>regal-api.app.actions/Transform.java</li>
+<li>regal-api.app.controllers/Resource.java</li>
 </ul>
 <p>In diesen drei Klassen müssen an mehreren Stellen Anpassungen, bzw. Erweiterungen des Codes vorgenommen werden, damit das Mapping und die Erstellung
 eines Metadaten-Stroms im System ausgelöst und gesteuert wird.</p>
-<p>In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addNeuesFormatTransformer erstellt werden.</p>
+<p>In der Datei <strong>OaiDispatcher.java</strong> muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode <strong>addNeuesFormatTransformer</strong> erstellt werden.</p>
 <blockquote>
-<div><div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">addNeuesFormatTransformer</span><span class="p">(</span><span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">String</span> <span class="n">type</span> <span class="o">=</span> <span class="n">node</span><span class="p">.</span><span class="na">getContentType</span><span class="p">();</span>
-    <span class="k">if</span> <span class="p">(</span><span class="s">&quot;public&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="na">getPublishScheme</span><span class="p">()))</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="s">&quot;monograph&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">type</span><span class="p">)</span> <span class="o">||</span> <span class="s">&quot;journal&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">type</span><span class="p">)</span>
-        <span class="o">||</span> <span class="s">&quot;webpage&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">type</span><span class="p">)</span> <span class="o">||</span> <span class="s">&quot;researchData&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">type</span><span class="p">)</span>
-        <span class="o">||</span> <span class="s">&quot;article&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">type</span><span class="p">))</span> <span class="p">{</span>
-          <span class="n">node</span><span class="p">.</span><span class="na">addTransformer</span><span class="p">(</span><span class="k">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="s">&quot;neuesFormat&quot;</span><span class="p">));</span>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addNeuesFormatTransformer</span><span class="p">(</span><span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">String</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">getContentType</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;public&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">getPublishScheme</span><span class="p">()))</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;monograph&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;journal&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+        <span class="o">||</span> <span class="s2">&quot;webpage&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;researchData&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+        <span class="o">||</span> <span class="s2">&quot;article&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span> <span class="p">{</span>
+          <span class="n">node</span><span class="o">.</span><span class="n">addTransformer</span><span class="p">(</span><span class="n">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="s2">&quot;neuesFormat&quot;</span><span class="p">));</span>
       <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">}</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage integriert werden.</p>
+<p>Ebenso muss in die Methode <strong>addUnknownTransformer</strong> eine zusätzliche If-Abfrage integriert werden.</p>
 <blockquote>
-<div><div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">addUnknownTransformer</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">transformers</span><span class="p">,</span>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private</span> <span class="n">static</span> <span class="n">void</span> <span class="n">addUnknownTransformer</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">transformers</span><span class="p">,</span>
   <span class="n">Node</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">transformers</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">transformers</span> <span class="o">!=</span> <span class="n">null</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">t</span> <span class="p">:</span> <span class="n">transformers</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="s">&quot;oaidc&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
-        <span class="k">continue</span><span class="p">;</span> <span class="c1">// implicitly added - or not allowed to set</span>
-  <span class="o">[</span><span class="p">...</span><span class="o">]</span>
-      <span class="k">if</span> <span class="p">(</span><span class="s">&quot;neuesFormat&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
-        <span class="k">continue</span><span class="p">;</span> <span class="c1">// implicitly added - or not allowed to set</span>
-      <span class="n">node</span><span class="p">.</span><span class="na">addTransformer</span><span class="p">(</span><span class="k">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+      <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;oaidc&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="k">continue</span><span class="p">;</span> <span class="o">//</span> <span class="n">implicitly</span> <span class="n">added</span> <span class="o">-</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">allowed</span> <span class="n">to</span> <span class="nb">set</span>
+  <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+      <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;neuesFormat&quot;</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="k">continue</span><span class="p">;</span> <span class="o">//</span> <span class="n">implicitly</span> <span class="n">added</span> <span class="o">-</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">allowed</span> <span class="n">to</span> <span class="nb">set</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">addTransformer</span><span class="p">(</span><span class="n">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>In der Methode initContentModels(String namespace)ist dann noch ein zusätzlicher Block transformers.add einzutragen.</p>
+<p>In der Methode <strong>initContentModels(String namespace)</strong> ist dann noch ein zusätzlicher Block transformers.add einzutragen.</p>
 <blockquote>
-<div><div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">transformers</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">namespace</span> <span class="o">+</span> <span class="s">&quot;neuesFormat&quot;</span><span class="p">,</span> <span class="s">&quot;neuesFormat&quot;</span><span class="p">,</span>
-                <span class="n">internalAccessRoute</span> <span class="o">+</span> <span class="s">&quot;neuesFormat&quot;</span><span class="p">));</span>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transformers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">namespace</span> <span class="o">+</span> <span class="s2">&quot;neuesFormat&quot;</span><span class="p">,</span> <span class="s2">&quot;neuesFormat&quot;</span><span class="p">,</span>
+                <span class="n">internalAccessRoute</span> <span class="o">+</span> <span class="s2">&quot;neuesFormat&quot;</span><span class="p">));</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Die Datei Transform muss anschließend um eine Methode neuesFormat erweitert werden. Diese Methode wird später über eine, in der Datei Resource.java definierte
+<p>Die Java-Klasse <strong>Transform.java</strong> muss anschließend um eine Methode <strong>neuesFormat</strong> erweitert werden. Diese Methode wird später über eine, in der Klasse <strong>Resource.java</strong> definierte
 ApiOperation „asNeuesFormat“ als Restful-Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.</p>
 <p>Das Mappen und die Erzeugung eines Metadatenstroms wurde in der Vergangenheit über unterschiedliche Wege umgesetzt, bei denen ebenfalls mehrere Klassen und ggf.
 ScalaViews beteiligt sind.</p>
@@ -125,39 +126,39 @@ Im Unterschied dazu erzeugen die Record-Klassen String-Representationen eines XM
 Objektelementen, die aber gelöst werden sollen. Um strukturiert zuzugreifen, sollte die Klasse regal-api.app.helper.oai.JsonLDMapper verwendet werden. Damit
 wird auch das Anlegen neuer ScalaViews obsolet.</p>
 </div>
-<div class="section" id="konfiguration-der-regal-api-und-des-oai-providers-anpassen">
-<h2>Konfiguration der regal-api und des OAI-Providers anpassen<a class="headerlink" href="#konfiguration-der-regal-api-und-des-oai-providers-anpassen" title="Link zu dieser Überschrift">¶</a></h2>
-<p>Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.</p>
+<div class="section" id="konfiguration-anpassen">
+<h2>Konfiguration anpassen<a class="headerlink" href="#konfiguration-anpassen" title="Link zu dieser Überschrift">¶</a></h2>
+<p>Damit das als Dissemination angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>GET /resource/:pid.openaire     controllers.Resource.asOpenAire<span class="o">(</span>pid, validate : Boolean ?<span class="o">=</span> <span class="nb">false</span><span class="o">)</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>GET /resource/:pid.openaire     controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
 </pre></div>
 </div>
 </div></blockquote>
-<p>Mit dieseem Eintrag wird eine Verbindung zwischen der entsprechenden Java-Methode und dem über das Play Framework stattfindenden Aufruf über eine HTTP-Methode erreicht.</p>
-<p>Wie zu sehen ist, wird hier auch bestimmt, ob das erstellte Objekt normalerweise gegen eine xsd-Datei validiert werden soll. Im Beispile ist das nicht der Fall: validate : Boolean ?= false.
+<p>Mit diesem Eintrag wird eine Verbindung zwischen der entsprechenden Java-Methode und dem über das Play Framework stattfindenden Aufruf über eine HTTP-Methode erreicht.</p>
+<p>Wie zu sehen ist, wird hier auch bestimmt, ob das erstellte Objekt normalerweise gegen eine xsd-Datei validiert werden soll. Im Beispiel ist das nicht der Fall: validate : Boolean ?= false.
 In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhängenden Konfigurationen angepasst werden. Die Datei wird direkt im entpackten Applikation-Container angepasst.</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################</span>
 <span class="c1"># Fedora Driver: Metadata Format Configuration #</span>
 <span class="c1">################################################</span>
 <span class="c1"># Metadata formats to make available.</span>
-driver.fedora.md.formats <span class="o">=</span> oai_dc epicur mabxml-1 mets rdf oai_wgl oai_openaire
-<span class="o">[</span>...<span class="o">]</span>
-driver.fedora.md.format.oai_ore.loc <span class="o">=</span> http://www.w3.org/2000/07/rdf.xsd
+<span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">formats</span> <span class="o">=</span> <span class="n">oai_dc</span> <span class="n">epicur</span> <span class="n">mabxml</span><span class="o">-</span><span class="mi">1</span> <span class="n">mets</span> <span class="n">rdf</span> <span class="n">oai_wgl</span> <span class="n">oai_openaire</span>
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">oai_ore</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">w3</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="mi">2000</span><span class="o">/</span><span class="mi">07</span><span class="o">/</span><span class="n">rdf</span><span class="o">.</span><span class="n">xsd</span>
 
-driver.fedora.md.format.oai_openaire.loc <span class="o">=</span> https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd
+<span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">oai_openaire</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">openaire</span><span class="o">.</span><span class="n">eu</span><span class="o">/</span><span class="n">schema</span><span class="o">/</span><span class="n">repo</span><span class="o">-</span><span class="n">lit</span><span class="o">/</span><span class="mf">4.0</span><span class="o">/</span><span class="n">openaire</span><span class="o">.</span><span class="n">xsd</span>
 
-<span class="o">[</span>...<span class="o">]</span>
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
 
-driver.fedora.md.format.oai_ore.uri <span class="o">=</span> http://www.w3.org/1999/02/22-rdf-syntax-ns#
+<span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">oai_ore</span><span class="o">.</span><span class="n">uri</span> <span class="o">=</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">w3</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="mi">1999</span><span class="o">/</span><span class="mi">02</span><span class="o">/</span><span class="mi">22</span><span class="o">-</span><span class="n">rdf</span><span class="o">-</span><span class="n">syntax</span><span class="o">-</span><span class="n">ns</span><span class="c1">#</span>
 
-driver.fedora.md.format.oai_openaire.uri <span class="o">=</span> http://namespace.openaire.eu/schema/oaire/
+<span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">oai_openaire</span><span class="o">.</span><span class="n">uri</span> <span class="o">=</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">namespace</span><span class="o">.</span><span class="n">openaire</span><span class="o">.</span><span class="n">eu</span><span class="o">/</span><span class="n">schema</span><span class="o">/</span><span class="n">oaire</span><span class="o">/</span>
 
-<span class="o">[</span>...<span class="o">]</span>
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
 
-driver.fedora.md.format.oai_dc.dissType <span class="o">=</span> info:fedora/*/CM:oaidcServiceDefinition/oaidc
+<span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">oai_dc</span><span class="o">.</span><span class="n">dissType</span> <span class="o">=</span> <span class="n">info</span><span class="p">:</span><span class="n">fedora</span><span class="o">/*/</span><span class="n">CM</span><span class="p">:</span><span class="n">oaidcServiceDefinition</span><span class="o">/</span><span class="n">oaidc</span>
 
-driver.fedora.md.format.oai_openaire.dissType <span class="o">=</span> info:fedora/*/CM:openaireServiceDefinition/openaire
+<span class="n">driver</span><span class="o">.</span><span class="n">fedora</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">oai_openaire</span><span class="o">.</span><span class="n">dissType</span> <span class="o">=</span> <span class="n">info</span><span class="p">:</span><span class="n">fedora</span><span class="o">/*/</span><span class="n">CM</span><span class="p">:</span><span class="n">openaireServiceDefinition</span><span class="o">/</span><span class="n">openaire</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -176,11 +177,11 @@ Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittel
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Inhaltsverzeichnis</a></h3>
+  <h3><a href="../index.html">Inhalt</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Neues Metadaten-Format in die OAI-Schnittstelle integrieren</a><ul>
-<li><a class="reference internal" href="#java-klassen-erweitern-und-anpassen">Java-Klassen erweitern und anpassen</a></li>
-<li><a class="reference internal" href="#konfiguration-der-regal-api-und-des-oai-providers-anpassen">Konfiguration der regal-api und des OAI-Providers anpassen</a></li>
+<li><a class="reference internal" href="#">Neues MD-Format in OAI integrieren</a><ul>
+<li><a class="reference internal" href="#java-klassen-erweitern">Java-Klassen erweitern</a></li>
+<li><a class="reference internal" href="#konfiguration-anpassen">Konfiguration anpassen</a></li>
 <li><a class="reference internal" href="#testen-der-schnittstelle">Testen der Schnittstelle</a></li>
 </ul>
 </li>
@@ -200,11 +201,13 @@ Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittel
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Schnellsuche</h3>
+  <h3>Schnellsuche</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Los" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -230,7 +233,7 @@ Obwohl GET als Methode deklariert ist, funktioniert jedoch nur der Aufruf mittel
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2019, Andres Quast.
-      Mit <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1 erstellt.
+      Mit <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6 erstellt.
     </div>
   </body>
 </html>

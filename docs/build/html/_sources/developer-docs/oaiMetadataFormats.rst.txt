@@ -1,5 +1,5 @@
-Neues Metadaten-Format in die OAI-Schnittstelle integrieren
-===========================================================
+Neues MD-Format in OAI integrieren
+==================================
 
 Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Aktivitäten an mehreren Stellen.
 
@@ -7,8 +7,8 @@ Die Integration eines neuen Metadatenformats in die OAI-Schnittstelle umfasst Ak
 2. Konfiguration der regal-api und des OAI-Providers anpassen
 3. Testen der Schnittstelle
 
-Java-Klassen erweitern und anpassen
------------------------------------
+Java-Klassen erweitern
+----------------------
 
 Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind die folgenden Dateien relevant.
 
@@ -19,7 +19,7 @@ Für die Integration eines neuen Metadaten-Formats in die OAI-Schnittstelle sind
 In diesen drei Klassen müssen an mehreren Stellen Anpassungen, bzw. Erweiterungen des Codes vorgenommen werden, damit das Mapping und die Erstellung 
 eines Metadaten-Stroms im System ausgelöst und gesteuert wird.
 
-In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode addNeuesFormatTransformer erstellt werden. 
+In der Datei **OaiDispatcher.java** muss ein zusätzlicher Transformer-Aufruf generiert werden und eine neue Methode **addNeuesFormatTransformer** erstellt werden. 
 
  .. code:: java
 
@@ -35,7 +35,7 @@ In der Datei OaiDispatcher.java muss ein zusätzlicher Transformer-Aufruf generi
       } 
 
 
-Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage integriert werden.
+Ebenso muss in die Methode **addUnknownTransformer** eine zusätzliche If-Abfrage integriert werden.
 
  .. code:: java
 
@@ -53,7 +53,7 @@ Ebenso muss in die Methode addUnknownTransformer eine zusätzliche If-Abfrage in
       }
     }
 
-In der Methode initContentModels(String namespace)ist dann noch ein zusätzlicher Block transformers.add einzutragen.
+In der Methode **initContentModels(String namespace)** ist dann noch ein zusätzlicher Block transformers.add einzutragen.
 
  .. code:: java
 
@@ -62,7 +62,7 @@ In der Methode initContentModels(String namespace)ist dann noch ein zusätzliche
 
 
 
-Die Datei Transform muss anschließend um eine Methode neuesFormat erweitert werden. Diese Methode wird später über eine, in der Datei Resource.java definierte 
+Die Java-Klasse **Transform.java** muss anschließend um eine Methode **neuesFormat** erweitert werden. Diese Methode wird später über eine, in der Klasse **Resource.java** definierte 
 ApiOperation "asNeuesFormat" als Restful-Request aufgerufen. Die ApiOperation muss entsprechend auch angelegt werden.  
 
 Das Mappen und die Erzeugung eines Metadatenstroms wurde in der Vergangenheit über unterschiedliche Wege umgesetzt, bei denen ebenfalls mehrere Klassen und ggf.
@@ -82,20 +82,20 @@ wird auch das Anlegen neuer ScalaViews obsolet.
 
 
     
-      
 
-Konfiguration der regal-api und des OAI-Providers anpassen
-----------------------------------------------------------
 
-Damit das als Dissemination* angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.
+Konfiguration anpassen
+----------------------
+
+Damit das als Dissemination angelegte neue Format über die regal-api abgefragt werden kann, muss in der Datei conf/routes eine entsprechende Konfigurationszeile erstellt werden.
 
  .. code:: bash
 
     GET /resource/:pid.openaire	    controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
 
-Mit dieseem Eintrag wird eine Verbindung zwischen der entsprechenden Java-Methode und dem über das Play Framework stattfindenden Aufruf über eine HTTP-Methode erreicht.  
+Mit diesem Eintrag wird eine Verbindung zwischen der entsprechenden Java-Methode und dem über das Play Framework stattfindenden Aufruf über eine HTTP-Methode erreicht.  
 
-Wie zu sehen ist, wird hier auch bestimmt, ob das erstellte Objekt normalerweise gegen eine xsd-Datei validiert werden soll. Im Beispile ist das nicht der Fall: validate : Boolean ?= false. 
+Wie zu sehen ist, wird hier auch bestimmt, ob das erstellte Objekt normalerweise gegen eine xsd-Datei validiert werden soll. Im Beispiel ist das nicht der Fall: validate : Boolean ?= false. 
 In der Datei proai.properties müssen die mit der OAI-Schnittstelle zusammenhängenden Konfigurationen angepasst werden. Die Datei wird direkt im entpackten Applikation-Container angepasst. 
 
  .. code:: bash

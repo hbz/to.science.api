@@ -1,9 +1,11 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="de">
   <head>
-    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>JSON in Java-Klassen überführen &#8212; regal-api  Dokumentation</title>
     <link rel="stylesheet" href="../_static/hbz.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -11,7 +13,6 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
     <script type="text/javascript" src="../_static/translations.js"></script>
     <link rel="index" title="Stichwortverzeichnis" href="../genindex.html" />
     <link rel="search" title="Suche" href="../search.html" />
@@ -56,9 +57,9 @@ der die im JSON liegenden Metadaten in einer einheitlichen Weise für die Verarb
 <p>Die Einrichtung der Klasse JsonLDMapper verfolgt das Ziel, kommende Änderungen am Datenmodell vom lobid mit möglichst wenig Aufwand in das Repository übernehmen zu können.</p>
 <p>Grundlage bilden die von JSON unterstützten Datentypen. Die in JSON verwendeten Datentypen werden zunächst konzeptuell auf drei Typen reduziert.</p>
 <ul class="simple">
-<li><p>Object</p></li>
-<li><p>Array of Values als ArrayList&lt;Hashtable&lt;String,String&gt;&gt;</p></li>
-<li><p>Key/Value-Paare als Hashtable&lt;String,String&gt;</p></li>
+<li>Object</li>
+<li>Array of Values als ArrayList&lt;Hashtable&lt;String,String&gt;&gt;</li>
+<li>Key/Value-Paare als Hashtable&lt;String,String&gt;</li>
 </ul>
 <p>Der Datentyp Object wird als Container-Element für weitere Datentypen verwendet und rekursiv bis zu den
 elementaren Datentypen Array of Values und key/value-Paare aufgelöst. Die dabei verarbeitete Pfad-Struktur wird
@@ -70,53 +71,53 @@ Arrays of Value in Form des Array-Bezeichners aus dem JSON und des jeweiligen We
 <p>Beispiele</p>
 <p>Aus dem Array von Literalen „title“</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>record : <span class="o">{</span>title: <span class="o">[</span><span class="s2">&quot;Ausdrücke in Java&quot;</span>, <span class="s2">&quot;Java Expressions&quot;</span>, <span class="s2">&quot;Expression de Java&quot;</span><span class="o">]}}</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">record</span> <span class="p">:</span> <span class="p">{</span><span class="n">title</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ausdrücke in Java&quot;</span><span class="p">,</span> <span class="s2">&quot;Java Expressions&quot;</span><span class="p">,</span> <span class="s2">&quot;Expression de Java&quot;</span><span class="p">]}}</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>erhält man durch mit dem JsonLDMapper</p>
 <blockquote>
-<div><div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
-<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="p">.</span><span class="na">getElement</span><span class="p">(</span><span class="s">&quot;root.record.title&quot;</span><span class="p">);</span>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
+<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;root.record.title&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>eine <strong>ArrayListe</strong> die aus drei Key/Value-Paaren besteht:</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">title</span> <span class="o">=</span> <span class="s2">&quot;Ausdrücke in Java&quot;</span>
-<span class="nv">title</span> <span class="o">=</span> <span class="s2">&quot;Java Expressions&quot;</span>
-<span class="nv">title</span> <span class="o">=</span> <span class="s2">&quot;Expression de Java&quot;</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Ausdrücke in Java&quot;</span>
+<span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Java Expressions&quot;</span>
+<span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Expression de Java&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>Aus dem aus zwei Key/Value-Paaren bestehenden Objekt „creator“</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>record : <span class="o">{</span>creator: <span class="o">{</span>
-        prefLabel : <span class="s2">&quot;Loki Schmidt&quot;</span>,
-        @id : <span class="s2">&quot;https://orcid.org/000-000-000&quot;</span> <span class="o">}</span>
-<span class="o">}}</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">record</span> <span class="p">:</span> <span class="p">{</span><span class="n">creator</span><span class="p">:</span> <span class="p">{</span>
+        <span class="n">prefLabel</span> <span class="p">:</span> <span class="s2">&quot;Loki Schmidt&quot;</span><span class="p">,</span>
+        <span class="nd">@id</span> <span class="p">:</span> <span class="s2">&quot;https://orcid.org/000-000-000&quot;</span> <span class="p">}</span>
+<span class="p">}}</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>erhält man durch den gleichen Aufruf:</p>
 <blockquote>
-<div><div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
-<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="p">.</span><span class="na">getElement</span><span class="p">(</span><span class="s">&quot;root.creator&quot;</span><span class="p">);</span>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
+<span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Hashtable</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">title</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;root.creator&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>eine <strong>ArrayListe</strong> die aus zwei Key/Value-Paaren besteht:</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">prefLabel</span> <span class="o">=</span> <span class="s2">&quot;Loki Schmidt&quot;</span>
-@id : <span class="s2">&quot;https://orcid.org/000-000-000&quot;</span>
+<div><div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prefLabel</span> <span class="o">=</span> <span class="s2">&quot;Loki Schmidt&quot;</span>
+<span class="nd">@id</span> <span class="p">:</span> <span class="s2">&quot;https://orcid.org/000-000-000&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>Damit der in Json verwendete Datentyp weiterhin eindeutig unterscheiden werden kann, besitzt die JsonLDMapper-Klasse zusätzlich die Methoden
 isArray() und isObject().</p>
 <blockquote>
-<div><div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
-<span class="kt">boolean</span> <span class="n">test</span> <span class="o">=</span> <span class="n">jMapper</span><span class="p">.</span><span class="na">getElement</span><span class="p">(</span><span class="s">&quot;\root.creator\&quot;</span><span class="p">).</span><span class="na">isArray</span><span class="p">();</span>
+<div><div class="code java highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">JsonLDMapper</span> <span class="n">jMapper</span> <span class="o">=</span> <span class="n">new</span> <span class="n">JsonLDMapper</span><span class="p">(</span><span class="n">JsonNode</span><span class="p">);</span>
+<span class="n">boolean</span> <span class="n">test</span> <span class="o">=</span> <span class="n">jMapper</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">oot.creator</span><span class="se">\&quot;</span><span class="s2">).isArray();</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -139,11 +140,13 @@ isArray() und isObject().</p>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Schnellsuche</h3>
+  <h3>Schnellsuche</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Los" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -166,7 +169,7 @@ isArray() und isObject().</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2019, Andres Quast.
-      Mit <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1 erstellt.
+      Mit <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6 erstellt.
     </div>
   </body>
 </html>

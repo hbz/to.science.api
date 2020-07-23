@@ -1,9 +1,11 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="de">
   <head>
-    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Willkommen zur regal-api Dokumentation! &#8212; regal-api  Dokumentation</title>
     <link rel="stylesheet" href="_static/hbz.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -11,11 +13,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
     <script type="text/javascript" src="_static/translations.js"></script>
     <link rel="index" title="Stichwortverzeichnis" href="genindex.html" />
     <link rel="search" title="Suche" href="search.html" />
-    <link rel="next" title="Neues Metadaten-Format in die OAI-Schnittstelle integrieren" href="developer-docs/oaiMetadataFormats.html" />
+    <link rel="next" title="Neues MD-Format in OAI integrieren" href="developer-docs/oaiMetadataFormats.html" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -38,7 +39,7 @@
           <a href="genindex.html" title="Stichwortverzeichnis"
              accesskey="I">Index</a></li>
         <li class="right" >
-          <a href="developer-docs/oaiMetadataFormats.html" title="Neues Metadaten-Format in die OAI-Schnittstelle integrieren"
+          <a href="developer-docs/oaiMetadataFormats.html" title="Neues MD-Format in OAI integrieren"
              accesskey="N">weiter</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">regal-api  Dokumentation</a> &#187;</li> 
       </ul>
@@ -54,9 +55,9 @@
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Inhalt:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="developer-docs/oaiMetadataFormats.html">Neues Metadaten-Format in die OAI-Schnittstelle integrieren</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="developer-docs/oaiMetadataFormats.html#java-klassen-erweitern-und-anpassen">Java-Klassen erweitern und anpassen</a></li>
-<li class="toctree-l2"><a class="reference internal" href="developer-docs/oaiMetadataFormats.html#konfiguration-der-regal-api-und-des-oai-providers-anpassen">Konfiguration der regal-api und des OAI-Providers anpassen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer-docs/oaiMetadataFormats.html">Neues MD-Format in OAI integrieren</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer-docs/oaiMetadataFormats.html#java-klassen-erweitern">Java-Klassen erweitern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-docs/oaiMetadataFormats.html#konfiguration-anpassen">Konfiguration anpassen</a></li>
 <li class="toctree-l2"><a class="reference internal" href="developer-docs/oaiMetadataFormats.html#testen-der-schnittstelle">Testen der Schnittstelle</a></li>
 </ul>
 </li>
@@ -67,7 +68,7 @@
 <div class="section" id="suche">
 <h1>Suche<a class="headerlink" href="#suche" title="Link zu dieser Überschrift">¶</a></h1>
 <ul class="simple">
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Suche</span></a></p></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Suche</span></a></li>
 </ul>
 </div>
 
@@ -77,7 +78,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Inhaltsverzeichnis</a></h3>
+  <h3><a href="#">Inhalt</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Willkommen zur regal-api Dokumentation!</a></li>
 <li><a class="reference internal" href="#suche">Suche</a></li>
@@ -85,7 +86,7 @@
 
   <h4>Nächstes Thema</h4>
   <p class="topless"><a href="developer-docs/oaiMetadataFormats.html"
-                        title="nächstes Kapitel">Neues Metadaten-Format in die OAI-Schnittstelle integrieren</a></p>
+                        title="nächstes Kapitel">Neues MD-Format in OAI integrieren</a></p>
   <div role="note" aria-label="source link">
     <h3>Diese Seite</h3>
     <ul class="this-page-menu">
@@ -94,11 +95,13 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Schnellsuche</h3>
+  <h3>Schnellsuche</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Los" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -114,14 +117,14 @@
           <a href="genindex.html" title="Stichwortverzeichnis"
              >Index</a></li>
         <li class="right" >
-          <a href="developer-docs/oaiMetadataFormats.html" title="Neues Metadaten-Format in die OAI-Schnittstelle integrieren"
+          <a href="developer-docs/oaiMetadataFormats.html" title="Neues MD-Format in OAI integrieren"
              >weiter</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">regal-api  Dokumentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2019, Andres Quast.
-      Mit <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1 erstellt.
+      Mit <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6 erstellt.
     </div>
   </body>
 </html>
