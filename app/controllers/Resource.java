@@ -908,14 +908,43 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/xml", nickname = "asBibTex", value = "asBib", notes = "Returns a BibTech representation of the resource meta data", response = Message.class, httpMethod = "GET")
-	public static Promise<Result> asMods(@PathParam("pid") String pid,
+	@ApiOperation(produces = "text/plain", nickname = "asBibTex", value = "asBibTex", notes = "Returns a BibTex representation of the resource meta data", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asBibTex(@PathParam("pid") String pid,
 			@QueryParam("validate") boolean validate) {
 		return new ReadMetadataAction().call(pid, node -> {
-			response().setContentType("application/xml");
-			String result = transform.mods(pid);
+			response().setContentType("text/plain");
+			String result = transform.bibtex(pid);
 			if (validate) {
-				validate(result, "public/schemas/mods-3-7.xsd", null, "public/schemas");
+				// validate(result, "public/schemas/mods-3-7.xsd", null,
+				// "public/schemas");
+			}
+			return ok(result);
+		});
+	}
+
+	@ApiOperation(produces = "text/plain", nickname = "asEndNote", value = "asEndNote", notes = "Returns a EndNote representation of the resource meta data", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asEndNote(@PathParam("pid") String pid,
+			@QueryParam("validate") boolean validate) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setContentType("text/plain");
+			String result = transform.endnote(pid);
+			if (validate) {
+				// validate(result, "public/schemas/mods-3-7.xsd", null,
+				// "public/schemas");
+			}
+			return ok(result);
+		});
+	}
+
+	@ApiOperation(produces = "text/plain", nickname = "asRis", value = "asRis", notes = "Returns a RIS representation of the resource meta data", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asRis(@PathParam("pid") String pid,
+			@QueryParam("validate") boolean validate) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setContentType("text/plain");
+			String result = transform.endnote(pid);
+			if (validate) {
+				// validate(result, "public/schemas/mods-3-7.xsd", null,
+				// "public/schemas");
 			}
 			return ok(result);
 		});
