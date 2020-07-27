@@ -20,6 +20,7 @@ import helper.DataciteMapper;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.PdfText;
+import helper.oai.BuRunner;
 import helper.oai.JsonLDMapper;
 import helper.oai.ModsMapper;
 import helper.oai.OpenAireMapper;
@@ -198,6 +199,39 @@ public class Transform {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
 		String result = new ModsMapper(node, uri).getData();
+		return result;
+	}
+
+	/**
+	 * @param pid The pid of an object
+	 * @return a openaire mapping
+	 */
+	public String bibtex(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		String result = new BuRunner("bib").getData();
+		return result;
+	}
+
+	/**
+	 * @param pid The pid of an object
+	 * @return a openaire mapping
+	 */
+	public String endnote(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		String result = new BuRunner("end").getData();
+		return result;
+	}
+
+	/**
+	 * @param pid The pid of an object
+	 * @return a openaire mapping
+	 */
+	public String ris(String pid) {
+		Node node = new Read().readNode(pid);
+		String uri = Globals.urnbase + node.getPid();
+		String result = new BuRunner("ris").getData();
 		return result;
 	}
 

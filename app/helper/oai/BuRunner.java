@@ -7,9 +7,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.w3c.dom.Document;
+
+import models.Node;
 
 /**
  * @author aquast
@@ -20,20 +23,39 @@ public class BuRunner {
 	/**
 	 * Constructor to initialize Hashtable
 	 */
-	public BuRunner() {
+	public BuRunner(String format) {
 		init();
 	}
 
+	private String format = null;
 	private String exitStateStr = null;
 	private String stoutStr = null;
 
 	private Hashtable<String, String> bibutils = new Hashtable<>();
 	private Document doc = null;
+	private String params = null;
 
 	private void init() {
 		bibutils.put("bib", "/usr/bin/xml2bib");
 		bibutils.put("end", "/usr/bin/xml2end");
 		bibutils.put("ris", "/usr/bin/xml2ris");
+	}
+
+	/**
+	 * @return
+	 */
+	public String getData() {
+
+		// Enumeration<String> bibEnum = bibutils.keys();
+
+		/*
+		 * while(bibEnum.hasMoreElements()) { String format = bibEnum.nextElement();
+		 * executeBibUtils(doc, format, params); }
+		 */
+
+		executeBibUtils(doc, format, params);
+
+		return stoutStr;
 	}
 
 	/**

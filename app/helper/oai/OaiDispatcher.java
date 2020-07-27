@@ -78,6 +78,9 @@ public class OaiDispatcher {
 		addWglTransformer(node);
 		addOpenAireTransformer(node);
 		addModsTransformer(node);
+		addBibTexTransformer(node);
+		addEndNoteTransformer(node);
+		addRisTransformer(node);
 
 	}
 
@@ -103,6 +106,12 @@ public class OaiDispatcher {
 				internalAccessRoute + "openaire"));
 		transformers.add(new Transformer(namespace + "mods", "mods",
 				internalAccessRoute + "mods"));
+		transformers.add(new Transformer(namespace + "bibtex", "bibtex",
+				internalAccessRoute + "bibtex"));
+		transformers.add(new Transformer(namespace + "endnote", "endnote",
+				internalAccessRoute + "endnote"));
+		transformers.add(
+				new Transformer(namespace + "ris", "ris", internalAccessRoute + "ris"));
 		transformers.add(
 				new Transformer(namespace + "rdf", "rdf", internalAccessRoute + "rdf"));
 		transformers.add(
@@ -257,7 +266,11 @@ public class OaiDispatcher {
 					continue; // implicitly added - or not allowed to set
 				if ("mods".equals(t))
 					continue; // implicitly added - or not allowed to set
-				if ("bibutils".equals(t))
+				if ("bibtex".equals(t))
+					continue; // implicitly added - or not allowed to set
+				if ("endnote".equals(t))
+					continue; // implicitly added - or not allowed to set
+				if ("ris".equals(t))
 					continue; // implicitly added - or not allowed to set
 				node.addTransformer(new Transformer(t));
 			}
@@ -346,7 +359,33 @@ public class OaiDispatcher {
 		}
 	}
 
-	private static void addBibutilsTransformer(Node node) {
+	private static void addBibTexTransformer(Node node) {
+		String type = node.getContentType();
+		if ("public".equals(node.getPublishScheme())) {
+			if ("monograph".equals(type) || "journal".equals(type)
+					|| "webpage".equals(type) || "researchData".equals(type)
+					|| "article".equals(type)) {
+				node.addTransformer(new Transformer("mods"));
+				node.addTransformer(new Transformer("bibutils"));
+
+			}
+		}
+	}
+
+	private static void addEndNoteTransformer(Node node) {
+		String type = node.getContentType();
+		if ("public".equals(node.getPublishScheme())) {
+			if ("monograph".equals(type) || "journal".equals(type)
+					|| "webpage".equals(type) || "researchData".equals(type)
+					|| "article".equals(type)) {
+				node.addTransformer(new Transformer("mods"));
+				node.addTransformer(new Transformer("bibutils"));
+
+			}
+		}
+	}
+
+	private static void addRisTransformer(Node node) {
 		String type = node.getContentType();
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
