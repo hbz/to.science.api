@@ -941,7 +941,7 @@ public class Resource extends MyController {
 			@QueryParam("validate") boolean validate) {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setContentType("text/plain");
-			String result = transform.endnote(pid);
+			String result = transform.ris(pid);
 			if (validate) {
 				// validate(result, "public/schemas/mods-3-7.xsd", null,
 				// "public/schemas");

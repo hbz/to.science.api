@@ -36,9 +36,9 @@ public class BuRunner {
 	private String params = null;
 
 	private void init() {
-		bibutils.put("bib", "/usr/bin/xml2bib");
-		bibutils.put("end", "/usr/bin/xml2end");
-		bibutils.put("ris", "/usr/bin/xml2ris");
+		bibutils.put("bib", "/usr/local/bin/xml2bib");
+		bibutils.put("end", "/usr/local/bin/xml2end");
+		bibutils.put("ris", "/usr/local/bin/xml2ris");
 	}
 
 	/**
