@@ -52,6 +52,12 @@ public class Globals {
 			Play.application().configuration().getString("regal-api.serverName");
 
 	/**
+	 * the server that hosts this app
+	 */
+	public static String apiUrl = "https://"
+			+ Play.application().configuration().getString("regal-api.serverName");
+
+	/**
 	 * the server to where urns should point
 	 */
 	public static String urnbase =
