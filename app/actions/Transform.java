@@ -209,7 +209,8 @@ public class Transform {
 	public String bibtex(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
-		String result = new BuRunner("bib").getData();
+		String modsXml = new ModsMapper(node, uri).getData();
+		String result = new BuRunner("bib", modsXml).getData();
 		return result;
 	}
 
@@ -220,7 +221,8 @@ public class Transform {
 	public String endnote(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
-		String result = new BuRunner("end").getData();
+		String modsXml = new ModsMapper(node, uri).getData();
+		String result = new BuRunner("end", modsXml).getData();
 		return result;
 	}
 
@@ -231,7 +233,8 @@ public class Transform {
 	public String ris(String pid) {
 		Node node = new Read().readNode(pid);
 		String uri = Globals.urnbase + node.getPid();
-		String result = new BuRunner("ris").getData();
+		String modsXml = new ModsMapper(node, uri).getData();
+		String result = new BuRunner("ris", modsXml).getData();
 		return result;
 	}
 

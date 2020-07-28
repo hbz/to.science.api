@@ -365,8 +365,7 @@ public class OaiDispatcher {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
 					|| "article".equals(type)) {
-				node.addTransformer(new Transformer("mods"));
-				node.addTransformer(new Transformer("bibutils"));
+				node.addTransformer(new Transformer("bibtex"));
 
 			}
 		}
@@ -378,8 +377,7 @@ public class OaiDispatcher {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
 					|| "article".equals(type)) {
-				node.addTransformer(new Transformer("mods"));
-				node.addTransformer(new Transformer("bibutils"));
+				node.addTransformer(new Transformer("endnote"));
 
 			}
 		}
@@ -391,8 +389,7 @@ public class OaiDispatcher {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
 					|| "article".equals(type)) {
-				node.addTransformer(new Transformer("mods"));
-				node.addTransformer(new Transformer("bibutils"));
+				node.addTransformer(new Transformer("ris"));
 
 			}
 		}

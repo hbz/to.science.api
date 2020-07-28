@@ -23,17 +23,17 @@ public class BuRunner {
 	/**
 	 * Constructor to initialize Hashtable
 	 */
-	public BuRunner(String format) {
+	public BuRunner(String format, String modsXml) {
 		init();
 	}
 
-	private String format = null;
+	private String format;
 	private String exitStateStr = null;
 	private String stoutStr = null;
 
 	private Hashtable<String, String> bibutils = new Hashtable<>();
-	private Document doc = null;
-	private String params = null;
+	private String modsXml;
+	private String params = "";
 
 	private void init() {
 		bibutils.put("bib", "/usr/local/bin/xml2bib");
@@ -53,7 +53,7 @@ public class BuRunner {
 		 * executeBibUtils(doc, format, params); }
 		 */
 
-		executeBibUtils(doc, format, params);
+		executeBibUtils(params);
 
 		return stoutStr;
 	}
@@ -70,18 +70,16 @@ public class BuRunner {
 	 * @param paramString
 	 * @param fileName
 	 */
-	public void executeBibUtils(Document doc, String format, String params) {
+	public void executeBibUtils(String params) {
 
 		// Complete execute String
 		String programPath = bibutils.get(format);
 		String defaultParams = new String("");
 
-		String modsXml = doc.getTextContent();
-
 		String executeString = new String(
 				"echo" + modsXml + " | " + programPath + " " + defaultParams);
 
-		play.Logger.debug("The execute String: " + executeString);
+		play.Logger.info("The execute String: " + executeString);
 		try {
 			Process proc = java.lang.Runtime.getRuntime().exec(executeString);
 			int exitState = proc.waitFor();
@@ -93,7 +91,7 @@ public class BuRunner {
 			while ((line = br.readLine()) != null) {
 				lineBuffer.append(line + "\n");
 			}
-			play.Logger.debug("STOUT: " + lineBuffer.toString());
+			play.Logger.info("STOUT: " + lineBuffer.toString());
 			play.Logger.info("Exit State: " + exitState);
 			stoutStr = lineBuffer.toString();
 			exitStateStr = Integer.toString(exitState);
