@@ -83,7 +83,9 @@ public class BuRunner {
 
 		play.Logger.info("The execute String: " + executeString);
 		try {
-			Process proc = java.lang.Runtime.getRuntime().exec(executeString);
+			ProcessBuilder procB = new ProcessBuilder("/bin/sh", "-c", executeString);
+			Process proc = procB.start();
+			// proc = java.lang.Runtime.getRuntime().exec(executeString);
 			int exitState = proc.waitFor();
 			InputStream stout = proc.getInputStream();
 			InputStreamReader isr = new InputStreamReader(stout);
