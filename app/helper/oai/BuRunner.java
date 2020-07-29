@@ -25,6 +25,8 @@ public class BuRunner {
 	 */
 	public BuRunner(String format, String modsXml) {
 		init();
+		this.format = format;
+		this.modsXml = modsXml;
 	}
 
 	private String format;
