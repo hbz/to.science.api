@@ -79,7 +79,7 @@ public class BuRunner {
 		String defaultParams = new String("");
 
 		String executeString = new String(
-				"echo" + modsXml + " | " + programPath + " " + defaultParams);
+				"echo " + modsXml + " | " + programPath + " " + defaultParams);
 
 		play.Logger.info("The execute String: " + executeString);
 		try {
