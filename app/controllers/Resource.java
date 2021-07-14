@@ -457,25 +457,35 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/json", nickname = "updateLrmiData", value = "updateLrmiData", notes = "Updates the metadata of the resource using Lrmi data.", response = Message.class, httpMethod = "PUT")
+	@ApiOperation(produces = "application/json", nickname = "updateLrmMessageiData", value = "updateLrmiData", notes = "Updates the metadata of the resource using Lrmi data.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
 	public static Promise<Result> updateLrmiData(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			play.Logger.debug("Starting updateLrmiData with pid=" + pid);
+			play.Logger
+					.debug("request().body().asJson()=" + request().body().asJson());
 			try {
 				/**
 				 * Wir legen 2 Datenströme an:
 				 * 
-				 * 1. gemappte LRMI-Daten als Metadata2-Datenstrom
+				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "lrmidata"
 				 */
-				String result1 = modify.updateLobidify2AndEnrichLrmiData(pid,
-						request().body().asText());
+				String result1 =
+						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
+				play.Logger.debug(result1);
+				/* das geht nicht, es wurde kein Datenstrom angelegt. */
+
 				/**
-				 * 2. ungemappte LRMI-Daten als neuartiger Datenstrom "lrmidata"
+				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom
 				 */
-				String result2 =
-						modify.updateAndEnrichLrmiData(pid, request().body().asText());
+				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
+				RDFFormat format = RDFFormat.NTRIPLES;
+				String result2 = modify.updateLobidify2AndEnrichLrmiData(pid, format,
+						request().body().asJson());
+				play.Logger.debug(result2);
+				/* das geht, es wird LRMI als Metadata2-Datenstrom angelegt. */
+
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
