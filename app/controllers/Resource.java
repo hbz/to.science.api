@@ -464,29 +464,27 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, node -> {
 			play.Logger.debug("Starting updateLrmiData with pid=" + pid);
 			play.Logger
-					.debug("request().body().asText()=" + request().body().asJson());
+					.debug("request().body().asJson()=" + request().body().asJson());
 			try {
 				/**
 				 * Wir legen 2 Datenströme an:
 				 * 
 				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "lrmidata"
 				 */
-				// ToDo: Hier asJson() anstatt asText() übergeben
 				String result1 =
-						modify.updateAndEnrichLrmiData(pid, request().body().asText());
+						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
+				play.Logger.debug(result1);
+				/* das geht nicht, es wurde kein Datenstrom angelegt. */
+
 				/**
 				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom
 				 */
-				RDFFormat format = RDFFormat.TURTLE;
-				if (request().accepts("application/rdf+xml")) {
-					format = RDFFormat.RDFXML;
-				} else if (request().accepts("text/turtle")) {
-					format = RDFFormat.TURTLE;
-				} else if (request().accepts("text/plain")) {
-					format = RDFFormat.NTRIPLES;
-				}
+				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
+				RDFFormat format = RDFFormat.NTRIPLES;
 				String result2 = modify.updateLobidify2AndEnrichLrmiData(pid, format,
-						request().body().asText());
+						request().body().asJson());
+				play.Logger.debug(result2);
+				/* das geht, es wird LRMI als Metadata2-Datenstrom angelegt. */
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {

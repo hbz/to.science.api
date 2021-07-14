@@ -36,6 +36,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -138,7 +141,18 @@ public class JsonMapper {
 	JsonConverter jsonConverter = null;
 
 	/**
-	 * @param node the node will be mapped to json ld in accordance to the profile
+	 * Ein Konstruktor für diese Klasse
+	 */
+	public JsonMapper() {
+		play.Logger.info("Creating new instance of Class JsonMapper");
+		jsonConverter = new JsonConverter(profile);
+	}
+
+	/**
+	 * Ein Konstruktor für diese Klasse, falls Metadata2-Datenstrom schon
+	 * vorhanden sein muss.
+	 * 
+	 * @param n the node will be mapped to json ld in accordance to the profile
 	 */
 	public JsonMapper(final Node n) {
 		try {
@@ -189,6 +203,8 @@ public class JsonMapper {
 	}
 
 	/**
+	 * Holt Metadaten im Format lobid --- VERALTET ! DEPRECATED !
+	 * 
 	 * @return a map representing the rdf data on this object
 	 */
 	public Map<String, Object> getLd() {
@@ -304,6 +320,11 @@ public class JsonMapper {
 		return null;
 	}
 
+	/**
+	 * Holt Metadaten im Format lobid2 als Java Map
+	 * 
+	 * @return
+	 */
 	private Map<String, Object> getDescriptiveMetadata2() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
@@ -800,6 +821,12 @@ public class JsonMapper {
 		return rdf;
 	}
 
+	/**
+	 * Holt Metadaten im Format lobid2 (falls vorhanden) und reichert sie an mit
+	 * Informationen aus dem Node
+	 * 
+	 * @return
+	 */
 	public Map<String, Object> getLd2() {
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata2();
@@ -952,6 +979,72 @@ public class JsonMapper {
 				result = true;
 		}
 		return result;
+	}
+
+	/**
+	 * Holt Metadaten im Format lobid2 (falls vorhanden) und mappt Felder aus
+	 * LRMI-Daten darauf.
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 * @param n The Node of the resource
+	 * @param content Die LRMI-Daten im Format JSON
+	 * @date 2021-07-14
+	 * 
+	 * @return Die Daten im Format lobid2-RDF
+	 */
+	public Map<String, Object> getLd2Lobidify2Lrmi(Node n, String content) {
+		/* ToDo: Hier muss das Mapping von LRMI.json nach lobid2.json hin !!! */
+		this.node = n;
+		try {
+			// Neues JSON-Objekt anlegen; für lobid2-Daten
+			Map<String, Object> rdf = node.getLd2();
+
+			// LRMIDaten nach JSONObject wandeln
+			JSONObject jcontent = new JSONObject(content);
+			play.Logger.debug("Start mapping of lrmi to lobid2");
+
+			JSONArray arr = jcontent.getJSONArray("@context");
+			play.Logger.debug("Found context: " + arr.getString(0));
+			rdf.put("@context", arr.getString(0));
+
+			String language = arr.getJSONObject(1).getString("@language");
+			play.Logger.debug("Found language: " + language);
+			/*
+			 * So etwas anlegen:
+			 * "language":[{"@id":"http://id.loc.gov/vocabulary/iso639-2/deu","label":
+			 * "Deutsch","prefLabel":"Deutsch"}]
+			 */
+			// eine Struktur {} anlegen:
+			Map<String, Object> languageMap = new TreeMap<>();
+			// languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/deu");
+			languageMap.put("@id",
+					"http://id.loc.gov/vocabulary/iso639-2/" + language);
+			// languageMap.put("label", "Deutsch");
+			// languageMap.put("prefLabel", "Deutsch");
+			List<Map<String, Object>> languages = new ArrayList<>();
+			languages.add(languageMap);
+			rdf.put("language", languages);
+			// *** hier weiter ***
+			postprocessing(rdf);
+
+			// Alternativ Rückgabetypen (experimentell):
+
+			// JsonNode childJsonNode = new ObjectMapper().valueToTree(rdf);
+			// return childJsonNode;
+
+			// return getJsonResult(rdf) = return Resource.asJson(rdf);
+
+			// String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
+			// return jsonString;
+
+			play.Logger.debug("Done mapping LRMI data to lobid2.");
+			return rdf;
+		} catch (JSONException je) {
+			play.Logger.error("Content could not be mapped!", je);
+			throw new RuntimeException("LRMI.json could not be mapped to lobid2.json",
+					je);
+		}
+
 	}
 
 }
