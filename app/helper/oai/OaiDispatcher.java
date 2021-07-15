@@ -70,7 +70,7 @@ public class OaiDispatcher {
 
 	public static void updateTransformer(List<String> transformers, Node node) {
 		node.removeAllContentModels();
-		addUnknownTransformer(transformers, nplay.Logger.debug("Start creating content type set");ode);
+		addUnknownTransformer(transformers, node);
 		addOaiDcTransformer(node);
 		addEpicurTransformer(node);
 		addAlephTransformer(node);
