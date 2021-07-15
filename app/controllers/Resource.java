@@ -469,12 +469,11 @@ public class Resource extends MyController {
 				/**
 				 * Wir legen 2 Datenströme an:
 				 * 
-				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "lrmidata"
+				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "Lrmidata"
 				 */
 				String result1 =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
 				play.Logger.debug(result1);
-				/* das geht nicht, es wurde kein Datenstrom angelegt. */
 
 				/**
 				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom
@@ -484,7 +483,6 @@ public class Resource extends MyController {
 				String result2 = modify.updateLobidify2AndEnrichLrmiData(pid, format,
 						request().body().asJson());
 				play.Logger.debug(result2);
-				/* das geht, es wird LRMI als Metadata2-Datenstrom angelegt. */
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {

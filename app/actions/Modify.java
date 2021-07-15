@@ -77,6 +77,7 @@ import models.RegalObject;
  *
  */
 public class Modify extends RegalAction {
+	String msg = "";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -338,7 +339,8 @@ public class Modify extends RegalAction {
 	 * @return a short message
 	 */
 	public String updateAndEnrichLrmiData(Node node, String content) {
-
+		play.Logger.debug("Start Update and enrich LRMI data.");
+		play.Logger.debug("content: " + content);
 		String pid = node.getPid();
 		if (content == null) {
 			throw new HttpArchiveException(406,
@@ -348,8 +350,10 @@ public class Modify extends RegalAction {
 		}
 
 		updateLrmiData(node, content);
-		return pid + " LRMI-metadata of " + node.getPid()
-				+ " successfully updated! ";
+		msg =
+				pid + " LRMI-metadata of " + node.getPid() + " successfully updated! ";
+		play.Logger.debug(msg);
+		return msg;
 
 		// Anreicherung muss erst mal nicht sein, wäre neue Methode:
 		// String enrichMessage = Enrich.enrichLrmiData(node);
@@ -1168,14 +1172,14 @@ public class Modify extends RegalAction {
 			}
 			File file = CopyUtils.copyStringToFile(content);
 			node.setLrmiDataFile(file.getAbsolutePath());
-			play.Logger.debug("LRMI data content: " + content);
+			play.Logger.debug("file.getAbsolutePath(): " + file.getAbsolutePath());
 			node.setLrmiData(content);
-			play.Logger.debug("Start making OAI Sets");
 			OaiDispatcher.makeOAISet(node);
 			play.Logger.debug("Re-Indexing node and parent");
 			reindexNodeAndParent(node);
-			play.Logger.debug("LRMI data successfully updated!");
-			return pid + " LRMI data successfully updated!";
+			msg = "LRMI data successfully updated!";
+			play.Logger.debug(msg);
+			return pid + " " + msg;
 		} catch (IOException e) {
 			throw new UpdateNodeException(e);
 		}
