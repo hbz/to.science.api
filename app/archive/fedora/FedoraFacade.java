@@ -202,6 +202,7 @@ public class FedoraFacade {
 	 */
 	public void createNode(Node node) {
 		try {
+			play.Logger.debug("Start create Node");
 			play.Logger.debug("node.getPid()=" + node.getPid());
 			play.Logger.debug("node.getLabel()=" + node.getLabel());
 			new Ingest(node.getPid()).label(node.getLabel()).execute();
@@ -399,6 +400,9 @@ public class FedoraFacade {
 		}
 		if (node.getMetadata2File() != null) {
 			utils.updateMetadata2Stream(node);
+		}
+		if (node.getLrmiDataFile() != null) {
+			utils.updateLrmiDataStream(node);
 		}
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);

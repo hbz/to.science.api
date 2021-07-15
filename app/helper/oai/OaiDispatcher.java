@@ -44,6 +44,7 @@ import archive.fedora.RdfUtils;
  *
  */
 public class OaiDispatcher {
+	static String msg = "";
 
 	/**
 	 * @param node the node to be published on the oai interface
@@ -59,17 +60,17 @@ public class OaiDispatcher {
 			createUrnSets(node);
 			createAlephSet(node);
 			createContentTypeSet(node);
+			play.Logger.debug("Start update Index");
 			new Modify().updateIndex(node.getPid());
 			return node.getPid() + " successfully created oai sets!";
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	public static void updateTransformer(List<String> transformers, Node node) {
 		node.removeAllContentModels();
-		addUnknownTransformer(transformers, node);
+		addUnknownTransformer(transformers, nplay.Logger.debug("Start creating content type set");ode);
 		addOaiDcTransformer(node);
 		addEpicurTransformer(node);
 		addAlephTransformer(node);

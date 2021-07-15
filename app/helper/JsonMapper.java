@@ -54,6 +54,7 @@ import play.Play;
 
 /**
  * @author jan schnasse
+ * @author Ingolf Kuss, hbz
  *
  */
 
@@ -993,7 +994,7 @@ public class JsonMapper {
 	 * @return Die Daten im Format lobid2-RDF
 	 */
 	public Map<String, Object> getLd2Lobidify2Lrmi(Node n, String content) {
-		/* ToDo: Hier muss das Mapping von LRMI.json nach lobid2.json hin !!! */
+		/* Mapping von LRMI.json nach lobid2.json */
 		this.node = n;
 		try {
 			// Neues JSON-Objekt anlegen; für lobid2-Daten
@@ -1002,44 +1003,124 @@ public class JsonMapper {
 			// LRMIDaten nach JSONObject wandeln
 			JSONObject jcontent = new JSONObject(content);
 			play.Logger.debug("Start mapping of lrmi to lobid2");
+			JSONArray arr = null;
+			JSONObject obj = null;
 
-			JSONArray arr = jcontent.getJSONArray("@context");
-			play.Logger.debug("Found context: " + arr.getString(0));
-			rdf.put("@context", arr.getString(0));
+			if (jcontent.has("@context")) {
+				arr = jcontent.getJSONArray("@context");
+				play.Logger.debug("Found context: " + arr.getString(0));
+				/* das geht nicht; @context wird in lobid2 automatisch erstellt */
+				/* kann man nicht mappen; soll auch nicht gemappt werden! */
+				rdf.put("@context", arr.getString(0));
+				obj = arr.getJSONObject(1);
+				String language = obj.getString("@language");
+				play.Logger.debug("Found language: " + language);
+				/*
+				 * So etwas anlegen:
+				 * "language":[{"@id":"http://id.loc.gov/vocabulary/iso639-2/deu",
+				 * "label": "Deutsch","prefLabel":"Deutsch"}]
+				 */
+				// eine Struktur {} anlegen:
+				Map<String, Object> languageMap = new TreeMap<>();
+				if (language != null && !language.trim().isEmpty()) {
+					if (language.length() == 2) {
+						// vermutlich ISO639-1
+						languageMap.put("@id",
+								"http://id.loc.gov/vocabulary/iso639-1/" + language);
+					} else if (language.length() == 3) {
+						// vermutlich ISO639-2
+						languageMap.put("@id",
+								"http://id.loc.gov/vocabulary/iso639-2/" + language);
+					} else {
+						play.Logger.warn(
+								"Unbekanntes Vokabluar für Sprachencode! Code=" + language);
+					}
+				}
+				// languageMap.put("label", "Deutsch");
+				// languageMap.put("prefLabel", "Deutsch");
+				List<Map<String, Object>> languages = new ArrayList<>();
+				languages.add(languageMap);
+				rdf.put("language", languages);
+			}
 
-			String language = arr.getJSONObject(1).getString("@language");
-			play.Logger.debug("Found language: " + language);
-			/*
-			 * So etwas anlegen:
-			 * "language":[{"@id":"http://id.loc.gov/vocabulary/iso639-2/deu","label":
-			 * "Deutsch","prefLabel":"Deutsch"}]
-			 */
-			// eine Struktur {} anlegen:
-			Map<String, Object> languageMap = new TreeMap<>();
-			// languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/deu");
-			languageMap.put("@id",
-					"http://id.loc.gov/vocabulary/iso639-2/" + language);
-			// languageMap.put("label", "Deutsch");
-			// languageMap.put("prefLabel", "Deutsch");
-			List<Map<String, Object>> languages = new ArrayList<>();
-			languages.add(languageMap);
-			rdf.put("language", languages);
-			// *** hier weiter ***
+			rdf.put(accessScheme, "public");
+			rdf.put(publishScheme, "public");
+
+			arr = jcontent.getJSONArray("type");
+			rdf.put("contentType", arr.getString(0));
+
+			List<String> names = new ArrayList<>();
+			names.add(jcontent.getString(name));
+			rdf.put("title", names);
+
+			if (jcontent.has("creator")) {
+				List<Map<String, Object>> creators = new ArrayList<>();
+				arr = jcontent.getJSONArray("creator");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					Map<String, Object> creatorMap = new TreeMap<>();
+					creatorMap.put("prefLabel", obj.getString(name));
+					creatorMap.put("@id", obj.getString("id"));
+					creators.add(creatorMap);
+				}
+				rdf.put("creator", creators);
+			}
+
+			if (jcontent.has("contributor")) {
+				List<Map<String, Object>> contributors = new ArrayList<>();
+				arr = jcontent.getJSONArray("contributor");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					Map<String, Object> contributorMap = new TreeMap<>();
+					contributorMap.put("prefLabel", obj.getString(name));
+					contributorMap.put("@id", obj.getString("id"));
+					contributors.add(contributorMap);
+				}
+				rdf.put("contributor", contributors);
+			}
+
+			if (jcontent.has("description")) {
+				List<String> abstractTexts = new ArrayList<>();
+				// arr = jcontent.getJSONArray("description");
+				// for (int i = 0; i < arr.length(); i++) {
+				// abstractTexts.add(arr.getString(i));
+				abstractTexts.add(jcontent.getString("description"));
+				// }
+				rdf.put("abstractText", abstractTexts);
+			}
+
+			if (jcontent.has("license")) {
+				List<Map<String, Object>> licenses = new ArrayList<>();
+				// arr = jcontent.getJSONArray("license");
+				// for (int i = 0; i < arr.length(); i++) {
+				Map<String, Object> licenseMap = new TreeMap<>();
+				// licenseMap.put("@id", arr.getString(i));
+				licenseMap.put("@id", jcontent.getString("license"));
+				licenses.add(licenseMap);
+				// }
+				rdf.put("license", licenses);
+			}
+
+			if (jcontent.has("publisher")) {
+				List<Map<String, Object>> institutions = new ArrayList<>();
+				arr = jcontent.getJSONArray("publisher");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					Map<String, Object> publisherMap = new TreeMap<>();
+					publisherMap.put("prefLabel", obj.getString(name));
+					publisherMap.put("@id", obj.getString("id"));
+					institutions.add(publisherMap);
+				}
+				rdf.put("institution", institutions);
+			}
+
 			postprocessing(rdf);
-
-			// Alternativ Rückgabetypen (experimentell):
-
-			// JsonNode childJsonNode = new ObjectMapper().valueToTree(rdf);
-			// return childJsonNode;
-
-			// return getJsonResult(rdf) = return Resource.asJson(rdf);
-
-			// String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
-			// return jsonString;
 
 			play.Logger.debug("Done mapping LRMI data to lobid2.");
 			return rdf;
-		} catch (JSONException je) {
+		} catch (
+
+		JSONException je) {
 			play.Logger.error("Content could not be mapped!", je);
 			throw new RuntimeException("LRMI.json could not be mapped to lobid2.json",
 					je);
