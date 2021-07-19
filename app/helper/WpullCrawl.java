@@ -328,6 +328,8 @@ public class WpullCrawl {
 				|| conf.getRobotsPolicy().equals(RobotsPolicy.ignore)) {
 			sb.append(" --no-robots");
 		}
+		sb.append(" --prefer-family=IPv4");
+		sb.append(" --http-proxy=http://externer-web-proxy.hbz-nrw.de:3128");
 		sb.append(" --escaped-fragment --strip-session-id");
 		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
@@ -335,9 +337,17 @@ public class WpullCrawl {
 		sb.append(" --no-directories"); // mandatory to prevent runtime errors
 		sb.append(" --delete-after"); // mandatory for reducing required disc space
 		sb.append(" --convert-links"); // mandatory to rewrite relative urls
-		sb.append(" --no-strong-redirects"); // ohne diesen Parameter wird www.facebook.com, www.youtoube.com uvm. eingesammelt (aktiviert 12.05.2020)
-		sb.append(" --warc-append"); // um CDN-Crawls und Haupt-Crawl im gleichen Archiv zu bündeln
-	        // sb.append(" --warc-tempdir=" + tempJobDir); auskommentiert 27.08.2020 für EDOZWO-1026
+		/**
+		 * ohne diesen Parameter wird www.facebook.com, www.youtoube.com uvm.
+		 * eingesammelt (aktiviert 12.05.2020)
+		 */
+		sb.append(" --no-strong-redirects");
+		/**
+		 * um CDN-Crawls und Haupt-Crawl im gleichen Archiv zu bündeln
+		 */
+		sb.append(" --warc-append");
+		// auskommentiert 27.08.2020 für EDOZWO-1026
+		// sb.append(" --warc-tempdir=" + tempJobDir)
 		sb.append(" --warc-move=" + resultDir);
 		return sb.toString();
 	}

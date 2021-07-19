@@ -25,6 +25,10 @@ public class WpullThread extends Thread {
 	private String warcFilename = null;
 	private String localpath = null;
 	private String executeCommand = null;
+	/**
+	 * "%20" durch Leerzeichen ersetzt für Ausgabe ins Log
+	 */
+	private String executeCommandRepl = null;
 	private ProcessBuilder pbCDN = null;
 	private ProcessBuilder pb = null;
 	private File logFileCDN = null;
@@ -166,8 +170,9 @@ public class WpullThread extends Thread {
 			for (int i = 0; i < execArr.length; i++) {
 				execArr[i] = execArr[i].replaceAll("%20", " ");
 			}
-			executeCommand = executeCommand.replaceAll("%20", " ");
-			WebgatherLogger.info("Executing command " + executeCommand);
+			executeCommandRepl = new String(executeCommand);
+			executeCommandRepl = executeCommandRepl.replaceAll("%20", " ");
+			WebgatherLogger.info("Executing command " + executeCommandRepl);
 			// andere Logdatei für den Hauptcrawl anlegen
 			logFile = new File(crawlDir.toString() + "/crawl.log");
 			logFile.createNewFile();
@@ -193,9 +198,22 @@ public class WpullThread extends Thread {
 				new Create().createWebpageVersion(node, conf, outDir, localpath);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
+				return;
 			}
-      
+
 			// Crawl wird erneut angestoßen
+			attempt++;
+			if (attempt > maxNumberAttempts) {
+				WebgatherLogger.info("Webcrawl for " + conf.getName()
+						+ " wurde bereits " + maxNumberAttempts
+						+ "-mal angestoßen. Kein weiterer Versuch.");
+				WebgatherLogger
+						.warn("Webcrawl für " + conf.getName() + "fehlgeschlagen !!");
+				/**
+				 * ToDo 20210719: Verschicken einer E-Mail !
+				 */
+				return;
+			}
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
 			pbCDN.directory(crawlDir);
