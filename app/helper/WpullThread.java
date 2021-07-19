@@ -201,6 +201,13 @@ public class WpullThread extends Thread {
 				return;
 			}
 
+			// Keep warc file of failed crawl
+			File warcFile =
+					new File(crawlDir.toString() + "/" + warcFilename + ".warc.gz");
+			File warcFileAttempted = new File(crawlDir.toString() + "/" + warcFilename
+					+ ".warc.gz.attempt" + attempt);
+			warcFile.renameTo(warcFileAttempted);
+			warcFile.delete();
 			// Crawl wird erneut angestoßen
 			attempt++;
 			if (attempt > maxNumberAttempts) {
