@@ -328,8 +328,9 @@ public class WpullCrawl {
 				|| conf.getRobotsPolicy().equals(RobotsPolicy.ignore)) {
 			sb.append(" --no-robots");
 		}
-		// sb.append(" --prefer-family=IPv4");
-		// sb.append(" --http-proxy=http://externer-web-proxy.hbz-nrw.de:3128");
+		/* Benutze Internet-Protokoll Version 4 */
+		sb.append(" -4");
+		sb.append(" --http-proxy=externer-web-proxy.hbz-nrw.de:3128");
 		sb.append(" --escaped-fragment --strip-session-id");
 		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
