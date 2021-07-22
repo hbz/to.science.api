@@ -124,6 +124,7 @@ public class Webgatherer implements Runnable {
 						new WebgatherUtils().startCrawl(n);
 						count++; // count erst hier, so dass fehlgeschlagene Launches nicht
 											// mitgezählt werden
+						WebgatherLogger.info("Count is now = " + count);
 					}
 				}
 
