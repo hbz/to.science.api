@@ -330,7 +330,8 @@ public class WpullCrawl {
 		}
 		/* Benutze Internet-Protokoll Version 4 */
 		sb.append(" -4");
-		sb.append(" --http-proxy=externer-web-proxy.hbz-nrw.de:3128");
+		// sb.append(" --http-proxy=externer-web-proxy.hbz-nrw.de:3128");
+		// kommt "Misconfigured redirect"
 		sb.append(" --escaped-fragment --strip-session-id");
 		sb.append(" --no-host-directories --page-requisites --no-parent");
 		sb.append(" --database=" + warcFilename + ".db");
