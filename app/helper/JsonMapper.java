@@ -1060,7 +1060,9 @@ public class JsonMapper {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> creatorMap = new TreeMap<>();
 					creatorMap.put("prefLabel", obj.getString(name));
-					creatorMap.put("@id", obj.getString("id"));
+					if (obj.has("id")) {
+						creatorMap.put("@id", obj.getString("id"));
+					}
 					creators.add(creatorMap);
 				}
 				rdf.put("creator", creators);
@@ -1073,7 +1075,9 @@ public class JsonMapper {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> contributorMap = new TreeMap<>();
 					contributorMap.put("prefLabel", obj.getString(name));
-					contributorMap.put("@id", obj.getString("id"));
+					if (obj.has("id")) {
+						contributorMap.put("@id", obj.getString("id"));
+					}
 					contributors.add(contributorMap);
 				}
 				rdf.put("contributor", contributors);
