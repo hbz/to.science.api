@@ -273,6 +273,7 @@ public class FedoraFacade {
 		getChecksumFromFedora(node);
 		getMetadataFromFedora(node);
 		getMetadata2FromFedora(node);
+		getLrmiDataFromFedora(node);
 		getDataFromFedora(pid, node);
 		getConfFromFedora(pid, node);
 		getUrlHistFromFedora(pid, node);
@@ -344,6 +345,17 @@ public class FedoraFacade {
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
+		}
+	}
+
+	private void getLrmiDataFromFedora(Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(node.getPid(), "Lrmidata").execute();
+			node.setLrmiData(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// datastream with name lrmiData is optional
 		}
 	}
 

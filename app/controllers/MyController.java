@@ -407,8 +407,9 @@ public class MyController extends Controller {
 	}
 
 	/**
-	 * @author Jan Schnasse
-	 *
+	 * @author Jan Schnasse Kontrolle der Zugriffsberechtigungen.
+	 *         Veröffentlichungsschema und Nutzer-Rolle müssen zusammen passen,
+	 *         sonst "Accss Denied"
 	 */
 	public static class ReadMetadataAction {
 		Promise<Result> call(String pid, NodeAction ca) {

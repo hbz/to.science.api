@@ -514,6 +514,21 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * @author I. Kuss
+	 * @param node Der Knoten, von dem die LRMI-Daten gelesen werden sollen
+	 * @return Die LRMI-Daten, genauso, wie sie gePOSTet wurden
+	 */
+	public String readLrmiData(Node node) {
+		try {
+			String lrmiData = node.getLrmiData();
+			return lrmiData;
+
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
 	 * @param node
 	 * @return a webgather configuration
 	 */

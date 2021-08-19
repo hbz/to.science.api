@@ -283,6 +283,17 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "text/plain", nickname = "listLrmiData", value = "listLrmiData", notes = "Shows LRMI-Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listLrmiData(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setHeader("Access-Control-Allow-Origin", "*");
+			String result = read.readLrmiData(node);
+			play.Logger.debug("result=" + result);
+			return ok(result);
+		});
+
+	}
+
 	@SuppressWarnings("resource")
 	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listData(@PathParam("pid") String pid) {
