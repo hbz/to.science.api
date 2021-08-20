@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -138,6 +139,7 @@ public class JsonMapper {
 			"info:regal/zettel/File" };
 
 	Node node = null;
+	String toscience_id = null;
 	EtikettMakerInterface profile = Globals.profile;
 	JsonConverter jsonConverter = null;
 
@@ -980,6 +982,80 @@ public class JsonMapper {
 				result = true;
 		}
 		return result;
+	}
+
+	/**
+	 * Diese Methode modifiziert den LRMI-Datenstrom. Der LRMI-Datenstrom muss im
+	 * Format JSON-String übergeben werden. Es werden IDs darin ersetzt. Der
+	 * LRMI-Datenstrom wird als JSON-String zurück gegeben.
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 * @param n The Node of the resource
+	 * @param content Die LRMI-Daten im Format JSON
+	 * @date 2021-08-20
+	 * 
+	 * @return Die Daten im Format LRMI JSON
+	 */
+	public String getTosciencefyLrmi(Node n, String content) {
+		this.node = n;
+		play.Logger.debug("Start getTosciencefyLrmi");
+		try {
+			// LRMI-Daten nach JSONObject wandeln
+			JSONObject jcontent = new JSONObject(content);
+			JSONArray arr = null;
+			JSONObject obj = null;
+
+			// toscience-ID generieren
+			toscience_id = new String(
+					Globals.protocol + Globals.server + "/resource/" + node.getPid());
+			play.Logger.debug("toscience ID for this resource is: " + toscience_id);
+
+			// Top-Level ID
+			String top_level_id = null;
+			if (jcontent.has("id")) {
+				top_level_id = jcontent.getString("id");
+			}
+			if (top_level_id == null) {
+				play.Logger.debug("Adding new top level id: " + toscience_id);
+				jcontent.put("id", toscience_id);
+			} else {
+				play.Logger.debug(
+						"Found top level id: " + top_level_id + ". Leaving unmodified.");
+			}
+
+			// mainEntityOfPage - ID
+			if (jcontent.has("mainEntityOfPage")) {
+				// ID in "mainEntityOfPage" wird ersetzt
+				arr = jcontent.getJSONArray("mainEntityOfPage");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					if (obj.has("id")) {
+						play.Logger
+								.debug("Bestehende mainEntityOfPage-ID " + obj.getString("id")
+										+ " wird ersetzt durch " + toscience_id + ".");
+					}
+					obj.put("id", toscience_id);
+					obj.put("dateModified", LocalDate.now());
+				}
+			} else {
+				// Element "mainEntityOfPage" wird neu angelegt
+				Collection<Map<String, Object>> mainEntityOfPage = new ArrayList<>();
+				Map<String, Object> mainEntityMap = new TreeMap<>();
+				mainEntityMap.put("id", toscience_id);
+				mainEntityMap.put("dateCreated", LocalDate.now());
+				mainEntityOfPage.add(mainEntityMap);
+				jcontent.put("mainEntityOfPage", mainEntityOfPage);
+			}
+
+			// geändertes JSONObject als Zeichenkette zurück geben
+			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
+			return jcontent.toString();
+
+		} catch (JSONException je) {
+			play.Logger.error("Content could not be mapped!", je);
+			throw new RuntimeException(
+					"LRMI.json could not be modified for toscience !", je);
+		}
 	}
 
 	/**

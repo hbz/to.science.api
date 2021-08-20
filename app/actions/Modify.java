@@ -349,7 +349,11 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
-		updateLrmiData(node, content);
+		String content_toscience =
+				new JsonMapper().getTosciencefyLrmi(node, content);
+		play.Logger.debug(
+				"Substituted IDs in content. Content is now: " + content_toscience);
+		updateLrmiData(node, content_toscience);
 		msg =
 				pid + " LRMI-metadata of " + node.getPid() + " successfully updated! ";
 		play.Logger.debug(msg);
