@@ -1094,12 +1094,14 @@ public class JsonMapper {
 			}
 
 			if (jcontent.has("license")) {
+				obj = jcontent.getJSONObject("license");
 				List<Map<String, Object>> licenses = new ArrayList<>();
 				// arr = jcontent.getJSONArray("license");
 				// for (int i = 0; i < arr.length(); i++) {
 				Map<String, Object> licenseMap = new TreeMap<>();
 				// licenseMap.put("@id", arr.getString(i));
-				licenseMap.put("@id", jcontent.getString("license"));
+				// licenseMap.put("@id", jcontent.getString("license"));
+				licenseMap.put("@id", obj.getString("id"));
 				licenses.add(licenseMap);
 				// }
 				rdf.put("license", licenses);
