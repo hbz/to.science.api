@@ -288,6 +288,7 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readLrmiData(node);
+			response().setContentType("application/json");
 			play.Logger.debug("result=" + result);
 			return ok(result);
 		});
