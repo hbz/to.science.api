@@ -25,7 +25,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.xml.namespace.NamespaceContext;
@@ -53,8 +56,14 @@ import org.xml.sax.SAXException;
 
 import com.google.common.xml.XmlEscapers;
 
+import helper.JSONArray;
+import helper.JSONException;
+import helper.JSONObject;
+
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
+ * @author Ingolf Kuss, hbz
+ * @author Alessio Pellerito, hbz
  * 
  */
 public class XmlUtils {
@@ -319,4 +328,128 @@ public class XmlUtils {
 			return "";
 		return XmlEscapers.xmlContentEscaper().escape(text);
 	}
+
+	/**
+	 * Holt Metadaten im Format lobid2 (falls vorhanden) und mappt Felder aus
+	 * DeepGreen-Daten darauf.
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 * @author Alessio Pellerito, hbz
+	 * @param n The Node of the resource
+	 * @param content Die DeepGreen-Daten im Format Document (XML)
+	 * @date 2021-10-01
+	 * 
+	 * @return Die Daten im Format lobid2-RDF
+	 */
+	public Map<String, Object> getLd2Lobidify2DeepGreen(Node n,
+			Document content) {
+		/* Mapping von DeepGreen.xml nach lobid2.json */
+		this.node = n;
+		try {
+			// Neues JSON-Objekt anlegen; für lobid2-Daten
+			Map<String, Object> rdf = node.getLd2();
+
+			// DeepGreenDaten nach JSONObject wandeln
+			// JSONObject jcontent = new JSONObject(content);
+			play.Logger.debug("Start mapping of DeepGreen to lobid2");
+			JSONArray arr = null;
+			JSONObject obj = null;
+
+			NodeList nodeList = content.getElementsByTagName("journal-title");
+			if (nodeList.getLength() > 0) {
+				play.Logger.debug("Found journal title: " + nodeList.item(0));
+				// eine Struktur {} anlegen:
+				Map<String, Object> containedInMap = new TreeMap<>();
+				containedInMap.put("prefLabel", nodeList.item(0));
+				List<Map<String, Object>> containedIns = new ArrayList<>();
+				containedIns.add(containedInMap);
+				rdf.put("containedIn", containedIns);
+			}
+
+			/**
+			 * if (content.getElementsByTagName("journal-title")) { arr =
+			 * jcontent.getJSONArray("@context"); play.Logger.debug("Found context: "
+			 * + arr.getString(0));
+			 * 
+			 * 
+			 * rdf.put("@context", arr.getString(0)); obj = arr.getJSONObject(1);
+			 * String language = obj.getString("@language"); play.Logger.debug("Found
+			 * language: " + language);
+			 * 
+			 * // eine Struktur {} anlegen: Map<String, Object> languageMap = new
+			 * TreeMap<>(); if (language != null && !language.trim().isEmpty()) { if
+			 * (language.length() == 2) { // vermutlich ISO639-1
+			 * languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-1/" +
+			 * language); } else if (language.length() == 3) { // vermutlich ISO639-2
+			 * languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/" +
+			 * language); } else { play.Logger.warn( "Unbekanntes Vokabluar fÃ¼r
+			 * Sprachencode! Code=" + language); } } // languageMap.put("label",
+			 * "Deutsch"); // languageMap.put("prefLabel", "Deutsch");
+			 * List<Map<String, Object>> languages = new ArrayList<>();
+			 * languages.add(languageMap); rdf.put("language", languages); }
+			 * 
+			 * rdf.put(accessScheme, "public"); rdf.put(publishScheme, "public");
+			 * 
+			 * arr = jcontent.getJSONArray("type"); rdf.put("contentType",
+			 * arr.getString(0));
+			 * 
+			 * List<String> names = new ArrayList<>();
+			 * names.add(jcontent.getString(name)); rdf.put("title", names);
+			 * 
+			 * if (jcontent.has("creator")) { List<Map<String, Object>> creators = new
+			 * ArrayList<>(); arr = jcontent.getJSONArray("creator"); for (int i = 0;
+			 * i < arr.length(); i++) { obj = arr.getJSONObject(i); Map<String,
+			 * Object> creatorMap = new TreeMap<>(); creatorMap.put("prefLabel",
+			 * obj.getString(name)); if (obj.has("id")) { creatorMap.put("@id",
+			 * obj.getString("id")); } creators.add(creatorMap); } rdf.put("creator",
+			 * creators); }
+			 * 
+			 * if (jcontent.has("contributor")) { List<Map<String, Object>>
+			 * contributors = new ArrayList<>(); arr =
+			 * jcontent.getJSONArray("contributor"); for (int i = 0; i < arr.length();
+			 * i++) { obj = arr.getJSONObject(i); Map<String, Object> contributorMap =
+			 * new TreeMap<>(); contributorMap.put("prefLabel", obj.getString(name));
+			 * if (obj.has("id")) { contributorMap.put("@id", obj.getString("id")); }
+			 * contributors.add(contributorMap); } rdf.put("contributor",
+			 * contributors); }
+			 * 
+			 * if (jcontent.has("description")) { List<String> abstractTexts = new
+			 * ArrayList<>(); // arr = jcontent.getJSONArray("description"); // for
+			 * (int i = 0; i < arr.length(); i++) { //
+			 * abstractTexts.add(arr.getString(i));
+			 * abstractTexts.add(jcontent.getString("description")); // }
+			 * rdf.put("abstractText", abstractTexts); }
+			 * 
+			 * if (jcontent.has("license")) { obj = jcontent.getJSONObject("license");
+			 * List<Map<String, Object>> licenses = new ArrayList<>(); // arr =
+			 * jcontent.getJSONArray("license"); // for (int i = 0; i < arr.length();
+			 * i++) { Map<String, Object> licenseMap = new TreeMap<>(); //
+			 * licenseMap.put("@id", arr.getString(i)); // licenseMap.put("@id",
+			 * jcontent.getString("license")); licenseMap.put("@id",
+			 * obj.getString("id")); licenses.add(licenseMap); // } rdf.put("license",
+			 * licenses); }
+			 * 
+			 * if (jcontent.has("publisher")) { List<Map<String, Object>> institutions
+			 * = new ArrayList<>(); arr = jcontent.getJSONArray("publisher"); for (int
+			 * i = 0; i < arr.length(); i++) { obj = arr.getJSONObject(i); Map<String,
+			 * Object> publisherMap = new TreeMap<>(); publisherMap.put("prefLabel",
+			 * obj.getString(name)); publisherMap.put("@id", obj.getString("id"));
+			 * institutions.add(publisherMap); } rdf.put("institution", institutions);
+			 * }
+			 */
+
+			// postprocessing(rdf);
+
+			play.Logger.debug("Done mapping DeepGreen data to lobid2.");
+			return rdf;
+		} catch (
+
+		Exception e) {
+			play.Logger.error("Content could not be mapped!", e);
+			throw new RuntimeException(
+					"DeepGreen-XML could not be mapped to lobid2.json", e);
+		}
+
+	}
+
 }

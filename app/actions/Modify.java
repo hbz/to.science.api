@@ -48,6 +48,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -211,6 +212,26 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * This method maps DeepGreen data to the Lobid2 format and creates a
+	 * datastream "metadata2" of the resource
+	 * 
+	 * @param pid The pid of the resource that must be updated
+	 * @param format Das RDF-Format, in das die Metadaten konvertiert werden
+	 *          sollen (z.B. TURTLE, XDFXML, NTRIPLES)
+	 * @param content The metadata in the format DeepGreen-XML
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichDeepGreenData(String pid,
+			RDFFormat format, Document content) {
+		try {
+			Node node = new Read().readNode(pid);
+			return updateLobidify2AndEnrichDeepGreenData(node, format, content);
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * This method creates an LRMI datastream (unmapped) and appends it to a
 	 * ressource.
 	 * 
@@ -328,6 +349,39 @@ public class Modify extends RegalAction {
 		String enrichMessage = Enrich.enrichMetadata2(node);
 		return pid
 				+ " LRMI-metadata successfully updated, lobidified and enriched! "
+				+ enrichMessage;
+	}
+
+	/**
+	 * The method maps DeepGreen metadata to the Lobid2 format and creates a data
+	 * stream Metadata2 of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param format RDF-Format, z.B. NTRIPLES
+	 * @param content The metadata as DeepGreen XML
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichDeepGreenData(Node node,
+			RDFFormat format, Document content) {
+
+		play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		Map<String, Object> rdf =
+				new XmlUtils().getLd2Lobidify2DeepGreen(node, content);
+		play.Logger.debug("Mapped DeepGrren data to lobid2!");
+		updateMetadata2(node, rdfToString(rdf, format));
+		play.Logger.debug("Updated Metadata2 datastream!");
+
+		String enrichMessage = Enrich.enrichMetadata2(node);
+		return pid
+				+ " DeepGreen-metadata successfully updated, lobidified and enriched! "
 				+ enrichMessage;
 	}
 

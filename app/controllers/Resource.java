@@ -503,6 +503,42 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "updateDeepGreen", value = "updateDeepGreen", notes = "Updates the metadata of the resource using DeepGreen data.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	public static Promise<Result> updateDeepGreen(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("Starting updateDeepGreen data with pid=" + pid);
+			play.Logger.debug("request().body().asXml()=" + request().body().asXml());
+			try {
+				/**
+				 * Wir legen 2 Datenströme an:
+				 * 
+				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "Lrmidata" ==> für
+				 * DeepGreen erstmal nicht machen
+				 */
+				/**
+				 * String result1 = modify.updateAndEnrichLrmiData(pid,
+				 * request().body().asJson()); play.Logger.debug(result1);
+				 */
+
+				/**
+				 * 2. gemappte DeepGreen-Daten als Metadata2-Datenstrom
+				 */
+				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
+				RDFFormat format = RDFFormat.NTRIPLES;
+				String result2 = modify.updateLobidify2AndEnrichDeepGreenData(pid,
+						format, request().body().asXml());
+				play.Logger.debug(result2);
+
+				// return JsonMessage(new Message(result1 + "\n" + result2));
+				return JsonMessage(new Message(result2));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "updateData", value = "updateData", notes = "Updates the data of a resource", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
