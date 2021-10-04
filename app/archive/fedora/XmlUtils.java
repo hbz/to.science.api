@@ -56,9 +56,7 @@ import org.xml.sax.SAXException;
 
 import com.google.common.xml.XmlEscapers;
 
-import helper.JSONArray;
-import helper.JSONException;
-import helper.JSONObject;
+import helper.JsonMapper;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -341,29 +339,40 @@ public class XmlUtils {
 	 * 
 	 * @return Die Daten im Format lobid2-RDF
 	 */
-	public Map<String, Object> getLd2Lobidify2DeepGreen(Node n,
-			Document content) {
+	public Map<String, Object> getLd2Lobidify2DeepGreen(
+			Map<String, Object> metadata2, Document content) {
 		/* Mapping von DeepGreen.xml nach lobid2.json */
-		this.node = n;
 		try {
-			// Neues JSON-Objekt anlegen; für lobid2-Daten
-			Map<String, Object> rdf = node.getLd2();
+			// Neues JSON-Objekt anlegen; fuer lobid2-Daten
+			Map<String, Object> rdf = metadata2;
 
 			// DeepGreenDaten nach JSONObject wandeln
 			// JSONObject jcontent = new JSONObject(content);
 			play.Logger.debug("Start mapping of DeepGreen to lobid2");
-			JSONArray arr = null;
-			JSONObject obj = null;
+
+			// jsonLD-Context; was ist die Entsprechung in DeepGreen ?
+			rdf.put("@context",
+					"https://w3id.org/kim/lrmi-profile/draft/context.jsonld");
 
 			NodeList nodeList = content.getElementsByTagName("journal-title");
 			if (nodeList.getLength() > 0) {
-				play.Logger.debug("Found journal title: " + nodeList.item(0));
+				play.Logger
+						.debug("Found journal title: " + nodeList.item(0).getTextContent());
 				// eine Struktur {} anlegen:
 				Map<String, Object> containedInMap = new TreeMap<>();
-				containedInMap.put("prefLabel", nodeList.item(0));
+				containedInMap.put("prefLabel", nodeList.item(0).getTextContent());
 				List<Map<String, Object>> containedIns = new ArrayList<>();
 				containedIns.add(containedInMap);
 				rdf.put("containedIn", containedIns);
+			}
+
+			nodeList = content.getElementsByTagName("article-title");
+			if (nodeList.getLength() > 0) {
+				play.Logger
+						.debug("Found article title: " + nodeList.item(0).getTextContent());
+				List<String> titles = new ArrayList<>();
+				titles.add(nodeList.item(0).getTextContent());
+				rdf.put("title", titles);
 			}
 
 			/**
@@ -438,7 +447,8 @@ public class XmlUtils {
 			 * }
 			 */
 
-			// postprocessing(rdf);
+			JsonMapper jsonMapper = new JsonMapper();
+			jsonMapper.postprocessing(rdf);
 
 			play.Logger.debug("Done mapping DeepGreen data to lobid2.");
 			return rdf;

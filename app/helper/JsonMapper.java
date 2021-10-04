@@ -382,7 +382,7 @@ public class JsonMapper {
 		return rdf;
 	}
 
-	private void postprocessing(Map<String, Object> rdf) {
+	public void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
 			if ("file".equals(rdf.get("contentType"))) {

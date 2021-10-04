@@ -364,25 +364,32 @@ public class Modify extends RegalAction {
 	public String updateLobidify2AndEnrichDeepGreenData(Node node,
 			RDFFormat format, Document content) {
 
-		play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
-		String pid = node.getPid();
-		if (content == null) {
-			throw new HttpArchiveException(406,
-					pid + " You've tried to upload an empty string."
-							+ " This action is not supported."
-							+ " Use HTTP DELETE instead.\n");
+		try {
+			play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
+			String pid = node.getPid();
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+
+			Map<String, Object> rdf =
+					new XmlUtils().getLd2Lobidify2DeepGreen(node.getLd2(), content);
+			play.Logger.debug("Mapped DeepGrren data to lobid2!");
+			updateMetadata2(node, rdfToString(rdf, format));
+			play.Logger.debug("Updated Metadata2 datastream!");
+
+			String enrichMessage = Enrich.enrichMetadata2(node);
+			return pid
+					+ " DeepGreen-metadata successfully updated, lobidified and enriched! "
+					+ enrichMessage;
+		} catch (Exception e) {
+			play.Logger.error(
+					"Datastream metadata2 with mapped DeepGreen data could not be created!",
+					e);
+			throw new RuntimeException(e);
 		}
-
-		Map<String, Object> rdf =
-				new XmlUtils().getLd2Lobidify2DeepGreen(node, content);
-		play.Logger.debug("Mapped DeepGrren data to lobid2!");
-		updateMetadata2(node, rdfToString(rdf, format));
-		play.Logger.debug("Updated Metadata2 datastream!");
-
-		String enrichMessage = Enrich.enrichMetadata2(node);
-		return pid
-				+ " DeepGreen-metadata successfully updated, lobidified and enriched! "
-				+ enrichMessage;
 	}
 
 	/**
@@ -1304,10 +1311,12 @@ public class Modify extends RegalAction {
 	 */
 	private static String json(Object obj) {
 		try {
+			play.Logger.debug("Start json(obj)");
 			StringWriter w = new StringWriter();
 			ObjectMapper mapper = JsonUtil.mapper();
 			mapper.writeValue(w, obj);
 			String result = w.toString();
+			play.Logger.debug("Return result " + result);
 			return result;
 		} catch (IOException e) {
 			throw new HttpArchiveException(500, e);

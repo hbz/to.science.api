@@ -512,10 +512,10 @@ public class Resource extends MyController {
 			play.Logger.debug("request().body().asXml()=" + request().body().asXml());
 			try {
 				/**
-				 * Wir legen 2 Datenströme an:
+				 * Wir legen 2 Datenstroeme an:
 				 * 
-				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "Lrmidata" ==> für
-				 * DeepGreen erstmal nicht machen
+				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "Lrmidata" ==>
+				 * fuer DeepGreen erstmal nicht machen
 				 */
 				/**
 				 * String result1 = modify.updateAndEnrichLrmiData(pid,
