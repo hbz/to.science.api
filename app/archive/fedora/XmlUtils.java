@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -57,6 +58,7 @@ import org.xml.sax.SAXException;
 import com.google.common.xml.XmlEscapers;
 
 import helper.JsonMapper;
+import models.Globals;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -354,19 +356,91 @@ public class XmlUtils {
 			rdf.put("@context",
 					"https://w3id.org/kim/lrmi-profile/draft/context.jsonld");
 
+			/* Zeitschriftentitel */
 			NodeList nodeList = content.getElementsByTagName("journal-title");
 			if (nodeList.getLength() > 0) {
-				play.Logger
-						.debug("Found journal title: " + nodeList.item(0).getTextContent());
+				String journalTitle = nodeList.item(0).getTextContent();
+				play.Logger.debug("Found journal title: " + journalTitle);
+				/* erzeuge adhoc-ID für Zeitschriftentitel */
+				String adhocTitleId = Globals.protocol + Globals.server + "/adhoc/"
+						+ RdfUtils.urlEncode("uri") + "/"
+						+ helper.MyURLEncoding.encode(journalTitle);
+				play.Logger.debug(
+						"adhocId fuer Titel \"" + journalTitle + "\": " + adhocTitleId);
 				// eine Struktur {} anlegen:
 				Map<String, Object> containedInMap = new TreeMap<>();
-				containedInMap.put("prefLabel", nodeList.item(0).getTextContent());
+				containedInMap.put("prefLabel", journalTitle);
+				containedInMap.put("@id", adhocTitleId);
 				List<Map<String, Object>> containedIns = new ArrayList<>();
 				containedIns.add(containedInMap);
 				rdf.put("containedIn", containedIns);
 			}
 
+			/* Die Zeitschrift über die ISSN hinzu lesen */
+			nodeList = content.getElementsByTagName("issn");
+			if (nodeList.getLength() > 0) {
+				String issn = nodeList.item(0).getTextContent();
+				play.Logger.debug("Found ISSN: " + issn);
+				issn = issn.replaceAll("-", "");
+				play.Logger.debug("ISSN ohne Bindestrich: " + issn);
+				// mit der ISSN in der lobid-API suchen
+				// curl "https://lobid.org/resources/search?q=issn:"+issn+"&format=json"
+				// | jq -c ".member[0].id"
+				// aber das in Java
+			}
+
+			/* DOI */
+			nodeList = content.getElementsByTagName("article-id");
+			Node node = null;
+			NamedNodeMap attributes = null;
+			Node attrib = null;
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
+				attributes = node.getAttributes();
+				if (attributes == null) {
+					continue;
+				}
+				attrib = attributes.getNamedItem("pub-id-type");
+				if (attrib == null) {
+					continue;
+				}
+				if (attrib.getNodeValue().equalsIgnoreCase("doi")) {
+					String doi = node.getTextContent();
+					play.Logger.debug("DOI: " + doi);
+					Map<String, Object> publisherVersion = new TreeMap<>();
+					publisherVersion.put("@id", "http://dx.doi.org/" + doi);
+					publisherVersion.put("prefLabel", "http://dx.doi.org/" + doi);
+					List<Map<String, Object>> publisherVersions = new ArrayList<>();
+					publisherVersions.add(publisherVersion);
+					rdf.put("publisherVersion", publisherVersions);
+					break;
+				}
+			}
+
+			/* Aufsatztitel */
 			nodeList = content.getElementsByTagName("article-title");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
+				attributes = node.getAttributes();
+				if (attributes == null) {
+					continue;
+				}
+				attrib = attributes.getNamedItem("pub-id-type");
+				if (attrib == null) {
+					continue;
+				}
+				if (attrib.getNodeValue().equalsIgnoreCase("doi")) {
+					String doi = node.getTextContent();
+					play.Logger.debug("DOI: " + doi);
+					Map<String, Object> publisherVersion = new TreeMap<>();
+					publisherVersion.put("@id", "http://dx.doi.org/" + doi);
+					publisherVersion.put("prefLabel", "http://dx.doi.org/" + doi);
+					List<Map<String, Object>> publisherVersions = new ArrayList<>();
+					publisherVersions.add(publisherVersion);
+					rdf.put("publisherVersion", publisherVersions);
+					break;
+				}
+			}
 			if (nodeList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
@@ -375,77 +449,80 @@ public class XmlUtils {
 				rdf.put("title", titles);
 			}
 
-			/**
-			 * if (content.getElementsByTagName("journal-title")) { arr =
-			 * jcontent.getJSONArray("@context"); play.Logger.debug("Found context: "
-			 * + arr.getString(0));
-			 * 
-			 * 
-			 * rdf.put("@context", arr.getString(0)); obj = arr.getJSONObject(1);
-			 * String language = obj.getString("@language"); play.Logger.debug("Found
-			 * language: " + language);
-			 * 
-			 * // eine Struktur {} anlegen: Map<String, Object> languageMap = new
-			 * TreeMap<>(); if (language != null && !language.trim().isEmpty()) { if
-			 * (language.length() == 2) { // vermutlich ISO639-1
-			 * languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-1/" +
-			 * language); } else if (language.length() == 3) { // vermutlich ISO639-2
-			 * languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/" +
-			 * language); } else { play.Logger.warn( "Unbekanntes Vokabluar für
-			 * Sprachencode! Code=" + language); } } // languageMap.put("label",
-			 * "Deutsch"); // languageMap.put("prefLabel", "Deutsch");
-			 * List<Map<String, Object>> languages = new ArrayList<>();
-			 * languages.add(languageMap); rdf.put("language", languages); }
-			 * 
-			 * rdf.put(accessScheme, "public"); rdf.put(publishScheme, "public");
-			 * 
-			 * arr = jcontent.getJSONArray("type"); rdf.put("contentType",
-			 * arr.getString(0));
-			 * 
-			 * List<String> names = new ArrayList<>();
-			 * names.add(jcontent.getString(name)); rdf.put("title", names);
-			 * 
-			 * if (jcontent.has("creator")) { List<Map<String, Object>> creators = new
-			 * ArrayList<>(); arr = jcontent.getJSONArray("creator"); for (int i = 0;
-			 * i < arr.length(); i++) { obj = arr.getJSONObject(i); Map<String,
-			 * Object> creatorMap = new TreeMap<>(); creatorMap.put("prefLabel",
-			 * obj.getString(name)); if (obj.has("id")) { creatorMap.put("@id",
-			 * obj.getString("id")); } creators.add(creatorMap); } rdf.put("creator",
-			 * creators); }
-			 * 
-			 * if (jcontent.has("contributor")) { List<Map<String, Object>>
-			 * contributors = new ArrayList<>(); arr =
-			 * jcontent.getJSONArray("contributor"); for (int i = 0; i < arr.length();
-			 * i++) { obj = arr.getJSONObject(i); Map<String, Object> contributorMap =
-			 * new TreeMap<>(); contributorMap.put("prefLabel", obj.getString(name));
-			 * if (obj.has("id")) { contributorMap.put("@id", obj.getString("id")); }
-			 * contributors.add(contributorMap); } rdf.put("contributor",
-			 * contributors); }
-			 * 
-			 * if (jcontent.has("description")) { List<String> abstractTexts = new
-			 * ArrayList<>(); // arr = jcontent.getJSONArray("description"); // for
-			 * (int i = 0; i < arr.length(); i++) { //
-			 * abstractTexts.add(arr.getString(i));
-			 * abstractTexts.add(jcontent.getString("description")); // }
-			 * rdf.put("abstractText", abstractTexts); }
-			 * 
-			 * if (jcontent.has("license")) { obj = jcontent.getJSONObject("license");
-			 * List<Map<String, Object>> licenses = new ArrayList<>(); // arr =
-			 * jcontent.getJSONArray("license"); // for (int i = 0; i < arr.length();
-			 * i++) { Map<String, Object> licenseMap = new TreeMap<>(); //
-			 * licenseMap.put("@id", arr.getString(i)); // licenseMap.put("@id",
-			 * jcontent.getString("license")); licenseMap.put("@id",
-			 * obj.getString("id")); licenses.add(licenseMap); // } rdf.put("license",
-			 * licenses); }
-			 * 
-			 * if (jcontent.has("publisher")) { List<Map<String, Object>> institutions
-			 * = new ArrayList<>(); arr = jcontent.getJSONArray("publisher"); for (int
-			 * i = 0; i < arr.length(); i++) { obj = arr.getJSONObject(i); Map<String,
-			 * Object> publisherMap = new TreeMap<>(); publisherMap.put("prefLabel",
-			 * obj.getString(name)); publisherMap.put("@id", obj.getString("id"));
-			 * institutions.add(publisherMap); } rdf.put("institution", institutions);
-			 * }
-			 */
+			/* Autor */
+			nodeList = content.getElementsByTagName("contrib");
+			NodeList childNodes = null;
+			Node child = null;
+			List<Map<String, Object>> creators = new ArrayList<>();
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
+				attributes = node.getAttributes();
+				if (attributes == null) {
+					continue;
+				}
+				attrib = attributes.getNamedItem("contrib-type");
+				if (attrib == null) {
+					continue;
+				}
+				String surname = "";
+				String givenNames = "";
+				String prefLabel = "";
+				String orcid = null;
+				if (attrib.getNodeValue().equalsIgnoreCase("author")) {
+					childNodes = node.getChildNodes();
+					for (int j = 0; j < childNodes.getLength(); j++) {
+						child = childNodes.item(j);
+						String childName = child.getNodeName();
+						if (childName.equals("name")) {
+							NodeList subchildNodes = child.getChildNodes();
+							for (int k = 0; k < subchildNodes.getLength(); k++) {
+								Node subchild = subchildNodes.item(k);
+								String subchildName = subchild.getNodeName();
+								if (subchildName.equals("surname")) {
+									surname = subchild.getTextContent();
+								}
+								if (subchildName.equals("given-names")) {
+									givenNames = subchild.getTextContent();
+								}
+								prefLabel = surname + ", " + givenNames;
+								play.Logger.debug("Found author: " + prefLabel);
+							}
+						} else if (childName.equals("contrib-id")) {
+							NamedNodeMap childAttributes = child.getAttributes();
+							if (childAttributes == null) {
+								continue;
+							}
+							Node childAttrib =
+									childAttributes.getNamedItem("contrib-id-type");
+							if (childAttrib == null) {
+								continue;
+							}
+							if (childAttrib.getNodeValue().equalsIgnoreCase("orcid")) {
+								orcid = child.getTextContent();
+								play.Logger.debug("Found orcid: " + orcid);
+							}
+						}
+					} /* end of for Node child */
+					Map<String, Object> creator = new TreeMap<>();
+					if (orcid == null) {
+						/*
+						 * So erzeugt man eine "adhoc-URI" ; siehe
+						 * controllers.AdhocControllers.getAdhocRdf
+						 */
+						String adhocAuthorsId = Globals.protocol + Globals.server
+								+ "/adhoc/" + RdfUtils.urlEncode("uri") + "/"
+								+ helper.MyURLEncoding.encode(prefLabel);
+						play.Logger.debug(
+								"adhocId fuer Autor \"" + prefLabel + "\": " + adhocAuthorsId);
+						creator.put("@id", adhocAuthorsId);
+					} else {
+						creator.put("@id", orcid);
+					}
+					creator.put("prefLabel", prefLabel);
+					creators.add(creator);
+				} /* end of author */
+			} /* end of loop over contrib Nodes (authors) */
+			rdf.put("creator", creators);
 
 			JsonMapper jsonMapper = new JsonMapper();
 			jsonMapper.postprocessing(rdf);
