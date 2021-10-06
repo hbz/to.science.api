@@ -25,7 +25,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -54,6 +57,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.apache.commons.lang3.*;
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.google.common.xml.XmlEscapers;
 
@@ -335,14 +340,15 @@ public class XmlUtils {
 	 * 
 	 * @author Ingolf Kuss, hbz
 	 * @author Alessio Pellerito, hbz
-	 * @param n The Node of the resource
+	 * @param metadata2 RDF-Metadaten im Format lobid2 als Java-Map
+	 * @param embargo_duration : Die Dauer des Embargos in Monaten.
 	 * @param content Die DeepGreen-Daten im Format Document (XML)
 	 * @date 2021-10-01
 	 * 
 	 * @return Die Daten im Format lobid2-RDF
 	 */
 	public Map<String, Object> getLd2Lobidify2DeepGreen(
-			Map<String, Object> metadata2, Document content) {
+			Map<String, Object> metadata2, int embargo_duration, Document content) {
 		/* Mapping von DeepGreen.xml nach lobid2.json */
 		try {
 			// Neues JSON-Objekt anlegen; fuer lobid2-Daten
@@ -450,6 +456,7 @@ public class XmlUtils {
 			}
 
 			/* Autor */
+			String contributorOrder = null;
 			nodeList = content.getElementsByTagName("contrib");
 			NodeList childNodes = null;
 			Node child = null;
@@ -468,6 +475,7 @@ public class XmlUtils {
 				String givenNames = "";
 				String prefLabel = "";
 				String orcid = null;
+				String authorsId = null;
 				if (attrib.getNodeValue().equalsIgnoreCase("author")) {
 					childNodes = node.getChildNodes();
 					for (int j = 0; j < childNodes.getLength(); j++) {
@@ -514,24 +522,198 @@ public class XmlUtils {
 								+ helper.MyURLEncoding.encode(prefLabel);
 						play.Logger.debug(
 								"adhocId fuer Autor \"" + prefLabel + "\": " + adhocAuthorsId);
-						creator.put("@id", adhocAuthorsId);
+						authorsId = adhocAuthorsId;
 					} else {
-						creator.put("@id", orcid);
+						authorsId = orcid;
 					}
+					creator.put("@id", authorsId);
 					creator.put("prefLabel", prefLabel);
 					creators.add(creator);
+					if (contributorOrder == null) {
+						contributorOrder = authorsId;
+					} else {
+						contributorOrder = contributorOrder.concat("|" + authorsId);
+					}
 				} /* end of author */
 			} /* end of loop over contrib Nodes (authors) */
 			rdf.put("creator", creators);
+
+			/* Reihenfolge der Beitragenden */
+			List<String> contributorOrders = new ArrayList<>();
+			contributorOrders.add(contributorOrder);
+			rdf.put("contributorOrder", contributorOrders);
+
+			/* Veröffentlichungsdatum */
+			String pubYear = null;
+			String epubDay = null;
+			String epubMonth = null;
+			String epubYear = null;
+			nodeList = content.getElementsByTagName("pub-date");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
+				attributes = node.getAttributes();
+				if (attributes == null) {
+					continue;
+				}
+				attrib = attributes.getNamedItem("pub-type");
+				if (attrib == null) {
+					continue;
+				}
+				if (attrib.getNodeValue().equalsIgnoreCase("subscription-year")) {
+					childNodes = node.getChildNodes();
+					for (int j = 0; j < childNodes.getLength(); j++) {
+						child = childNodes.item(j);
+						String childName = child.getNodeName();
+						if (childName.equals("year")) {
+							pubYear = child.getTextContent();
+							play.Logger.debug("Found publication year: " + pubYear);
+						}
+					} /* end of child node */
+				} else if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
+					childNodes = node.getChildNodes();
+					for (int j = 0; j < childNodes.getLength(); j++) {
+						child = childNodes.item(j);
+						String childName = child.getNodeName();
+						if (childName.equals("day")) {
+							epubDay = child.getTextContent();
+							play.Logger.debug("Found e-publication day: " + epubDay);
+						} else if (childName.equals("month")) {
+							epubMonth = child.getTextContent();
+							play.Logger.debug("Found e-publication month: " + epubMonth);
+						} else if (childName.equals("year")) {
+							epubYear = child.getTextContent();
+							play.Logger.debug("Found e-publication year: " + epubYear);
+						}
+					}
+				}
+			} /* end of loop over pub-date nodes) */
+			rdf.put("issued", pubYear);
+			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
+			rdf.put("publicationYear", Arrays.asList(publicationDateStr));
+
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			Date publicationDate = formatter.parse(publicationDateStr);
+			Date embargoDate = DateUtils.addMonths(publicationDate, embargo_duration);
+			rdf.put("embargoTime", Arrays.asList(formatter.format(embargoDate)));
+
+			/* Zitierangabe */
+			NodeList volumes = content.getElementsByTagName("volume");
+			String volume = "";
+			for (int i = 0; i < volumes.getLength(); i++) {
+				volume = volumes.item(i).getTextContent();
+				break;
+			}
+			NodeList issues = content.getElementsByTagName("issue");
+			String issue = "";
+			for (int i = 0; i < issues.getLength(); i++) {
+				issue = issues.item(i).getTextContent();
+				break;
+			}
+			NodeList fpages = content.getElementsByTagName("fpage");
+			String fpage = "";
+			for (int i = 0; i < fpages.getLength(); i++) {
+				fpage = fpages.item(i).getTextContent();
+				break;
+			}
+			NodeList lpages = content.getElementsByTagName("lpage");
+			String lpage = "";
+			for (int i = 0; i < lpages.getLength(); i++) {
+				lpage = lpages.item(i).getTextContent();
+				break;
+			}
+			String bibliographicCitation =
+					new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
+			rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
+
+			/* Copyright-Jahr */
+			nodeList = content.getElementsByTagName("copyright-year");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				rdf.put("yearOfCopyright",
+						Arrays.asList(nodeList.item(i).getTextContent()));
+				break;
+			}
+
+			/* Open-Access Lizenz */
+			nodeList = content.getElementsByTagName("license");
+			List<Map<String, Object>> licenses = new ArrayList<>();
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				// wir gehen davon aus, dass license-type == open-access ; streng
+				// genommen das hier noch prüfen !!
+				attributes = nodeList.item(i).getAttributes();
+				if (attributes == null) {
+					continue;
+				}
+				attrib = attributes.getNamedItem("xlink:href");
+				if (attrib == null) {
+					continue;
+				}
+				String licenseId = attrib.getNodeValue();
+				Map<String, Object> license = new TreeMap<>();
+				license.put("@id", licenseId);
+				license.put("prefLabel", licenseId);
+				licenses.add(license);
+			}
+			rdf.put("license", licenses);
+
+			/* Abstract */
+			nodeList = content.getElementsByTagName("abstract");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				rdf.put("abstract", Arrays.asList(nodeList.item(i).getTextContent()));
+				break;
+			}
+
+			/* Schlagwörter */
+			nodeList = content.getElementsByTagName("kwd");
+			List<Map<String, Object>> keywords = new ArrayList<>();
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				String keywordStr = nodeList.item(i).getTextContent();
+				String keywordId = Globals.protocol + Globals.server + "/adhoc/"
+						+ RdfUtils.urlEncode("uri") + "/"
+						+ helper.MyURLEncoding.encode(keywordStr);
+				play.Logger.debug(
+						"adhocId fuer Schlagwort \"" + keywordStr + "\": " + keywordId);
+				Map<String, Object> keyword = new TreeMap<>();
+				keyword.put("@id", keywordId);
+				keyword.put("prefLabel", keywordStr);
+				keywords.add(keyword);
+			}
+			rdf.put("subject", keywords);
+
+			rdf.put("contentType", "article");
+
+			/* Review-Status */
+			Map<String, Object> reviewStatus = new TreeMap<>();
+			reviewStatus.put("@id", "http://hbz-nrw.de/regal#peerReviewed");
+			reviewStatus.put("prefLabel", "begutachtet (Peer-reviewed)");
+			rdf.put("reviewStatus", Arrays.asList(reviewStatus));
+
+			/* Veröffentlichungs-Status */
+			Map<String, Object> publicationStatus = new TreeMap<>();
+			publicationStatus.put("@id", "http://hbz-nrw.de/regal#original");
+			publicationStatus.put("prefLabel", "Postprint Verlagsversion");
+			rdf.put("publicationStatus", Arrays.asList(publicationStatus));
+
+			/* Sprache */
+			Map<String, Object> language = new TreeMap<>();
+			language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/eng");
+			language.put("prefLabel", "Englisch");
+			rdf.put("language", Arrays.asList(language));
+
+			/* DDC */
+			Map<String, Object> ddc = new TreeMap<>();
+			ddc.put("@id", "http://dewey.info/class/610/");
+			ddc.put("prefLabel", "Medizin & Gesundheit");
+			rdf.put("ddc", Arrays.asList(ddc));
+
+			rdf.put("accessScheme", "private");
+			rdf.put("publishScheme", "public");
 
 			JsonMapper jsonMapper = new JsonMapper();
 			jsonMapper.postprocessing(rdf);
 
 			play.Logger.debug("Done mapping DeepGreen data to lobid2.");
 			return rdf;
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			play.Logger.error("Content could not be mapped!", e);
 			throw new RuntimeException(
 					"DeepGreen-XML could not be mapped to lobid2.json", e);

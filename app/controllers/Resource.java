@@ -506,7 +506,8 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateDeepGreen", value = "updateDeepGreen", notes = "Updates the metadata of the resource using DeepGreen data.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
-	public static Promise<Result> updateDeepGreen(@PathParam("pid") String pid) {
+	public static Promise<Result> updateDeepGreen(@PathParam("pid") String pid,
+			@QueryParam("embargo_duration") int embargo_duration) {
 		return new ModifyAction().call(pid, node -> {
 			play.Logger.debug("Starting updateDeepGreen data with pid=" + pid);
 			play.Logger.debug("request().body().asXml()=" + request().body().asXml());
@@ -528,7 +529,7 @@ public class Resource extends MyController {
 				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
 				RDFFormat format = RDFFormat.NTRIPLES;
 				String result2 = modify.updateLobidify2AndEnrichDeepGreenData(pid,
-						format, request().body().asXml());
+						embargo_duration, format, request().body().asXml());
 				play.Logger.debug(result2);
 
 				// return JsonMessage(new Message(result1 + "\n" + result2));
