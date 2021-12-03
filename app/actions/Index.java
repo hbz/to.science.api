@@ -145,7 +145,7 @@ public class Index {
 					|| "webpage".equals(n.getContentType())
 					|| "article".equals(n.getContentType())
 					|| "researchData".equals(n.getContentType())
-					|| "orca".equals(n.getContentType()))
+					|| "oer".equals(n.getContentType()))
 				return indexToPublicIndex(pid, type, index, n);
 		} else {
 			return removeFromPublicIndex(pid, type, index);
