@@ -296,7 +296,7 @@ public class OaiDispatcher {
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
-					|| "article".equals(type)) {
+					|| "article".equals(type) || "oer".equals(type)) {
 				node.addTransformer(new Transformer("oaidc"));
 			}
 		}
@@ -307,7 +307,7 @@ public class OaiDispatcher {
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
-					|| "article".equals(type)) {
+					|| "article".equals(type) || "oer".contentEquals(type)) {
 				node.addTransformer(new Transformer("rdf"));
 			}
 		}
