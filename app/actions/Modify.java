@@ -211,6 +211,27 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * This method maps lobid2 data to the LRMI data format and creates or updates
+	 * a datastream "Lrmidata" of the resource
+	 * 
+	 * @param pid The pid of the resource that must be updated
+	 * @param format Das RDF-Format, in dem die Metadaten vorliegen (z.B. TURTLE,
+	 *          XDFXML, NTRIPLES)
+	 * @param content The metadata in the format lobid2
+	 * @return a short message
+	 */
+	public String updateLrmifyAndEnrichMetadata(String pid, RDFFormat format,
+			String content) {
+		try {
+			play.Logger.debug("Start method updateLrmifyAndEnrichMetadata(pid, ...)");
+			Node node = new Read().readNode(pid);
+			return updateLrmifyAndEnrichMetadata(node, format, content);
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * This method creates an LRMI datastream (unmapped) and appends it to a
 	 * ressource.
 	 * 
@@ -329,6 +350,60 @@ public class Modify extends RegalAction {
 		return pid
 				+ " LRMI-metadata successfully updated, lobidified and enriched! "
 				+ enrichMessage;
+	}
+
+	/**
+	 * The method maps lobid2 metadata to the LRMI data format and creates or
+	 * updates a data stream Lrmidata of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param format the RDF-Format of the metadata, z.B. NTRIPLES
+	 * @param content The metadata as lobid2 string
+	 * @return a short message
+	 */
+	public String updateLrmifyAndEnrichMetadata(Node node, RDFFormat format,
+			String content) {
+
+		play.Logger.debug("Start method updateLrmifyAndEnrichMetadata(node, ...)");
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		// play.Logger.debug("Sent content: " + content);
+		// hier weiter !
+		// String lrmiContent = getLrmiAndLrmifyMetadata(node, format, content);
+		/**
+		 * etwa so:
+		 * 
+		 * - hole den LRMI-Datenstrom (s. GET /lrmiData)
+		 * 
+		 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
+		 * 
+		 * - wandle die gesendeten Metadata2-Daten (Format NTRIPLES) nach JSON:
+		 * Ähnlich wie hier: Map<String, Object> rdf = node.getLd2();
+		 * 
+		 * - gehe die lobid-Daten durch (Mapping lobid => LRMI !) und überschreibe
+		 * die entsrpechenden Felder in den LRMI-Daten oder füge sie neu ein.
+		 * Löschen geht erst mal nicht (die LRMI-Daten werden i.d.R. reicher sein
+		 * als die lobid-Daten)
+		 * 
+		 * - gib die LRMI-Daten zurück (Format JSON-String)
+		 */
+		/**
+		 * Map<String, Object> rdf = new JsonMapper().getLd2Lobidify2Lrmi(node,
+		 * content);
+		 */
+		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
+		// updateLrmiData(node, lrmiContent);
+		play.Logger.debug("Updated LRMI datastream!");
+
+		// String enrichMessage = Enrich.enrichLrmiData(node);
+		return pid + " LRMI-metadata successfully updated!";
+		// + " and enriched! " + enrichMessage;
 	}
 
 	/**

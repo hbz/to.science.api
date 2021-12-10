@@ -466,9 +466,38 @@ public class Resource extends MyController {
 	public static Promise<Result> updateMetadata2(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
-				String result = modify.updateLobidify2AndEnrichMetadata(pid,
+				play.Logger.debug("Start method updateMetadata2(pid)");
+				/**
+				 * Wir aktualisieren 2 Datenströme, oder legen sie neu an:
+				 * 
+				 * 1. lobid2-Metadaten als Datenstrom "Metadata2"
+				 */
+
+				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
-				return JsonMessage(new Message(result));
+				play.Logger.debug(result1);
+
+				/**
+				 * 2. nach LRMI gemappte lobid2-Metadaten als Datenstrom "Lrmidata"
+				 */
+				RDFFormat format = null;
+				if (request().accepts("application/rdf+xml")) {
+					format = RDFFormat.RDFXML;
+					response().setContentType("application/rdf+xml");
+				} else if (request().accepts("text/turtle")) {
+					format = RDFFormat.TURTLE;
+					response().setContentType("text/turtle");
+				} else if (request().accepts("text/plain")) {
+					format = RDFFormat.NTRIPLES;
+					response().setContentType("text/plain");
+				}
+				// Es wird nur NTRIPLES akzeptiert
+				play.Logger.debug("request body=" + request().body().asText());
+				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
+						request().body().asText());
+				play.Logger.debug(result2);
+
+				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
