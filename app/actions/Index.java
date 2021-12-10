@@ -198,7 +198,7 @@ public class Index {
 					|| "article".equals(n.getContentType())
 					|| "researchData".equals(n.getContentType())
 					|| "oer".equals(n.getContentType()))
-				return indexToPublicIndex(pid, type, naemspace, n);
+				return indexToPublicIndex(pid, type, namespace, n);
 		} else {
 			return removeFromPublicIndex(pid, type, namespace);
 		}
