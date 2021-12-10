@@ -68,7 +68,7 @@ import models.Link;
 import models.MabRecord;
 import models.Message;
 import models.Node;
-import models.RegalObject;
+import models.ToScienceObject;
 import models.UrlHist;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -91,6 +91,11 @@ import views.html.oai.wgl;
 import views.html.tags.getTitle;
 
 /**
+ * In dieser Klasse werden API-Calls (Endpoint-Calls) auf Ressourcen (sub-path
+ * /resource) definiert. Siehe die Definitionen der HTTP-Requests in der
+ * "routes"-Datei, to.science.api/conf/routes.
+ * 
+ * Zur eigentlichen Verarbeitung der Calls wird an andere Klassen übergeben.
  * 
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
@@ -299,11 +304,12 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listData(@PathParam("pid") String pid) {
 		return new ReadDataAction().call(pid, node -> {
+			HttpURLConnection connection = null;
 			try {
 				response().setHeader("Access-Control-Allow-Origin", "*");
 				URL url = new URL(Globals.fedoraIntern + "/objects/" + pid
 						+ "/datastreams/data/content");
-				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				connection = (HttpURLConnection) url.openConnection();
 				response().setContentType(connection.getContentType());
 				response().setHeader("Content-Disposition",
 						"inline;filename=\"" + node.getFileLabel() + "\"");
@@ -335,7 +341,7 @@ public class Resource extends MyController {
 				play.Logger.debug("Patching Pid: " + pid);
 				String result = "";
 				Node node = readNodeOrNull(pid);
-				RegalObject object = getRegalObject(request().body().asJson());
+				ToScienceObject object = getRegalObject(request().body().asJson());
 				Node newNode = create.patchResource(node, object);
 				result = newNode.getLastModifyMessage();
 				result = result.concat(" " + newNode.getPid() + " created/updated!");
@@ -353,7 +359,7 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> patchResources(@PathParam("pid") String pid) {
 		return new BulkActionAccessor().call((userId) -> {
-			RegalObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getRegalObject(request().body().asJson());
 			List<Node> list = Globals.fedora.listComplexObject(pid);
 			list.removeIf(n -> "D".equals(n.getState()));
 			BulkAction bulk = new BulkAction();
@@ -373,7 +379,7 @@ public class Resource extends MyController {
 			play.Logger.debug("Updating Pid: " + pid);
 			String result = "";
 			Node node = readNodeOrNull(pid);
-			RegalObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getRegalObject(request().body().asJson());
 			Node newNode = null;
 			if (node == null) {
 				String[] namespacePlusId = pid.split(":");
@@ -395,7 +401,7 @@ public class Resource extends MyController {
 	public static Promise<Result> createResource(
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
-			RegalObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getRegalObject(request().body().asJson());
 			if (object.getContentType().equals("webpage")) {
 				object.setAccessScheme("restricted");
 			}
@@ -406,13 +412,13 @@ public class Resource extends MyController {
 		});
 	}
 
-	private static RegalObject getRegalObject(JsonNode json) {
+	private static ToScienceObject getRegalObject(JsonNode json) {
 		try {
-			RegalObject object;
+			ToScienceObject object;
 			play.Logger.debug("Json Body: " + json);
 			if (json != null) {
-				object =
-						MyController.mapper.readValue(json.toString(), RegalObject.class);
+				object = MyController.mapper.readValue(json.toString(),
+						ToScienceObject.class);
 				return object;
 			}
 			throw new NullPointerException(
@@ -1160,6 +1166,7 @@ public class Resource extends MyController {
 
 	public static Promise<Result> createVersion(@PathParam("pid") String pid) {
 		try {
+			play.Logger.debug("Starting Resource.createVersion()");
 			Node node = readNodeOrNull(pid);
 			Gatherconf conf = Gatherconf.create(node.getConf());
 			if (conf.hasUrlMoved(node)) {
@@ -1200,6 +1207,23 @@ public class Resource extends MyController {
 			Node node = readNodeOrNull(pid);
 			Node result = create.postWebpageVersion(node, versionPid, dataDir,
 					timestamp, filename);
+			return getJsonResult(result);
+		});
+	}
+
+	/**
+	 * Dieser Endpunkt fügt eine Forschungsdaten-Ressource (Datei) zu einem
+	 * Forschungsdatenobjekt hinzu.
+	 */
+	public static Promise<Result> createResearchData(@PathParam("pid") String pid,
+			@QueryParam("collectionUrl") String collectionUrl,
+			@QueryParam("subPath") String subPath,
+			@QueryParam("filename") String filename,
+			@QueryParam("resourcePid") String resourcePid) {
+		return new ModifyAction().call(pid, userId -> {
+			Node node = readNodeOrNull(pid);
+			Node result = create.createResearchData(node, collectionUrl, subPath,
+					filename, resourcePid);
 			return getJsonResult(result);
 		});
 	}
@@ -1361,7 +1385,7 @@ public class Resource extends MyController {
 				String alephId = form.get("alephId");
 				String namespace = form.get("namespace");
 				String pid = form.get("pid");
-				RegalObject object = new RegalObject();
+				ToScienceObject object = new ToScienceObject();
 				object.setContentType("monograph");
 				Node node = null;
 				if (pid != null && !pid.isEmpty()) {

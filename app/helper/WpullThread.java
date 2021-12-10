@@ -24,10 +24,17 @@ public class WpullThread extends Thread {
 	private File outDir = null;
 	private String warcFilename = null;
 	private String localpath = null;
+	private String executeCommand = null;
+	/**
+	 * "%20" durch Leerzeichen ersetzt für Ausgabe ins Log
+	 */
+	private String executeCommandRepl = null;
+	private ProcessBuilder pbCDN = null;
 	private ProcessBuilder pb = null;
-	private String[] execArr = null;
+	private File logFileCDN = null;
 	private File logFile = null;
 	private int exitState = 0;
+	private int CDNGathererExitState = 0;
 	/**
 	 * Der wievielte Versuch ist es, diesen Crawl zu starten ?
 	 */
@@ -40,12 +47,12 @@ public class WpullThread extends Thread {
 	/**
 	 * Der Konstruktor für diese Klasse.
 	 * 
-	 * @param pb Ein Objekt der Klasse ProcessBuilder mit Aufrufinformationen für
-	 *          den Crawl.
+	 * @param pbCDN Ein Objekt der Klasse ProcessBuilder mit Aufrufinformationen
+	 *          für den CDN-Crawl.
 	 * @param attempt Der wievielte Versuch es ist, diesen Webschnitt zu sammeln.
 	 */
-	public WpullThread(ProcessBuilder pb, int attempt) {
-		this.pb = pb;
+	public WpullThread(ProcessBuilder pbCDN, int attempt) {
+		this.pbCDN = pbCDN;
 		this.attempt = attempt;
 		exitState = 0;
 	}
@@ -113,22 +120,21 @@ public class WpullThread extends Thread {
 	}
 
 	/**
-	 * Die Methode, um execArr zu setzen.
+	 * Die Methode, um das Aufrufkommando (wpull) für den Hauptcrawl zu setzen
 	 * 
-	 * @param execArr ein Array of String mit den Parametern für den Aufruf von
-	 *          wpull
+	 * @param executeCommand das Aufrufkommando für den Hauptcrawl
 	 */
-	public void setExecArr(String[] execArr) {
-		this.execArr = execArr;
+	public void setExecuteCommand(String executeCommand) {
+		this.executeCommand = executeCommand;
 	}
 
 	/**
-	 * Die Methode, um den Parameter logFile zu setzen.
+	 * Die Methode, um den Parameter logFileCDN zu setzen.
 	 * 
-	 * @param logFile Die Logdatei für wpull (crawl.log). Objekttyp "File".
+	 * @param logFileCDN Die Logdatei für den CDN-Crawl; Objekttyp 'File'
 	 */
-	public void setLogFile(File logFile) {
-		this.logFile = logFile;
+	public void setLogFileCDN(File logFileCDN) {
+		this.logFileCDN = logFileCDN;
 	}
 
 	/**
@@ -146,7 +152,38 @@ public class WpullThread extends Thread {
 	@Override
 	public void run() {
 		try {
-			Process proc = pb.start();
+			// 1. Ausführung des CDN-Precrawls
+			Process proc = pbCDN.start();
+			assert pbCDN.redirectInput() == ProcessBuilder.Redirect.PIPE;
+			assert pbCDN.redirectOutput().file() == logFileCDN;
+			assert proc.getInputStream().read() == -1;
+			CDNGathererExitState = proc.waitFor();
+			/**
+			 * Exit-Status: 0 = Crawl erfolgreich beendet
+			 */
+			WebgatherLogger.info("CDN-Crawl für " + conf.getName()
+					+ " wurde beendet mit Exit-Status " + CDNGathererExitState);
+
+			// 2. Ausführung des Hauptcrawls (URL)
+			String[] execArr = executeCommand.split(" ");
+			// unmask spaces in exec command
+			for (int i = 0; i < execArr.length; i++) {
+				execArr[i] = execArr[i].replaceAll("%20", " ");
+			}
+			executeCommandRepl = new String(executeCommand);
+			executeCommandRepl = executeCommandRepl.replaceAll("%20", " ");
+			WebgatherLogger.info("Executing command " + executeCommandRepl);
+			// andere Logdatei für den Hauptcrawl anlegen
+			logFile = new File(crawlDir.toString() + "/crawl.log");
+			logFile.createNewFile();
+			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
+			pb = new ProcessBuilder(execArr);
+			assert crawlDir.isDirectory();
+			pb.directory(crawlDir);
+			pb.redirectErrorStream(true);
+			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+
+			proc = pb.start();
 			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
 			assert pb.redirectOutput().file() == logFile;
 			assert proc.getInputStream().read() == -1;
@@ -161,8 +198,43 @@ public class WpullThread extends Thread {
 				new Create().createWebpageVersion(node, conf, outDir, localpath);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
+				return;
 			}
-			return;
+
+			// Keep warc file of failed crawl
+			File warcFile =
+					new File(crawlDir.toString() + "/" + warcFilename + ".warc.gz");
+			File warcFileAttempted = new File(crawlDir.toString() + "/" + warcFilename
+					+ ".warc.gz.attempt" + attempt);
+			warcFile.renameTo(warcFileAttempted);
+			warcFile.delete();
+			// Crawl wird erneut angestoßen
+			attempt++;
+			if (attempt > maxNumberAttempts) {
+				WebgatherLogger.info("Webcrawl for " + conf.getName()
+						+ " wurde bereits " + maxNumberAttempts
+						+ "-mal angestoßen. Kein weiterer Versuch.");
+				WebgatherLogger
+						.warn("Webcrawl für " + conf.getName() + "fehlgeschlagen !!");
+				/**
+				 * ToDo 20210719: Verschicken einer E-Mail !
+				 */
+				return;
+			}
+			WebgatherLogger.info("Webcrawl for " + conf.getName()
+					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
+			pbCDN.directory(crawlDir);
+			pbCDN.redirectErrorStream(true);
+			WpullThread wpullThread = new WpullThread(pbCDN, attempt);
+			wpullThread.setNode(node);
+			wpullThread.setConf(conf);
+			wpullThread.setCrawlDir(crawlDir);
+			wpullThread.setOutDir(outDir);
+			wpullThread.setWarcFilename(warcFilename);
+			wpullThread.setLocalPath(localpath);
+			wpullThread.setExecuteCommand(executeCommand);
+			wpullThread.setLogFileCDN(logFileCDN);
+			wpullThread.start(); // rekursiver Aufruf
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("wpull crawl not successfully started!", e);

@@ -9,7 +9,7 @@ import models.Globals;
 import models.Gatherconf.Interval;
 import models.Gatherconf.RobotsPolicy;
 import models.Node;
-import models.RegalObject;
+import models.ToScienceObject;
 
 import org.junit.Before;
 
@@ -32,7 +32,7 @@ public class HeritrixTest {
 			@SuppressWarnings("deprecation")
 			public void run() {
 				String pid = "test:1234";
-				RegalObject object = new RegalObject();
+				ToScienceObject object = new ToScienceObject();
 				object.setContentType("webpage");
 				Node webpage = create.createResource("test", object);
 				play.Logger.debug(webpage.getPid());
@@ -49,8 +49,7 @@ public class HeritrixTest {
 				String uriPath = Globals.heritrix.getUriPath(warcPath);
 				String localpath =
 						Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
-				Node webpageVersion =
-						create.createWebpageVersion(webpage, conf, crawlDir, localpath);
+				Node webpageVersion = create.createWebpageVersion(webpage, conf, crawlDir, localpath);
 			}
 		});
 	}
