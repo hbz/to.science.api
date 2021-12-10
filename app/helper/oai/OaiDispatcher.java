@@ -44,6 +44,7 @@ import archive.fedora.RdfUtils;
  *
  */
 public class OaiDispatcher {
+	static String msg = "";
 
 	/**
 	 * @param node the node to be published on the oai interface
@@ -59,12 +60,12 @@ public class OaiDispatcher {
 			createUrnSets(node);
 			createAlephSet(node);
 			createContentTypeSet(node);
+			play.Logger.debug("Start update Index");
 			new Modify().updateIndex(node.getPid());
 			return node.getPid() + " successfully created oai sets!";
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	public static void updateTransformer(List<String> transformers, Node node) {
@@ -295,7 +296,7 @@ public class OaiDispatcher {
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
-					|| "article".equals(type)) {
+					|| "article".equals(type) || "oer".equals(type)) {
 				node.addTransformer(new Transformer("oaidc"));
 			}
 		}
@@ -306,7 +307,7 @@ public class OaiDispatcher {
 		if ("public".equals(node.getPublishScheme())) {
 			if ("monograph".equals(type) || "journal".equals(type)
 					|| "webpage".equals(type) || "researchData".equals(type)
-					|| "article".equals(type)) {
+					|| "article".equals(type) || "oer".contentEquals(type)) {
 				node.addTransformer(new Transformer("rdf"));
 			}
 		}

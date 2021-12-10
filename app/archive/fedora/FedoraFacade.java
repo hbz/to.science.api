@@ -202,6 +202,7 @@ public class FedoraFacade {
 	 */
 	public void createNode(Node node) {
 		try {
+			play.Logger.debug("Start create Node");
 			play.Logger.debug("node.getPid()=" + node.getPid());
 			play.Logger.debug("node.getLabel()=" + node.getLabel());
 			new Ingest(node.getPid()).label(node.getLabel()).execute();
@@ -272,6 +273,7 @@ public class FedoraFacade {
 		getChecksumFromFedora(node);
 		getMetadataFromFedora(node);
 		getMetadata2FromFedora(node);
+		getLrmiDataFromFedora(node);
 		getDataFromFedora(pid, node);
 		getConfFromFedora(pid, node);
 		getUrlHistFromFedora(pid, node);
@@ -346,6 +348,17 @@ public class FedoraFacade {
 		}
 	}
 
+	private void getLrmiDataFromFedora(Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(node.getPid(), "Lrmidata").execute();
+			node.setLrmiData(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// datastream with name lrmiData is optional
+		}
+	}
+
 	private void getDublinCoreFromFedora(Node node) {
 		try {
 			DublinCoreHandler.readFedoraDcToNode(node);
@@ -401,6 +414,9 @@ public class FedoraFacade {
 		}
 		if (node.getMetadata2File() != null) {
 			utils.updateMetadata2Stream(node);
+		}
+		if (node.getLrmiDataFile() != null) {
+			utils.updateLrmiDataStream(node);
 		}
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);

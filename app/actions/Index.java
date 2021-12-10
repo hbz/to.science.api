@@ -196,8 +196,9 @@ public class Index {
 					|| "journal".equals(n.getContentType())
 					|| "webpage".equals(n.getContentType())
 					|| "article".equals(n.getContentType())
-					|| "researchData".equals(n.getContentType()))
-				return indexToPublicIndex(pid, type, namespace, n);
+					|| "researchData".equals(n.getContentType())
+					|| "oer".equals(n.getContentType()))
+				return indexToPublicIndex(pid, type, naemspace, n);
 		} else {
 			return removeFromPublicIndex(pid, type, namespace);
 		}

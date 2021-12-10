@@ -92,17 +92,16 @@ public class Read extends RegalAction {
 	public Node getLastModifiedChild(Node node, String contentType) {
 		if (contentType == null || contentType.isEmpty()) {
 			return getLastModifiedChild(node);
-		} else {
-			Node oldestNode = null;
-			for (Node n : getParts(node)) {
-				if (contentType.equals(n.getContentType())) {
-					oldestNode = compareDates(n, oldestNode);
-				}
-			}
-			if (oldestNode == null)
-				return node;
-			return oldestNode;
 		}
+		Node oldestNode = null;
+		for (Node n : getParts(node)) {
+			if (contentType.equals(n.getContentType())) {
+				oldestNode = compareDates(n, oldestNode);
+			}
+		}
+		if (oldestNode == null)
+			return node;
+		return oldestNode;
 	}
 
 	/**
@@ -542,6 +541,21 @@ public class Read extends RegalAction {
 			}
 		} catch (UrlConnectionException e) {
 			throw new HttpArchiveException(404, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
+	 * @author I. Kuss
+	 * @param node Der Knoten, von dem die LRMI-Daten gelesen werden sollen
+	 * @return Die LRMI-Daten, genauso, wie sie gePOSTet wurden
+	 */
+	public String readLrmiData(Node node) {
+		try {
+			String lrmiData = node.getLrmiData();
+			return lrmiData;
+
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
 		}

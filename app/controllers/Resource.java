@@ -143,6 +143,7 @@ public class Resource extends MyController {
 			return jsonList(namespace, contentType, from, until);
 		} catch (HttpArchiveException e) {
 			return Promise.promise(new Function0<Result>() {
+				@Override
 				public Result apply() {
 					return JsonMessage(new Message(e, e.getCode()));
 				}
@@ -150,6 +151,7 @@ public class Resource extends MyController {
 		} catch (Exception e) {
 			return Promise.promise(new Function0<Result>() {
 
+				@Override
 				public Result apply() {
 					return JsonMessage(new Message(e, 500));
 				}
@@ -286,6 +288,19 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "text/plain", nickname = "listLrmiData", value = "listLrmiData", notes = "Shows LRMI-Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listLrmiData(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setHeader("Access-Control-Allow-Origin", "*");
+			String result = read.readLrmiData(node);
+			response().setContentType("application/json");
+			play.Logger.debug("result=" + result);
+			return ok(result);
+		});
+
+	}
+
+	@SuppressWarnings("resource")
 	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listData(@PathParam("pid") String pid) {
 		return new ReadDataAction().call(pid, node -> {
@@ -432,6 +447,7 @@ public class Resource extends MyController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
+
 		return new ModifyAction().call(pid, node -> {
 			try {
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
@@ -441,6 +457,7 @@ public class Resource extends MyController {
 				throw new HttpArchiveException(500, e);
 			}
 		});
+
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "updateMetadata2", value = "updateMetadata2", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
@@ -452,6 +469,40 @@ public class Resource extends MyController {
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				return JsonMessage(new Message(result));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "updateLrmMessageiData", value = "updateLrmiData", notes = "Updates the metadata of the resource using Lrmi data.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	public static Promise<Result> updateLrmiData(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("Starting updateLrmiData with pid=" + pid);
+			play.Logger
+					.debug("request().body().asJson()=" + request().body().asJson());
+			try {
+				/**
+				 * Wir legen 2 Datenströme an:
+				 * 
+				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "Lrmidata"
+				 */
+				String result1 =
+						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
+				play.Logger.debug(result1);
+
+				/**
+				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom
+				 */
+				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
+				RDFFormat format = RDFFormat.NTRIPLES;
+				String result2 = modify.updateLobidify2AndEnrichLrmiData(pid, format,
+						request().body().asJson());
+				play.Logger.debug(result2);
+
+				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
@@ -629,7 +680,7 @@ public class Resource extends MyController {
 			@QueryParam("from") int from, @QueryParam("until") int until,
 			@QueryParam("format") String format) {
 		return new ReadMetadataAction().call(null, node -> {
-			List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
+			List<Map<String, Object>> hitMap = new ArrayList<>();
 			try {
 				SearchResponse response = getSearchResult(queryString, from, until);
 				SearchHits hits = response.getHits();
@@ -1088,10 +1139,9 @@ public class Resource extends MyController {
 					}
 					Globals.heritrix.createJobDir(conf);
 					return JsonMessage(new Message(result, 200));
-				} else {
-					throw new HttpArchiveException(409,
-							"Please provide JSON config in request body.");
 				}
+				throw new HttpArchiveException(409,
+						"Please provide JSON config in request body.");
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

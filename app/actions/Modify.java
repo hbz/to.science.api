@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -53,6 +54,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
@@ -61,6 +63,7 @@ import archive.fedora.XmlUtils;
 import controllers.MyController;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
+import helper.JsonMapper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
@@ -74,6 +77,7 @@ import models.ToScienceObject;
  *
  */
 public class Modify extends RegalAction {
+	String msg = "";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -187,6 +191,43 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * This method maps LRMI data to the Lobid2 format and creates a datastream
+	 * "metadata2" of the resource
+	 * 
+	 * @param pid The pid of the resource that must be updated
+	 * @param format Das RDF-Format, in das die Metadaten konvertiert werden
+	 *          sollen (z.B. TURTLE, XDFXML, NTRIPLES)
+	 * @param content The metadata in the format lrmi
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichLrmiData(String pid, RDFFormat format,
+			JsonNode content) {
+		try {
+			Node node = new Read().readNode(pid);
+			return updateLobidify2AndEnrichLrmiData(node, format, content.toString());
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
+	 * This method creates an LRMI datastream (unmapped) and appends it to a
+	 * ressource.
+	 * 
+	 * @param pid The pid of the ressource that must be updated
+	 * @param content The metadata in the format lrmi
+	 * @return a short message
+	 */
+	public String updateAndEnrichLrmiData(String pid, JsonNode content) {
+		try {
+			Node node = new Read().readNode(pid);
+			return updateAndEnrichLrmiData(node, content.toString());
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * @param node The node that must be updated
 	 * @param content The metadata as rdf string
 	 * @return a short message
@@ -255,6 +296,73 @@ public class Modify extends RegalAction {
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage;
 		}
+	}
+
+	/**
+	 * The method maps LRMI metadata to the Lobid2 format and creates a data
+	 * stream Metadata2 of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param format RDF-Format, z.B. NTRIPLES
+	 * @param content The metadata as LRMI string
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichLrmiData(Node node, RDFFormat format,
+			String content) {
+
+		play.Logger.debug("Start updateLobidify2AndEnrichLrmiData");
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		Map<String, Object> rdf =
+				new JsonMapper().getLd2Lobidify2Lrmi(node, content);
+		play.Logger.debug("Mapped LRMI data to lobid2!");
+		updateMetadata2(node, rdfToString(rdf, format));
+		play.Logger.debug("Updated Metadata2 datastream!");
+
+		String enrichMessage = Enrich.enrichMetadata2(node);
+		return pid
+				+ " LRMI-metadata successfully updated, lobidified and enriched! "
+				+ enrichMessage;
+	}
+
+	/**
+	 * This method creates an LRMI data stream (unmapped) of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param content The metadata as LRMI string
+	 * @return a short message
+	 */
+	public String updateAndEnrichLrmiData(Node node, String content) {
+		play.Logger.debug("Start Update and enrich LRMI data.");
+		play.Logger.debug("content: " + content);
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		String content_toscience =
+				new JsonMapper().getTosciencefyLrmi(node, content);
+		play.Logger.debug(
+				"Substituted IDs in content. Content is now: " + content_toscience);
+		updateLrmiData(node, content_toscience);
+		msg =
+				pid + " LRMI-metadata of " + node.getPid() + " successfully updated! ";
+		play.Logger.debug(msg);
+		return msg;
+
+		// Anreicherung muss erst mal nicht sein, wäre neue Methode:
+		// String enrichMessage = Enrich.enrichLrmiData(node);
+		// return pid + " LRMI-metadata successfully updated and enriched! " +
+		// enrichMessage;
 	}
 
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,
@@ -1030,6 +1138,8 @@ public class Modify extends RegalAction {
 	String updateMetadata2(Node node, String content) {
 		try {
 			String pid = node.getPid();
+			play.Logger.debug("Updating Metadata2 of PID " + pid);
+			play.Logger.debug("content: " + content);
 			if (content == null) {
 				throw new HttpArchiveException(406,
 						pid + " You've tried to upload an empty string."
@@ -1041,6 +1151,8 @@ public class Modify extends RegalAction {
 			content = rewriteContent(content, pid);
 			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
+			play.Logger
+					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
 			node.setMetadata2File(file.getAbsolutePath());
 			node.setMetadata2(content);
 			OaiDispatcher.makeOAISet(node);
@@ -1048,6 +1160,30 @@ public class Modify extends RegalAction {
 			return pid + " metadata2 successfully updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	String updateLrmiData(Node node, String content) {
+		try {
+			String pid = node.getPid();
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			File file = CopyUtils.copyStringToFile(content);
+			node.setLrmiDataFile(file.getAbsolutePath());
+			play.Logger.debug("file.getAbsolutePath(): " + file.getAbsolutePath());
+			node.setLrmiData(content);
+			OaiDispatcher.makeOAISet(node);
+			play.Logger.debug("Re-Indexing node and parent");
+			reindexNodeAndParent(node);
+			msg = "LRMI data successfully updated!";
+			play.Logger.debug(msg);
+			return pid + " " + msg;
 		} catch (IOException e) {
 			throw new UpdateNodeException(e);
 		}
@@ -1093,6 +1229,33 @@ public class Modify extends RegalAction {
 			}
 			return result;
 		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	private static String rdfToString(Map<String, Object> result,
+			RDFFormat format) {
+		try {
+			String rdf = RdfUtils.readRdfToString(
+					new ByteArrayInputStream(json(result).getBytes("utf-8")),
+					RDFFormat.JSONLD, format, "");
+			return rdf;
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/*
+	 * Mappt Objekt nach JSON-String. "Objekt" ist typischerweise eine Java Map.
+	 */
+	private static String json(Object obj) {
+		try {
+			StringWriter w = new StringWriter();
+			ObjectMapper mapper = JsonUtil.mapper();
+			mapper.writeValue(w, obj);
+			String result = w.toString();
+			return result;
+		} catch (IOException e) {
 			throw new HttpArchiveException(500, e);
 		}
 	}
