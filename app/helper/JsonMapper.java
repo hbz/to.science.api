@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -1105,13 +1106,13 @@ public class JsonMapper {
 				Map<String, Object> languageMap = new TreeMap<>();
 				if (language != null && !language.trim().isEmpty()) {
 					if (language.length() == 2) {
-						// vermutlich ISO639-1
-						languageMap.put("@id",
-								"http://id.loc.gov/vocabulary/iso639-1/" + language);
+					  Locale loc = Locale.forLanguageTag(language);
+					  languageMap.put("@id",
+								"http://id.loc.gov/vocabulary/iso639-3/" + loc.getISO3Language());
 					} else if (language.length() == 3) {
 						// vermutlich ISO639-2
 						languageMap.put("@id",
-								"http://id.loc.gov/vocabulary/iso639-2/" + language);
+								"http://id.loc.gov/vocabulary/iso639-3/" + language);
 					} else {
 						play.Logger.warn(
 								"Unbekanntes Vokabluar für Sprachencode! Code=" + language);
