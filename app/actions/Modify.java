@@ -64,6 +64,7 @@ import controllers.MyController;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
+import helper.LRMIMapper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
@@ -374,31 +375,11 @@ public class Modify extends RegalAction {
 		}
 
 		// play.Logger.debug("Sent content: " + content);
-		// hier weiter !
-		// String lrmiContent = getLrmiAndLrmifyMetadata(node, format, content);
-		/**
-		 * etwa so:
-		 * 
-		 * - hole den LRMI-Datenstrom (s. GET /lrmiData)
-		 * 
-		 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
-		 * 
-		 * - wandle die gesendeten Metadata2-Daten (Format NTRIPLES) nach JSON:
-		 * Ähnlich wie hier: Map<String, Object> rdf = node.getLd2();
-		 * 
-		 * - gehe die lobid-Daten durch (Mapping lobid => LRMI !) und überschreibe
-		 * die entsrpechenden Felder in den LRMI-Daten oder füge sie neu ein.
-		 * Löschen geht erst mal nicht (die LRMI-Daten werden i.d.R. reicher sein
-		 * als die lobid-Daten)
-		 * 
-		 * - gib die LRMI-Daten zurück (Format JSON-String)
-		 */
-		/**
-		 * Map<String, Object> rdf = new JsonMapper().getLd2Lobidify2Lrmi(node,
-		 * content);
-		 */
+		String lrmiContent =
+				new LRMIMapper().getLrmiAndLrmifyMetadata(node, format, content);
+		play.Logger.debug("lrmiContent=" + lrmiContent);
 		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
-		// updateLrmiData(node, lrmiContent);
+		updateLrmiData(node, lrmiContent);
 		play.Logger.debug("Updated LRMI datastream!");
 
 		// String enrichMessage = Enrich.enrichLrmiData(node);

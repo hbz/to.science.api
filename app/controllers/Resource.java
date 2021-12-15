@@ -480,18 +480,9 @@ public class Resource extends MyController {
 				/**
 				 * 2. nach LRMI gemappte lobid2-Metadaten als Datenstrom "Lrmidata"
 				 */
-				RDFFormat format = null;
-				if (request().accepts("application/rdf+xml")) {
-					format = RDFFormat.RDFXML;
-					response().setContentType("application/rdf+xml");
-				} else if (request().accepts("text/turtle")) {
-					format = RDFFormat.TURTLE;
-					response().setContentType("text/turtle");
-				} else if (request().accepts("text/plain")) {
-					format = RDFFormat.NTRIPLES;
-					response().setContentType("text/plain");
-				}
 				// Es wird nur NTRIPLES akzeptiert
+				RDFFormat format = RDFFormat.NTRIPLES;
+				response().setContentType("text/plain");
 				play.Logger.debug("request body=" + request().body().asText());
 				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
 						request().body().asText());
