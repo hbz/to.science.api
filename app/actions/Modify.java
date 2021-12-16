@@ -374,7 +374,6 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
-		// play.Logger.debug("Sent content: " + content);
 		String lrmiContent =
 				new LRMIMapper().getLrmiAndLrmifyMetadata(node, format, content);
 		play.Logger.debug("lrmiContent=" + lrmiContent);

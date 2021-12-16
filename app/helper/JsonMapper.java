@@ -1015,7 +1015,7 @@ public class JsonMapper {
 					Globals.protocol + Globals.server + "/resource/" + node.getPid());
 			play.Logger.debug("toscience ID for this resource is: " + toscience_id);
 
-			// Top-Level ID
+			// bisherige Top-Level ID
 			String top_level_id = null;
 			if (jcontent.has("id")) {
 				top_level_id = jcontent.getString("id");
@@ -1023,12 +1023,13 @@ public class JsonMapper {
 			if (top_level_id == null) {
 				play.Logger.debug("Adding new top level id: " + toscience_id);
 				jcontent.put("id", toscience_id);
-			} else {
-				play.Logger.debug(
-						"Found top level id: " + top_level_id + ". Leaving unmodified.");
+			} else if (!toscience_id.equals(top_level_id)) {
+				play.Logger.info("Found top level id: " + top_level_id
+						+ ". Replacing by toscience id: " + toscience_id);
+				jcontent.put("id", toscience_id);
 			}
 
-			// mainEntityOfPage - ID
+			// mainEntityOfPage - ID (mit letztem Änderungsdatum)
 			if (jcontent.has("mainEntityOfPage")) {
 				// ID in "mainEntityOfPage" wird ersetzt
 				arr = jcontent.getJSONArray("mainEntityOfPage");
@@ -1050,6 +1051,11 @@ public class JsonMapper {
 				mainEntityMap.put("dateCreated", LocalDate.now());
 				mainEntityOfPage.add(mainEntityMap);
 				jcontent.put("mainEntityOfPage", mainEntityOfPage);
+			}
+
+			// Anlagedatum generieren (falls noch nicht vorhanden)
+			if (!jcontent.has("dateCreated")) {
+				jcontent.put("dateCreated", LocalDate.now());
 			}
 
 			// geändertes JSONObject als Zeichenkette zurück geben
@@ -1086,6 +1092,7 @@ public class JsonMapper {
 			play.Logger.debug("Start mapping of lrmi to lobid2");
 			JSONArray arr = null;
 			JSONObject obj = null;
+			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
 
 			if (jcontent.has("@context")) {
 				arr = jcontent.getJSONArray("@context");
@@ -1166,25 +1173,40 @@ public class JsonMapper {
 
 			if (jcontent.has("description")) {
 				List<String> abstractTexts = new ArrayList<>();
-				// arr = jcontent.getJSONArray("description");
-				// for (int i = 0; i < arr.length(); i++) {
-				// abstractTexts.add(arr.getString(i));
-				abstractTexts.add(jcontent.getString("description"));
-				// }
+				myObj = jcontent.get("description");
+				if (myObj instanceof java.lang.String) {
+					abstractTexts.add(jcontent.getString("description"));
+				} else if (myObj instanceof org.json.JSONArray) {
+					arr = jcontent.getJSONArray("description");
+					for (int i = 0; i < arr.length(); i++) {
+						abstractTexts.add(arr.getString(i));
+					}
+				}
 				rdf.put("abstractText", abstractTexts);
 			}
 
 			if (jcontent.has("license")) {
-				obj = jcontent.getJSONObject("license");
 				List<Map<String, Object>> licenses = new ArrayList<>();
-				// arr = jcontent.getJSONArray("license");
-				// for (int i = 0; i < arr.length(); i++) {
-				Map<String, Object> licenseMap = new TreeMap<>();
-				// licenseMap.put("@id", arr.getString(i));
-				// licenseMap.put("@id", jcontent.getString("license"));
-				licenseMap.put("@id", obj.getString("id"));
-				licenses.add(licenseMap);
-				// }
+				myObj = jcontent.get("license");
+				Map<String, Object> licenseMap = null;
+				if (myObj instanceof java.lang.String) {
+					licenseMap = new TreeMap<>();
+					licenseMap.put("@id", jcontent.getString("license"));
+					licenses.add(licenseMap);
+				} else if (myObj instanceof org.json.JSONObject) {
+					obj = jcontent.getJSONObject("license");
+					licenseMap = new TreeMap<>();
+					licenseMap.put("@id", obj.getString("id"));
+					licenses.add(licenseMap);
+				} else if (myObj instanceof org.json.JSONArray) {
+					arr = jcontent.getJSONArray("license");
+					for (int i = 0; i < arr.length(); i++) {
+						obj = arr.getJSONObject(i);
+						licenseMap = new TreeMap<>();
+						licenseMap.put("@id", obj.getString("id"));
+						licenses.add(licenseMap);
+					}
+				}
 				rdf.put("license", licenses);
 			}
 

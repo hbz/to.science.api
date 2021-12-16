@@ -483,7 +483,7 @@ public class Resource extends MyController {
 				// Es wird nur NTRIPLES akzeptiert
 				RDFFormat format = RDFFormat.NTRIPLES;
 				response().setContentType("text/plain");
-				play.Logger.debug("request body=" + request().body().asText());
+				// play.Logger.debug("request body=" + request().body().asText());
 				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
 						request().body().asText());
 				play.Logger.debug(result2);

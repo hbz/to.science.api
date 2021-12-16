@@ -105,13 +105,57 @@ public class LRMIMapper {
 			 */
 			/* Rückabbildung lobid2 => LRMI (vgl. JsonMapper.getLd2Lobidify2Lrmi */
 			HashSet<Map<String, Object>> hashSet = null;
+			HashSet<String> arrOfString = null;
 			Iterator iterator = null;
 			Map<String, Object> map = null;
-			/* accessScheme : ist kein Feld in LRMI */
+			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
+
+			/*** Beginn Mapping lobid2 => LRMI ***/
+			if (rdf.containsKey("language")) {
+				hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
+				iterator = hashSet.iterator();
+				// Suche Objekt "@language" im JSONArray "@context"
+				arr = (JSONArray) jcontent.get("@context");
+				obj = null;
+				for (int i = 0; i < arr.length(); i++) {
+					myObj = arr.get(i);
+					play.Logger
+							.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
+					if (myObj instanceof org.json.JSONObject) {
+						obj = (JSONObject) arr.getJSONObject(i);
+						if (obj.has("@language")) {
+							break;
+						}
+					}
+				}
+				// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
+				if (obj == null) {
+					obj = new JSONObject();
+					arr.put(obj);
+				}
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj.put("@language", map.get("prefLabel"));
+					// obj.put("id", map.get("@id"));
+					// arr.put(obj);
+					break;
+				}
+				jcontent.put("@context", arr);
+			}
+
+			if (rdf.containsKey("contentType")) {
+				arrOfString = (HashSet<String>) rdf.get("contentType");
+				iterator = arrOfString.iterator();
+				arr = new JSONArray();
+				while (iterator.hasNext()) {
+					arr.put(iterator.next());
+				}
+				jcontent.put("type", arr);
+			}
 
 			if (rdf.containsKey("title")) {
-				HashSet<String> names = (HashSet<String>) rdf.get("title");
-				iterator = names.iterator();
+				arrOfString = (HashSet<String>) rdf.get("title");
+				iterator = arrOfString.iterator();
 				jcontent.put("name", iterator.next());
 			}
 
@@ -145,26 +189,14 @@ public class LRMIMapper {
 				jcontent.put("contributor", arr);
 			}
 
-			if (rdf.containsKey("language")) {
-				hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
-				iterator = hashSet.iterator();
-				arr = (JSONArray) jcontent.get("@context");
-				for (int i = 0; i < arr.length(); i++) {
-					obj = (JSONObject) arr.getJSONObject(i); // Achtung, es muss nicht
-																										// Objekt sein, es kann auch
-																										// String sein
-					if (obj.has("@language")) {
-						break;
-					}
-				}
+			if (rdf.containsKey("abstractText")) {
+				arrOfString = (HashSet<String>) rdf.get("abstractText");
+				iterator = arrOfString.iterator();
+				arr = new JSONArray();
 				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj.put("@language", map.get("prefLabel"));
-					// obj.put("id", map.get("@id"));
-					arr.put(obj);
-					break;
+					arr.put(iterator.next());
 				}
-				jcontent.put("@context", arr);
+				jcontent.put("description", arr);
 			}
 
 			if (rdf.containsKey("license")) {
@@ -181,11 +213,29 @@ public class LRMIMapper {
 				jcontent.put("license", arr);
 			}
 
+			if (rdf.containsKey("institution")) {
+				hashSet = (HashSet<Map<String, Object>>) rdf.get("institution");
+				iterator = hashSet.iterator();
+				arr = new JSONArray();
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj = new JSONObject();
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", "Organization");
+					arr.put(obj);
+				}
+				jcontent.put("publisher", arr);
+			}
+
 			/**
 			 * - gib die aktualisierten oder neu angelegten LRMI-Daten zurück (Format
 			 * JSON-String)
 			 */
-			return jcontent.toString();
+
+			/* zunächst Anreicherung und Update der LRMI-Daten */
+			return new JsonMapper().getTosciencefyLrmi(node, jcontent.toString());
+
 		} catch (Exception e) {
 			play.Logger.error("LRMI Content could not be mapped!", e);
 			throw new RuntimeException("LRMI.json could not be modified or created !",
