@@ -19,6 +19,10 @@ package helper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -99,11 +103,84 @@ public class LRMIMapper {
 			 * gesendeten lobid-Daten, und man will nicht die gesamte Differenz
 			 * löschen).
 			 */
-			// hier weiter
-			/* accessScheme */
-			if (rdf.containsKey("accessScheme")) {
-				jcontent.put("accessScheme", rdf.get("accessScheme"));
+			/* Rückabbildung lobid2 => LRMI (vgl. JsonMapper.getLd2Lobidify2Lrmi */
+			HashSet<Map<String, Object>> hashSet = null;
+			Iterator iterator = null;
+			Map<String, Object> map = null;
+			/* accessScheme : ist kein Feld in LRMI */
+
+			if (rdf.containsKey("title")) {
+				HashSet<String> names = (HashSet<String>) rdf.get("title");
+				iterator = names.iterator();
+				jcontent.put("name", iterator.next());
 			}
+
+			if (rdf.containsKey("creator")) {
+				hashSet = (HashSet<Map<String, Object>>) rdf.get("creator");
+				iterator = hashSet.iterator();
+				arr = new JSONArray();
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj = new JSONObject();
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", "Person"); /* guess */
+					arr.put(obj);
+				}
+				jcontent.put("creator", arr);
+			}
+
+			if (rdf.containsKey("contributor")) {
+				hashSet = (HashSet<Map<String, Object>>) rdf.get("contributor");
+				iterator = hashSet.iterator();
+				arr = new JSONArray();
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj = new JSONObject();
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", "Person"); /* guess; can't match if id is absent */
+					arr.put(obj);
+				}
+				jcontent.put("contributor", arr);
+			}
+
+			if (rdf.containsKey("language")) {
+				hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
+				iterator = hashSet.iterator();
+				arr = (JSONArray) jcontent.get("@context");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = (JSONObject) arr.getJSONObject(i); // Achtung, es muss nicht
+																										// Objekt sein, es kann auch
+																										// String sein
+					if (obj.has("@language")) {
+						break;
+					}
+				}
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj.put("@language", map.get("prefLabel"));
+					// obj.put("id", map.get("@id"));
+					arr.put(obj);
+					break;
+				}
+				jcontent.put("@context", arr);
+			}
+
+			if (rdf.containsKey("license")) {
+				hashSet = (HashSet<Map<String, Object>>) rdf.get("license");
+				iterator = hashSet.iterator();
+				arr = new JSONArray();
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj = new JSONObject();
+					// obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					arr.put(obj);
+				}
+				jcontent.put("license", arr);
+			}
+
 			/**
 			 * - gib die aktualisierten oder neu angelegten LRMI-Daten zurück (Format
 			 * JSON-String)
