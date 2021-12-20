@@ -112,14 +112,21 @@ public class LRMIMapper {
 			HashSet<Map<String, Object>> hashSet = null;
 			ArrayList<Map<String, Object>> arrayList = null;
 			HashSet<String> arrOfString = null;
+			ArrayList<String> arrListOfString = null;
 			Iterator iterator = null;
 			Map<String, Object> map = null;
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
 
 			/*** Beginn Mapping lobid2 => LRMI ***/
 			if (rdf.containsKey("language")) {
-				hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
-				iterator = hashSet.iterator();
+				myObj = rdf.get("language");
+				if (myObj instanceof java.util.ArrayList) {
+					arrayList = (ArrayList<Map<String, Object>>) rdf.get("language");
+					iterator = arrayList.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
+					iterator = hashSet.iterator();
+				}
 				// Suche Objekt "@language" im JSONArray "@context"
 				if (jcontent.has("@context")) {
 					arr = (JSONArray) jcontent.get("@context");
@@ -157,8 +164,14 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("contentType")) {
-				arrOfString = (HashSet<String>) rdf.get("contentType");
-				iterator = arrOfString.iterator();
+				myObj = rdf.get("contentTyp");
+				if (myObj instanceof java.util.ArrayList) {
+					arrListOfString = (ArrayList<String>) rdf.get("contentType");
+					iterator = arrListOfString.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					arrOfString = (HashSet<String>) rdf.get("contentType");
+					iterator = arrOfString.iterator();
+				}
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					arr.put(iterator.next());
@@ -167,8 +180,14 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("title")) {
-				arrOfString = (HashSet<String>) rdf.get("title");
-				iterator = arrOfString.iterator();
+				myObj = rdf.get("title");
+				if (myObj instanceof java.util.ArrayList) {
+					arrListOfString = (ArrayList<String>) rdf.get("title");
+					iterator = arrListOfString.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					arrOfString = (HashSet<String>) rdf.get("title");
+					iterator = arrOfString.iterator();
+				}
 				jcontent.put("name", iterator.next());
 			}
 
@@ -195,8 +214,14 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("contributor")) {
-				hashSet = (HashSet<Map<String, Object>>) rdf.get("contributor");
-				iterator = hashSet.iterator();
+				myObj = rdf.get("contributor");
+				if (myObj instanceof java.util.ArrayList) {
+					arrayList = (ArrayList<Map<String, Object>>) rdf.get("contributor");
+					iterator = arrayList.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					hashSet = (HashSet<Map<String, Object>>) rdf.get("contributor");
+					iterator = hashSet.iterator();
+				}
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
@@ -210,8 +235,14 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("abstractText")) {
-				arrOfString = (HashSet<String>) rdf.get("abstractText");
-				iterator = arrOfString.iterator();
+				myObj = rdf.get("abstractText");
+				if (myObj instanceof java.util.ArrayList) {
+					arrListOfString = (ArrayList<String>) rdf.get("abstractText");
+					iterator = arrListOfString.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					arrOfString = (HashSet<String>) rdf.get("abstractText");
+					iterator = arrOfString.iterator();
+				}
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					arr.put(iterator.next());
@@ -220,8 +251,14 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("license")) {
-				hashSet = (HashSet<Map<String, Object>>) rdf.get("license");
-				iterator = hashSet.iterator();
+				myObj = rdf.get("license");
+				if (myObj instanceof java.util.ArrayList) {
+					arrayList = (ArrayList<Map<String, Object>>) rdf.get("license");
+					iterator = arrayList.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					hashSet = (HashSet<Map<String, Object>>) rdf.get("license");
+					iterator = hashSet.iterator();
+				}
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
@@ -234,8 +271,14 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("institution")) {
-				hashSet = (HashSet<Map<String, Object>>) rdf.get("institution");
-				iterator = hashSet.iterator();
+				myObj = rdf.get("institution");
+				if (myObj instanceof java.util.ArrayList) {
+					arrayList = (ArrayList<Map<String, Object>>) rdf.get("institution");
+					iterator = arrayList.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					hashSet = (HashSet<Map<String, Object>>) rdf.get("institution");
+					iterator = hashSet.iterator();
+				}
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
