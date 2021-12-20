@@ -105,6 +105,7 @@ public class LRMIMapper {
 			 */
 			/* Rückabbildung lobid2 => LRMI (vgl. JsonMapper.getLd2Lobidify2Lrmi */
 			HashSet<Map<String, Object>> hashSet = null;
+			ArrayList<Map<String, Object>> arrayList = null;
 			HashSet<String> arrOfString = null;
 			Iterator iterator = null;
 			Map<String, Object> map = null;
@@ -160,8 +161,14 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("creator")) {
-				hashSet = (HashSet<Map<String, Object>>) rdf.get("creator");
-				iterator = hashSet.iterator();
+				myObj = rdf.get("creator");
+				if (myObj instanceof java.util.ArrayList) {
+					arrayList = (ArrayList<Map<String, Object>>) rdf.get("creator");
+					iterator = arrayList.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					hashSet = (HashSet<Map<String, Object>>) rdf.get("creator");
+					iterator = hashSet.iterator();
+				}
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
@@ -172,6 +179,7 @@ public class LRMIMapper {
 					arr.put(obj);
 				}
 				jcontent.put("creator", arr);
+
 			}
 
 			if (rdf.containsKey("contributor")) {
