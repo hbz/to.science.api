@@ -81,7 +81,12 @@ public class LRMIMapper {
 			 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
 			 */
 			// LRMI-Daten nach JSONObject wandeln
-			JSONObject jcontent = new JSONObject(oldContent);
+			JSONObject jcontent = null;
+			if (oldContent == null) {
+				jcontent = new JSONObject();
+			} else {
+				jcontent = new JSONObject(oldContent);
+			}
 			JSONArray arr = null;
 			JSONObject obj = null;
 			/**
@@ -116,24 +121,31 @@ public class LRMIMapper {
 				hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
 				iterator = hashSet.iterator();
 				// Suche Objekt "@language" im JSONArray "@context"
-				arr = (JSONArray) jcontent.get("@context");
-				obj = null;
-				for (int i = 0; i < arr.length(); i++) {
-					myObj = arr.get(i);
-					play.Logger
-							.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
-					if (myObj instanceof org.json.JSONObject) {
-						obj = (JSONObject) arr.getJSONObject(i);
-						if (obj.has("@language")) {
-							break;
+				if (jcontent.has("@context")) {
+					arr = (JSONArray) jcontent.get("@context");
+					obj = null;
+					for (int i = 0; i < arr.length(); i++) {
+						myObj = arr.get(i);
+						play.Logger
+								.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
+						if (myObj instanceof org.json.JSONObject) {
+							obj = (JSONObject) arr.getJSONObject(i);
+							if (obj.has("@language")) {
+								break;
+							}
 						}
 					}
-				}
-				// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
-				if (obj == null) {
+					// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
+					if (obj == null) {
+						obj = new JSONObject();
+						arr.put(obj);
+					}
+				} else {
+					arr = new JSONArray();
 					obj = new JSONObject();
 					arr.put(obj);
 				}
+
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj.put("@language", map.get("prefLabel"));
