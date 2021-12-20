@@ -449,6 +449,7 @@ public class Resource extends MyController {
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 
 		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("BEGIN controllers.Resource.updateMetadata(pid)");
 			try {
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
@@ -465,6 +466,7 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
 	public static Promise<Result> updateMetadata2(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("BEGIN controllers.Resource.updateMetadata2(pid)");
 			try {
 				play.Logger.debug("Start method updateMetadata2(pid)");
 				/**
