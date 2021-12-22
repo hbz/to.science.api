@@ -1172,17 +1172,17 @@ public class JsonMapper {
 			}
 
 			if (jcontent.has("description")) {
-				List<String> abstractTexts = new ArrayList<>();
+				List<String> descriptions = new ArrayList<>();
 				myObj = jcontent.get("description");
 				if (myObj instanceof java.lang.String) {
-					abstractTexts.add(jcontent.getString("description"));
+					descriptions.add(jcontent.getString("description"));
 				} else if (myObj instanceof org.json.JSONArray) {
 					arr = jcontent.getJSONArray("description");
 					for (int i = 0; i < arr.length(); i++) {
-						abstractTexts.add(arr.getString(i));
+						descriptions.add(arr.getString(i));
 					}
 				}
-				rdf.put("abstractText", abstractTexts);
+				rdf.put("description", descriptions);
 			}
 
 			if (jcontent.has("license")) {

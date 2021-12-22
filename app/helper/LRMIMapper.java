@@ -234,13 +234,13 @@ public class LRMIMapper {
 				jcontent.put("contributor", arr);
 			}
 
-			if (rdf.containsKey("abstractText")) {
-				myObj = rdf.get("abstractText");
+			if (rdf.containsKey("description")) {
+				myObj = rdf.get("description");
 				if (myObj instanceof java.util.ArrayList) {
-					arrListOfString = (ArrayList<String>) rdf.get("abstractText");
+					arrListOfString = (ArrayList<String>) rdf.get("description");
 					iterator = arrListOfString.iterator();
 				} else if (myObj instanceof java.util.HashSet) {
-					arrOfString = (HashSet<String>) rdf.get("abstractText");
+					arrOfString = (HashSet<String>) rdf.get("description");
 					iterator = arrOfString.iterator();
 				}
 				arr = new JSONArray();
