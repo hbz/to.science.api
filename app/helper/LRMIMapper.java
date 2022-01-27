@@ -243,11 +243,7 @@ public class LRMIMapper {
 					arrOfString = (HashSet<String>) rdf.get("description");
 					iterator = arrOfString.iterator();
 				}
-				arr = new JSONArray();
-				while (iterator.hasNext()) {
-					arr.put(iterator.next());
-				}
-				jcontent.put("description", arr);
+				jcontent.put("description", iterator.next());
 			}
 
 			if (rdf.containsKey("license")) {
