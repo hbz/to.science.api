@@ -3,8 +3,11 @@ package actions;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -262,7 +265,8 @@ public class Enrich {
 					if (!obj.has("id")) {
 						// Autor ohne ID. Das bedeutet in LRMI-Sprache: ohne URI
 						// Mache API-Call an Zettel, um eine ad-hoc-URI zu erhalten
-						creatorName = creatorName.replaceAll(" ", "%20");
+						creatorName = URLEncoder.encode(creatorName,
+								StandardCharsets.UTF_8.toString());
 						WSResponse response = play.libs.ws.WS.url(
 								Globals.zettelUrl + "/localAutocomplete" + "?q=" + creatorName)
 								.setFollowRedirects(true).get().get(2000);
@@ -291,7 +295,7 @@ public class Enrich {
 			return jcontent.toString();
 		} catch (Exception e) {
 			play.Logger.error("Content could not be enriched!", e);
-			throw new RuntimeException("LRMI.json could not be ß´enriched", e);
+			throw new RuntimeException("LRMI.json could not be enriched", e);
 		}
 
 	}
