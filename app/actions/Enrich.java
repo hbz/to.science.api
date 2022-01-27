@@ -267,7 +267,7 @@ public class Enrich {
 						// Mache API-Call an Zettel, um eine ad-hoc-URI zu erhalten
 						creatorName = URLEncoder
 								.encode(creatorName, StandardCharsets.UTF_8.toString())
-								.replaceAll("+", "%20").replaceAll("%21", "!")
+								.replaceAll("\\+", "%20").replaceAll("%21", "!")
 								.replaceAll("%27", "'").replaceAll("%28", "(")
 								.replaceAll("%29", ")").replaceAll("%7E", "~");
 						WSResponse response = play.libs.ws.WS.url(
