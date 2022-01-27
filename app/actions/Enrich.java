@@ -265,9 +265,11 @@ public class Enrich {
 					if (!obj.has("id")) {
 						// Autor ohne ID. Das bedeutet in LRMI-Sprache: ohne URI
 						// Mache API-Call an Zettel, um eine ad-hoc-URI zu erhalten
-						creatorName = creatorName.replaceAll(" ", "%20");
-						creatorName = URLEncoder.encode(creatorName,
-								StandardCharsets.UTF_8.toString());
+						creatorName = URLEncoder
+								.encode(creatorName, StandardCharsets.UTF_8.toString())
+								.replaceAll("+", "%20").replaceAll("%21", "!")
+								.replaceAll("%27", "'").replaceAll("%28", "(")
+								.replaceAll("%29", ")").replaceAll("%7E", "~");
 						WSResponse response = play.libs.ws.WS.url(
 								Globals.zettelUrl + "/localAutocomplete" + "?q=" + creatorName)
 								.setFollowRedirects(true).get().get(2000);
