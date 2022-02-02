@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -437,13 +439,26 @@ public class JsonMapper {
 	}
 
 	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
-		List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
-		if (all == null)
-			return;
-		for (Map<String, String> m : all) {
-			m.put(PREF_LABEL, m.get(ID2));
+		play.Logger.debug("key=" + key);
+		Object myObj = rdf.get(key);
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, String>> all =
+					(HashSet<Map<String, String>>) rdf.get(key);
+			if (all == null)
+				return;
+			Iterator<Map<String, String>> fit = all.iterator();
+			while (fit.hasNext()) {
+				Map<String, String> m = fit.next();
+				m.put(PREF_LABEL, m.get(ID2));
+			}
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
+			if (all == null)
+				return;
+			for (Map<String, String> m : all) {
+				m.put(PREF_LABEL, m.get(ID2));
+			}
 		}
-
 	}
 
 	private static void postProcessSubjectName(Map<String, Object> rdf) {
