@@ -1093,6 +1093,7 @@ public class JsonMapper {
 			JSONArray arr = null;
 			JSONObject obj = null;
 			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
+			String prefLabel = null;
 
 			if (jcontent.has("@context")) {
 				arr = jcontent.getJSONArray("@context");
@@ -1112,9 +1113,9 @@ public class JsonMapper {
 				Map<String, Object> languageMap = new TreeMap<>();
 				if (language != null && !language.trim().isEmpty()) {
 					if (language.length() == 2) {
-					  Locale loc = Locale.forLanguageTag(language);
-					  languageMap.put("@id",
-								"http://id.loc.gov/vocabulary/iso639-3/" + loc.getISO3Language());
+						Locale loc = Locale.forLanguageTag(language);
+						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-3/"
+								+ loc.getISO3Language());
 					} else if (language.length() == 3) {
 						// vermutlich ISO639-2
 						languageMap.put("@id",
@@ -1140,6 +1141,30 @@ public class JsonMapper {
 			List<String> names = new ArrayList<>();
 			names.add(jcontent.getString(name));
 			rdf.put("title", names);
+
+			if (jcontent.has("learningResourceType")) {
+				List<Map<String, Object>> media = new ArrayList<>();
+				arr = jcontent.getJSONArray("learningResourceType");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					Map<String, Object> mediumMap = new TreeMap<>();
+					if (obj.has("prefLabel")) {
+						JSONObject subObj = obj.getJSONObject("prefLabel");
+						prefLabel = subObj.getString("de");
+						mediumMap.put("prefLabel", prefLabel);
+						play.Logger.debug("learningResourceType: prefLabel: " + prefLabel);
+					}
+					if (obj.has("id")) {
+						mediumMap.put("@id", obj.getString("id"));
+					} else {
+						// Dieser Fall sollte nicht vorkommen
+						play.Logger
+								.warn("Achtung! learningResourceType (Medium) hat keine ID !");
+					}
+					media.add(mediumMap);
+				}
+				rdf.put("medium", media);
+			}
 
 			String creatorName = null;
 			if (jcontent.has("creator")) {
