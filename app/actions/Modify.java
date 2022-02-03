@@ -64,6 +64,7 @@ import controllers.MyController;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
+import helper.LRMIMapper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
@@ -191,20 +192,21 @@ public class Modify extends RegalAction {
 	}
 
 	/**
-	 * This method maps LRMI data to the Lobid2 format and creates a datastream
-	 * "metadata2" of the resource
+	 * This method maps lobid2 data to the LRMI data format and creates or updates
+	 * a datastream "Lrmidata" of the resource
 	 * 
 	 * @param pid The pid of the resource that must be updated
-	 * @param format Das RDF-Format, in das die Metadaten konvertiert werden
-	 *          sollen (z.B. TURTLE, XDFXML, NTRIPLES)
-	 * @param content The metadata in the format lrmi
+	 * @param format Das RDF-Format, in dem die Metadaten vorliegen (z.B. TURTLE,
+	 *          XDFXML, NTRIPLES)
+	 * @param content The metadata in the format lobid2
 	 * @return a short message
 	 */
-	public String updateLobidify2AndEnrichLrmiData(String pid, RDFFormat format,
-			JsonNode content) {
+	public String updateLrmifyAndEnrichMetadata(String pid, RDFFormat format,
+			String content) {
 		try {
+			play.Logger.debug("Start method updateLrmifyAndEnrichMetadata(pid, ...)");
 			Node node = new Read().readNode(pid);
-			return updateLobidify2AndEnrichLrmiData(node, format, content.toString());
+			return updateLrmifyAndEnrichMetadata(node, format, content);
 		} catch (Exception e) {
 			throw new UpdateNodeException(e);
 		}
@@ -300,7 +302,7 @@ public class Modify extends RegalAction {
 
 	/**
 	 * The method maps LRMI metadata to the Lobid2 format and creates a data
-	 * stream Metadata2 of the resource
+	 * stream "metadata2" of the resource
 	 * 
 	 * @param node The node of the resource that must be updated
 	 * @param format RDF-Format, z.B. NTRIPLES
@@ -332,6 +334,39 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * The method maps lobid2 metadata to the LRMI data format and creates or
+	 * updates a data stream Lrmidata of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param format the RDF-Format of the metadata, z.B. NTRIPLES
+	 * @param content The metadata as lobid2 string
+	 * @return a short message
+	 */
+	public String updateLrmifyAndEnrichMetadata(Node node, RDFFormat format,
+			String content) {
+
+		play.Logger.debug("Start method updateLrmifyAndEnrichMetadata(node, ...)");
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		String lrmiContent =
+				new LRMIMapper().getLrmiAndLrmifyMetadata(node, format, content);
+		play.Logger.debug("lrmiContent=" + lrmiContent);
+		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
+		updateLrmiData(node, lrmiContent);
+		play.Logger.debug("Updated LRMI datastream!");
+
+		String enrichMessage = new Enrich().enrichLrmiData(node);
+		return pid + " LRMI-metadata successfully updated and enriched! "
+				+ enrichMessage;
+	}
+
+	/**
 	 * This method creates an LRMI data stream (unmapped) of the resource
 	 * 
 	 * @param node The node of the resource that must be updated
@@ -354,15 +389,13 @@ public class Modify extends RegalAction {
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
 		updateLrmiData(node, content_toscience);
-		msg =
-				pid + " LRMI-metadata of " + node.getPid() + " successfully updated! ";
+		// msg = pid + " LRMI-metadata of " + node.getPid() + " successfully
+		// updated! ";
+		String enrichMessage = new Enrich().enrichLrmiData(node);
+		msg = pid + " LRMI-metadata of " + node.getPid()
+				+ " successfully updated and enriched! " + enrichMessage;
 		play.Logger.debug(msg);
 		return msg;
-
-		// Anreicherung muss erst mal nicht sein, wäre neue Methode:
-		// String enrichMessage = Enrich.enrichLrmiData(node);
-		// return pid + " LRMI-metadata successfully updated and enriched! " +
-		// enrichMessage;
 	}
 
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,

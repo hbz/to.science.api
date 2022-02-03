@@ -54,6 +54,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
 import actions.Enrich;
+import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
@@ -449,6 +450,7 @@ public class Resource extends MyController {
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 
 		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("BEGIN controllers.Resource.updateMetadata(pid)");
 			try {
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
@@ -465,10 +467,31 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
 	public static Promise<Result> updateMetadata2(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("BEGIN controllers.Resource.updateMetadata2(pid)");
 			try {
-				String result = modify.updateLobidify2AndEnrichMetadata(pid,
+				play.Logger.debug("Start method updateMetadata2(pid)");
+				/**
+				 * Wir aktualisieren 2 Datenströme, oder legen sie neu an:
+				 * 
+				 * 1. lobid2-Metadaten als Datenstrom "Metadata2"
+				 */
+
+				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
-				return JsonMessage(new Message(result));
+				play.Logger.debug(result1);
+
+				/**
+				 * 2. nach LRMI gemappte lobid2-Metadaten als Datenstrom "Lrmidata"
+				 */
+				// Es wird nur NTRIPLES akzeptiert
+				RDFFormat format = RDFFormat.NTRIPLES;
+				response().setContentType("text/plain");
+				// play.Logger.debug("request body=" + request().body().asText());
+				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
+						request().body().asText());
+				play.Logger.debug(result2);
+
+				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
@@ -487,7 +510,8 @@ public class Resource extends MyController {
 				/**
 				 * Wir legen 2 Datenströme an:
 				 * 
-				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "Lrmidata"
+				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
+				 * Datenstrom "Lrmidata"
 				 */
 				String result1 =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
@@ -498,8 +522,9 @@ public class Resource extends MyController {
 				 */
 				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
 				RDFFormat format = RDFFormat.NTRIPLES;
-				String result2 = modify.updateLobidify2AndEnrichLrmiData(pid, format,
-						request().body().asJson());
+				Node nodeNode = new Read().readNode(pid);
+				String result2 = modify.updateLobidify2AndEnrichLrmiData(nodeNode,
+						format, nodeNode.getLrmiData());
 				play.Logger.debug(result2);
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
