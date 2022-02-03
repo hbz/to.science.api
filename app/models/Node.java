@@ -112,6 +112,8 @@ public class Node implements java.io.Serializable {
 
 	private String createdBy = null;
 	private String lastModifiedBy = null;
+  private String submittedBy = null;
+  private String submittedByEmail = null;
 	private String importedFrom = null;
 	private String legacyId = null;
 	private String catalogId = null;
@@ -922,6 +924,39 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+   * @return submittedBy
+   */
+  public String getSubmittedBy() {
+    return submittedBy;
+  }
+
+  /**
+   * @param submittedBy
+   * @return this
+   */
+  public Node setSubmittedBy(String submittedBy) {
+    this.submittedBy = submittedBy;
+    return this;
+  }
+
+  /**
+   * @return submittedBy
+   */
+  public String getSubmittedByEmail() {
+    return submittedByEmail;
+  }
+
+  /**
+   * @param submittedBy
+   * @return this
+   */
+  public Node setSubmittedByEmail(String submittedByEmail) {
+    this.submittedByEmail = submittedByEmail;
+    return this;
+  }
+
+	
+	/**
 	 * @return importedFrom
 	 */
 	public String getImportedFrom() {
@@ -1359,4 +1394,5 @@ public class Node implements java.io.Serializable {
 		}
 		return result;
 	}
+
 }

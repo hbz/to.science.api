@@ -164,6 +164,8 @@ public class ToScienceObject implements java.io.Serializable {
 		public int hashCode() {
 			int result = 17;
 			result = 31 * result + (createdBy != null ? createdBy.hashCode() : 0);
+      result = 31 * result + (submittedBy != null ? submittedBy.hashCode() : 0);
+      result = 31 * result + (submittedByEmail != null ? submittedByEmail.hashCode() : 0);
 			result =
 					31 * result + (importedFrom != null ? importedFrom.hashCode() : 0);
 			result = 31 * result + (legacyId != null ? legacyId.hashCode() : 0);
@@ -183,6 +185,12 @@ public class ToScienceObject implements java.io.Serializable {
 			if (!(createdBy == null ? mt.createdBy == null
 					: createdBy.equals(mt.createdBy)))
 				return false;
+      if (!(submittedBy == null ? mt.submittedBy == null
+          : submittedBy.equals(mt.submittedBy)))
+        return false;
+      if (!(submittedByEmail == null ? mt.submittedByEmail == null
+          : submittedByEmail.equals(mt.submittedByEmail)))
+        return false;
 			if (!(importedFrom == null ? mt.importedFrom == null
 					: importedFrom.equals(mt.importedFrom)))
 				return false;
