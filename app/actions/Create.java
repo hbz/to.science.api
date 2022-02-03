@@ -184,6 +184,10 @@ public class Create extends RegalAction {
 		if (object.getIsDescribedBy() != null) {
 			if (object.getIsDescribedBy().getCreatedBy() != null)
 				node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+      if (object.getIsDescribedBy().getSubmittedBy() != null)
+        node.setCreatedBy(object.getIsDescribedBy().getSubmittedBy());
+      if (object.getIsDescribedBy().getSubmittedByEmail() != null)
+        node.setCreatedBy(object.getIsDescribedBy().getSubmittedByEmail());
 			if (object.getIsDescribedBy().getImportedFrom() != null)
 				node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
 			if (object.getIsDescribedBy().getLegacyId() != null)

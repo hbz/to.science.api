@@ -32,10 +32,13 @@ public class ToScienceObject implements java.io.Serializable {
 
 	/**
 	 * @author jan schnasse
+	 * @author Andres Quast
 	 *
 	 */
 	public class Provenience {
 		String createdBy = null;
+    String submittedBy = null;
+    String submittedByEmail = null;
 		String importedFrom = null;
 		String legacyId = null;
 		String name = null;
@@ -49,7 +52,21 @@ public class ToScienceObject implements java.io.Serializable {
 			this.createdBy = createdBy;
 		}
 
-		/**
+    /**
+     * @param submittedBy
+     */
+    public void setSubmittedBy(String submittedBy) {
+      this.submittedBy = submittedBy;
+    }
+
+    /**
+     * @param submittedBy
+     */
+    public void setSubmittedByEmail(String submittedByEmail) {
+      this.submittedByEmail = submittedByEmail;
+    }
+
+    /**
 		 * @return importedFrom
 		 */
 		public String getImportedFrom() {
@@ -83,6 +100,20 @@ public class ToScienceObject implements java.io.Serializable {
 		public String getCreatedBy() {
 			return createdBy;
 		}
+
+    /**
+     * @return createdBy
+     */
+    public String getSubmittedBy() {
+      return submittedBy;
+    }
+
+    /**
+     * @return createdBy
+     */
+    public String getSubmittedByEmail() {
+      return submittedByEmail;
+    }
 
 		/**
 		 * An internal name for the object
