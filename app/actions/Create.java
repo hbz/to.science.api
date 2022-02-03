@@ -172,56 +172,56 @@ public class Create extends RegalAction {
 		return node;
 	}
 
-	private void setNodeMembers(Node node, ToScienceObject object) {
-		if (object.getContentType() != null)
-			setNodeType(object.getContentType(), node);
-		if (object.getAccessScheme() != null)
-			node.setAccessScheme(object.getAccessScheme());
-		if (object.getPublishScheme() != null)
-			node.setPublishScheme(object.getPublishScheme());
-		if (object.getParentPid() != null)
-			linkWithParent(object.getParentPid(), node);
-		if (object.getIsDescribedBy() != null) {
-			if (object.getIsDescribedBy().getCreatedBy() != null)
-				node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
-      if (object.getIsDescribedBy().getSubmittedBy() != null)
-        node.setCreatedBy(object.getIsDescribedBy().getSubmittedBy());
-      if (object.getIsDescribedBy().getSubmittedByEmail() != null)
-        node.setCreatedBy(object.getIsDescribedBy().getSubmittedByEmail());
-			if (object.getIsDescribedBy().getImportedFrom() != null)
-				node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
-			if (object.getIsDescribedBy().getLegacyId() != null)
-				node.setLegacyId(object.getIsDescribedBy().getLegacyId());
-			if (object.getIsDescribedBy().getName() != null)
-				node.setName(object.getIsDescribedBy().getName());
-			if (object.getTransformer() != null)
-				OaiDispatcher.updateTransformer(object.getTransformer(), node);
-			if (object.getIsDescribedBy().getDoi() != null)
-				node.setDoi(object.getIsDescribedBy().getDoi());
-			if (object.getIsDescribedBy().getUrn() != null)
-				node.setUrn(object.getIsDescribedBy().getUrn());
+	private void setNodeMembers(Node node, ToScienceObject tsObj) {
+		if (tsObj.getContentType() != null)
+			setNodeType(tsObj.getContentType(), node);
+		if (tsObj.getAccessScheme() != null)
+			node.setAccessScheme(tsObj.getAccessScheme());
+		if (tsObj.getPublishScheme() != null)
+			node.setPublishScheme(tsObj.getPublishScheme());
+		if (tsObj.getParentPid() != null)
+			linkWithParent(tsObj.getParentPid(), node);
+		if (tsObj.getIsDescribedBy() != null) {
+			if (tsObj.getIsDescribedBy().getCreatedBy() != null)
+				node.setCreatedBy(tsObj.getIsDescribedBy().getCreatedBy());
+      if (tsObj.getIsDescribedBy().getSubmittedBy() != null)
+        node.setSubmittedBy(tsObj.getIsDescribedBy().getSubmittedBy());
+      if (tsObj.getIsDescribedBy().getSubmittedByEmail() != null)
+        node.setSubmittedByEmail(tsObj.getIsDescribedBy().getSubmittedByEmail());
+			if (tsObj.getIsDescribedBy().getImportedFrom() != null)
+				node.setImportedFrom(tsObj.getIsDescribedBy().getImportedFrom());
+			if (tsObj.getIsDescribedBy().getLegacyId() != null)
+				node.setLegacyId(tsObj.getIsDescribedBy().getLegacyId());
+			if (tsObj.getIsDescribedBy().getName() != null)
+				node.setName(tsObj.getIsDescribedBy().getName());
+			if (tsObj.getTransformer() != null)
+				OaiDispatcher.updateTransformer(tsObj.getTransformer(), node);
+			if (tsObj.getIsDescribedBy().getDoi() != null)
+				node.setDoi(tsObj.getIsDescribedBy().getDoi());
+			if (tsObj.getIsDescribedBy().getUrn() != null)
+				node.setUrn(tsObj.getIsDescribedBy().getUrn());
 		}
 		OaiDispatcher.makeOAISet(node);
 	}
 
-	private void overrideNodeMembers(Node node, ToScienceObject object) {
-		setNodeType(object.getContentType(), node);
-		node.setAccessScheme(object.getAccessScheme());
-		node.setPublishScheme(object.getPublishScheme());
-		if (object.getParentPid() != null) {
-			linkWithParent(object.getParentPid(), node);
+	private void overrideNodeMembers(Node node, ToScienceObject tsObj) {
+		setNodeType(tsObj.getContentType(), node);
+		node.setAccessScheme(tsObj.getAccessScheme());
+		node.setPublishScheme(tsObj.getPublishScheme());
+		if (tsObj.getParentPid() != null) {
+			linkWithParent(tsObj.getParentPid(), node);
 		}
-		if (object.getIsDescribedBy() != null) {
-			node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
+		if (tsObj.getIsDescribedBy() != null) {
+			node.setCreatedBy(tsObj.getIsDescribedBy().getCreatedBy());
       
-			node.setSubmittedBy(object.getIsDescribedBy().getSubmittedBy());
-      node.setSubmittedByEmail(object.getIsDescribedBy().getSubmittedByEmail());
+			node.setSubmittedBy(tsObj.getIsDescribedBy().getSubmittedBy());
+      node.setSubmittedByEmail(tsObj.getIsDescribedBy().getSubmittedByEmail());
 			
-			node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
-			node.setLegacyId(object.getIsDescribedBy().getLegacyId());
-			node.setName(object.getIsDescribedBy().getName());
-			node.setDoi(object.getIsDescribedBy().getDoi());
-			node.setUrn(object.getIsDescribedBy().getUrn());
+			node.setImportedFrom(tsObj.getIsDescribedBy().getImportedFrom());
+			node.setLegacyId(tsObj.getIsDescribedBy().getLegacyId());
+			node.setName(tsObj.getIsDescribedBy().getName());
+			node.setDoi(tsObj.getIsDescribedBy().getDoi());
+			node.setUrn(tsObj.getIsDescribedBy().getUrn());
 		}
 		OaiDispatcher.makeOAISet(node);
 	}
