@@ -192,26 +192,6 @@ public class Modify extends RegalAction {
 	}
 
 	/**
-	 * This method maps LRMI data to the Lobid2 format and creates a datastream
-	 * "metadata2" of the resource
-	 * 
-	 * @param pid The pid of the resource that must be updated
-	 * @param format Das RDF-Format, in das die Metadaten konvertiert werden
-	 *          sollen (z.B. TURTLE, XDFXML, NTRIPLES)
-	 * @param content The metadata in the format lrmi
-	 * @return a short message
-	 */
-	public String updateLobidify2AndEnrichLrmiData(String pid, RDFFormat format,
-			JsonNode content) {
-		try {
-			Node node = new Read().readNode(pid);
-			return updateLobidify2AndEnrichLrmiData(node, format, content.toString());
-		} catch (Exception e) {
-			throw new UpdateNodeException(e);
-		}
-	}
-
-	/**
 	 * This method maps lobid2 data to the LRMI data format and creates or updates
 	 * a datastream "Lrmidata" of the resource
 	 * 
@@ -322,7 +302,7 @@ public class Modify extends RegalAction {
 
 	/**
 	 * The method maps LRMI metadata to the Lobid2 format and creates a data
-	 * stream Metadata2 of the resource
+	 * stream "metadata2" of the resource
 	 * 
 	 * @param node The node of the resource that must be updated
 	 * @param format RDF-Format, z.B. NTRIPLES
@@ -381,9 +361,9 @@ public class Modify extends RegalAction {
 		updateLrmiData(node, lrmiContent);
 		play.Logger.debug("Updated LRMI datastream!");
 
-		// String enrichMessage = Enrich.enrichLrmiData(node);
-		return pid + " LRMI-metadata successfully updated!";
-		// + " and enriched! " + enrichMessage;
+		String enrichMessage = new Enrich().enrichLrmiData(node);
+		return pid + " LRMI-metadata successfully updated and enriched! "
+				+ enrichMessage;
 	}
 
 	/**
@@ -409,15 +389,13 @@ public class Modify extends RegalAction {
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
 		updateLrmiData(node, content_toscience);
-		msg =
-				pid + " LRMI-metadata of " + node.getPid() + " successfully updated! ";
+		// msg = pid + " LRMI-metadata of " + node.getPid() + " successfully
+		// updated! ";
+		String enrichMessage = new Enrich().enrichLrmiData(node);
+		msg = pid + " LRMI-metadata of " + node.getPid()
+				+ " successfully updated and enriched! " + enrichMessage;
 		play.Logger.debug(msg);
 		return msg;
-
-		// Anreicherung muss erst mal nicht sein, wäre neue Methode:
-		// String enrichMessage = Enrich.enrichLrmiData(node);
-		// return pid + " LRMI-metadata successfully updated and enriched! " +
-		// enrichMessage;
 	}
 
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,

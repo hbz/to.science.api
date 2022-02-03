@@ -52,7 +52,6 @@ import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
-import play.Play;
 
 /**
  * @author jan schnasse
@@ -1142,15 +1141,28 @@ public class JsonMapper {
 			names.add(jcontent.getString(name));
 			rdf.put("title", names);
 
+			String creatorName = null;
 			if (jcontent.has("creator")) {
 				List<Map<String, Object>> creators = new ArrayList<>();
 				arr = jcontent.getJSONArray("creator");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> creatorMap = new TreeMap<>();
-					creatorMap.put("prefLabel", obj.getString(name));
+					creatorName = new String(obj.getString(name));
+					creatorMap.put("prefLabel", creatorName);
 					if (obj.has("id")) {
 						creatorMap.put("@id", obj.getString("id"));
+					} else {
+						/*
+						 * Dieser Fall sollte nicht vorkommen, da die LRMI-Daten vorher
+						 * angreichert (enriched) werden, bevor sie auf die Metadata2-Felder
+						 * abgebildet werden. Das passiert in Enrich.enrichLrmiData(). Falls
+						 * man doch hier hin kommt, gibt es eine Warnung:
+						 */
+						play.Logger.warn(
+								"Achtung! Un-angereicherte LMRI-Daten werden nach metadata2 gemappt!!");
+						play.Logger.warn(
+								"Dem Creator \"" + creatorName + "\" fehlt eine URI/id !");
 					}
 					creators.add(creatorMap);
 				}
@@ -1173,17 +1185,17 @@ public class JsonMapper {
 			}
 
 			if (jcontent.has("description")) {
-				List<String> abstractTexts = new ArrayList<>();
+				List<String> descriptions = new ArrayList<>();
 				myObj = jcontent.get("description");
 				if (myObj instanceof java.lang.String) {
-					abstractTexts.add(jcontent.getString("description"));
+					descriptions.add(jcontent.getString("description"));
 				} else if (myObj instanceof org.json.JSONArray) {
 					arr = jcontent.getJSONArray("description");
 					for (int i = 0; i < arr.length(); i++) {
-						abstractTexts.add(arr.getString(i));
+						descriptions.add(arr.getString(i));
 					}
 				}
-				rdf.put("abstractText", abstractTexts);
+				rdf.put("description", descriptions);
 			}
 
 			if (jcontent.has("license")) {
@@ -1228,12 +1240,10 @@ public class JsonMapper {
 
 			play.Logger.debug("Done mapping LRMI data to lobid2.");
 			return rdf;
-		} catch (
-
-		JSONException je) {
-			play.Logger.error("Content could not be mapped!", je);
+		} catch (Exception e) {
+			play.Logger.error("Content could not be mapped!", e);
 			throw new RuntimeException("LRMI.json could not be mapped to lobid2.json",
-					je);
+					e);
 		}
 
 	}
