@@ -32,10 +32,13 @@ public class ToScienceObject implements java.io.Serializable {
 
 	/**
 	 * @author jan schnasse
+	 * @author Andres Quast
 	 *
 	 */
 	public class Provenience {
 		String createdBy = null;
+		String submittedBy = null;
+		String submittedByEmail = null;
 		String importedFrom = null;
 		String legacyId = null;
 		String name = null;
@@ -47,6 +50,20 @@ public class ToScienceObject implements java.io.Serializable {
 		 */
 		public void setCreatedBy(String createdBy) {
 			this.createdBy = createdBy;
+		}
+
+		/**
+		 * @param submittedBy
+		 */
+		public void setSubmittedBy(String submittedBy) {
+			this.submittedBy = submittedBy;
+		}
+
+		/**
+		 * @param submittedBy
+		 */
+		public void setSubmittedByEmail(String submittedByEmail) {
+			this.submittedByEmail = submittedByEmail;
 		}
 
 		/**
@@ -82,6 +99,20 @@ public class ToScienceObject implements java.io.Serializable {
 		 */
 		public String getCreatedBy() {
 			return createdBy;
+		}
+
+		/**
+		 * @return createdBy
+		 */
+		public String getSubmittedBy() {
+			return submittedBy;
+		}
+
+		/**
+		 * @return createdBy
+		 */
+		public String getSubmittedByEmail() {
+			return submittedByEmail;
 		}
 
 		/**
@@ -133,6 +164,9 @@ public class ToScienceObject implements java.io.Serializable {
 		public int hashCode() {
 			int result = 17;
 			result = 31 * result + (createdBy != null ? createdBy.hashCode() : 0);
+			result = 31 * result + (submittedBy != null ? submittedBy.hashCode() : 0);
+			result = 31 * result
+					+ (submittedByEmail != null ? submittedByEmail.hashCode() : 0);
 			result =
 					31 * result + (importedFrom != null ? importedFrom.hashCode() : 0);
 			result = 31 * result + (legacyId != null ? legacyId.hashCode() : 0);
@@ -151,6 +185,12 @@ public class ToScienceObject implements java.io.Serializable {
 			Provenience mt = (Provenience) other;
 			if (!(createdBy == null ? mt.createdBy == null
 					: createdBy.equals(mt.createdBy)))
+				return false;
+			if (!(submittedBy == null ? mt.submittedBy == null
+					: submittedBy.equals(mt.submittedBy)))
+				return false;
+			if (!(submittedByEmail == null ? mt.submittedByEmail == null
+					: submittedByEmail.equals(mt.submittedByEmail)))
 				return false;
 			if (!(importedFrom == null ? mt.importedFrom == null
 					: importedFrom.equals(mt.importedFrom)))

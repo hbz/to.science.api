@@ -39,6 +39,8 @@ import static archive.fedora.Vocabulary.REL_ACCESS_SCHEME;
 import static archive.fedora.Vocabulary.REL_CATALOG_ID;
 import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
 import static archive.fedora.Vocabulary.REL_CREATED_BY;
+import static archive.fedora.Vocabulary.REL_SUBMITTED_BY;
+import static archive.fedora.Vocabulary.REL_SUBMITTED_BY_EMAIL;
 import static archive.fedora.Vocabulary.REL_HAS_DOI;
 import static archive.fedora.Vocabulary.REL_HAS_URN;
 import static archive.fedora.Vocabulary.REL_IMPORTED_FROM;
@@ -59,6 +61,8 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
@@ -578,6 +582,13 @@ public class Utils {
 						link.setPredicate(predUri.stringValue());
 
 						String pred = link.getPredicate();
+
+						Hashtable<String, String> vocRel = Vocabulary.getRelationVocabs();
+						Enumeration<String> vocEnum = vocRel.elements();
+						while (vocEnum.hasMoreElements()) {
+							// This code is still to be developed
+						}
+
 						if (REL_IS_NODE_TYPE.equals(pred)) {
 							node.setType(link.getObject());
 							continue;
@@ -595,6 +606,12 @@ public class Utils {
 							continue;
 						} else if (REL_CREATED_BY.equals(pred)) {
 							node.setCreatedBy(link.getObject());
+							continue;
+						} else if (REL_SUBMITTED_BY.equals(pred)) {
+							node.setSubmittedBy(link.getObject());
+							continue;
+						} else if (REL_SUBMITTED_BY_EMAIL.equals(pred)) {
+							node.setSubmittedByEmail(link.getObject());
 							continue;
 						} else if (REL_PUBLISH_SCHEME.equals(pred)) {
 							node.setPublishScheme(link.getObject());
@@ -808,6 +825,18 @@ public class Utils {
 		link = new Link();
 		link.setObject(node.getImportedFrom(), true);
 		link.setPredicate(REL_IMPORTED_FROM);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getCreatedBy(), true);
+		link.setPredicate(REL_CREATED_BY);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getSubmittedBy(), true);
+		link.setPredicate(REL_SUBMITTED_BY);
+		node.addRelation(link);
+		link = new Link();
+		link.setObject(node.getSubmittedByEmail(), true);
+		link.setPredicate(REL_SUBMITTED_BY_EMAIL);
 		node.addRelation(link);
 		link = new Link();
 		link.setObject(node.getCreatedBy(), true);
