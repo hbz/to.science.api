@@ -487,8 +487,9 @@ public class Resource extends MyController {
 				RDFFormat format = RDFFormat.NTRIPLES;
 				response().setContentType("text/plain");
 				// play.Logger.debug("request body=" + request().body().asText());
+				Node nodeNode = new Read().readNode(pid);
 				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
-						request().body().asText());
+						nodeNode.getMetadata2());
 				play.Logger.debug(result2);
 
 				return JsonMessage(new Message(result1 + "\n" + result2));

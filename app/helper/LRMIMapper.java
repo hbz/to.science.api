@@ -89,6 +89,7 @@ public class LRMIMapper {
 			}
 			JSONArray arr = null;
 			JSONObject obj = null;
+			JSONObject subObj = null;
 			/**
 			 * - wandle die gesendeten Metadata2-Daten nach JSON. Genauso wie hier:
 			 * JsonMapper.getDescriptiveMetadata2(), jedoch die Metadata2 nicht aus
@@ -189,6 +190,54 @@ public class LRMIMapper {
 					iterator = arrOfString.iterator();
 				}
 				jcontent.put("name", iterator.next());
+			}
+
+			if (rdf.containsKey("medium")) {
+				myObj = rdf.get("medium");
+				if (myObj instanceof java.util.ArrayList) {
+					arrayList = (ArrayList<Map<String, Object>>) rdf.get("medium");
+					iterator = arrayList.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					hashSet = (HashSet<Map<String, Object>>) rdf.get("medium");
+					iterator = hashSet.iterator();
+				}
+				// Hole ein Objekt aus LRMI-JSON oder lege es neu an
+				obj = null;
+				if (jcontent.has("learningResourceType")) {
+					arr = (JSONArray) jcontent.get("learningResourceType");
+					for (int i = 0; i < arr.length(); i++) {
+						myObj = arr.get(i);
+						play.Logger
+								.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
+						if (myObj instanceof org.json.JSONObject) {
+							obj = arr.getJSONObject(i);
+							// nimm nur den ersten learningResourceType und überschreibe ihn
+							// mit dem, was aus RDF kommt
+							break;
+						}
+					}
+					// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
+					if (obj == null) {
+						obj = new JSONObject();
+						arr.put(obj);
+					}
+				} else {
+					arr = new JSONArray();
+					obj = new JSONObject();
+					arr.put(obj);
+				}
+				// Jetzt editiere das JSONObject mit den in RDF gefundenen Informationen
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					if (map.containsKey("prefLabel")) {
+						subObj = new JSONObject();
+						subObj.put("de", map.get("prefLabel"));
+						obj.put("prefLabel", subObj);
+					}
+					obj.put("id", map.get("@id"));
+					break; // nimm nur den ersten Medientypen
+				}
+				jcontent.put("learningResourceType", arr);
 			}
 
 			if (rdf.containsKey("creator")) {
