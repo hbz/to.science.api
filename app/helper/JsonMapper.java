@@ -879,6 +879,10 @@ public class JsonMapper {
 		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
 		if (node.getCreatedBy() != null)
 			aboutMap.put(createdBy, node.getCreatedBy());
+		if (node.getSubmittedBy() != null)
+			aboutMap.put(submittedBy, node.getSubmittedBy());
+		if (node.getSubmittedByEmail() != null)
+			aboutMap.put(submittedByEmail, node.getSubmittedByEmail());
 		if (node.getLegacyId() != null)
 			aboutMap.put(legacyId, node.getLegacyId());
 		if (node.getImportedFrom() != null)
