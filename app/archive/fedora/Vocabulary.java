@@ -16,6 +16,8 @@
  */
 package archive.fedora;
 
+import java.util.Hashtable;
+
 /**
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
@@ -76,6 +78,19 @@ public abstract class Vocabulary {
 	public final static String REL_CREATED_BY = HBZ_MODEL_NAMESPACE + "createdBy";
 
 	/**
+	 * Used to identify the submitter of the regal resource
+	 * 
+	 */
+	public final static String REL_SUBMITTED_BY = HBZ_MODEL_NAMESPACE + "submittedBy";
+
+	/**
+	 * Used to identify the submitters email of the regal resource
+	 * 
+	 */
+
+	public final static String REL_SUBMITTED_BY_EMAIL = HBZ_MODEL_NAMESPACE + "submittedByEmail";
+
+	/**
 	 * Used to identify the last modifier of the regal resource
 	 * 
 	 */
@@ -128,4 +143,34 @@ public abstract class Vocabulary {
 	 */
 	public final static String REL_LOBID_DOI =
 			"http://purl.org/ontology/bibo/doi";
+	
+	private static Hashtable<String,String> relationVocabs = new Hashtable<String,String>();
+	
+	private void setRelationVocabs() {
+		relationVocabs.put("REL_IS_NODE_TYPE", REL_IS_NODE_TYPE);
+		relationVocabs.put("REL_CONTENT_TYPE", REL_CONTENT_TYPE);
+		relationVocabs.put("TYPE_NODE", TYPE_NODE);
+		relationVocabs.put("TYPE_OBJECT", TYPE_OBJECT);
+		relationVocabs.put("REL_ACCESS_SCHEME", REL_ACCESS_SCHEME);
+		relationVocabs.put("REL_PUBLISH_SCHEME", REL_PUBLISH_SCHEME);
+		relationVocabs.put("REL_IMPORTED_FROM", REL_IMPORTED_FROM);
+		relationVocabs.put("REL_CREATED_BY", REL_CREATED_BY);
+		relationVocabs.put("REL_SUBMITTED_BY", REL_SUBMITTED_BY);
+		relationVocabs.put("REL_SUBMITTED_BY_EMAIL", REL_SUBMITTED_BY_EMAIL);
+		relationVocabs.put("REL_LAST_MODIFIED_BY", REL_LAST_MODIFIED_BY);
+		relationVocabs.put("REL_LEGACY_ID", REL_LEGACY_ID);
+		relationVocabs.put("REL_NAME", REL_NAME);
+		relationVocabs.put("REL_CATALOG_ID", REL_CATALOG_ID);
+		relationVocabs.put("REL_HAS_URN", REL_HAS_URN);
+		relationVocabs.put("REL_HAS_DOI", REL_HAS_DOI);
+		relationVocabs.put("REL_HBZ_ID", REL_HBZ_ID);
+		relationVocabs.put("REL_MAB_527", REL_MAB_527);
+		relationVocabs.put("REL_LOBID_DOI", REL_LOBID_DOI);
+
+	}
+	
+	public static Hashtable getRelationVocabs() {
+		return relationVocabs;
+	}
+	
 }
