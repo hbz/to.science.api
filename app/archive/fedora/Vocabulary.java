@@ -81,14 +81,16 @@ public abstract class Vocabulary {
 	 * Used to identify the submitter of the regal resource
 	 * 
 	 */
-	public final static String REL_SUBMITTED_BY = HBZ_MODEL_NAMESPACE + "submittedBy";
+	public final static String REL_SUBMITTED_BY =
+			HBZ_MODEL_NAMESPACE + "submittedBy";
 
 	/**
 	 * Used to identify the submitters email of the regal resource
 	 * 
 	 */
 
-	public final static String REL_SUBMITTED_BY_EMAIL = HBZ_MODEL_NAMESPACE + "submittedByEmail";
+	public final static String REL_SUBMITTED_BY_EMAIL =
+			HBZ_MODEL_NAMESPACE + "submittedByEmail";
 
 	/**
 	 * Used to identify the last modifier of the regal resource
@@ -143,9 +145,13 @@ public abstract class Vocabulary {
 	 */
 	public final static String REL_LOBID_DOI =
 			"http://purl.org/ontology/bibo/doi";
-	
-	private static Hashtable<String,String> relationVocabs = new Hashtable<String,String>();
-	
+
+	private static Hashtable<String, String> relationVocabs =
+			new Hashtable<String, String>();
+
+	/*
+	 * This method is not yet in use!
+	 */
 	private void setRelationVocabs() {
 		relationVocabs.put("REL_IS_NODE_TYPE", REL_IS_NODE_TYPE);
 		relationVocabs.put("REL_CONTENT_TYPE", REL_CONTENT_TYPE);
@@ -168,9 +174,9 @@ public abstract class Vocabulary {
 		relationVocabs.put("REL_LOBID_DOI", REL_LOBID_DOI);
 
 	}
-	
+
 	public static Hashtable getRelationVocabs() {
 		return relationVocabs;
 	}
-	
+
 }

@@ -26,7 +26,6 @@ import models.Gatherconf;
 import models.Globals;
 import models.Gatherconf.CrawlerSelection;
 import models.Node;
-import models.ToScienceObject;
 import play.Logger;
 import play.Play;
 import com.yourmediashelf.fedora.client.request.GetDatastream;

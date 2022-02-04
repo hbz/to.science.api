@@ -184,10 +184,11 @@ public class Create extends RegalAction {
 		if (tsObj.getIsDescribedBy() != null) {
 			if (tsObj.getIsDescribedBy().getCreatedBy() != null)
 				node.setCreatedBy(tsObj.getIsDescribedBy().getCreatedBy());
-      if (tsObj.getIsDescribedBy().getSubmittedBy() != null)
-        node.setSubmittedBy(tsObj.getIsDescribedBy().getSubmittedBy());
-      if (tsObj.getIsDescribedBy().getSubmittedByEmail() != null)
-        node.setSubmittedByEmail(tsObj.getIsDescribedBy().getSubmittedByEmail());
+			if (tsObj.getIsDescribedBy().getSubmittedBy() != null)
+				node.setSubmittedBy(tsObj.getIsDescribedBy().getSubmittedBy());
+			if (tsObj.getIsDescribedBy().getSubmittedByEmail() != null)
+				node.setSubmittedByEmail(
+						tsObj.getIsDescribedBy().getSubmittedByEmail());
 			if (tsObj.getIsDescribedBy().getImportedFrom() != null)
 				node.setImportedFrom(tsObj.getIsDescribedBy().getImportedFrom());
 			if (tsObj.getIsDescribedBy().getLegacyId() != null)
@@ -213,10 +214,8 @@ public class Create extends RegalAction {
 		}
 		if (tsObj.getIsDescribedBy() != null) {
 			node.setCreatedBy(tsObj.getIsDescribedBy().getCreatedBy());
-      
 			node.setSubmittedBy(tsObj.getIsDescribedBy().getSubmittedBy());
-      node.setSubmittedByEmail(tsObj.getIsDescribedBy().getSubmittedByEmail());
-			
+			node.setSubmittedByEmail(tsObj.getIsDescribedBy().getSubmittedByEmail());
 			node.setImportedFrom(tsObj.getIsDescribedBy().getImportedFrom());
 			node.setLegacyId(tsObj.getIsDescribedBy().getLegacyId());
 			node.setName(tsObj.getIsDescribedBy().getName());

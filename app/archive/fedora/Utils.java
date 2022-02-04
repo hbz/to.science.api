@@ -582,13 +582,13 @@ public class Utils {
 						link.setPredicate(predUri.stringValue());
 
 						String pred = link.getPredicate();
-						
-						Hashtable<String,String> vocRel = Vocabulary.getRelationVocabs();
+
+						Hashtable<String, String> vocRel = Vocabulary.getRelationVocabs();
 						Enumeration<String> vocEnum = vocRel.elements();
-						while(vocEnum.hasMoreElements()) {
-							
+						while (vocEnum.hasMoreElements()) {
+							// This code is still to be developed
 						}
-						
+
 						if (REL_IS_NODE_TYPE.equals(pred)) {
 							node.setType(link.getObject());
 							continue;
