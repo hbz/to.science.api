@@ -17,7 +17,11 @@
 package models;
 
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -36,83 +40,94 @@ public class ToScienceObject implements java.io.Serializable {
 	 *
 	 */
 	public class Provenience {
-		String createdBy = null;
-    String submittedBy = null;
-    String submittedByEmail = null;
-		String importedFrom = null;
-		String legacyId = null;
-		String name = null;
-		String doi = null;
-		String urn = null;
+		HashMap<String,String> provenience = setInitialProvenience();		
+
+		/**
+		 * Setting up HashMap including all provenience variables
+		 */
+		private HashMap<String,String> setInitialProvenience(){
+			HashMap<String,String> initProvenience = new HashMap<>(); 
+			initProvenience.put("createdBy", null);
+			initProvenience.put("submittedBy", null);
+			initProvenience.put("submittedByEmail", null);
+			initProvenience.put("importedFrom", null);
+			initProvenience.put("legacyId", null);
+			initProvenience.put("name", null);
+			initProvenience.put("doi", null);
+			initProvenience.put("urn", null);
+			return initProvenience;
+		}
+		
+			
 
 		/**
 		 * @param createdBy
 		 */
 		public void setCreatedBy(String createdBy) {
-			this.createdBy = createdBy;
+			this.provenience.put("createdBy", createdBy);
 		}
 
     /**
      * @param submittedBy
      */
     public void setSubmittedBy(String submittedBy) {
-      this.submittedBy = submittedBy;
+      this.provenience.put("submittedBy", submittedBy);
     }
 
     /**
      * @param submittedBy
      */
     public void setSubmittedByEmail(String submittedByEmail) {
-      this.submittedByEmail = submittedByEmail;
+      this.provenience.put("submittedByEmail", submittedByEmail);
     }
 
     /**
 		 * @return importedFrom
 		 */
 		public String getImportedFrom() {
-			return importedFrom;
+			return this.provenience.get("importedFrom");
 		}
 
 		/**
 		 * @param importedFrom
 		 */
 		public void setImportedFrom(String importedFrom) {
-			this.importedFrom = importedFrom;
+      this.provenience.put("importedFrom", importedFrom);
 		}
 
 		/**
 		 * @return legacyId
 		 */
 		public String getLegacyId() {
-			return legacyId;
+			return this.provenience.get("legacyId");
 		}
 
 		/**
 		 * @param legacyId legacyId
 		 */
 		public void setLegacyId(String legacyId) {
-			this.legacyId = legacyId;
+      this.provenience.put("legacyId", legacyId);
 		}
 
 		/**
 		 * @return createdBy
 		 */
 		public String getCreatedBy() {
-			return createdBy;
+			return this.provenience.get("createdBy");
 		}
 
     /**
-     * @return createdBy
+     * @return submittedBy
      */
     public String getSubmittedBy() {
-      return submittedBy;
+			return this.provenience.get("submittedBy");
     }
 
     /**
-     * @return createdBy
+     * @return submittedByEmail
      */
     public String getSubmittedByEmail() {
-      return submittedByEmail;
+			return this.provenience.get("submittedByEmail");
     }
 
 		/**
@@ -121,7 +136,7 @@ public class ToScienceObject implements java.io.Serializable {
 		 * @param name
 		 */
 		public void setName(String name) {
-			this.name = name;
+			this.provenience.put("name", name);
 		}
 
 		/**
@@ -129,49 +144,49 @@ public class ToScienceObject implements java.io.Serializable {
 		 * @return an internal name for the object
 		 */
 		public String getName() {
-			return name;
+			return this.provenience.get("name");
 		}
 
 		/**
 		 * @return the doi as string
 		 */
 		public String getDoi() {
-			return doi;
+			return this.provenience.get("doi");
 		}
 
 		/**
 		 * @param doi
 		 */
 		public void setDoi(String doi) {
-			this.doi = doi;
+			this.provenience.put("doi",doi);
 		}
 
 		/**
 		 * @return the urn as string
 		 */
 		public String getUrn() {
-			return urn;
+			return this.provenience.get("urn");
 		}
 
 		/**
 		 * @param urn
 		 */
 		public void setUrn(String urn) {
-			this.urn = urn;
+			this.provenience.put("urn", urn);
 		}
 
 		@Override
 		public int hashCode() {
 			int result = 17;
-			result = 31 * result + (createdBy != null ? createdBy.hashCode() : 0);
-      result = 31 * result + (submittedBy != null ? submittedBy.hashCode() : 0);
-      result = 31 * result + (submittedByEmail != null ? submittedByEmail.hashCode() : 0);
+			result = 31 * result + (provenience.get("createdBy") != null ? provenience.get("createdBy").hashCode() : 0);
+      result = 31 * result + (provenience.get("submittedBy") != null ? provenience.get("submittedBy").hashCode() : 0);
+      result = 31 * result + (provenience.get("submittedByEmail") != null ? provenience.get("submittedByEmail").hashCode() : 0);
 			result =
-					31 * result + (importedFrom != null ? importedFrom.hashCode() : 0);
-			result = 31 * result + (legacyId != null ? legacyId.hashCode() : 0);
-			result = 31 * result + (name != null ? name.hashCode() : 0);
-			result = 31 * result + (doi != null ? doi.hashCode() : 0);
-			result = 31 * result + (urn != null ? urn.hashCode() : 0);
+					31 * result + (provenience.get("importedFrom") != null ? provenience.get("importedFrom").hashCode() : 0);
+			result = 31 * result + (provenience.get("legacyId") != null ? provenience.get("legacyId").hashCode() : 0);
+			result = 31 * result + (provenience.get("name") != null ? provenience.get("name").hashCode() : 0);
+			result = 31 * result + (provenience.get("doi") != null ? provenience.get("doi").hashCode() : 0);
+			result = 31 * result + (provenience.get("urn") != null ? provenience.get("urn").hashCode() : 0);
 			return result;
 		}
 
@@ -181,10 +196,36 @@ public class ToScienceObject implements java.io.Serializable {
 				return true;
 			if (!(other instanceof Provenience))
 				return false;
+
 			Provenience mt = (Provenience) other;
+			
+			// create Iterator from HashMap
+			Iterator<Map.Entry<String, String>> pit = provenience.entrySet().iterator();
+			
+			while(pit.hasNext()) {
+				Entry<String,String> proEntry = pit.next();
+				play.Logger.debug(mt.provenience.get(proEntry.getKey()));
+				play.Logger.debug(proEntry.getValue());
+				if (!(proEntry.getValue() == null ? mt.provenience.get(proEntry.getKey()) == null : 
+					mt.provenience.get(proEntry.getKey()).equals(proEntry.getValue()))) {
+					return false;
+				};
+			}
+			
+			/*
+			* Gebe falsch zurück wenn die interne Prüfung falsch ist: 
+			* 1. Prüfe ob createdBy null ist. 
+			* 2. Wenn ja, prüfe ob auch mt.createdBy null ist. 
+			* Wenn 2 wahr, gebe wahr zurück
+			* 3. Wenn 1 falsch, prüfe ob createdBy mt.createdBy entspricht.
+			* Wenn 3 wahr, gebe wahr zurück 
+			
 			if (!(createdBy == null ? mt.createdBy == null
 					: createdBy.equals(mt.createdBy)))
 				return false;
+				
+				
+				
       if (!(submittedBy == null ? mt.submittedBy == null
           : submittedBy.equals(mt.submittedBy)))
         return false;
@@ -201,6 +242,8 @@ public class ToScienceObject implements java.io.Serializable {
 				return false;
 			if (!(urn == null ? mt.urn == null : urn.equals(mt.urn)))
 				return false;
+				
+			*/
 			return true;
 		}
 	}
