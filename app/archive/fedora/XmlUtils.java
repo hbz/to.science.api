@@ -359,8 +359,8 @@ public class XmlUtils {
 			play.Logger.debug("Start mapping of DeepGreen to lobid2");
 
 			// jsonLD-Context; was ist die Entsprechung in DeepGreen ?
-			rdf.put("@context",
-					"https://w3id.org/kim/lrmi-profile/draft/context.jsonld");
+			// rdf.put("@context",
+			// "https://w3id.org/kim/lrmi-profile/draft/context.jsonld");
 
 			/* Zeitschriftentitel */
 			NodeList nodeList = content.getElementsByTagName("journal-title");
