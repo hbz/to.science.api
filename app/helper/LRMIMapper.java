@@ -128,7 +128,7 @@ public class LRMIMapper {
 					hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
 					iterator = hashSet.iterator();
 				}
-				// Suche Objekt "@language" im JSONArray "@context"
+				// 1. Suche Objekt "@language" im JSONArray "@context"
 				if (jcontent.has("@context")) {
 					arr = (JSONArray) jcontent.get("@context");
 					obj = null;
@@ -154,14 +154,22 @@ public class LRMIMapper {
 					arr.put(obj);
 				}
 
+				// 2. Sprache auch auf das LRMI-Feld "inLanguage" abbilden
+				JSONArray inLanguageArr = new JSONArray();
+
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj.put("@language", map.get("prefLabel"));
 					// obj.put("id", map.get("@id"));
-					// arr.put(obj);
+					inLanguageArr.put(map.get("prefLabel"));
 					break;
 				}
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					inLanguageArr.put(map.get("prefLabel"));
+				}
 				jcontent.put("@context", arr);
+				jcontent.put("inLanguage", inLanguageArr);
 			}
 
 			if (rdf.containsKey("contentType")) {
