@@ -21897,4 +21897,20 @@
   "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#submittedBy",
+  "label" : "Eingeliefert von",
+  "name" : "submittedBy",
+  "referenceType" : "String",
+  "weight" : "118",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
+}, {
+  "uri" : "http://hbz-nrw.de/regal#submittedByEmail",
+  "label" : "E-Mailadresse der einliefernden Person",
+  "name" : "submittedByEmail",
+  "referenceType" : "String",
+  "weight" : "118",
+  "type" : "CONTEXT",
+  "multilangLabel" : { }
 } ]
