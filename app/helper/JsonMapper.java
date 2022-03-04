@@ -1102,7 +1102,7 @@ public class JsonMapper {
 			JsonObject jcontent = new JSONObject(content);
 			play.Logger.debug("Start mapping of lrmi to lobid2");
 			JSONArray arr = null;
-			JSONObject obj = null;
+			JsonObject obj = null;
 			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
 			String prefLabel = null;
 
@@ -1153,6 +1153,22 @@ public class JsonMapper {
 			names.add(jcontent.getString(name));
 			rdf.put("title", names);
 
+			if (jcontent.has("inLanguage")) {
+				List<Map<String, String>> inLangList = new ArrayList<>();
+				String inLang = null;
+				arr = jcontent.getAsJsonArray("inLanguage");
+				for (int i = 0; i < arr.length(); i++) {
+					Map<String, String> inLangMap = new TreeMap<>();
+					inLang = arr.get(i);
+					Locale loc = Locale.forLanguageTag(inLang);
+					inLangMap.put("@id",
+							"http://id.loc.gov/vocabulary/iso639-2/" + loc.getISO3Language());
+					inLangMap.put(prefLabel, loc.getDisplayLanguage());
+					inLangList.add(inLangMap);
+				}
+				rdf.put("language", inLangList);
+			}
+
 			if (jcontent.has("learningResourceType")) {
 				List<Map<String, Object>> media = new ArrayList<>();
 				arr = jcontent.getJSONArray("learningResourceType");
@@ -1199,6 +1215,10 @@ public class JsonMapper {
 								"Achtung! Un-angereicherte LMRI-Daten werden nach metadata2 gemappt!!");
 						play.Logger.warn(
 								"Dem Creator \"" + creatorName + "\" fehlt eine URI/id !");
+					}
+					if (obj.has("affiliation")) {
+						creatorMap.put("affiliation", obj.get("affiliation"));
+
 					}
 					creators.add(creatorMap);
 				}
@@ -1270,6 +1290,29 @@ public class JsonMapper {
 					institutions.add(publisherMap);
 				}
 				rdf.put("institution", institutions);
+			}
+
+			if (jcontent.has("keywords")) {
+				List<Map<String, Object>> subject = new ArrayList<>();
+				arr = jcontent.getJSONArray("keywords");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					Map<String, Object> subjectMap = new TreeMap<>();
+					if (obj.has("prefLabel")) {
+						JSONObject subObj = obj.getJSONObject("prefLabel");
+						prefLabel = subObj.getString("de");
+						subjectMap.put("prefLabel", prefLabel);
+						play.Logger.debug("subject: prefLabel: " + prefLabel);
+					}
+					if (obj.has("id")) {
+						subjectMap.put("@id", obj.getString("id"));
+					} else {
+						// Dieser Fall sollte nicht vorkommen
+						play.Logger.warn("Warn subject has no ID !");
+					}
+					subject.add(subjectMap);
+				}
+				rdf.put("subject", subject);
 			}
 
 			postprocessing(rdf);
