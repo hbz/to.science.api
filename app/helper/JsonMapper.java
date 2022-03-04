@@ -44,7 +44,6 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.google.gson.JsonObject;
 
 import actions.Read;
 import archive.fedora.RdfUtils;
@@ -1099,10 +1098,10 @@ public class JsonMapper {
 			Map<String, Object> rdf = node.getLd2();
 
 			// LRMIDaten nach JSONObject wandeln
-			JsonObject jcontent = new JSONObject(content);
+			JSONObject jcontent = new JSONObject(content);
 			play.Logger.debug("Start mapping of lrmi to lobid2");
 			JSONArray arr = null;
-			JsonObject obj = null;
+			JSONObject obj = null;
 			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
 			String prefLabel = null;
 
