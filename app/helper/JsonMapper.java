@@ -1154,12 +1154,12 @@ public class JsonMapper {
 			rdf.put("title", names);
 
 			if (jcontent.has("inLanguage")) {
-				List<Map<String, String>> inLangList = new ArrayList<>();
+				List<Map<String, Object>> inLangList = new ArrayList<>();
 				String inLang = null;
 				arr = jcontent.getAsJsonArray("inLanguage");
 				for (int i = 0; i < arr.length(); i++) {
-					Map<String, String> inLangMap = new TreeMap<>();
-					inLang = arr.get(i);
+					Map<String, Object> inLangMap = new TreeMap<>();
+					inLang = arr.getString(i);
 					Locale loc = Locale.forLanguageTag(inLang);
 					inLangMap.put("@id",
 							"http://id.loc.gov/vocabulary/iso639-2/" + loc.getISO3Language());
