@@ -1296,24 +1296,14 @@ public class JsonMapper {
 			}
 
 			if (jcontent.has("keywords")) {
+				String keyword = null;
 				List<Map<String, Object>> subject = new ArrayList<>();
 				arr = jcontent.getJSONArray("keywords");
 				for (int i = 0; i < arr.length(); i++) {
-					obj = arr.getJSONObject(i);
-					Map<String, Object> subjectMap = new TreeMap<>();
-					if (obj.has("prefLabel")) {
-						JSONObject subObj = obj.getJSONObject("prefLabel");
-						prefLabel = subObj.getString("de");
-						subjectMap.put("prefLabel", prefLabel);
-						play.Logger.debug("subject: prefLabel: " + prefLabel);
-					}
-					if (obj.has("id")) {
-						subjectMap.put("@id", obj.getString("id"));
-					} else {
-						// Dieser Fall sollte nicht vorkommen
-						play.Logger.warn("Warn subject has no ID !");
-					}
-					subject.add(subjectMap);
+					Map<String, Object> keywordMap = new TreeMap<>();
+					keyword = arr.getString(i);
+					keywordMap.put("prefLabel", keyword);
+					subject.add(keywordMap);
 				}
 				rdf.put("subject", subject);
 			}
