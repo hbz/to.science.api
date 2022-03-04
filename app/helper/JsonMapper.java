@@ -1166,7 +1166,7 @@ public class JsonMapper {
 					if (loc.getDisplayLanguage() != null) {
 						langPrefLabel = loc.getDisplayLanguage();
 					}
-					inLangMap.put(prefLabel, langPrefLabel);
+					inLangMap.put("prefLabel", langPrefLabel);
 					inLangList.add(inLangMap);
 				}
 				rdf.put("language", inLangList);
