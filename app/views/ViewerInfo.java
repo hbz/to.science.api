@@ -30,7 +30,8 @@ public class ViewerInfo {
 
 	public ViewerInfo(Node n) {
 		pid = n.getPid();
-		dataLink = "/resource/" + n.getPid() + "/data";
+		dataLink =
+				Globals.protocol + Globals.server + "/resource/" + n.getPid() + "/data";
 		filesize = n.getFileSize();
 		viewertype = createViewerType(n);
 		viewerAdress = createViewerAdress(n);
