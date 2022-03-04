@@ -1162,7 +1162,11 @@ public class JsonMapper {
 					Locale loc = Locale.forLanguageTag(inLang);
 					inLangMap.put("@id",
 							"http://id.loc.gov/vocabulary/iso639-2/" + loc.getISO3Language());
-					inLangMap.put(prefLabel, loc.getDisplayLanguage());
+					String langPrefLabel = inLang;
+					if (loc.getDisplayLanguage() != null) {
+						langPrefLabel = loc.getDisplayLanguage();
+					}
+					inLangMap.put(prefLabel, langPrefLabel);
 					inLangList.add(inLangMap);
 				}
 				rdf.put("language", inLangList);
