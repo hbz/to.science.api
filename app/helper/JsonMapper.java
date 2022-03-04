@@ -1155,7 +1155,7 @@ public class JsonMapper {
 			if (jcontent.has("inLanguage")) {
 				List<Map<String, Object>> inLangList = new ArrayList<>();
 				String inLang = null;
-				arr = jcontent.getAsJsonArray("inLanguage");
+				arr = jcontent.getJSONArray("inLanguage");
 				for (int i = 0; i < arr.length(); i++) {
 					Map<String, Object> inLangMap = new TreeMap<>();
 					inLang = arr.getString(i);
