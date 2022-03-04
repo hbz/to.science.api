@@ -44,6 +44,7 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 
 import actions.Read;
 import archive.fedora.RdfUtils;
@@ -1098,7 +1099,7 @@ public class JsonMapper {
 			Map<String, Object> rdf = node.getLd2();
 
 			// LRMIDaten nach JSONObject wandeln
-			JSONObject jcontent = new JSONObject(content);
+			JsonObject jcontent = new JSONObject(content);
 			play.Logger.debug("Start mapping of lrmi to lobid2");
 			JSONArray arr = null;
 			JSONObject obj = null;
@@ -1124,12 +1125,12 @@ public class JsonMapper {
 				if (language != null && !language.trim().isEmpty()) {
 					if (language.length() == 2) {
 						Locale loc = Locale.forLanguageTag(language);
-						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-3/"
+						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
 								+ loc.getISO3Language());
 					} else if (language.length() == 3) {
 						// vermutlich ISO639-2
 						languageMap.put("@id",
-								"http://id.loc.gov/vocabulary/iso639-3/" + language);
+								"http://id.loc.gov/vocabulary/iso639-2/" + language);
 					} else {
 						play.Logger.warn(
 								"Unbekanntes Vokabluar für Sprachencode! Code=" + language);
