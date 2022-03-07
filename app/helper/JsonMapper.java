@@ -1070,7 +1070,7 @@ public class JsonMapper {
 				Map<String, Object> encodingMap = new TreeMap<>();
 
 				// get Metadata2
-				Map<String, Object> rdf = node.getLd2();
+				Map<String, Object> rdf = node.getLd2WithParts();
 				if (rdf.containsKey("hasPart")) {
 					play.Logger
 							.debug("found hasPart here ----------!!!------------------");
