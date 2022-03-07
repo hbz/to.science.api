@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,11 +60,17 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.time.DateUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
 import com.google.common.xml.XmlEscapers;
 
 import helper.JsonMapper;
 import models.Globals;
+import play.libs.ws.WSResponse;
 
 /**
  * @author Jan Schnasse schnasse@hbz-nrw.de
@@ -362,28 +369,9 @@ public class XmlUtils {
 			// rdf.put("@context",
 			// "https://w3id.org/kim/lrmi-profile/draft/context.jsonld");
 
-			/* Zeitschriftentitel */
-			NodeList nodeList = content.getElementsByTagName("journal-title");
-			if (nodeList.getLength() > 0) {
-				String journalTitle = nodeList.item(0).getTextContent();
-				play.Logger.debug("Found journal title: " + journalTitle);
-				/* erzeuge adhoc-ID für Zeitschriftentitel */
-				String adhocTitleId = Globals.protocol + Globals.server + "/adhoc/"
-						+ RdfUtils.urlEncode("uri") + "/"
-						+ helper.MyURLEncoding.encode(journalTitle);
-				play.Logger.debug(
-						"adhocId fuer Titel \"" + journalTitle + "\": " + adhocTitleId);
-				// eine Struktur {} anlegen:
-				Map<String, Object> containedInMap = new TreeMap<>();
-				containedInMap.put("prefLabel", journalTitle);
-				containedInMap.put("@id", adhocTitleId);
-				List<Map<String, Object>> containedIns = new ArrayList<>();
-				containedIns.add(containedInMap);
-				rdf.put("containedIn", containedIns);
-			}
-
-			/* Die Zeitschrift über die ISSN hinzu lesen */
-			nodeList = content.getElementsByTagName("issn");
+			/* Die Zeitschrift bei lobid über die ISSN hinzu lesen */
+			String lobidId = null;
+			NodeList nodeList = content.getElementsByTagName("issn");
 			if (nodeList.getLength() > 0) {
 				String issn = nodeList.item(0).getTextContent();
 				play.Logger.debug("Found ISSN: " + issn);
@@ -393,6 +381,54 @@ public class XmlUtils {
 				// curl "https://lobid.org/resources/search?q=issn:"+issn+"&format=json"
 				// | jq -c ".member[0].id"
 				// aber das in Java
+				WSResponse response = play.libs.ws.WS
+						.url("https://lobid.org/resources/search?q=issn:" + issn
+								+ "&format=json")
+						.setFollowRedirects(true).get().get(2000);
+				InputStream input = response.getBodyAsStream();
+				String formsResponseBody =
+						CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
+				Closeables.closeQuietly(input);
+				// fetch annoying errors from to.science.forms service
+				if (response.getStatus() != 200) {
+					play.Logger
+							.warn("to.science.api service request ISSN search fails for "
+									+ issn + "!");
+				} else {
+					// Parse out ID value from JSON structure
+					// play.Logger.debug("formsResponseBody=" + formsResponseBody);
+					JSONObject jFormsResponse = new JSONObject(formsResponseBody);
+					JSONArray jArr = jFormsResponse.getJSONArray("member");
+					JSONObject jObj = jArr.getJSONObject(0);
+					lobidId = new String(jObj.getString("id"));
+					play.Logger.debug("Found lobid ID: " + lobidId);
+				}
+			}
+
+			/* Zeitschriftentitel */
+			nodeList = content.getElementsByTagName("journal-title");
+			if (nodeList.getLength() > 0) {
+				String journalTitle = nodeList.item(0).getTextContent();
+				play.Logger.debug("Found journal title: " + journalTitle);
+				String titleId = null;
+				if (lobidId == null) {
+					/* erzeuge adhoc-ID für Zeitschriftentitel */
+					String adhocTitleId = Globals.protocol + Globals.server + "/adhoc/"
+							+ RdfUtils.urlEncode("uri") + "/"
+							+ helper.MyURLEncoding.encode(journalTitle);
+					play.Logger.debug(
+							"adhocId fuer Titel \"" + journalTitle + "\": " + adhocTitleId);
+					titleId = adhocTitleId;
+				} else {
+					titleId = lobidId;
+				}
+				// eine Struktur {} anlegen:
+				Map<String, Object> containedInMap = new TreeMap<>();
+				containedInMap.put("prefLabel", journalTitle);
+				containedInMap.put("@id", titleId);
+				List<Map<String, Object>> containedIns = new ArrayList<>();
+				containedIns.add(containedInMap);
+				rdf.put("containedIn", containedIns);
 			}
 
 			/* DOI */
