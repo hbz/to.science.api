@@ -363,12 +363,16 @@ public class LRMIMapper {
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
-					obj.put("type", map.get("MediaType"));
-					obj.put("contentUrl", map.get("@id") + "data");
+					obj.put("type", "MediaType");
+					obj.put("contentUrl", map.get("@id"));
+					obj.put("prefLabel", map.get("prefLabel"));
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
 				jcontent.put("encoding", arr);
+			} else {
+				play.Logger.debug("no hasPart found");
+				jcontent.put("encoding", "leer");
 			}
 
 			/**
