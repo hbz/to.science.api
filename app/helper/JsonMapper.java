@@ -1018,7 +1018,7 @@ public class JsonMapper {
 			// LRMI-Daten nach JSONObject wandeln
 			JSONObject jcontent = new JSONObject(content);
 			JSONArray arr = null;
-			JSONObject obj = null;
+			JsonObject obj = null;
 
 			// toscience-ID generieren
 			toscience_id = new String(
@@ -1066,6 +1066,23 @@ public class JsonMapper {
 			// Anlagedatum generieren (falls noch nicht vorhanden)
 			if (!jcontent.has("dateCreated")) {
 				jcontent.put("dateCreated", LocalDate.now());
+			}
+			
+			// associate child (content) objects to lmri
+			// add child data url as encoding contentUrl to make content accessible 
+			if(jcontent.has("hasPart")) {
+				Collection<Map<String, Object>> encodingObj = new ArrayList<>();
+				Map<String, Object> encodingMap = new TreeMap<>();
+				arr = jcontent.getJSONArray("hasPart");
+				for (int i = 0;; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					if (obj.has("id")) {
+						encodingMap.put("type", "MediaObject");
+						encodingMap.put("contentUrl", obj.get("id"));
+					  encodingObj.add(encodingMap);
+					}					
+				}
+				jcontent.put("encoding", encodingObj);
 			}
 
 			// geändertes JSONObject als Zeichenkette zurück geben
