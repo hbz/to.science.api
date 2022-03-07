@@ -1063,6 +1063,26 @@ public class JsonMapper {
 				jcontent.put("mainEntityOfPage", mainEntityOfPage);
 			}
 
+			// create encoding if not already created
+			if (!jcontent.has("encoding")) {
+				// Element "encoding" will be created
+				Collection<Map<String, Object>> encoding = new ArrayList<>();
+				Map<String, Object> encodingMap = new TreeMap<>();
+
+				// get Metadata2
+				Map<String, Object> rdf = node.getLd2();
+				if (rdf.containsKey("hasPart")) {
+					play.Logger
+							.debug("found hasPart here ----------!!!------------------");
+				} else {
+					play.Logger.debug("----------!!!------------------ no hasPart here");
+				}
+				encodingMap.put("contentUrl", "Holla");
+				encodingMap.put("type", "MediaObject");
+				encoding.add(encodingMap);
+				jcontent.put("encoding", encoding);
+			}
+
 			// Anlagedatum generieren (falls noch nicht vorhanden)
 			if (!jcontent.has("dateCreated")) {
 				jcontent.put("dateCreated", LocalDate.now());
