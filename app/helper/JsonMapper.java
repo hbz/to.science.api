@@ -1067,20 +1067,20 @@ public class JsonMapper {
 			if (!jcontent.has("dateCreated")) {
 				jcontent.put("dateCreated", LocalDate.now());
 			}
-			
+
 			// associate child (content) objects to lmri
-			// add child data url as encoding contentUrl to make content accessible 
-			if(jcontent.has("hasPart")) {
+			// add child data url as encoding contentUrl to make content accessible
+			if (jcontent.has("hasPart")) {
 				Collection<Map<String, Object>> encodingObj = new ArrayList<>();
 				Map<String, Object> encodingMap = new TreeMap<>();
 				arr = jcontent.getJSONArray("hasPart");
-				for (int i = 0;; i < arr.length(); i++) {
+				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
 					if (obj.has("id")) {
 						encodingMap.put("type", "MediaObject");
 						encodingMap.put("contentUrl", obj.get("id"));
-					  encodingObj.add(encodingMap);
-					}					
+						encodingObj.add(encodingMap);
+					}
 				}
 				jcontent.put("encoding", encodingObj);
 			}
