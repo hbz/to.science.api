@@ -1068,25 +1068,6 @@ public class JsonMapper {
 				jcontent.put("dateCreated", LocalDate.now());
 			}
 
-			// associate child (content) objects to lmri
-			// add child data url as encoding contentUrl to make content accessible
-			if (jcontent.has("hasPart")) {
-				play.Logger.debug("Child Node exists and is found");
-				Collection<Map<String, Object>> encodingObj = new ArrayList<>();
-				Map<String, Object> encodingMap = new TreeMap<>();
-				arr = jcontent.getJSONArray("hasPart");
-				for (int i = 0; i < arr.length(); i++) {
-					obj = arr.getJSONObject(i);
-					if (obj.has("@id")) {
-						encodingMap.put("contentUrl", obj.get("@id"));
-					}
-					encodingMap.put("type", "MediaObject");
-					encodingObj.add(encodingMap);
-					play.Logger.debug("Added new encoding-field");
-				}
-				jcontent.put("encoding", encodingObj);
-			}
-
 			// geändertes JSONObject als Zeichenkette zurück geben
 			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
 			return jcontent.toString();
