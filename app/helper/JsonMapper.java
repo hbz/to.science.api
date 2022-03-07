@@ -1018,7 +1018,7 @@ public class JsonMapper {
 			// LRMI-Daten nach JSONObject wandeln
 			JSONObject jcontent = new JSONObject(content);
 			JSONArray arr = null;
-			JsonObject obj = null;
+			JSONObject obj = null;
 
 			// toscience-ID generieren
 			toscience_id = new String(
