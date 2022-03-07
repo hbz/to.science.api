@@ -1076,9 +1076,9 @@ public class JsonMapper {
 				arr = jcontent.getJSONArray("hasPart");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
-					if (obj.has("id")) {
-						encodingMap.put("type", "MediaObject");
-						encodingMap.put("contentUrl", obj.get("id"));
+					encodingMap.put("type", "MediaObject");
+					if (obj.has("@id")) {
+						encodingMap.put("contentUrl", obj.get("@id"));
 						encodingObj.add(encodingMap);
 					}
 				}
