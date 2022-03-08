@@ -371,8 +371,28 @@ public class LRMIMapper {
 				}
 				jcontent.put("encoding", arr);
 			} else {
-				play.Logger.debug("no hasPart found");
-				jcontent.put("encoding", "leer");
+				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
+				Map<String, Object> l1rdf = node.getLd1();
+				if (l1rdf.containsKey("hasPart")) {
+					if (myObj instanceof java.util.ArrayList) {
+						arrayList = (ArrayList<Map<String, Object>>) l1rdf.get("hasPart");
+						iterator = arrayList.iterator();
+					} else if (myObj instanceof java.util.HashSet) {
+						hashSet = (HashSet<Map<String, Object>>) rdf.get("hasPart");
+						iterator = hashSet.iterator();
+					}
+					arr = new JSONArray();
+					while (iterator.hasNext()) {
+						map = (Map<String, Object>) iterator.next();
+						obj = new JSONObject();
+						obj.put("type", "MediaType");
+						obj.put("contentUrl", map.get("@id"));
+					}
+					arr.put(obj);
+					play.Logger.debug("Added new encoding-field");
+				}
+				jcontent.put("encoding", arr);
+
 			}
 
 			/**
