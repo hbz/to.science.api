@@ -388,7 +388,7 @@ public class LRMIMapper {
 						map = (Map<String, Object>) iterator.next();
 						obj = new JSONObject();
 						obj.put("type", "MediaType");
-						// obj.put("contentUrl", map.get("@id"));
+						obj.put("contentUrl", map.get("@id"));
 					}
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
