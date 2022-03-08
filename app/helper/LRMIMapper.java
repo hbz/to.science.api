@@ -373,6 +373,7 @@ public class LRMIMapper {
 			} else {
 				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
 				Map<String, Object> l1rdf = node.getLd1();
+				myObj = l1rdf.get("hasPart");
 				if (l1rdf.containsKey("hasPart")) {
 					play.Logger.debug("found Child in lobid");
 					if (myObj instanceof java.util.ArrayList) {
