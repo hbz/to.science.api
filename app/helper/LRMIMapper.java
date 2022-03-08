@@ -374,6 +374,7 @@ public class LRMIMapper {
 				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
 				Map<String, Object> l1rdf = node.getLd1();
 				if (l1rdf.containsKey("hasPart")) {
+					play.Logger.debug("found Child in lobid");
 					if (myObj instanceof java.util.ArrayList) {
 						arrayList = (ArrayList<Map<String, Object>>) l1rdf.get("hasPart");
 						iterator = arrayList.iterator();
@@ -386,7 +387,7 @@ public class LRMIMapper {
 						map = (Map<String, Object>) iterator.next();
 						obj = new JSONObject();
 						obj.put("type", "MediaType");
-						obj.put("contentUrl", map.get("@id"));
+						// obj.put("contentUrl", map.get("@id"));
 					}
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
