@@ -379,7 +379,7 @@ public class LRMIMapper {
 						arrayList = (ArrayList<Map<String, Object>>) l1rdf.get("hasPart");
 						iterator = arrayList.iterator();
 					} else if (myObj instanceof java.util.HashSet) {
-						hashSet = (HashSet<Map<String, Object>>) rdf.get("hasPart");
+						hashSet = (HashSet<Map<String, Object>>) l1rdf.get("hasPart");
 						iterator = hashSet.iterator();
 					}
 					arr = new JSONArray();
