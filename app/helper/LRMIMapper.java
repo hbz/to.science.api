@@ -365,7 +365,7 @@ public class LRMIMapper {
 					obj = new JSONObject();
 					obj.put("type", "MediaType");
 					obj.put("contentUrl", map.get("@id"));
-					obj.put("prefLabel", map.get("prefLabel"));
+					// obj.put("prefLabel", map.get("prefLabel"));
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
@@ -388,7 +388,8 @@ public class LRMIMapper {
 						map = (Map<String, Object>) iterator.next();
 						obj = new JSONObject();
 						obj.put("type", "MediaType");
-						obj.put("contentUrl", map.get("@id"));
+						obj.put("contentUrl",
+								Globals.protocol + Globals.server + map.get("@id"));
 					}
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
