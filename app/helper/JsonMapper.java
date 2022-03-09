@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1046,7 +1047,7 @@ public class JsonMapper {
 			// LRMI-Daten nach JSONObject wandeln
 			JSONObject jcontent = new JSONObject(content);
 			JSONArray arr = null;
-			JSONObject obj = null;
+			JsonObject obj = null;
 
 			// toscience-ID generieren
 			toscience_id = new String(
@@ -1094,6 +1095,23 @@ public class JsonMapper {
 			// Anlagedatum generieren (falls noch nicht vorhanden)
 			if (!jcontent.has("dateCreated")) {
 				jcontent.put("dateCreated", LocalDate.now());
+			}
+
+			Map<String, Object> encodingMap = node.getLd2();
+			if (arr.has("hasPart")) {
+				Object encodingObject = arr.get("hasPart");
+				LRMIMapper lMapper = new LRMIMapper();
+				Iterator encodingIt = lMapper.getLobid2Iterator(encodingMap, "hasPart");
+				JSONArray encodingArr = new JSONArray();
+				while (encodingIt.hasNext()) {
+					Map<String, Object> encoding =
+							(Map<String, Object>) encodingIt.next();
+					encoding.put("type", "MediaObject");
+					encoding.put("contentUrl", Globals.protocol + Globals.server
+							+ "/resource/" + arr.get("@id").toString() + "/data");
+					encodingArr.add(encoding);
+				}
+				jcontent.put("encoding", encodingArr);
 			}
 
 			// geändertes JSONObject als Zeichenkette zurück geben
@@ -1150,6 +1168,10 @@ public class JsonMapper {
 				// eine Struktur {} anlegen:
 				Map<String, Object> languageMap = new TreeMap<>();
 				if (language != null && !language.trim().isEmpty()) {
+					// fix the wrong language tag provided by lrmi
+					if (language.equals("deu")) {
+						language = "ger";
+					}
 					if (language.length() == 2) {
 						Locale loc = Locale.forLanguageTag(language);
 						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
@@ -1252,7 +1274,6 @@ public class JsonMapper {
 
 					if (obj.has("honoricPrefix")) {
 						creatorMap.put("academicTitle", obj.getString("honoricPrefix"));
-
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1280,6 +1301,20 @@ public class JsonMapper {
 					if (obj.has("id")) {
 						contributorMap.put("@id", obj.getString("id"));
 					}
+					if (obj.has("honoricPrefix")) {
+						contributorMap.put("academicTitle", obj.getString("honoricPrefix"));
+					}
+					if (obj.has("affiliation")) {
+						JSONObject obj2 = obj.getJSONObject("affiliation");
+						affiliationId = new String(obj2.getString("id"));
+						affiliationType = new String(obj2.getString("type"));
+
+						Map<String, Object> affiliationMap = new TreeMap<>();
+						affiliationMap.put("@id", affiliationId);
+						affiliationMap.put("type", affiliationType);
+						contributorMap.put("affiliation", affiliationMap);
+					}
+
 					contributors.add(contributorMap);
 				}
 				rdf.put("contributor", contributors);

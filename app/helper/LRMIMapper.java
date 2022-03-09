@@ -105,7 +105,7 @@ public class LRMIMapper {
 					format, profile.getContext().get("@context"));
 			/**
 			 * - gehe die lobid-Daten durch (Mapping lobid => LRMI !) und überschreibe
-			 * die entsrpechenden Felder in den LRMI-Daten oder füge sie neu ein.
+			 * die entsprechenden Felder in den LRMI-Daten oder füge sie neu ein.
 			 * Anmerkung: Löschen kann man mit dieser Methode nicht (das macht auch
 			 * hier keinen Sinn, da die LRMI-Daten i.d.R. reicher sein werden als die
 			 * gesendeten lobid-Daten, und man will nicht die gesamte Differenz
@@ -261,6 +261,7 @@ public class LRMIMapper {
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess */
 					if (map.containsKey("affiliation")) {
+						play.Logger.debug("key affiliation found");
 						Iterator mIterator = getLobid2Iterator(map, "affiliation");
 						JSONArray mArr = new JSONArray();
 						while (mIterator.hasNext()) {
@@ -369,7 +370,7 @@ public class LRMIMapper {
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
-					obj.put("type", "MediaType");
+					obj.put("type", "MediaObject");
 					obj.put("contentUrl", Globals.protocol + Globals.server + "/resource/"
 							+ map.get("@id").toString() + "/data");
 					arr.put(obj);
@@ -428,7 +429,7 @@ public class LRMIMapper {
 	 * @param arrayKey
 	 * @return
 	 */
-	private Iterator getLobid2Iterator(Map<String, Object> rdf, String key) {
+	public Iterator getLobid2Iterator(Map<String, Object> rdf, String key) {
 		Iterator lIterator = null;
 		if (rdf.containsKey(key)) {
 			Object jObj = rdf.get(key);
