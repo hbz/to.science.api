@@ -20,10 +20,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
@@ -342,6 +344,58 @@ public class LRMIMapper {
 					arr.put(obj);
 				}
 				jcontent.put("publisher", arr);
+			}
+
+			// associate child (content) objects to lmri
+			// add child data url as encoding contentUrl to make content accessible
+			if (rdf.containsKey("hasPart")) {
+				play.Logger.debug("Child Node exists and is found");
+				myObj = rdf.get("hasPart");
+				if (myObj instanceof java.util.ArrayList) {
+					arrayList = (ArrayList<Map<String, Object>>) rdf.get("hasPart");
+					iterator = arrayList.iterator();
+				} else if (myObj instanceof java.util.HashSet) {
+					hashSet = (HashSet<Map<String, Object>>) rdf.get("hasPart");
+					iterator = hashSet.iterator();
+				}
+
+				arr = new JSONArray();
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj = new JSONObject();
+					obj.put("type", "MediaType");
+					obj.put("contentUrl", Globals.protocol + Globals.server + "/resource/"
+							+ map.get("@id").toString() + "/data");
+					arr.put(obj);
+					play.Logger.debug("Added new encoding-field");
+				}
+				jcontent.put("encoding", arr);
+			} else {
+				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
+				Map<String, Object> l1rdf = node.getLd1();
+				myObj = l1rdf.get("hasPart");
+				if (l1rdf.containsKey("hasPart")) {
+					play.Logger.debug("found Child in lobid");
+					if (myObj instanceof java.util.ArrayList) {
+						arrayList = (ArrayList<Map<String, Object>>) l1rdf.get("hasPart");
+						iterator = arrayList.iterator();
+					} else if (myObj instanceof java.util.HashSet) {
+						hashSet = (HashSet<Map<String, Object>>) l1rdf.get("hasPart");
+						iterator = hashSet.iterator();
+					}
+					arr = new JSONArray();
+					while (iterator.hasNext()) {
+						map = (Map<String, Object>) iterator.next();
+						obj = new JSONObject();
+						obj.put("type", "MediaType");
+						obj.put("contentUrl", Globals.protocol + Globals.server
+								+ "/resource/" + map.get("@id").toString() + "/data");
+					}
+					arr.put(obj);
+					play.Logger.debug("Added new encoding-field");
+				}
+				jcontent.put("encoding", arr);
+
 			}
 
 			/**

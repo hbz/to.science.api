@@ -44,7 +44,6 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
 
 import actions.Read;
 import archive.fedora.RdfUtils;
@@ -1099,7 +1098,7 @@ public class JsonMapper {
 			Map<String, Object> rdf = node.getLd2();
 
 			// LRMIDaten nach JSONObject wandeln
-			JsonObject jcontent = new JSONObject(content);
+			JSONObject jcontent = new JSONObject(content);
 			play.Logger.debug("Start mapping of lrmi to lobid2");
 			JSONArray arr = null;
 			JSONObject obj = null;
@@ -1153,6 +1152,26 @@ public class JsonMapper {
 			names.add(jcontent.getString(name));
 			rdf.put("title", names);
 
+			if (jcontent.has("inLanguage")) {
+				List<Map<String, Object>> inLangList = new ArrayList<>();
+				String inLang = null;
+				arr = jcontent.getJSONArray("inLanguage");
+				for (int i = 0; i < arr.length(); i++) {
+					Map<String, Object> inLangMap = new TreeMap<>();
+					inLang = arr.getString(i);
+					Locale loc = Locale.forLanguageTag(inLang);
+					inLangMap.put("@id",
+							"http://id.loc.gov/vocabulary/iso639-2/" + loc.getISO3Language());
+					String langPrefLabel = inLang;
+					if (loc.getDisplayLanguage() != null) {
+						langPrefLabel = loc.getDisplayLanguage();
+					}
+					inLangMap.put("prefLabel", langPrefLabel);
+					inLangList.add(inLangMap);
+				}
+				rdf.put("language", inLangList);
+			}
+
 			if (jcontent.has("learningResourceType")) {
 				List<Map<String, Object>> media = new ArrayList<>();
 				arr = jcontent.getJSONArray("learningResourceType");
@@ -1200,6 +1219,12 @@ public class JsonMapper {
 						play.Logger.warn(
 								"Dem Creator \"" + creatorName + "\" fehlt eine URI/id !");
 					}
+					/*
+					 * if (obj.has("affiliation")) { creatorMap.put("affiliation",
+					 * obj.get("affiliation"));
+					 * 
+					 * }
+					 */
 					creators.add(creatorMap);
 				}
 				rdf.put("creator", creators);
@@ -1270,6 +1295,19 @@ public class JsonMapper {
 					institutions.add(publisherMap);
 				}
 				rdf.put("institution", institutions);
+			}
+
+			if (jcontent.has("keywords")) {
+				String keyword = null;
+				List<Map<String, Object>> subject = new ArrayList<>();
+				arr = jcontent.getJSONArray("keywords");
+				for (int i = 0; i < arr.length(); i++) {
+					Map<String, Object> keywordMap = new TreeMap<>();
+					keyword = arr.getString(i);
+					keywordMap.put("prefLabel", keyword);
+					subject.add(keywordMap);
+				}
+				rdf.put("subject", subject);
 			}
 
 			postprocessing(rdf);
