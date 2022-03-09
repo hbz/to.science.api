@@ -1255,7 +1255,7 @@ public class JsonMapper {
 
 					}
 					if (obj.has("affiliation")) {
-						JSONObject obj2 = obj.get("affiliation");
+						JSONObject obj2 = obj.getJSONObject("affiliation");
 						affiliationId = new String(obj2.getString("id"));
 						affiliationType = new String(obj2.getString("type"));
 
