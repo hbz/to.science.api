@@ -1097,22 +1097,6 @@ public class JsonMapper {
 				jcontent.put("dateCreated", LocalDate.now());
 			}
 
-			Map<String, Object> encodingMap = node.getLd2();
-			if (encodingMap.containsKey("hasPart")) {
-				Object encodingObject = encodingMap.get("hasPart");
-				LRMIMapper lMapper = new LRMIMapper();
-				Iterator encodingIt = lMapper.getLobid2Iterator(encodingMap, "hasPart");
-				JSONObject eObj = new JSONObject();
-				while (encodingIt.hasNext()) {
-					Map<String, Object> encoding =
-							(Map<String, Object>) encodingIt.next();
-					eObj.put("type", "MediaObject");
-					eObj.put("contentUrl", Globals.protocol + Globals.server
-							+ "/resource/" + encodingMap.get("@id").toString() + "/data");
-				}
-				jcontent.put("encoding", eObj);
-			}
-
 			// geändertes JSONObject als Zeichenkette zurück geben
 			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
 			return jcontent.toString();
@@ -1168,7 +1152,7 @@ public class JsonMapper {
 				Map<String, Object> languageMap = new TreeMap<>();
 				if (language != null && !language.trim().isEmpty()) {
 					// fix the wrong language tag provided by lrmi
-					if (language.equals("deu")) {
+					if (language.equals("de")) {
 						language = "ger";
 					}
 					if (language.length() == 2) {

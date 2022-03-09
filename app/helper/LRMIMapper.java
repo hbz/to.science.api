@@ -120,7 +120,7 @@ public class LRMIMapper {
 			Map<String, Object> map = null;
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
 
-			/*** Beginn Mapping lobid2 => LRMI ***/
+			/*** Begin Mapping lobid2 => LRMI ***/
 			if (rdf.containsKey("language")) {
 				myObj = rdf.get("language");
 				if (myObj instanceof java.util.ArrayList) {
@@ -260,9 +260,15 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess */
+					Iterator mIterator = null;
 					if (map.containsKey("affiliation")) {
-						play.Logger.debug("key affiliation found");
-						Iterator mIterator = getLobid2Iterator(map, "affiliation");
+						play.Logger.debug("key affiliation found in rdf");
+						mIterator = getLobid2Iterator(map, "affiliation");
+					} else if (node.getLd2().containsKey("affiliation")) {
+						play.Logger.debug("key affiliation found in node.ld2");
+						mIterator = getLobid2Iterator(node.getLd2(), "affiliation");
+					}
+					if (mIterator != null) {
 						JSONArray mArr = new JSONArray();
 						while (mIterator.hasNext()) {
 							JSONObject mObj = new JSONObject();
