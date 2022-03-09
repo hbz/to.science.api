@@ -251,23 +251,29 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("creator")) {
-				myObj = rdf.get("creator");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("creator");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("creator");
-					iterator = hashSet.iterator();
-				}
+				Object creatorObj = rdf.get("creator");
+				Iterator jIterator = getLobid2Iterator(rdf, "creator");
 				arr = new JSONArray();
-				while (iterator.hasNext()) {
+				while (jIterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess */
+					if (map.containsKey("affiliation")) {
+						Iterator mIterator = getLobid2Iterator(map, "affiliation");
+						JSONArray mArr = new JSONArray();
+						while (mIterator.hasNext()) {
+							JSONObject mObj = new JSONObject();
+							mObj.put("name", map.get("prefLabel"));
+							mObj.put("id", map.get("@id"));
+							mObj.put("type", map.get("Organization")); /* guess */
+							obj.put("affiliation", mObj);
+						}
+					}
 					arr.put(obj);
 				}
+
 				jcontent.put("creator", arr);
 
 			}
@@ -412,6 +418,33 @@ public class LRMIMapper {
 					e);
 		}
 
+	}
+
+	/**
+	 * Check if JSONObject has Array or Object structure and returns an iterator
+	 * either
+	 * 
+	 * @param rdf
+	 * @param arrayKey
+	 * @return
+	 */
+	private Iterator getLobid2Iterator(Map<String, Object> rdf, String key) {
+		if (rdf.containsKey(key)) {
+			JSONObject jObj = rdf.get(key);
+			ArrayList<Map<String, Object>> jList =
+					new ArrayList<Map<String, Object>>();
+			HashSet<Map<String, Object>> jHashSet =
+					new HashSet<Map<String, Object>>();
+			Iterator iterator = null;
+			if (jObj instanceof java.util.ArrayList) {
+				jList = (ArrayList<Map<String, Object>>) rdf.get(key);
+				iterator = jList.iterator();
+			} else if (jObj instanceof java.util.HashSet) {
+				jHashSet = (HashSet<Map<String, Object>>) rdf.get(key);
+				iterator = jHashSet.iterator();
+			}
+			return iterator;
+		}
 	}
 
 }
