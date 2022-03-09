@@ -1219,10 +1219,12 @@ public class JsonMapper {
 						play.Logger.warn(
 								"Dem Creator \"" + creatorName + "\" fehlt eine URI/id !");
 					}
-					if (obj.has("affiliation")) {
-						creatorMap.put("affiliation", obj.get("affiliation"));
-
-					}
+					/*
+					 * if (obj.has("affiliation")) { creatorMap.put("affiliation",
+					 * obj.get("affiliation"));
+					 * 
+					 * }
+					 */
 					creators.add(creatorMap);
 				}
 				rdf.put("creator", creators);
