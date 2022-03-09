@@ -627,10 +627,13 @@ public class XmlUtils {
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
 			rdf.put("publicationYear", Arrays.asList(publicationDateStr));
 
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			Date publicationDate = formatter.parse(publicationDateStr);
-			Date embargoDate = DateUtils.addMonths(publicationDate, embargo_duration);
-			rdf.put("embargoTime", Arrays.asList(formatter.format(embargoDate)));
+			if (embargo_duration > 0) {
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+				Date publicationDate = formatter.parse(publicationDateStr);
+				Date embargoDate =
+						DateUtils.addMonths(publicationDate, embargo_duration);
+				rdf.put("embargoTime", Arrays.asList(formatter.format(embargoDate)));
+			}
 
 			/* Zitierangabe */
 			NodeList volumes = content.getElementsByTagName("volume");
@@ -693,9 +696,13 @@ public class XmlUtils {
 
 			/* Abstract */
 			nodeList = content.getElementsByTagName("abstract");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				rdf.put("abstract", Arrays.asList(nodeList.item(i).getTextContent()));
-				break;
+			if (nodeList.getLength() >= 0) {
+				if (nodeList.item(1).getFirstChild() == null) {
+					rdf.put("abstract", Arrays.asList(nodeList.item(1).getTextContent()));
+				} else {
+					rdf.put("abstract",
+							Arrays.asList(nodeList.item(1).getFirstChild().getTextContent()));
+				}
 			}
 
 			/* Schlagwörter */
@@ -716,6 +723,13 @@ public class XmlUtils {
 			rdf.put("subject", keywords);
 
 			rdf.put("contentType", "article");
+			/* RDF-Type */
+			List<Map<String, Object>> rdftypes = new ArrayList<>();
+			Map<String, Object> rdftype = new TreeMap<>();
+			rdftype.put("@id", "http://purl.org/ontology/bibo/Article");
+			rdftype.put("prefLabel", "Artikel");
+			rdftypes.add(rdftype);
+			rdf.put("rdftype", rdftypes);
 
 			/* Review-Status */
 			Map<String, Object> reviewStatus = new TreeMap<>();
