@@ -1047,7 +1047,7 @@ public class JsonMapper {
 			// LRMI-Daten nach JSONObject wandeln
 			JSONObject jcontent = new JSONObject(content);
 			JSONArray arr = null;
-			JsonObject obj = null;
+			JSONObject obj = null;
 
 			// toscience-ID generieren
 			toscience_id = new String(
@@ -1098,7 +1098,7 @@ public class JsonMapper {
 			}
 
 			Map<String, Object> encodingMap = node.getLd2();
-			if (arr.has("hasPart")) {
+			if (encodingMap.containsKey("hasPart")) {
 				Object encodingObject = arr.get("hasPart");
 				LRMIMapper lMapper = new LRMIMapper();
 				Iterator encodingIt = lMapper.getLobid2Iterator(encodingMap, "hasPart");
