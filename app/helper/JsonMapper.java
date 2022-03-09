@@ -1099,7 +1099,7 @@ public class JsonMapper {
 
 			Map<String, Object> encodingMap = node.getLd2();
 			if (encodingMap.containsKey("hasPart")) {
-				Object encodingObject = arr.get("hasPart");
+				Object encodingObject = encodingMap.get("hasPart");
 				LRMIMapper lMapper = new LRMIMapper();
 				Iterator encodingIt = lMapper.getLobid2Iterator(encodingMap, "hasPart");
 				JSONArray encodingArr = new JSONArray();
