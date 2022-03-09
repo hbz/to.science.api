@@ -697,11 +697,11 @@ public class XmlUtils {
 			/* Abstract */
 			nodeList = content.getElementsByTagName("abstract");
 			if (nodeList.getLength() >= 0) {
-				if (nodeList.item(1).getFirstChild() == null) {
-					rdf.put("abstract", Arrays.asList(nodeList.item(1).getTextContent()));
+				if (nodeList.item(0).getFirstChild() == null) {
+					rdf.put("abstract", Arrays.asList(nodeList.item(0).getTextContent()));
 				} else {
 					rdf.put("abstract",
-							Arrays.asList(nodeList.item(1).getFirstChild().getTextContent()));
+							Arrays.asList(nodeList.item(0).getFirstChild().getTextContent()));
 				}
 			}
 
