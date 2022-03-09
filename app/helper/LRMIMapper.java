@@ -252,9 +252,9 @@ public class LRMIMapper {
 
 			if (rdf.containsKey("creator")) {
 				Object creatorObj = rdf.get("creator");
-				Iterator jIterator = getLobid2Iterator(rdf, "creator");
+				iterator = getLobid2Iterator(rdf, "creator");
 				arr = new JSONArray();
-				while (jIterator.hasNext()) {
+				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
 					obj.put("name", map.get("prefLabel"));
