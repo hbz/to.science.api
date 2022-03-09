@@ -1102,16 +1102,15 @@ public class JsonMapper {
 				Object encodingObject = encodingMap.get("hasPart");
 				LRMIMapper lMapper = new LRMIMapper();
 				Iterator encodingIt = lMapper.getLobid2Iterator(encodingMap, "hasPart");
-				JSONArray encodingArr = new JSONArray();
+				JSONObject eObj = new JSONObject();
 				while (encodingIt.hasNext()) {
 					Map<String, Object> encoding =
 							(Map<String, Object>) encodingIt.next();
-					encoding.put("type", "MediaObject");
-					encoding.put("contentUrl", Globals.protocol + Globals.server
-							+ "/resource/" + arr.get("@id").toString() + "/data");
-					encodingArr.add(encoding);
+					eObj.put("type", "MediaObject");
+					eObj.put("contentUrl", Globals.protocol + Globals.server
+							+ "/resource/" + encodingMap.get("@id").toString() + "/data");
 				}
-				jcontent.put("encoding", encodingArr);
+				jcontent.put("encoding", eObj);
 			}
 
 			// geändertes JSONObject als Zeichenkette zurück geben
