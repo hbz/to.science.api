@@ -429,22 +429,22 @@ public class LRMIMapper {
 	 * @return
 	 */
 	private Iterator getLobid2Iterator(Map<String, Object> rdf, String key) {
+		Iterator lIterator = null;
 		if (rdf.containsKey(key)) {
-			JSONObject jObj = rdf.get(key);
+			Object jObj = rdf.get(key);
 			ArrayList<Map<String, Object>> jList =
 					new ArrayList<Map<String, Object>>();
 			HashSet<Map<String, Object>> jHashSet =
 					new HashSet<Map<String, Object>>();
-			Iterator iterator = null;
 			if (jObj instanceof java.util.ArrayList) {
 				jList = (ArrayList<Map<String, Object>>) rdf.get(key);
-				iterator = jList.iterator();
+				lIterator = jList.iterator();
 			} else if (jObj instanceof java.util.HashSet) {
 				jHashSet = (HashSet<Map<String, Object>>) rdf.get(key);
-				iterator = jHashSet.iterator();
+				lIterator = jHashSet.iterator();
 			}
-			return iterator;
 		}
+		return lIterator;
 	}
 
 }
