@@ -388,6 +388,9 @@ public class JsonMapper {
 		return rdf;
 	}
 
+	/**
+	 * @param rdf
+	 */
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
@@ -442,6 +445,10 @@ public class JsonMapper {
 		}
 	}
 
+	/**
+	 * @param key
+	 * @param rdf
+	 */
 	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
 		List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
 		if (all == null)
@@ -452,6 +459,9 @@ public class JsonMapper {
 
 	}
 
+	/**
+	 * @param rdf
+	 */
 	private static void postProcessSubjectName(Map<String, Object> rdf) {
 		List<Map<String, Object>> newSubjects = new ArrayList<>();
 		Set<String> subjects = (Set<String>) rdf.get("subjectName");
@@ -476,6 +486,9 @@ public class JsonMapper {
 		rdf.put("subject", oldSubjects);
 	}
 
+	/**
+	 * @param rdf
+	 */
 	private static void createJoinedFunding(Map<String, Object> rdf) {
 
 		List<Map<String, Object>> fundingId =
@@ -945,6 +958,12 @@ public class JsonMapper {
 		return rdf;
 	}
 
+	/**
+	 * provide information about publication dates from JsonNode
+	 * 
+	 * @param hit JsonNode
+	 * @return publication date or date issued
+	 */
 	public static String getPublicationMap(JsonNode hit) {
 		String issued = hit.at("/issued").asText();
 		if (issued != null && !issued.isEmpty()) {
@@ -961,6 +980,10 @@ public class JsonMapper {
 		return null;
 	}
 
+	/**
+	 * @param rdf
+	 * @return
+	 */
 	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 
@@ -989,6 +1012,11 @@ public class JsonMapper {
 		return result;
 	}
 
+	/**
+	 * @param rdf
+	 * @param key
+	 * @return
+	 */
 	private static boolean mediumArrayContains(JsonNode rdf, String key) {
 		boolean result = false;
 		JsonNode mediumArray = rdf.at("/medium");
@@ -1197,6 +1225,8 @@ public class JsonMapper {
 			}
 
 			String creatorName = null;
+			String affiliationId = null;
+			String affiliationType = null;
 			if (jcontent.has("creator")) {
 				List<Map<String, Object>> creators = new ArrayList<>();
 				arr = jcontent.getJSONArray("creator");
@@ -1219,12 +1249,22 @@ public class JsonMapper {
 						play.Logger.warn(
 								"Dem Creator \"" + creatorName + "\" fehlt eine URI/id !");
 					}
-					/*
-					 * if (obj.has("affiliation")) { creatorMap.put("affiliation",
-					 * obj.get("affiliation"));
-					 * 
-					 * }
-					 */
+
+					if (obj.has("honoricPrefix")) {
+						creatorMap.put("academicTitle", obj.getString("honoricPrefix"));
+
+					}
+					if (obj.has("affiliation")) {
+						JSONObject obj2 = obj.get("affiliation");
+						affiliationId = new String(obj2.getString("id"));
+						affiliationType = new String(obj2.getString("type"));
+
+						Map<String, Object> affiliationMap = new TreeMap<>();
+						affiliationMap.put("@id", affiliationId);
+						affiliationMap.put("type", affiliationType);
+						creatorMap.put("affiliation", affiliationMap);
+					}
+
 					creators.add(creatorMap);
 				}
 				rdf.put("creator", creators);
