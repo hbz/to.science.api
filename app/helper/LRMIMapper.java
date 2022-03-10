@@ -263,12 +263,6 @@ public class LRMIMapper {
 					if (map.containsKey("affiliation")) {
 						play.Logger.debug("key affiliation found in rdf");
 						mIterator = getLobid2Iterator(map, "affiliation");
-					} else if (node.getLd2().containsKey("creator")) {
-						Map<String, Object> cMap =
-								(Map<String, Object>) node.getLd2().get("creator");
-						if (cMap.containsKey("affiliation")) {
-							mIterator = getLobid2Iterator(cMap, "affiliation");
-						}
 					}
 					if (mIterator != null) {
 						JSONArray mArr = new JSONArray();
