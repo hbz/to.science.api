@@ -267,6 +267,14 @@ public class LRMIMapper {
 					} else if (node.getLd2().containsKey("affiliation")) {
 						play.Logger.debug("key affiliation found in node.ld2");
 						mIterator = getLobid2Iterator(node.getLd2(), "affiliation");
+					} else {
+						play.Logger.warn("found no affiliation associated with creator");
+						JSONObject dummyObj = new JSONObject();
+						dummyObj.put("name", "Example Affiliation");
+						dummyObj.put("id", "https://example.org");
+						dummyObj.put("type", "Organization"); /* guess */
+						obj.put("affiliation", dummyObj);
+
 					}
 					if (mIterator != null) {
 						JSONArray mArr = new JSONArray();
@@ -274,13 +282,12 @@ public class LRMIMapper {
 							JSONObject mObj = new JSONObject();
 							mObj.put("name", map.get("prefLabel"));
 							mObj.put("id", map.get("@id"));
-							mObj.put("type", map.get("Organization")); /* guess */
+							mObj.put("type", "Organization"); /* guess */
 							obj.put("affiliation", mObj);
 						}
 					}
 					arr.put(obj);
 				}
-
 				jcontent.put("creator", arr);
 
 			}
@@ -306,16 +313,13 @@ public class LRMIMapper {
 				jcontent.put("contributor", arr);
 			}
 
-			if (rdf.containsKey("description")) {
-				myObj = rdf.get("description");
-				if (myObj instanceof java.util.ArrayList) {
-					arrListOfString = (ArrayList<String>) rdf.get("description");
-					iterator = arrListOfString.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					arrOfString = (HashSet<String>) rdf.get("description");
-					iterator = arrOfString.iterator();
+			if (rdf.containsKey("subject")) {
+				myObj = rdf.get("subject");
+				iterator = getLobid2Iterator(rdf, "subject");
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					jcontent.put("keywords", map.get("prefLabel"));
 				}
-				jcontent.put("description", iterator.next());
 			}
 
 			if (rdf.containsKey("license")) {
