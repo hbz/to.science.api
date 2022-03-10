@@ -251,7 +251,6 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("creator")) {
-				Object creatorObj = rdf.get("creator");
 				iterator = getLobid2Iterator(rdf, "creator");
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
@@ -264,17 +263,12 @@ public class LRMIMapper {
 					if (map.containsKey("affiliation")) {
 						play.Logger.debug("key affiliation found in rdf");
 						mIterator = getLobid2Iterator(map, "affiliation");
-					} else if (node.getLd2().containsKey("affiliation")) {
-						play.Logger.debug("key affiliation found in node.ld2");
-						mIterator = getLobid2Iterator(node.getLd2(), "affiliation");
-					} else {
-						play.Logger.warn("found no affiliation associated with creator");
-						JSONObject dummyObj = new JSONObject();
-						dummyObj.put("name", "Example Affiliation");
-						dummyObj.put("id", "https://example.org");
-						dummyObj.put("type", "Organization"); /* guess */
-						obj.put("affiliation", dummyObj);
-
+					} else if (node.getLd2().containsKey("creator")) {
+						Map<String, Object> cMap =
+								(Map<String, Object>) node.getLd2().get("creator");
+						if (cMap.containsKey("affiliation")) {
+							mIterator = getLobid2Iterator(cMap, "affiliation");
+						}
 					}
 					if (mIterator != null) {
 						JSONArray mArr = new JSONArray();
@@ -285,6 +279,13 @@ public class LRMIMapper {
 							mObj.put("type", "Organization"); /* guess */
 							obj.put("affiliation", mObj);
 						}
+					} else {
+						play.Logger.warn("found no affiliation associated with creator");
+						JSONObject dummyObj = new JSONObject();
+						dummyObj.put("name", "Example Affiliation");
+						dummyObj.put("id", "https://example.org");
+						dummyObj.put("type", "Organization"); /* guess */
+						obj.put("affiliation", dummyObj);
 					}
 					arr.put(obj);
 				}
