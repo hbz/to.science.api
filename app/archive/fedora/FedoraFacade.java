@@ -393,7 +393,7 @@ public class FedoraFacade {
 	 * @param node
 	 */
 	public void updateNode(Node node) {
-		play.Logger.info("Update node in fedora");
+		play.Logger.info("Update node in fedora, pid=" + node.getPid());
 		play.Logger.debug("node access scheme: " + node.getAccessScheme());
 		play.Logger.debug("node publish scheme: " + node.getPublishScheme());
 		DublinCoreHandler.updateDc(node);
@@ -702,10 +702,14 @@ public class FedoraFacade {
 	/**
 	 * @param parentPid
 	 * @param pid
+	 * @return parent Node (modified)
 	 */
-	public void linkParentToNode(String parentPid, String pid) {
+	public Node linkParentToNode(String parentPid, String pid) {
+		Node parent = null;
 		try {
-			Node parent = readNode(parentPid);
+			play.Logger.info(
+					"Linking parent pid " + parentPid + " to child pid " + pid + ".");
+			parent = readNode(parentPid);
 			Link link = new Link();
 			link.setPredicate(HAS_PART);
 			link.setObject(pid, false);
@@ -713,9 +717,11 @@ public class FedoraFacade {
 			updateNode(parent);
 		} catch (NodeNotFoundException e) {
 			// Nothing to do
-			// logger.debug(pid +
-			// " has no parent! ParentPid: "+parentPid+" is not a valid pid.");
+			play.Logger.warn("Link to parent note could not be set ! childPid=" + pid
+					+ ", parentPid: " + parentPid);
+			throw new RuntimeException(e);
 		}
+		return parent;
 	}
 
 	/**
