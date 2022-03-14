@@ -31,6 +31,8 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.gson.JsonObject;
+
 import actions.Read;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
@@ -83,7 +85,7 @@ public class LRMIMapper {
 			 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
 			 */
 			// LRMI-Daten nach JSONObject wandeln
-			JSONObject jcontent = null;
+			JsonObject jcontent = null;
 			if (oldContent == null) {
 				jcontent = new JSONObject();
 			} else {
@@ -250,6 +252,42 @@ public class LRMIMapper {
 				jcontent.put("learningResourceType", arr);
 			}
 
+			if (node.getLd2().containsKey("creator")) {
+				arr = new JSONArray();
+				Map creatorMap = (Map<String, Object>) node.getLd2().get("creator");
+				iterator = getLobid2Iterator(creatorMap, "creator");
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj = new JSONObject();
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", map.get("type"));
+					obj.put("honoricPrefix", map.get("academicTitle"));
+					if (map.containsKey("affiliation")) {
+						Iterator aIterator = getLobid2Iterator(map, "affilitation");
+						while (aIterator.hasNext()) {
+							Map aMap = (Map<String, Object>) aIterator.next();
+							JSONObject aObj = new JSONObject();
+							aObj.put("name", map.get("prefLabel"));
+							aObj.put("id", map.get("@id"));
+							aObj.put("type", "Organization");
+							obj.put("affiliation", aObj);
+						}
+					}
+					arr.put(obj);
+				}
+				jcontent.put("creator", arr);
+			}
+
+			if (rdf.containsKey("academicTitle")) {
+				Iterator acadTIterator = getLobid2Iterator(rdf, "academicTitle");
+				while (acadTIterator.hasNext()) {
+					Map aMap = (Map<String, Object>) acadTIterator.next();
+					play.Logger.debug("found affiliationInfo" + aMap.toString());
+				}
+
+			}
+
 			if (rdf.containsKey("creator")) {
 				iterator = getLobid2Iterator(rdf, "creator");
 				arr = new JSONArray();
@@ -399,7 +437,7 @@ public class LRMIMapper {
 					while (iterator.hasNext()) {
 						map = (Map<String, Object>) iterator.next();
 						obj = new JSONObject();
-						obj.put("type", "MediaType");
+						obj.put("type", "MediaObject");
 						obj.put("contentUrl", Globals.protocol + Globals.server
 								+ "/resource/" + map.get("@id").toString() + "/data");
 					}

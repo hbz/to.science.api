@@ -1152,7 +1152,7 @@ public class JsonMapper {
 				Map<String, Object> languageMap = new TreeMap<>();
 				if (language != null && !language.trim().isEmpty()) {
 					// fix the wrong language tag provided by lrmi
-					if (language.equals("de")) {
+					if (language.equals("de") || language.equals("deu")) {
 						language = "ger";
 					}
 					if (language.length() == 2) {
