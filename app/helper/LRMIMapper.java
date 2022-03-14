@@ -31,8 +31,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.google.gson.JsonObject;
-
 import actions.Read;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
@@ -85,7 +83,7 @@ public class LRMIMapper {
 			 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
 			 */
 			// LRMI-Daten nach JSONObject wandeln
-			JsonObject jcontent = null;
+			JSONObject jcontent = null;
 			if (oldContent == null) {
 				jcontent = new JSONObject();
 			} else {
