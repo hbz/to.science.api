@@ -181,7 +181,7 @@ public class RepositoryTest extends BaseModelTest {
 		facade.createNode(child);
 		facade.unlinkParent(child);
 		facade.linkToParent(child, object.getPid());
-		facade.linkParentToNode(object.getPid(), child.getPid());
+		object = facade.linkParentToNode(object.getPid(), child.getPid());
 
 		Node grandchild = new Node().setNamespace("test").setPID("test:23456")
 				.setLabel("Ein Testobjekt").setFileLabel("test")

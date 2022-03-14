@@ -367,6 +367,31 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode fügt ein Kind-Objekt zu den LRMI-Daten eines Elternobjektes
+	 * hinzu.
+	 * 
+	 * @param parent The node of the parent resource that must be updated
+	 * @param child The node of the child resource that must be added to the
+	 *          parent
+	 * @return a short message
+	 */
+	public String updateLrmiDataByChild(Node parent, Node child) {
+
+		play.Logger.debug("Start method updateLrmiDataByChild");
+		String pid = parent.getPid();
+		play.Logger.debug("parentPid=" + pid);
+
+		String lrmiContent = new JsonMapper().addLrmiChildToParent(parent, child);
+		play.Logger
+				.debug("Added child in LRMI content. Content is now: " + lrmiContent);
+		updateLrmiData(parent, lrmiContent);
+		play.Logger.debug("Updated LRMI datastream!");
+
+		// String enrichMessage = new Enrich().enrichLrmiData(parent);
+		return pid + " Added a child in LRMI-metadata ! ";
+	}
+
+	/**
 	 * This method creates an LRMI data stream (unmapped) of the resource
 	 * 
 	 * @param node The node of the resource that must be updated

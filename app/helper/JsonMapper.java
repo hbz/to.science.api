@@ -1109,6 +1109,60 @@ public class JsonMapper {
 	}
 
 	/**
+	 * Diese Methode fügt ein Kindobjekt zu einem LRMI-Datenstrom hinzu. Zurück
+	 * gegeben wird der modifizierte LRMI-Datenstrom.
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 * @param parent The Node of the parent resource
+	 * @param child The Node of the child resource
+	 * @date 2022-03-10
+	 * 
+	 * @return Die geänderten Daten im Format LRMI JSON
+	 */
+	public String addLrmiChildToParent(Node parent, Node child) {
+		this.node = parent;
+		play.Logger.debug("Start addLrmiChildToParent");
+		try {
+			String lrmiData = node.getLrmiData();
+			// LRMI-Daten nach JSONObject wandeln
+			JSONObject jcontent = null;
+			if (lrmiData == null || lrmiData.isEmpty()) {
+				play.Logger.info("LRMI data of parent pid " + node.getPid()
+						+ " are not existing, yet.");
+				jcontent = new JSONObject();
+			} else {
+				jcontent = new JSONObject(lrmiData);
+			}
+
+			JSONArray arr = null;
+			JSONObject obj = null;
+
+			// Suche nach "encoding"-Array in den vorhandenen LRMI-Daten
+			if (jcontent.has("encoding")) {
+				arr = jcontent.getJSONArray("encoding");
+			} else {
+				arr = new JSONArray();
+			}
+
+			obj = new JSONObject();
+			obj.put("contentUrl", new String(Globals.protocol + Globals.server
+					+ "/resource/" + child.getPid() + "/data"));
+			obj.put("type", "MediaType");
+			arr.put(obj);
+			jcontent.put("encoding", arr);
+
+			// geändertes JSONObject als Zeichenkette zurück geben
+			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
+			return jcontent.toString();
+
+		} catch (JSONException je) {
+			play.Logger.error("Content could not be mapped!", je);
+			throw new RuntimeException(
+					"LRMI.json could not be modified for toscience !", je);
+		}
+	}
+
+	/**
 	 * Holt Metadaten im Format lobid2 (falls vorhanden) und mappt Felder aus
 	 * LRMI-Daten darauf.
 	 * 
