@@ -229,7 +229,7 @@ public class LRMIMapper {
 
 			if (node.getLd2().containsKey("creator")) {
 				arr = new JSONArray();
-				Object creatorObj = (Map<String, Object>) node.getLd2().get("creator");
+				Object creatorObj = node.getLd2().get("creator");
 				iterator = getLobid2Iterator(creatorObj);
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
