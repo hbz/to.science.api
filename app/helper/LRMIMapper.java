@@ -283,7 +283,7 @@ public class LRMIMapper {
 				Iterator acadTIterator = getLobid2Iterator(rdf, "academicTitle");
 				while (acadTIterator.hasNext()) {
 					Map aMap = (Map<String, Object>) acadTIterator.next();
-					play.Logger.debug("found affiliationInfo" + aMap.toString());
+					play.Logger.debug("found affiliation" + aMap.toString());
 				}
 
 			}
