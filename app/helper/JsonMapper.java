@@ -1147,7 +1147,7 @@ public class JsonMapper {
 			obj = new JSONObject();
 			obj.put("contentUrl", new String(Globals.protocol + Globals.server
 					+ "/resource/" + child.getPid() + "/data"));
-			obj.put("type", "MediaType");
+			obj.put("type", "MediaObject");
 			arr.put(obj);
 			jcontent.put("encoding", arr);
 
