@@ -1144,6 +1144,23 @@ public class JsonMapper {
 				arr = new JSONArray();
 			}
 
+			/**
+			 * Gucke, ob dieses Kind am Elternobjekt schon vorhanden ist. Falls ja,
+			 * lösche dieses Kind (um es weiter unten erneut anzuhängen (Patch)).
+			 */
+			// Hilfs-Array, da man aus JSONArray nichts entfernen kann (seufz):
+			ArrayList<JSONObject> hilf = new ArrayList<JSONObject>();
+			for (int i = 0; i < arr.length(); i++) {
+				obj = arr.getJSONObject(i);
+				String contentUrl = obj.getString("contentUrl");
+				if (contentUrl.indexOf(child.getPid()) >= 0) {
+					continue;
+				}
+				hilf.add(obj);
+			}
+			// Neuerzeugung JSON Array aus Hilfs-Array
+			arr = new JSONArray(hilf);
+			// Hänge nun ein neues Kind an den Parent an.
 			obj = new JSONObject();
 			obj.put("contentUrl", new String(Globals.protocol + Globals.server
 					+ "/resource/" + child.getPid() + "/data"));
