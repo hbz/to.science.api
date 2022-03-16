@@ -373,7 +373,7 @@ public class XmlUtils {
 			String lobidId = null;
 			NodeList nodeList = content.getElementsByTagName("issn");
 			if (nodeList.getLength() > 0) {
-				String issn = nodeList.item(0).getTextContent();
+				String issn = nodeList.item(1).getTextContent();
 				play.Logger.debug("Found ISSN: " + issn);
 				issn = issn.replaceAll("-", "");
 				play.Logger.debug("ISSN ohne Bindestrich: " + issn);
@@ -433,11 +433,9 @@ public class XmlUtils {
 
 			/* DOI */
 			nodeList = content.getElementsByTagName("article-id");
-			Node node = null;
 			NamedNodeMap attributes = null;
 			Node attrib = null;
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				node = nodeList.item(i);
+			for (Node node : nodeList) {
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -450,8 +448,8 @@ public class XmlUtils {
 					String doi = node.getTextContent();
 					play.Logger.debug("DOI: " + doi);
 					Map<String, Object> publisherVersion = new TreeMap<>();
-					publisherVersion.put("@id", "http://dx.doi.org/" + doi);
-					publisherVersion.put("prefLabel", "http://dx.doi.org/" + doi);
+					publisherVersion.put("@id", "http://doi.org/" + doi);
+					publisherVersion.put("prefLabel", "http://doi.org/" + doi);
 					List<Map<String, Object>> publisherVersions = new ArrayList<>();
 					publisherVersions.add(publisherVersion);
 					rdf.put("publisherVersion", publisherVersions);
@@ -461,8 +459,9 @@ public class XmlUtils {
 
 			/* Aufsatztitel */
 			nodeList = content.getElementsByTagName("article-title");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				node = nodeList.item(i);
+			List<Map<String, Object>> publisherVersions = new ArrayList<>();
+
+			for (Node node : nodeList) {
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -474,18 +473,24 @@ public class XmlUtils {
 				if (attrib.getNodeValue().equalsIgnoreCase("doi")) {
 					String doi = node.getTextContent();
 					play.Logger.debug("DOI: " + doi);
-					Map<String, Object> publisherVersion = new TreeMap<>();
-					publisherVersion.put("@id", "http://dx.doi.org/" + doi);
-					publisherVersion.put("prefLabel", "http://dx.doi.org/" + doi);
-					List<Map<String, Object>> publisherVersions = new ArrayList<>();
-					publisherVersions.add(publisherVersion);
-					rdf.put("publisherVersion", publisherVersions);
-					break;
+					Map<String, Object> publisherVersionDoi = new TreeMap<>();
+					publisherVersionDoi.put("@id", "http://doi.org/" + doi);
+					publisherVersionDoi.put("prefLabel", "http://doi.org/" + doi);
+					publisherVersions.add(publisherVersionDoi);
+				}
+				if (attrib.getNodeValue().equalsIgnoreCase("pmcid")) {
+					String pmcid = node.getTextContent();
+					play.Logger.debug("PMCID: " + pmcid);
+					Map<String, Object> publisherVersionPmcid = new TreeMap<>();
+					publisherVersionPmcid.put("@id", "https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
+					publisherVersionPmcid.put("prefLabel", "https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
+					publisherVersions.add(publisherVersionPmcid);
 				}
 			}
+			rdf.put("publisherVersion", publisherVersions);
+
 			if (nodeList.getLength() > 0) {
-				play.Logger
-						.debug("Found article title: " + nodeList.item(0).getTextContent());
+				play.Logger.debug("Found article title: " + nodeList.item(0).getTextContent());
 				List<String> titles = new ArrayList<>();
 				titles.add(nodeList.item(0).getTextContent());
 				rdf.put("title", titles);
@@ -497,8 +502,7 @@ public class XmlUtils {
 			NodeList childNodes = null;
 			Node child = null;
 			List<Map<String, Object>> creators = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				node = nodeList.item(i);
+			for (Node node : nodeList) {
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -585,8 +589,7 @@ public class XmlUtils {
 			String epubMonth = null;
 			String epubYear = null;
 			nodeList = content.getElementsByTagName("pub-date");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				node = nodeList.item(i);
+			for (Node node : nodeList) {
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -638,47 +641,45 @@ public class XmlUtils {
 			/* Zitierangabe */
 			NodeList volumes = content.getElementsByTagName("volume");
 			String volume = "";
-			for (int i = 0; i < volumes.getLength(); i++) {
-				volume = volumes.item(i).getTextContent();
+			for (Node node : volumes) {
+				volume = node.getTextContent();
 				break;
 			}
 			NodeList issues = content.getElementsByTagName("issue");
 			String issue = "";
-			for (int i = 0; i < issues.getLength(); i++) {
-				issue = issues.item(i).getTextContent();
+			for (Node node : issues) {
+				issue = node.getTextContent();
 				break;
 			}
 			NodeList fpages = content.getElementsByTagName("fpage");
 			String fpage = "";
-			for (int i = 0; i < fpages.getLength(); i++) {
-				fpage = fpages.item(i).getTextContent();
+			for (Node node : fpages) {
+				fpage = node.getTextContent();
 				break;
 			}
 			NodeList lpages = content.getElementsByTagName("lpage");
 			String lpage = "";
-			for (int i = 0; i < lpages.getLength(); i++) {
-				lpage = lpages.item(i).getTextContent();
+			for (Node node : lpages) {
+				lpage = node.getTextContent();
 				break;
 			}
-			String bibliographicCitation =
-					new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
+			String bibliographicCitation = new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
 			rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
 
 			/* Copyright-Jahr */
 			nodeList = content.getElementsByTagName("copyright-year");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				rdf.put("yearOfCopyright",
-						Arrays.asList(nodeList.item(i).getTextContent()));
+			for (Node node : nodeList) {
+				rdf.put("yearOfCopyright", Arrays.asList(node.getTextContent()));
 				break;
 			}
 
 			/* Open-Access Lizenz */
 			nodeList = content.getElementsByTagName("license");
 			List<Map<String, Object>> licenses = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
+			for (Node node : nodeList) {
 				// wir gehen davon aus, dass license-type == open-access ; streng
 				// genommen das hier noch prüfen !!
-				attributes = nodeList.item(i).getAttributes();
+				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
 				}
@@ -696,6 +697,10 @@ public class XmlUtils {
 
 			/* Abstract */
 			nodeList = content.getElementsByTagName("abstract");
+			if(nodeList.getLength() > 0) {
+				rdf.put("abstractText", Arrays.asList(nodeList.item(0).getTextContent()));
+			}
+			/* Von Ingolf
 			if (nodeList.getLength() >= 0) {
 				if (nodeList.item(0).getFirstChild() == null) {
 					rdf.put("abstract", Arrays.asList(nodeList.item(0).getTextContent()));
@@ -704,30 +709,29 @@ public class XmlUtils {
 							Arrays.asList(nodeList.item(0).getFirstChild().getTextContent()));
 				}
 			}
-
+			*/
 			/* Schlagwörter */
 			nodeList = content.getElementsByTagName("kwd");
 			List<Map<String, Object>> keywords = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				String keywordStr = nodeList.item(i).getTextContent();
+			for (Node node : nodeList) {
+				String keywordStr = node.getTextContent();
 				String keywordId = Globals.protocol + Globals.server + "/adhoc/"
 						+ RdfUtils.urlEncode("uri") + "/"
 						+ helper.MyURLEncoding.encode(keywordStr);
-				play.Logger.debug(
-						"adhocId fuer Schlagwort \"" + keywordStr + "\": " + keywordId);
+				play.Logger.debug("adhocId fuer Schlagwort \"" + keywordStr + "\": " + keywordId);
 				Map<String, Object> keyword = new TreeMap<>();
 				keyword.put("@id", keywordId);
 				keyword.put("prefLabel", keywordStr);
 				keywords.add(keyword);
 			}
 			rdf.put("subject", keywords);
-
 			rdf.put("contentType", "article");
+
 			/* RDF-Type */
 			List<Map<String, Object>> rdftypes = new ArrayList<>();
 			Map<String, Object> rdftype = new TreeMap<>();
 			rdftype.put("@id", "http://purl.org/ontology/bibo/Article");
-			rdftype.put("prefLabel", "Artikel");
+			rdftype.put("prefLabel", "Zeitschriftenartikel");
 			rdftypes.add(rdftype);
 			rdf.put("rdftype", rdftypes);
 
@@ -765,8 +769,7 @@ public class XmlUtils {
 			return rdf;
 		} catch (Exception e) {
 			play.Logger.error("Content could not be mapped!", e);
-			throw new RuntimeException(
-					"DeepGreen-XML could not be mapped to lobid2.json", e);
+			throw new RuntimeException("DeepGreen-XML could not be mapped to lobid2.json", e);
 		}
 
 	}
