@@ -371,6 +371,7 @@ public class XmlUtils {
 
 			/* Die Zeitschrift bei lobid über die ISSN hinzu lesen */
 			String lobidId = null;
+			Node node = null;
 			NodeList nodeList = content.getElementsByTagName("issn");
 			if (nodeList.getLength() > 0) {
 				String issn = nodeList.item(1).getTextContent();
@@ -435,7 +436,8 @@ public class XmlUtils {
 			nodeList = content.getElementsByTagName("article-id");
 			NamedNodeMap attributes = null;
 			Node attrib = null;
-			for (Node node : nodeList) {
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -461,7 +463,8 @@ public class XmlUtils {
 			nodeList = content.getElementsByTagName("article-title");
 			List<Map<String, Object>> publisherVersions = new ArrayList<>();
 
-			for (Node node : nodeList) {
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -502,7 +505,8 @@ public class XmlUtils {
 			NodeList childNodes = null;
 			Node child = null;
 			List<Map<String, Object>> creators = new ArrayList<>();
-			for (Node node : nodeList) {
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -589,7 +593,8 @@ public class XmlUtils {
 			String epubMonth = null;
 			String epubYear = null;
 			nodeList = content.getElementsByTagName("pub-date");
-			for (Node node : nodeList) {
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -641,25 +646,29 @@ public class XmlUtils {
 			/* Zitierangabe */
 			NodeList volumes = content.getElementsByTagName("volume");
 			String volume = "";
-			for (Node node : volumes) {
+			for (int i = 0; i < volumes.getLength(); i++) {
+				node = volumes.item(i);
 				volume = node.getTextContent();
 				break;
 			}
 			NodeList issues = content.getElementsByTagName("issue");
 			String issue = "";
-			for (Node node : issues) {
+			for (int i = 0; i < issues.getLength(); i++) {
+				node = issues.item(i);
 				issue = node.getTextContent();
 				break;
 			}
 			NodeList fpages = content.getElementsByTagName("fpage");
 			String fpage = "";
-			for (Node node : fpages) {
+			for (int i = 0; i < fpages.getLength(); i++) {
+				node = fpages.item(i);
 				fpage = node.getTextContent();
 				break;
 			}
 			NodeList lpages = content.getElementsByTagName("lpage");
 			String lpage = "";
-			for (Node node : lpages) {
+			for (int i = 0; i < lpages.getLength(); i++) {
+				node = lpages.item(i);
 				lpage = node.getTextContent();
 				break;
 			}
@@ -668,7 +677,8 @@ public class XmlUtils {
 
 			/* Copyright-Jahr */
 			nodeList = content.getElementsByTagName("copyright-year");
-			for (Node node : nodeList) {
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
 				rdf.put("yearOfCopyright", Arrays.asList(node.getTextContent()));
 				break;
 			}
@@ -676,7 +686,8 @@ public class XmlUtils {
 			/* Open-Access Lizenz */
 			nodeList = content.getElementsByTagName("license");
 			List<Map<String, Object>> licenses = new ArrayList<>();
-			for (Node node : nodeList) {
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
 				// wir gehen davon aus, dass license-type == open-access ; streng
 				// genommen das hier noch prüfen !!
 				attributes = node.getAttributes();
@@ -713,7 +724,8 @@ public class XmlUtils {
 			/* Schlagwörter */
 			nodeList = content.getElementsByTagName("kwd");
 			List<Map<String, Object>> keywords = new ArrayList<>();
-			for (Node node : nodeList) {
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				node = nodeList.item(i);
 				String keywordStr = node.getTextContent();
 				String keywordId = Globals.protocol + Globals.server + "/adhoc/"
 						+ RdfUtils.urlEncode("uri") + "/"
