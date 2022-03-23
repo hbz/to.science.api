@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -121,6 +122,7 @@ public class LRMIMapper {
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
 
 			/*** Begin Mapping lobid2 => LRMI ***/
+
 			if (rdf.containsKey("language")) {
 				myObj = rdf.get("language");
 				iterator = getLobid2Iterator(myObj);
@@ -155,14 +157,16 @@ public class LRMIMapper {
 
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					obj.put("@language", map.get("prefLabel"));
+					Locale loc = Locale.forLanguageTag(map.get("@id").toString());
+					// obj.put("@language", loc.getLanguage());
 					// obj.put("id", map.get("@id"));
-					inLanguageArr.put(map.get("prefLabel"));
+					inLanguageArr.put(loc.getLanguage());
 					break;
 				}
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					inLanguageArr.put(map.get("prefLabel"));
+					Locale loc = Locale.forLanguageTag(map.get("@id").toString());
+					inLanguageArr.put(loc.getLanguage());
 				}
 				jcontent.put("@context", arr);
 				jcontent.put("inLanguage", inLanguageArr);

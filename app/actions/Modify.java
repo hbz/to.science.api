@@ -279,6 +279,7 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
+		String enrichMessage = null;
 		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
@@ -287,17 +288,16 @@ public class Modify extends RegalAction {
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			alephid = alephid.replaceAll("#.*", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata2(node, content);
-
-			String enrichMessage = Enrich.enrichMetadata2(node);
-			return pid + " metadata successfully updated, lobidified and enriched! "
-					+ enrichMessage;
+			enrichMessage =
+					pid + " metadata successfully updated, lobidified and enriched! "
+							+ Enrich.enrichMetadata2(node);
 		} else {
-			updateMetadata2(node, content);
-			String enrichMessage = Enrich.enrichMetadata2(node);
-			return pid + " metadata successfully updated, and enriched! "
-					+ enrichMessage;
+			enrichMessage = pid + " metadata successfully updated, and enriched! "
+					+ Enrich.enrichMetadata2(node);
 		}
+		updateMetadata2(node, content);
+		return enrichMessage;
+
 	}
 
 	/**
