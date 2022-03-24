@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -455,10 +456,21 @@ public class LRMIMapper {
 	 * @param iso639_2Uri
 	 * @return
 	 */
+
 	private String iso639_1TagExtractor(String iso639_2Uri) {
+		String result = "unknown";
 		Locale loc = Locale.forLanguageTag(
 				iso639_2Uri.replace("http://id.loc.gov/vocabulary/iso639-2/", ""));
-		return loc.getLanguage();
+		Map<String, Locale> localeMap = new HashMap<String, Locale>();
+		String[] iso639_1Tags = Locale.getISOLanguages();
+		for (int i = 0; i < iso639_1Tags.length; i++) {
+			Locale locale = new Locale(iso639_1Tags[i]);
+			localeMap.put(locale.getISO3Language(), locale);
+		}
+		if (localeMap.get(loc.getISO3Language()) != null) {
+			result = localeMap.get(loc.getISO3Language()).getLanguage();
+		}
+		return result;
 	}
 
 }
