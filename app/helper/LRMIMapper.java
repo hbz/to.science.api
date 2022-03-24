@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -122,53 +121,39 @@ public class LRMIMapper {
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
 
 			/*** Begin Mapping lobid2 => LRMI ***/
-
 			if (rdf.containsKey("language")) {
 				myObj = rdf.get("language");
 				iterator = getLobid2Iterator(myObj);
 				// 1. Suche Objekt "@language" im JSONArray "@context"
-				if (jcontent.has("@context")) {
-					arr = (JSONArray) jcontent.get("@context");
-					obj = null;
-					for (int i = 0; i < arr.length(); i++) {
-						myObj = arr.get(i);
-						play.Logger
-								.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
-						if (myObj instanceof org.json.JSONObject) {
-							obj = (JSONObject) arr.getJSONObject(i);
-							if (obj.has("@language")) {
-								break;
-							}
-						}
-					}
-					// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
-					if (obj == null) {
-						obj = new JSONObject();
-						arr.put(obj);
-					}
-				} else {
-					arr = new JSONArray();
-					obj = new JSONObject();
-					arr.put(obj);
-				}
+				// leave @context @language unchanged
+				/*
+				 * if (jcontent.has("@context")) { arr = (JSONArray)
+				 * jcontent.get("@context"); obj = null; for (int i = 0; i <
+				 * arr.length(); i++) { myObj = arr.get(i); play.Logger .debug("i=" + i
+				 * + "; myObj.getClass()=" + myObj.getClass()); if (myObj instanceof
+				 * org.json.JSONObject) { obj = (JSONObject) arr.getJSONObject(i); if
+				 * (obj.has("@language")) { break; } } } // Falls Objekt nicht gefunden,
+				 * hänge ein neues Objekt an das Array an if (obj == null) { obj = new
+				 * JSONObject(); arr.put(obj); } } else { arr = new JSONArray(); obj =
+				 * new JSONObject(); arr.put(obj); }
+				 */
 
 				// 2. Sprache auch auf das LRMI-Feld "inLanguage" abbilden
 				JSONArray inLanguageArr = new JSONArray();
 
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					Locale loc = Locale.forLanguageTag(map.get("@id").toString());
-					// obj.put("@language", loc.getLanguage());
+					// obj.put("@language", map.get("prefLabel"));
 					// obj.put("id", map.get("@id"));
-					inLanguageArr.put(loc.getLanguage());
+					inLanguageArr.put(map.get("@id"));
 					break;
 				}
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					Locale loc = Locale.forLanguageTag(map.get("@id").toString());
-					inLanguageArr.put(loc.getLanguage());
+					inLanguageArr.put(map.get("@id" + "zweiter durchlauf"));
 				}
-				jcontent.put("@context", arr);
+				// leave language unchanged
+				// jcontent.put("@context", arr);
 				jcontent.put("inLanguage", inLanguageArr);
 			}
 
