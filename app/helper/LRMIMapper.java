@@ -460,7 +460,8 @@ public class LRMIMapper {
 	private String iso639_1TagExtractor(String iso639_2Uri) {
 		String result = "unknown";
 		Locale loc = Locale.forLanguageTag(
-				iso639_2Uri.replace("http://id.loc.gov/vocabulary/iso639-2/", ""));
+				iso639_2Uri.replace("http://id.loc.gov/vocabulary/iso639-2/", "")
+						.replace("ger", "deu"));
 		Map<String, Locale> localeMap = new HashMap<String, Locale>();
 		String[] iso639_1Tags = Locale.getISOLanguages();
 		for (int i = 0; i < iso639_1Tags.length; i++) {
