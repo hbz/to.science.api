@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -145,12 +146,14 @@ public class LRMIMapper {
 					map = (Map<String, Object>) iterator.next();
 					// obj.put("@language", map.get("prefLabel"));
 					// obj.put("id", map.get("@id"));
-					inLanguageArr.put(map.get("@id"));
+					String iso639_1Tag = iso639_1TagExtractor(map.get("@id").toString());
+					inLanguageArr.put(iso639_1Tag);
 					break;
 				}
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					inLanguageArr.put(map.get("@id" + "zweiter durchlauf"));
+					String iso639_1Tag = iso639_1TagExtractor(map.get("@id").toString());
+					inLanguageArr.put(iso639_1Tag);
 				}
 				// leave language unchanged
 				// jcontent.put("@context", arr);
@@ -442,6 +445,20 @@ public class LRMIMapper {
 			lIterator = jHashSet.iterator();
 		}
 		return lIterator;
+	}
+
+	/**
+	 * convert a three letter ISO639-2 uri into two letter ISO639-1 tag on the
+	 * base of java.util.Locale example: given Uri
+	 * "http://id.loc.gov/vocabulary/iso639-2/eng" will be converted in "en"
+	 * 
+	 * @param iso639_2Uri
+	 * @return
+	 */
+	private String iso639_1TagExtractor(String iso639_2Uri) {
+		Locale loc = Locale.forLanguageTag(
+				iso639_2Uri.replace("http://id.loc.gov/vocabulary/iso639-2/", ""));
+		return loc.getLanguage();
 	}
 
 }
