@@ -373,44 +373,41 @@ public class XmlUtils {
 			String lobidId = null;
 			Node node = null;
 			NodeList nodeList = content.getElementsByTagName("issn");
-			if (nodeList.getLength() > 0) {
-				for (int i = 0; i < nodeList.getLength(); i++) {
-					Node currentItem = nodeList.item(i);
-					if (currentItem.getAttributes().getNamedItem("pub-type")
-							.getTextContent().equals("epub")) {
-						String issn = currentItem.getTextContent();
-						play.Logger.debug("Found ISSN: " + issn);
-						issn = issn.replaceAll("-", "");
-						play.Logger.debug("ISSN ohne Bindestrich: " + issn);
-						// mit der ISSN in der lobid-API suchen
-						// curl
-						// "https://lobid.org/resources/search?q=issn:"+issn+"&format=json"
-						// | jq -c ".member[0].id"
-						// aber das in Java
-						WSResponse response =
-								play.libs.ws.WS
-										.url("https://lobid.org/resources/search?q=issn:" + issn
-												+ "&format=json")
-										.setFollowRedirects(true).get().get(2000);
-						InputStream input = response.getBodyAsStream();
-						String formsResponseBody = CharStreams
-								.toString(new InputStreamReader(input, Charsets.UTF_8));
-						Closeables.closeQuietly(input);
-						// fetch annoying errors from to.science.forms service
-						if (response.getStatus() != 200) {
-							play.Logger
-									.warn("to.science.api service request ISSN search fails for "
-											+ issn + "!");
-						} else {
-							// Parse out ID value from JSON structure
-							// play.Logger.debug("formsResponseBody=" + formsResponseBody);
-							JSONObject jFormsResponse = new JSONObject(formsResponseBody);
-							JSONArray jArr = jFormsResponse.getJSONArray("member");
-							JSONObject jObj = jArr.getJSONObject(0);
-							lobidId = new String(jObj.getString("id"));
-							play.Logger.debug("Found lobid ID: " + lobidId);
-							break;
-						}
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Node currentItem = nodeList.item(i);
+				if (currentItem.getAttributes().getNamedItem("pub-type").getNodeValue()
+						.equals("epub")) {
+					String issn = currentItem.getTextContent();
+					play.Logger.debug("Found ISSN: " + issn);
+					issn = issn.replaceAll("-", "");
+					play.Logger.debug("ISSN ohne Bindestrich: " + issn);
+					// mit der ISSN in der lobid-API suchen
+					// curl
+					// "https://lobid.org/resources/search?q=issn:"+issn+"&format=json"
+					// | jq -c ".member[0].id"
+					// aber das in Java
+					WSResponse response =
+							play.libs.ws.WS
+									.url("https://lobid.org/resources/search?q=issn:" + issn
+											+ "&format=json")
+									.setFollowRedirects(true).get().get(2000);
+					InputStream input = response.getBodyAsStream();
+					String formsResponseBody = CharStreams
+							.toString(new InputStreamReader(input, Charsets.UTF_8));
+					Closeables.closeQuietly(input);
+					// fetch annoying errors from to.science.forms service
+					if (response.getStatus() != 200) {
+						play.Logger
+								.warn("to.science.api service request ISSN search fails for "
+										+ issn + "!");
+					} else {
+						// Parse out ID value from JSON structure
+						// play.Logger.debug("formsResponseBody=" + formsResponseBody);
+						JSONObject jFormsResponse = new JSONObject(formsResponseBody);
+						JSONArray jArr = jFormsResponse.getJSONArray("member");
+						JSONObject jObj = jArr.getJSONObject(0);
+						lobidId = new String(jObj.getString("id"));
+						play.Logger.debug("Found lobid ID: " + lobidId);
 					}
 				}
 			}
