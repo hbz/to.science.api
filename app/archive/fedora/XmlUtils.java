@@ -374,35 +374,44 @@ public class XmlUtils {
 			Node node = null;
 			NodeList nodeList = content.getElementsByTagName("issn");
 			if (nodeList.getLength() > 0) {
-				String issn = nodeList.item(1).getTextContent();
-				play.Logger.debug("Found ISSN: " + issn);
-				issn = issn.replaceAll("-", "");
-				play.Logger.debug("ISSN ohne Bindestrich: " + issn);
-				// mit der ISSN in der lobid-API suchen
-				// curl "https://lobid.org/resources/search?q=issn:"+issn+"&format=json"
-				// | jq -c ".member[0].id"
-				// aber das in Java
-				WSResponse response = play.libs.ws.WS
-						.url("https://lobid.org/resources/search?q=issn:" + issn
-								+ "&format=json")
-						.setFollowRedirects(true).get().get(2000);
-				InputStream input = response.getBodyAsStream();
-				String formsResponseBody =
-						CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
-				Closeables.closeQuietly(input);
-				// fetch annoying errors from to.science.forms service
-				if (response.getStatus() != 200) {
-					play.Logger
-							.warn("to.science.api service request ISSN search fails for "
-									+ issn + "!");
-				} else {
-					// Parse out ID value from JSON structure
-					// play.Logger.debug("formsResponseBody=" + formsResponseBody);
-					JSONObject jFormsResponse = new JSONObject(formsResponseBody);
-					JSONArray jArr = jFormsResponse.getJSONArray("member");
-					JSONObject jObj = jArr.getJSONObject(0);
-					lobidId = new String(jObj.getString("id"));
-					play.Logger.debug("Found lobid ID: " + lobidId);
+				for (int i = 0; i < nodeList.getLength(); i++) {
+					Node currentItem = nodeList.item(i);
+					if (currentItem.getAttributes().getNamedItem("pub-type")
+							.getTextContent().equals("epub")) {
+						String issn = currentItem.getTextContent();
+						play.Logger.debug("Found ISSN: " + issn);
+						issn = issn.replaceAll("-", "");
+						play.Logger.debug("ISSN ohne Bindestrich: " + issn);
+						// mit der ISSN in der lobid-API suchen
+						// curl
+						// "https://lobid.org/resources/search?q=issn:"+issn+"&format=json"
+						// | jq -c ".member[0].id"
+						// aber das in Java
+						WSResponse response =
+								play.libs.ws.WS
+										.url("https://lobid.org/resources/search?q=issn:" + issn
+												+ "&format=json")
+										.setFollowRedirects(true).get().get(2000);
+						InputStream input = response.getBodyAsStream();
+						String formsResponseBody = CharStreams
+								.toString(new InputStreamReader(input, Charsets.UTF_8));
+						Closeables.closeQuietly(input);
+						// fetch annoying errors from to.science.forms service
+						if (response.getStatus() != 200) {
+							play.Logger
+									.warn("to.science.api service request ISSN search fails for "
+											+ issn + "!");
+						} else {
+							// Parse out ID value from JSON structure
+							// play.Logger.debug("formsResponseBody=" + formsResponseBody);
+							JSONObject jFormsResponse = new JSONObject(formsResponseBody);
+							JSONArray jArr = jFormsResponse.getJSONArray("member");
+							JSONObject jObj = jArr.getJSONObject(0);
+							lobidId = new String(jObj.getString("id"));
+							play.Logger.debug("Found lobid ID: " + lobidId);
+							break;
+						}
+					}
 				}
 			}
 
@@ -485,15 +494,18 @@ public class XmlUtils {
 					String pmcid = node.getTextContent();
 					play.Logger.debug("PMCID: " + pmcid);
 					Map<String, Object> publisherVersionPmcid = new TreeMap<>();
-					publisherVersionPmcid.put("@id", "https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
-					publisherVersionPmcid.put("prefLabel", "https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
+					publisherVersionPmcid.put("@id",
+							"https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
+					publisherVersionPmcid.put("prefLabel",
+							"https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
 					publisherVersions.add(publisherVersionPmcid);
 				}
 			}
 			rdf.put("publisherVersion", publisherVersions);
 
 			if (nodeList.getLength() > 0) {
-				play.Logger.debug("Found article title: " + nodeList.item(0).getTextContent());
+				play.Logger
+						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				List<String> titles = new ArrayList<>();
 				titles.add(nodeList.item(0).getTextContent());
 				rdf.put("title", titles);
@@ -672,7 +684,8 @@ public class XmlUtils {
 				lpage = node.getTextContent();
 				break;
 			}
-			String bibliographicCitation = new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
+			String bibliographicCitation =
+					new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
 			rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
 
 			/* Copyright-Jahr */
@@ -708,19 +721,17 @@ public class XmlUtils {
 
 			/* Abstract */
 			nodeList = content.getElementsByTagName("abstract");
-			if(nodeList.getLength() > 0) {
-				rdf.put("abstractText", Arrays.asList(nodeList.item(0).getTextContent()));
+			if (nodeList.getLength() > 0) {
+				rdf.put("abstractText",
+						Arrays.asList(nodeList.item(0).getTextContent()));
 			}
-			/* Von Ingolf
-			if (nodeList.getLength() >= 0) {
-				if (nodeList.item(0).getFirstChild() == null) {
-					rdf.put("abstract", Arrays.asList(nodeList.item(0).getTextContent()));
-				} else {
-					rdf.put("abstract",
-							Arrays.asList(nodeList.item(0).getFirstChild().getTextContent()));
-				}
-			}
-			*/
+			/*
+			 * Von Ingolf if (nodeList.getLength() >= 0) { if
+			 * (nodeList.item(0).getFirstChild() == null) { rdf.put("abstract",
+			 * Arrays.asList(nodeList.item(0).getTextContent())); } else {
+			 * rdf.put("abstract",
+			 * Arrays.asList(nodeList.item(0).getFirstChild().getTextContent())); } }
+			 */
 			/* Schlagwörter */
 			nodeList = content.getElementsByTagName("kwd");
 			List<Map<String, Object>> keywords = new ArrayList<>();
@@ -730,7 +741,8 @@ public class XmlUtils {
 				String keywordId = Globals.protocol + Globals.server + "/adhoc/"
 						+ RdfUtils.urlEncode("uri") + "/"
 						+ helper.MyURLEncoding.encode(keywordStr);
-				play.Logger.debug("adhocId fuer Schlagwort \"" + keywordStr + "\": " + keywordId);
+				play.Logger.debug(
+						"adhocId fuer Schlagwort \"" + keywordStr + "\": " + keywordId);
 				Map<String, Object> keyword = new TreeMap<>();
 				keyword.put("@id", keywordId);
 				keyword.put("prefLabel", keywordStr);
@@ -781,7 +793,8 @@ public class XmlUtils {
 			return rdf;
 		} catch (Exception e) {
 			play.Logger.error("Content could not be mapped!", e);
-			throw new RuntimeException("DeepGreen-XML could not be mapped to lobid2.json", e);
+			throw new RuntimeException(
+					"DeepGreen-XML could not be mapped to lobid2.json", e);
 		}
 
 	}
