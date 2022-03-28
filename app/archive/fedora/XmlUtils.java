@@ -375,6 +375,7 @@ public class XmlUtils {
 			NodeList nodeList = content.getElementsByTagName("issn");
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Node currentItem = nodeList.item(i);
+
 				if (currentItem.getAttributes().getNamedItem("pub-type").getNodeValue()
 						.equals("epub")) {
 					String issn = currentItem.getTextContent();
@@ -534,7 +535,8 @@ public class XmlUtils {
 					for (int j = 0; j < childNodes.getLength(); j++) {
 						child = childNodes.item(j);
 						String childName = child.getNodeName();
-						if (childName.equals("name")) {
+
+						if (childName.equals("name") || childName.equals("string-name")) {
 							NodeList subchildNodes = child.getChildNodes();
 							for (int k = 0; k < subchildNodes.getLength(); k++) {
 								Node subchild = subchildNodes.item(k);
@@ -548,7 +550,9 @@ public class XmlUtils {
 								prefLabel = surname + ", " + givenNames;
 								play.Logger.debug("Found author: " + prefLabel);
 							}
-						} else if (childName.equals("contrib-id")) {
+						}
+
+						else if (childName.equals("contrib-id")) {
 							NamedNodeMap childAttributes = child.getAttributes();
 							if (childAttributes == null) {
 								continue;
@@ -722,13 +726,7 @@ public class XmlUtils {
 				rdf.put("abstractText",
 						Arrays.asList(nodeList.item(0).getTextContent()));
 			}
-			/*
-			 * Von Ingolf if (nodeList.getLength() >= 0) { if
-			 * (nodeList.item(0).getFirstChild() == null) { rdf.put("abstract",
-			 * Arrays.asList(nodeList.item(0).getTextContent())); } else {
-			 * rdf.put("abstract",
-			 * Arrays.asList(nodeList.item(0).getFirstChild().getTextContent())); } }
-			 */
+
 			/* Schlagwörter */
 			nodeList = content.getElementsByTagName("kwd");
 			List<Map<String, Object>> keywords = new ArrayList<>();
@@ -749,12 +747,10 @@ public class XmlUtils {
 			rdf.put("contentType", "article");
 
 			/* RDF-Type */
-			List<Map<String, Object>> rdftypes = new ArrayList<>();
 			Map<String, Object> rdftype = new TreeMap<>();
 			rdftype.put("@id", "http://purl.org/ontology/bibo/Article");
 			rdftype.put("prefLabel", "Zeitschriftenartikel");
-			rdftypes.add(rdftype);
-			rdf.put("rdftype", rdftypes);
+			rdf.put("rdftype", Arrays.asList(rdftype));
 
 			/* Review-Status */
 			Map<String, Object> reviewStatus = new TreeMap<>();
