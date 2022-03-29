@@ -30,8 +30,10 @@ public class ViewerInfo {
 
 	public ViewerInfo(Node n) {
 		pid = n.getPid();
-		dataLink =
-				Globals.protocol + Globals.server + "/resource/" + n.getPid() + "/data";
+		dataLink = "/resource/" + n.getPid() + "/data";
+		// Qa: reverted patch for big file sizes. Reverted due to access issues
+		// dataLink = Globals.protocol + Globals.server + "/resource/" + n.getPid()
+		// + "/data";
 		filesize = n.getFileSize();
 		viewertype = createViewerType(n);
 		viewerAdress = createViewerAdress(n);
