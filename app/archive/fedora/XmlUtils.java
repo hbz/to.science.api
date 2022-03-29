@@ -112,7 +112,8 @@ public class XmlUtils {
 		}
 	}
 
-	final static Logger logger = LoggerFactory.getLogger(XmlUtils.class);
+	final static jdk.internal.instrumentation.Logger logger =
+			LoggerFactory.getLogger(XmlUtils.class);
 
 	/**
 	 * @param digitalEntityFile the xml file
@@ -516,6 +517,7 @@ public class XmlUtils {
 			Node child = null;
 			List<Map<String, Object>> creators = new ArrayList<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
+				play.Logger.warn("POSTEN 1 + NodeList-Länge: " + nodeList.getLength());
 				node = nodeList.item(i);
 				attributes = node.getAttributes();
 				if (attributes == null) {
@@ -531,20 +533,28 @@ public class XmlUtils {
 				String orcid = null;
 				String authorsId = null;
 				if (attrib.getNodeValue().equalsIgnoreCase("author")) {
+					play.Logger.warn("POSTEN 2");
 					childNodes = node.getChildNodes();
 					for (int j = 0; j < childNodes.getLength(); j++) {
+						play.Logger.warn(
+								"POSTEN 3 + childeNodes-Länge: " + childNodes.getLength());
 						child = childNodes.item(j);
 						String childName = child.getNodeName();
 
 						if (childName.equals("name") || childName.equals("string-name")) {
+							play.Logger.warn("POSTEN 4");
 							NodeList subchildNodes = child.getChildNodes();
 							for (int k = 0; k < subchildNodes.getLength(); k++) {
+								play.Logger.warn("POSTEN 5 + subchildNodes-Länge: "
+										+ subchildNodes.getLength());
 								Node subchild = subchildNodes.item(k);
 								String subchildName = subchild.getNodeName();
 								if (subchildName.equals("surname")) {
+									play.Logger.warn("POSTEN 6");
 									surname = subchild.getTextContent();
 								}
 								if (subchildName.equals("given-names")) {
+									play.Logger.warn("POSTEN 7");
 									givenNames = subchild.getTextContent();
 								}
 								prefLabel = surname + ", " + givenNames;
@@ -553,6 +563,7 @@ public class XmlUtils {
 						}
 
 						else if (childName.equals("contrib-id")) {
+							play.Logger.warn("POSTEN 8");
 							NamedNodeMap childAttributes = child.getAttributes();
 							if (childAttributes == null) {
 								continue;
