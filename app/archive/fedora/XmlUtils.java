@@ -112,8 +112,8 @@ public class XmlUtils {
 		}
 	}
 
-	final static jdk.internal.instrumentation.Logger logger =
-			LoggerFactory.getLogger(XmlUtils.class);
+	// final static jdk.internal.instrumentation.Logger logger =
+	// LoggerFactory.getLogger(XmlUtils.class);
 
 	/**
 	 * @param digitalEntityFile the xml file
@@ -217,7 +217,7 @@ public class XmlUtils {
 					Element element = (Element) elements.item(i);
 					result.add(element);
 				} catch (ClassCastException e) {
-					logger.warn(e.getMessage());
+					play.Logger.warn(e.getMessage());
 				}
 			}
 			return result;
@@ -533,28 +533,28 @@ public class XmlUtils {
 				String orcid = null;
 				String authorsId = null;
 				if (attrib.getNodeValue().equalsIgnoreCase("author")) {
-					logger.warn("POSTEN 2");
+					play.Logger.warn("POSTEN 2");
 					childNodes = node.getChildNodes();
 					for (int j = 0; j < childNodes.getLength(); j++) {
-						logger.warn(
+						play.Logger.warn(
 								"POSTEN 3 + childeNodes-Länge: " + childNodes.getLength());
 						child = childNodes.item(j);
 						String childName = child.getNodeName();
 
 						if (childName.equals("name") || childName.equals("string-name")) {
-							logger.warn("POSTEN 4");
+							play.Logger.warn("POSTEN 4");
 							NodeList subchildNodes = child.getChildNodes();
 							for (int k = 0; k < subchildNodes.getLength(); k++) {
-								logger.warn("POSTEN 5 + subchildNodes-Länge: "
+								play.Logger.warn("POSTEN 5 + subchildNodes-Länge: "
 										+ subchildNodes.getLength());
 								Node subchild = subchildNodes.item(k);
 								String subchildName = subchild.getNodeName();
 								if (subchildName.equals("surname")) {
-									logger.warn("POSTEN 6");
+									play.Logger.warn("POSTEN 6");
 									surname = subchild.getTextContent();
 								}
 								if (subchildName.equals("given-names")) {
-									logger.warn("POSTEN 7");
+									play.Logger.warn("POSTEN 7");
 									givenNames = subchild.getTextContent();
 								}
 								prefLabel = surname + ", " + givenNames;
@@ -563,7 +563,7 @@ public class XmlUtils {
 						}
 
 						else if (childName.equals("contrib-id")) {
-							logger.warn("POSTEN 8");
+							play.Logger.warn("POSTEN 8");
 							NamedNodeMap childAttributes = child.getAttributes();
 							if (childAttributes == null) {
 								continue;
