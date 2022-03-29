@@ -21,9 +21,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -120,57 +122,42 @@ public class LRMIMapper {
 			Map<String, Object> map = null;
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
 
-			/*** Beginn Mapping lobid2 => LRMI ***/
+			/*** Begin Mapping lobid2 => LRMI ***/
 			if (rdf.containsKey("language")) {
 				myObj = rdf.get("language");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("language");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("language");
-					iterator = hashSet.iterator();
-				}
+				iterator = getLobid2Iterator(myObj);
 				// 1. Suche Objekt "@language" im JSONArray "@context"
-				if (jcontent.has("@context")) {
-					arr = (JSONArray) jcontent.get("@context");
-					obj = null;
-					for (int i = 0; i < arr.length(); i++) {
-						myObj = arr.get(i);
-						play.Logger
-								.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
-						if (myObj instanceof org.json.JSONObject) {
-							obj = (JSONObject) arr.getJSONObject(i);
-							if (obj.has("@language")) {
-								break;
-							}
-						}
-					}
-					// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
-					if (obj == null) {
-						obj = new JSONObject();
-						arr.put(obj);
-					}
-				} else {
-					arr = new JSONArray();
-					obj = new JSONObject();
-					arr.put(obj);
-				}
+				// leave @context @language unchanged
+				/*
+				 * if (jcontent.has("@context")) { arr = (JSONArray)
+				 * jcontent.get("@context"); obj = null; for (int i = 0; i <
+				 * arr.length(); i++) { myObj = arr.get(i); play.Logger .debug("i=" + i
+				 * + "; myObj.getClass()=" + myObj.getClass()); if (myObj instanceof
+				 * org.json.JSONObject) { obj = (JSONObject) arr.getJSONObject(i); if
+				 * (obj.has("@language")) { break; } } } // Falls Objekt nicht gefunden,
+				 * hänge ein neues Objekt an das Array an if (obj == null) { obj = new
+				 * JSONObject(); arr.put(obj); } } else { arr = new JSONArray(); obj =
+				 * new JSONObject(); arr.put(obj); }
+				 */
 
 				// 2. Sprache auch auf das LRMI-Feld "inLanguage" abbilden
 				JSONArray inLanguageArr = new JSONArray();
 
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					obj.put("@language", map.get("prefLabel"));
+					// obj.put("@language", map.get("prefLabel"));
 					// obj.put("id", map.get("@id"));
-					inLanguageArr.put(map.get("prefLabel"));
+					String iso639_1Tag = iso639_1TagExtractor(map.get("@id").toString());
+					inLanguageArr.put(iso639_1Tag);
 					break;
 				}
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					inLanguageArr.put(map.get("prefLabel"));
+					String iso639_1Tag = iso639_1TagExtractor(map.get("@id").toString());
+					inLanguageArr.put(iso639_1Tag);
 				}
-				jcontent.put("@context", arr);
+				// leave language unchanged
+				// jcontent.put("@context", arr);
 				jcontent.put("inLanguage", inLanguageArr);
 			}
 
@@ -411,7 +398,53 @@ public class LRMIMapper {
 			throw new RuntimeException("LRMI.json could not be modified or created !",
 					e);
 		}
-
 	}
 
+	/**
+	 * Check if JSONObject has Array or Object structure and returns an iterator
+	 * either
+	 * 
+	 * @param rdf
+	 * @param arrayKey
+	 * @return
+	 */
+	public Iterator getLobid2Iterator(Object iObj) {
+		Iterator lIterator = null;
+		if (iObj instanceof java.util.ArrayList) {
+			ArrayList<Map<String, Object>> jList =
+					(ArrayList<Map<String, Object>>) iObj;
+			lIterator = jList.iterator();
+		} else if (iObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> jHashSet =
+					(HashSet<Map<String, Object>>) iObj;
+			lIterator = jHashSet.iterator();
+		}
+		return lIterator;
+	}
+
+	/**
+	 * convert a three letter ISO639-2 uri into two letter ISO639-1 tag on the
+	 * base of java.util.Locale example: given Uri
+	 * "http://id.loc.gov/vocabulary/iso639-2/eng" will be converted in "en"
+	 * 
+	 * @param iso639_2Uri
+	 * @return
+	 */
+
+	private String iso639_1TagExtractor(String iso639_2Uri) {
+		String result = "unknown";
+		Locale loc = Locale.forLanguageTag(
+				iso639_2Uri.replace("http://id.loc.gov/vocabulary/iso639-2/", "")
+						.replace("ger", "deu"));
+		Map<String, Locale> localeMap = new HashMap<String, Locale>();
+		String[] iso639_1Tags = Locale.getISOLanguages();
+		for (int i = 0; i < iso639_1Tags.length; i++) {
+			Locale locale = new Locale(iso639_1Tags[i]);
+			localeMap.put(locale.getISO3Language(), locale);
+		}
+		if (localeMap.get(loc.getISO3Language()) != null) {
+			result = localeMap.get(loc.getISO3Language()).getLanguage();
+		}
+		return result;
+	}
 }
