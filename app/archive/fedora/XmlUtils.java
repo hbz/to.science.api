@@ -764,10 +764,14 @@ public class XmlUtils {
 
 	private static Node getFirstElementNode(Node parentNode) {
 		Node node = parentNode.getFirstChild();
-		while (node.getNodeType() != Node.ELEMENT_NODE) {
+		while (node != null && Node.ELEMENT_NODE != node.getNodeType()) {
 			node = node.getNextSibling();
 		}
+		if (node == null) {
+			return null;
+		}
 		return node;
+
 	}
 
 }
