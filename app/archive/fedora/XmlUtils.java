@@ -350,7 +350,7 @@ public class XmlUtils {
 	 * @param metadata2 RDF-Metadaten im Format lobid2 als Java-Map
 	 * @param embargo_duration : Die Dauer des Embargos in Monaten.
 	 * @param content Die DeepGreen-Daten im Format Document (XML)
-	 * @date 2021-10-01
+	 * @date 2022-03-30
 	 * 
 	 * @return Die Daten im Format lobid2-RDF
 	 */
@@ -361,11 +361,8 @@ public class XmlUtils {
 			// Neues JSON-Objekt anlegen; fuer lobid2-Daten
 			Map<String, Object> rdf = metadata2;
 
-			// DeepGreenDaten nach JSONObject wandeln
-			// JSONObject jcontent = new JSONObject(content);
 			play.Logger.debug("Start mapping of DeepGreen to lobid2");
 
-			// jsonLD-Context; was ist die Entsprechung in DeepGreen ?
 			// rdf.put("@context",
 			// "https://w3id.org/kim/lrmi-profile/draft/context.jsonld");
 
@@ -377,16 +374,11 @@ public class XmlUtils {
 				Node currentItem = nodeList.item(i);
 
 				if (currentItem.getAttributes().getNamedItem("pub-type").getNodeValue()
-						.equals("epub")) {
+						.equalsIgnoreCase("epub")) {
 					String issn = currentItem.getTextContent();
 					play.Logger.debug("Found ISSN: " + issn);
 					issn = issn.replaceAll("-", "");
 					play.Logger.debug("ISSN ohne Bindestrich: " + issn);
-					// mit der ISSN in der lobid-API suchen
-					// curl
-					// "https://lobid.org/resources/search?q=issn:"+issn+"&format=json"
-					// | jq -c ".member[0].id"
-					// aber das in Java
 					WSResponse response =
 							play.libs.ws.WS
 									.url("https://lobid.org/resources/search?q=issn:" + issn
@@ -434,41 +426,15 @@ public class XmlUtils {
 				Map<String, Object> containedInMap = new TreeMap<>();
 				containedInMap.put("prefLabel", journalTitle);
 				containedInMap.put("@id", titleId);
-				List<Map<String, Object>> containedIns = new ArrayList<>();
-				containedIns.add(containedInMap);
-				rdf.put("containedIn", containedIns);
+				rdf.put("containedIn", Arrays.asList(containedInMap));
 			}
 
 			/* DOI */
 			nodeList = content.getElementsByTagName("article-id");
 			NamedNodeMap attributes = null;
 			Node attrib = null;
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				node = nodeList.item(i);
-				attributes = node.getAttributes();
-				if (attributes == null) {
-					continue;
-				}
-				attrib = attributes.getNamedItem("pub-id-type");
-				if (attrib == null) {
-					continue;
-				}
-				if (attrib.getNodeValue().equalsIgnoreCase("doi")) {
-					String doi = node.getTextContent();
-					play.Logger.debug("DOI: " + doi);
-					Map<String, Object> publisherVersion = new TreeMap<>();
-					publisherVersion.put("@id", "http://doi.org/" + doi);
-					publisherVersion.put("prefLabel", "http://doi.org/" + doi);
-					List<Map<String, Object>> publisherVersions = new ArrayList<>();
-					publisherVersions.add(publisherVersion);
-					rdf.put("publisherVersion", publisherVersions);
-					break;
-				}
-			}
-
-			/* Aufsatztitel */
-			nodeList = content.getElementsByTagName("article-title");
-			List<Map<String, Object>> publisherVersions = new ArrayList<>();
+			Map<String, Object> publisherVersionDoi = new TreeMap<>();
+			Map<String, Object> publisherVersionPmcid = new TreeMap<>();
 
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
@@ -483,30 +449,27 @@ public class XmlUtils {
 				if (attrib.getNodeValue().equalsIgnoreCase("doi")) {
 					String doi = node.getTextContent();
 					play.Logger.debug("DOI: " + doi);
-					Map<String, Object> publisherVersionDoi = new TreeMap<>();
-					publisherVersionDoi.put("@id", "http://doi.org/" + doi);
-					publisherVersionDoi.put("prefLabel", "http://doi.org/" + doi);
-					publisherVersions.add(publisherVersionDoi);
+					publisherVersionDoi.put("@id", "https://doi.org/" + doi);
+					publisherVersionDoi.put("prefLabel", "https://doi.org/" + doi);
 				}
 				if (attrib.getNodeValue().equalsIgnoreCase("pmcid")) {
 					String pmcid = node.getTextContent();
 					play.Logger.debug("PMCID: " + pmcid);
-					Map<String, Object> publisherVersionPmcid = new TreeMap<>();
 					publisherVersionPmcid.put("@id",
 							"https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
 					publisherVersionPmcid.put("prefLabel",
 							"https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
-					publisherVersions.add(publisherVersionPmcid);
 				}
 			}
-			rdf.put("publisherVersion", publisherVersions);
+			rdf.put("publisherVersion",
+					Arrays.asList(publisherVersionDoi, publisherVersionPmcid));
 
+			/* Aufsatztitel */
+			nodeList = content.getElementsByTagName("article-title");
 			if (nodeList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
-				List<String> titles = new ArrayList<>();
-				titles.add(nodeList.item(0).getTextContent());
-				rdf.put("title", titles);
+				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent()));
 			}
 
 			/* Autor */
@@ -514,10 +477,9 @@ public class XmlUtils {
 			nodeList = content.getElementsByTagName("contrib");
 			NodeList childNodes = null;
 			Node child = null;
-			List<Map<String, Object>> creators = new ArrayList<>();
+			Map<String, Object> creator = new TreeMap<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
-				play.Logger.debug("Platz 1 + node: " + node.getNodeName());
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
@@ -535,44 +497,51 @@ public class XmlUtils {
 					childNodes = node.getChildNodes();
 					for (int j = 0; j < childNodes.getLength(); j++) {
 						child = childNodes.item(j);
-						play.Logger.debug("Platz 2 + child: " + child.getNodeName());
-						String childName = child.getNodeName();
+						if (child.getNodeType() == Node.ELEMENT_NODE) {
+							String childName = child.getNodeName();
 
-						if (childName.equals("name") || childName.equals("string-name")) {
-							NodeList subchildNodes = child.getChildNodes();
-							for (int k = 0; k < subchildNodes.getLength(); k++) {
-								Node subchild = subchildNodes.item(k);
-								play.Logger
-										.debug("Platz 3 + subchildName: " + subchild.getNodeName());
-								String subchildName = subchild.getNodeName();
-								if (subchildName.equals("surname")) {
-									surname = subchild.getTextContent();
-								}
-								if (subchildName.equals("given-names")) {
-									givenNames = subchild.getTextContent();
+							if (childName.equalsIgnoreCase("name")
+									|| childName.equalsIgnoreCase("string-name")) {
+								NodeList subchildNodes = child.getChildNodes();
+								for (int k = 0; k < subchildNodes.getLength(); k++) {
+									Node subchild = subchildNodes.item(k);
+									if (subchild.getNodeType() == Node.ELEMENT_NODE) {
+										String subchildName = subchild.getNodeName();
+										if (subchildName.equalsIgnoreCase("surname")) {
+											surname = subchild.getTextContent();
+										}
+										if (subchildName.equalsIgnoreCase("given-names")) {
+											givenNames = subchild.getTextContent();
+										}
+									}
 								}
 								prefLabel = surname + ", " + givenNames;
 								play.Logger.debug("Found author: " + prefLabel);
 							}
-						}
 
-						else if (childName.equals("contrib-id")) {
-							NamedNodeMap childAttributes = child.getAttributes();
-							if (childAttributes == null) {
-								continue;
+							if (childName.equalsIgnoreCase("contrib-id")) {
+								NamedNodeMap childAttributes = child.getAttributes();
+								if (childAttributes == null) {
+									continue;
+								}
+								Node childAttrib =
+										childAttributes.getNamedItem("contrib-id-type");
+								if (childAttrib == null) {
+									continue;
+								}
+								if (childAttrib.getNodeValue().equalsIgnoreCase("orcid")) {
+									orcid = child.getTextContent();
+									play.Logger.debug("Found orcid: " + orcid);
+								}
 							}
-							Node childAttrib =
-									childAttributes.getNamedItem("contrib-id-type");
-							if (childAttrib == null) {
-								continue;
+
+							if (childName.equalsIgnoreCase("collab")) {
+								prefLabel = child.getTextContent();
 							}
-							if (childAttrib.getNodeValue().equalsIgnoreCase("orcid")) {
-								orcid = child.getTextContent();
-								play.Logger.debug("Found orcid: " + orcid);
-							}
+
 						}
 					} /* end of for Node child */
-					Map<String, Object> creator = new TreeMap<>();
+
 					if (orcid == null) {
 						/*
 						 * So erzeugt man eine "adhoc-URI" ; siehe
@@ -589,7 +558,6 @@ public class XmlUtils {
 					}
 					creator.put("@id", authorsId);
 					creator.put("prefLabel", prefLabel);
-					creators.add(creator);
 					if (contributorOrder == null) {
 						contributorOrder = authorsId;
 					} else {
@@ -597,12 +565,10 @@ public class XmlUtils {
 					}
 				} /* end of author */
 			} /* end of loop over contrib Nodes (authors) */
-			rdf.put("creator", creators);
+			rdf.put("creator", Arrays.asList(creator));
 
 			/* Reihenfolge der Beitragenden */
-			List<String> contributorOrders = new ArrayList<>();
-			contributorOrders.add(contributorOrder);
-			rdf.put("contributorOrder", contributorOrders);
+			rdf.put("contributorOrder", Arrays.asList(contributorOrder));
 
 			/* Veröffentlichungsdatum */
 			String pubYear = null;
@@ -625,7 +591,7 @@ public class XmlUtils {
 					for (int j = 0; j < childNodes.getLength(); j++) {
 						child = childNodes.item(j);
 						String childName = child.getNodeName();
-						if (childName.equals("year")) {
+						if (childName.equalsIgnoreCase("year")) {
 							pubYear = child.getTextContent();
 							play.Logger.debug("Found publication year: " + pubYear);
 						}
@@ -635,13 +601,13 @@ public class XmlUtils {
 					for (int j = 0; j < childNodes.getLength(); j++) {
 						child = childNodes.item(j);
 						String childName = child.getNodeName();
-						if (childName.equals("day")) {
+						if (childName.equalsIgnoreCase("day")) {
 							epubDay = child.getTextContent();
 							play.Logger.debug("Found e-publication day: " + epubDay);
-						} else if (childName.equals("month")) {
+						} else if (childName.equalsIgnoreCase("month")) {
 							epubMonth = child.getTextContent();
 							play.Logger.debug("Found e-publication month: " + epubMonth);
-						} else if (childName.equals("year")) {
+						} else if (childName.equalsIgnoreCase("year")) {
 							epubYear = child.getTextContent();
 							play.Logger.debug("Found e-publication year: " + epubYear);
 						}
@@ -703,7 +669,7 @@ public class XmlUtils {
 
 			/* Open-Access Lizenz */
 			nodeList = content.getElementsByTagName("license");
-			List<Map<String, Object>> licenses = new ArrayList<>();
+			Map<String, Object> license = new TreeMap<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
 				// wir gehen davon aus, dass license-type == open-access ; streng
@@ -717,23 +683,25 @@ public class XmlUtils {
 					continue;
 				}
 				String licenseId = attrib.getNodeValue();
-				Map<String, Object> license = new TreeMap<>();
 				license.put("@id", licenseId);
 				license.put("prefLabel", licenseId);
-				licenses.add(license);
 			}
-			rdf.put("license", licenses);
+			rdf.put("license", Arrays.asList(license));
 
 			/* Abstract */
 			nodeList = content.getElementsByTagName("abstract");
 			if (nodeList.getLength() > 0) {
-				rdf.put("abstractText",
-						Arrays.asList(nodeList.item(0).getTextContent()));
+				Node paragraphNode = nodeList.item(0).getFirstChild();
+				Node boldNode = getFirstElementNode(paragraphNode);
+				if (boldNode.getNodeName().equalsIgnoreCase("bold")) {
+					paragraphNode.removeChild(boldNode);
+				}
+				rdf.put("abstractText", Arrays.asList(paragraphNode.getTextContent()));
 			}
 
 			/* Schlagwörter */
 			nodeList = content.getElementsByTagName("kwd");
-			List<Map<String, Object>> keywords = new ArrayList<>();
+			Map<String, Object> keyword = new TreeMap<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
 				String keywordStr = node.getTextContent();
@@ -742,12 +710,10 @@ public class XmlUtils {
 						+ helper.MyURLEncoding.encode(keywordStr);
 				play.Logger.debug(
 						"adhocId fuer Schlagwort \"" + keywordStr + "\": " + keywordId);
-				Map<String, Object> keyword = new TreeMap<>();
 				keyword.put("@id", keywordId);
 				keyword.put("prefLabel", keywordStr);
-				keywords.add(keyword);
 			}
-			rdf.put("subject", keywords);
+			rdf.put("subject", Arrays.asList(keyword));
 			rdf.put("contentType", "article");
 
 			/* RDF-Type */
@@ -794,6 +760,14 @@ public class XmlUtils {
 					"DeepGreen-XML could not be mapped to lobid2.json", e);
 		}
 
+	}
+
+	private static Node getFirstElementNode(Node parentNode) {
+		Node node = parentNode.getFirstChild();
+		while (node.getNodeType() != Node.ELEMENT_NODE) {
+			node = node.getNextSibling();
+		}
+		return node;
 	}
 
 }
