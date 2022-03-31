@@ -516,6 +516,7 @@ public class XmlUtils {
 									}
 								}
 								prefLabel = surname + ", " + givenNames;
+								play.Logger.debug("Found author: " + prefLabel);
 							}
 
 							if (childName.equalsIgnoreCase("contrib-id")) {
@@ -536,10 +537,9 @@ public class XmlUtils {
 
 							if (childName.equalsIgnoreCase("collab")) {
 								prefLabel = child.getTextContent();
+								play.Logger.debug("Found collab: " + prefLabel);
 							}
-
-							play.Logger.debug("Found author/collab: " + prefLabel);
-
+							creator.put("prefLabel", prefLabel);
 						}
 					} /* end of for Node child */
 
@@ -567,9 +567,9 @@ public class XmlUtils {
 					if (contributorOrder != null) {
 						contributorOrder = contributorOrder.concat("|" + authorsId);
 					}
+					creator.put("@id", authorsId);
 				} /* end of author */
-				creator.put("@id", authorsId);
-				creator.put("prefLabel", prefLabel);
+
 			} /* end of loop over contrib Nodes (authors) */
 			rdf.put("creator", Arrays.asList(creator));
 
@@ -698,12 +698,8 @@ public class XmlUtils {
 			nodeList = content.getElementsByTagName("abstract");
 			if (nodeList.getLength() > 0) {
 				Node paragraphNode = getFirstElementNode(nodeList.item(0));
-				play.Logger.debug("ParagraphNode: " + paragraphNode.getNodeName()
-						+ " oder " + paragraphNode.getLocalName());
 				Node boldNode = getFirstElementNode(paragraphNode);
 				if (boldNode != null) {
-					play.Logger.debug("boldNode: " + boldNode.getNodeName() + " oder "
-							+ boldNode.getLocalName());
 					if (boldNode.getNodeName().equalsIgnoreCase("bold"))
 						paragraphNode.removeChild(boldNode);
 				}
@@ -782,7 +778,6 @@ public class XmlUtils {
 			return null;
 		}
 		return node;
-
 	}
 
 }
