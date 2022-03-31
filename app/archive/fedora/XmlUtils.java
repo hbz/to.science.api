@@ -693,8 +693,9 @@ public class XmlUtils {
 			if (nodeList.getLength() > 0) {
 				Node paragraphNode = nodeList.item(0).getFirstChild();
 				Node boldNode = getFirstElementNode(paragraphNode);
-				if (boldNode.getNodeName().equalsIgnoreCase("bold")) {
-					paragraphNode.removeChild(boldNode);
+				if (boldNode != null) {
+					if (boldNode.getNodeName().equalsIgnoreCase("bold"))
+						paragraphNode.removeChild(boldNode);
 				}
 				rdf.put("abstractText", Arrays.asList(paragraphNode.getTextContent()));
 			}
