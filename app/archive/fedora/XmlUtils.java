@@ -555,7 +555,7 @@ public class XmlUtils {
 						authorsId = adhocAuthorsId;
 					}
 
-					if (orcid != null) {
+					else {
 						authorsId = orcid;
 					}
 
@@ -567,7 +567,7 @@ public class XmlUtils {
 						contributorOrder = authorsId;
 					}
 
-					if (contributorOrder != null) {
+					else {
 						contributorOrder = contributorOrder.concat("|" + authorsId);
 					}
 
