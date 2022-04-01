@@ -693,7 +693,7 @@ public class XmlUtils {
 						continue;
 					}
 					String licenseId = attrib.getNodeValue();
-					play.Logger.debug("Found LicenseId");
+					play.Logger.debug("Found LicenseId: " + licenseId);
 					license.put("@id", licenseId);
 					license.put("prefLabel", licenseId);
 				}
