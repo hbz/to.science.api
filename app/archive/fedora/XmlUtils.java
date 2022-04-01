@@ -679,7 +679,9 @@ public class XmlUtils {
 			Map<String, Object> license = new TreeMap<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
-				if (node.getParentNode().getNodeName().contains("license")) {
+				String parentNodeName = node.getParentNode().getNodeName();
+				if (parentNodeName.equalsIgnoreCase("license-p")
+						|| parentNodeName.equalsIgnoreCase("license")) {
 					// wir gehen davon aus, dass license-type == open-access ; streng
 					// genommen das hier noch prüfen !!
 					attributes = node.getAttributes();
@@ -691,6 +693,7 @@ public class XmlUtils {
 						continue;
 					}
 					String licenseId = attrib.getNodeValue();
+					play.Logger.debug("Found LicenseId");
 					license.put("@id", licenseId);
 					license.put("prefLabel", licenseId);
 				}
