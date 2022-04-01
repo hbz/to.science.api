@@ -636,36 +636,41 @@ public class XmlUtils {
 
 			/* Zitierangabe */
 			NodeList volumes = content.getElementsByTagName("volume");
-			String volume = "";
-			for (int i = 0; i < volumes.getLength(); i++) {
-				node = volumes.item(i);
-				volume = node.getTextContent();
-				break;
+			if (volumes.getLength() > 0) {
+				String volume = "";
+				for (int i = 0; i < volumes.getLength(); i++) {
+					node = volumes.item(i);
+					volume = node.getTextContent();
+					break;
+				}
+				NodeList issues = content.getElementsByTagName("issue");
+				String issue = "";
+				for (int i = 0; i < issues.getLength(); i++) {
+					node = issues.item(i);
+					issue = node.getTextContent();
+					break;
+				}
+				NodeList fpages = content.getElementsByTagName("fpage");
+				String fpage = "";
+				for (int i = 0; i < fpages.getLength(); i++) {
+					node = fpages.item(i);
+					fpage = node.getTextContent();
+					break;
+				}
+				NodeList lpages = content.getElementsByTagName("lpage");
+				String lpage = "";
+				for (int i = 0; i < lpages.getLength(); i++) {
+					node = lpages.item(i);
+					lpage = node.getTextContent();
+					break;
+				}
+				String bibliographicCitation =
+						new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
+				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
+			} else {
+				String bibliographicCitation = new String("Ahead of print");
+				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
 			}
-			NodeList issues = content.getElementsByTagName("issue");
-			String issue = "";
-			for (int i = 0; i < issues.getLength(); i++) {
-				node = issues.item(i);
-				issue = node.getTextContent();
-				break;
-			}
-			NodeList fpages = content.getElementsByTagName("fpage");
-			String fpage = "";
-			for (int i = 0; i < fpages.getLength(); i++) {
-				node = fpages.item(i);
-				fpage = node.getTextContent();
-				break;
-			}
-			NodeList lpages = content.getElementsByTagName("lpage");
-			String lpage = "";
-			for (int i = 0; i < lpages.getLength(); i++) {
-				node = lpages.item(i);
-				lpage = node.getTextContent();
-				break;
-			}
-			String bibliographicCitation =
-					new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
-			rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
 
 			/* Copyright-Jahr */
 			nodeList = content.getElementsByTagName("copyright-year");
@@ -715,7 +720,7 @@ public class XmlUtils {
 
 			/* Schlagwörter */
 			nodeList = content.getElementsByTagName("kwd");
-			Map<String, Object> keyword = new TreeMap<>();
+			List<Map<String, Object>> keywords = new ArrayList<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
 				String keywordStr = node.getTextContent();
@@ -724,10 +729,12 @@ public class XmlUtils {
 						+ helper.MyURLEncoding.encode(keywordStr);
 				play.Logger.debug(
 						"adhocId fuer Schlagwort \"" + keywordStr + "\": " + keywordId);
+				Map<String, Object> keyword = new TreeMap<>();
 				keyword.put("@id", keywordId);
 				keyword.put("prefLabel", keywordStr);
+				keywords.add(keyword);
 			}
-			rdf.put("subject", Arrays.asList(keyword));
+			rdf.put("subject", keywords);
 			rdf.put("contentType", "article");
 
 			/* RDF-Type */
