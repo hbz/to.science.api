@@ -477,7 +477,7 @@ public class XmlUtils {
 			nodeList = content.getElementsByTagName("contrib");
 			NodeList childNodes = null;
 			Node child = null;
-			Map<String, Object> creator = new TreeMap<>();
+			List<Map<String, Object>> creators = new ArrayList<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
 				attributes = node.getAttributes();
@@ -539,10 +539,9 @@ public class XmlUtils {
 								prefLabel = child.getTextContent();
 								play.Logger.debug("Found collab: " + prefLabel);
 							}
-							creator.put("prefLabel", prefLabel);
 						}
 					} /* end of for Node child */
-
+					Map<String, Object> creator = new TreeMap<>();
 					if (orcid == null) {
 						/*
 						 * So erzeugt man eine "adhoc-URI" ; siehe
@@ -568,10 +567,12 @@ public class XmlUtils {
 						contributorOrder = contributorOrder.concat("|" + authorsId);
 					}
 					creator.put("@id", authorsId);
+					creator.put("prefLabel", prefLabel);
+					creators.add(creator);
 				} /* end of author */
 
 			} /* end of loop over contrib Nodes (authors) */
-			rdf.put("creator", Arrays.asList(creator));
+			rdf.put("creator", creators);
 
 			/* Reihenfolge der Beitragenden */
 			rdf.put("contributorOrder", Arrays.asList(contributorOrder));
@@ -674,23 +675,25 @@ public class XmlUtils {
 			}
 
 			/* Open-Access Lizenz */
-			nodeList = content.getElementsByTagName("license");
+			nodeList = content.getElementsByTagName("ext-link");
 			Map<String, Object> license = new TreeMap<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
-				// wir gehen davon aus, dass license-type == open-access ; streng
-				// genommen das hier noch prüfen !!
-				attributes = node.getAttributes();
-				if (attributes == null) {
-					continue;
+				if (node.getParentNode().getNodeName().contains("license")) {
+					// wir gehen davon aus, dass license-type == open-access ; streng
+					// genommen das hier noch prüfen !!
+					attributes = node.getAttributes();
+					if (attributes == null) {
+						continue;
+					}
+					attrib = attributes.getNamedItem("xlink:href");
+					if (attrib == null) {
+						continue;
+					}
+					String licenseId = attrib.getNodeValue();
+					license.put("@id", licenseId);
+					license.put("prefLabel", licenseId);
 				}
-				attrib = attributes.getNamedItem("xlink:href");
-				if (attrib == null) {
-					continue;
-				}
-				String licenseId = attrib.getNodeValue();
-				license.put("@id", licenseId);
-				license.put("prefLabel", licenseId);
 			}
 			rdf.put("license", Arrays.asList(license));
 
