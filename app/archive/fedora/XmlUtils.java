@@ -559,6 +559,10 @@ public class XmlUtils {
 						authorsId = orcid;
 					}
 
+					creator.put("@id", authorsId);
+					creator.put("prefLabel", prefLabel);
+					creators.add(creator);
+
 					if (contributorOrder == null) {
 						contributorOrder = authorsId;
 					}
@@ -566,11 +570,8 @@ public class XmlUtils {
 					if (contributorOrder != null) {
 						contributorOrder = contributorOrder.concat("|" + authorsId);
 					}
-					creator.put("@id", authorsId);
-					creator.put("prefLabel", prefLabel);
-					creators.add(creator);
-				} /* end of author */
 
+				} /* end of author */
 			} /* end of loop over contrib Nodes (authors) */
 			rdf.put("creator", creators);
 
