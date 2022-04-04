@@ -366,16 +366,26 @@ public class XmlUtils {
 			// rdf.put("@context",
 			// "https://w3id.org/kim/lrmi-profile/draft/context.jsonld");
 
+			NamedNodeMap attributes = null;
+			Node attrib = null;
 			/* Die Zeitschrift bei lobid über die ISSN hinzu lesen */
 			String lobidId = null;
 			Node node = null;
 			NodeList nodeList = content.getElementsByTagName("issn");
 			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node currentItem = nodeList.item(i);
+				node = nodeList.item(i);
 
-				if (currentItem.getAttributes().getNamedItem("pub-type").getNodeValue()
-						.equalsIgnoreCase("epub")) {
-					String issn = currentItem.getTextContent();
+				attributes = node.getAttributes();
+				if (attributes == null) {
+					continue;
+				}
+				attrib = attributes.getNamedItem("pub-type");
+				if (attrib == null) {
+					continue;
+				}
+
+				if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
+					String issn = node.getTextContent();
 					play.Logger.debug("Found ISSN: " + issn);
 					issn = issn.replaceAll("-", "");
 					play.Logger.debug("ISSN ohne Bindestrich: " + issn);
@@ -431,8 +441,6 @@ public class XmlUtils {
 
 			/* DOI */
 			nodeList = content.getElementsByTagName("article-id");
-			NamedNodeMap attributes = null;
-			Node attrib = null;
 			List<Map<String, Object>> publisherVersions = new ArrayList<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
