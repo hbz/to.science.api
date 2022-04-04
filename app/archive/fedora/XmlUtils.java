@@ -433,9 +433,7 @@ public class XmlUtils {
 			nodeList = content.getElementsByTagName("article-id");
 			NamedNodeMap attributes = null;
 			Node attrib = null;
-			Map<String, Object> publisherVersionDoi = new TreeMap<>();
-			Map<String, Object> publisherVersionPmcid = new TreeMap<>();
-
+			List<Map<String, Object>> publisherVersions = new ArrayList<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
 				attributes = node.getAttributes();
@@ -449,20 +447,23 @@ public class XmlUtils {
 				if (attrib.getNodeValue().equalsIgnoreCase("doi")) {
 					String doi = node.getTextContent();
 					play.Logger.debug("DOI: " + doi);
+					Map<String, Object> publisherVersionDoi = new TreeMap<>();
 					publisherVersionDoi.put("@id", "https://doi.org/" + doi);
 					publisherVersionDoi.put("prefLabel", "https://doi.org/" + doi);
+					publisherVersions.add(publisherVersionDoi);
 				}
 				if (attrib.getNodeValue().equalsIgnoreCase("pmcid")) {
 					String pmcid = node.getTextContent();
 					play.Logger.debug("PMCID: " + pmcid);
+					Map<String, Object> publisherVersionPmcid = new TreeMap<>();
 					publisherVersionPmcid.put("@id",
 							"https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
 					publisherVersionPmcid.put("prefLabel",
 							"https://www.ncbi.nlm.nih.gov/pmc/articles/" + pmcid + "/");
+					publisherVersions.add(publisherVersionPmcid);
 				}
 			}
-			rdf.put("publisherVersion",
-					Arrays.asList(publisherVersionDoi, publisherVersionPmcid));
+			rdf.put("publisherVersion", publisherVersions);
 
 			/* Aufsatztitel */
 			nodeList = content.getElementsByTagName("article-title");
@@ -682,7 +683,7 @@ public class XmlUtils {
 
 			/* Open-Access Lizenz */
 			nodeList = content.getElementsByTagName("ext-link");
-			Map<String, Object> license = new TreeMap<>();
+			List<Map<String, Object>> licenses = new ArrayList<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
 				String parentNodeName = node.getParentNode().getNodeName();
@@ -700,11 +701,13 @@ public class XmlUtils {
 					}
 					String licenseId = attrib.getNodeValue();
 					play.Logger.debug("Found LicenseId: " + licenseId);
+					Map<String, Object> license = new TreeMap<>();
 					license.put("@id", licenseId);
 					license.put("prefLabel", licenseId);
+					licenses.add(license);
 				}
 			}
-			rdf.put("license", Arrays.asList(license));
+			rdf.put("license", licenses);
 
 			/* Abstract */
 			nodeList = content.getElementsByTagName("abstract");
