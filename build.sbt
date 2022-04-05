@@ -7,7 +7,6 @@ scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
   cache,ws,javaWs,javaJdbc,
-  "org.marc4j" % "marc4j" % "2.4", 
   "junit" % "junit" % "4.11", 
   "org.apache.pdfbox" % "pdfbox" % "1.8.0",
   "org.bouncycastle" % "bcprov-jdk15" % "1.44",
