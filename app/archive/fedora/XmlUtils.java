@@ -613,7 +613,8 @@ public class XmlUtils {
 							play.Logger.debug("Found publication year: " + pubYear);
 						}
 					} /* end of child node */
-				} else if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
+				} else if (attrib.getNodeValue().equalsIgnoreCase("epub")
+						|| attrib.getNodeValue().equalsIgnoreCase("ppub")) {
 					childNodes = node.getChildNodes();
 					for (int j = 0; j < childNodes.getLength(); j++) {
 						child = childNodes.item(j);

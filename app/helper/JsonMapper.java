@@ -523,25 +523,63 @@ public class JsonMapper {
 		rdf.put("joinedFunding", joinedFundings);
 		rdf.put("fundingId", fundingId);
 	}
+	/*
+	 * if (myObj instanceof java.util.HashSet) { HashSet<Map<String, String>> all
+	 * = (HashSet<Map<String, String>>) rdf.get(key); if (all == null) return;
+	 * Iterator<Map<String, String>> fit = all.iterator(); while (fit.hasNext()) {
+	 * Map<String, String> m = fit.next(); m.put(PREF_LABEL, m.get(ID2)); } } else
+	 * if (myObj instanceof java.util.List) { List<Map<String, String>> all =
+	 * (List<Map<String, String>>) rdf.get(key); if (all == null) return; for
+	 * (Map<String, String> m : all) { m.put(PREF_LABEL, m.get(ID2)); } }
+	 */
 
-	private void addParts(Map<String, Object> rdf) {
+	private static void addParts(Map<String, Object> rdf) {
 		Read read = new Read();
-		List<Map<String, Object>> parts =
-				(List<Map<String, Object>>) rdf.get("hasPart");
-		List<Map<String, Object>> children = new ArrayList();
-		if (parts != null) {
-			for (Map<String, Object> part : parts) {
+		List<Map<String, Object>> children = new ArrayList<>();
+		Object myObj = rdf.get("hasPart");
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> all =
+					(HashSet<Map<String, Object>>) rdf.get("hasPart");
+			if (all == null)
+				return;
+			Iterator<Map<String, Object>> fit = all.iterator();
+			while (fit.hasNext()) {
+				Map<String, Object> m = fit.next();
+				String id = (String) m.get(ID2);
+				Node cn = read.internalReadNode(id);
+				if (!"D".equals(cn.getState())) {
+					children.add(new JsonMapper(cn).getLd2WithoutContext());
+				}
+			}
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, Object>> all =
+					(List<Map<String, Object>>) rdf.get("hasPart");
+			if (all == null)
+				return;
+			for (Map<String, Object> part : all) {
 				String id = (String) part.get(ID2);
 				Node cn = read.internalReadNode(id);
 				if (!"D".equals(cn.getState())) {
 					children.add(new JsonMapper(cn).getLd2WithoutContext());
 				}
 			}
-			if (!children.isEmpty()) {
-				rdf.put("hasPart", children);
-			}
+		}
+		if (!children.isEmpty()) {
+			rdf.put("hasPart", children);
 		}
 	}
+
+	// alt
+	/*
+	 * private void addParts(Map<String, Object> rdf) { Read read = new Read();
+	 * List<Map<String, Object>> parts = (List<Map<String, Object>>)
+	 * rdf.get("hasPart"); List<Map<String, Object>> children = new ArrayList();
+	 * if (parts != null) { for (Map<String, Object> part : parts) { String id =
+	 * (String) part.get(ID2); Node cn = read.internalReadNode(id); if
+	 * (!"D".equals(cn.getState())) { children.add(new
+	 * JsonMapper(cn).getLd2WithoutContext()); } } if (!children.isEmpty()) {
+	 * rdf.put("hasPart", children); } } }
+	 */
 
 	private void postProcessContribution(Map<String, Object> rdf) {
 		try {
