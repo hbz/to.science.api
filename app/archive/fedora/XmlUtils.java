@@ -727,7 +727,8 @@ public class XmlUtils {
 					if (boldNode.getNodeName().equalsIgnoreCase("bold"))
 						paragraphNode.removeChild(boldNode);
 				}
-				rdf.put("abstractText", Arrays.asList(paragraphNode.getTextContent()));
+				rdf.put("abstractText", Arrays.asList(
+						paragraphNode.getTextContent().trim().replaceAll("  +", " ")));
 			}
 
 			/* Schlagwörter */

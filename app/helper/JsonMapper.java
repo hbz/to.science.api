@@ -485,44 +485,6 @@ public class JsonMapper {
 		rdf.put("subject", oldSubjects);
 	}
 
-	private static void createJoinedFunding(Map<String, Object> rdf) {
-
-		List<Map<String, Object>> fundingId =
-				(List<Map<String, Object>>) rdf.get("fundingId");
-		if (fundingId == null) {
-			fundingId = new ArrayList<>();
-		}
-		List<String> fundings = (List<String>) rdf.get("funding");
-		if (fundings != null) {
-			for (String funding : fundings) {
-				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
-				fundingJoinedMap.put(PREF_LABEL, funding);
-				fundingId.add(fundingJoinedMap);
-			}
-			rdf.remove("funding");
-		}
-		List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
-		List<String> projectId = (List<String>) rdf.get("projectId");
-
-		List<Map<String, Object>> joinedFundings = new ArrayList<>();
-		if (fundingId.isEmpty())
-			return;
-		for (int i = 0; i < fundingId.size(); i++) {
-			// play.Logger.info(fundingId.get(i));
-			Map<String, Object> f = new LinkedHashMap<>();
-			Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-			fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
-			fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
-			f.put("fundingJoined", fundingJoinedMap);
-			f.put("fundingProgramJoined", fundingProgram.get(i));
-			f.put("projectIdJoined", projectId.get(i));
-			joinedFundings.add(f);
-		}
-		rdf.put("joinedFunding", joinedFundings);
-		rdf.put("fundingId", fundingId);
-	}
 	/*
 	 * if (myObj instanceof java.util.HashSet) { HashSet<Map<String, String>> all
 	 * = (HashSet<Map<String, String>>) rdf.get(key); if (all == null) return;
@@ -532,6 +494,90 @@ public class JsonMapper {
 	 * (List<Map<String, String>>) rdf.get(key); if (all == null) return; for
 	 * (Map<String, String> m : all) { m.put(PREF_LABEL, m.get(ID2)); } }
 	 */
+
+	private static void createJoinedFunding(Map<String, Object> rdf) {
+
+		Object myObj = rdf.get("fundingId");
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> fundingId =
+					(HashSet<Map<String, Object>>) rdf.get("fundingId");
+			if (fundingId == null) {
+				fundingId = new HashSet<>();
+			}
+			List<String> fundings = (List<String>) rdf.get("funding");
+			if (fundings != null) {
+				for (String funding : fundings) {
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+					fundingJoinedMap.put(PREF_LABEL, funding);
+					fundingId.add(fundingJoinedMap);
+				}
+				rdf.remove("funding");
+			}
+			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+			List<String> projectId = (List<String>) rdf.get("projectId");
+
+			List<Map<String, Object>> joinedFundings = new ArrayList<>();
+			if (fundingId.isEmpty())
+				return;
+
+			Iterator<Map<String, Object>> fit = fundingId.iterator();
+			int i = 0;
+			while (fit.hasNext()) {
+				Map<String, Object> m = fit.next();
+				Map<String, Object> f = new LinkedHashMap<>();
+				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+				fundingJoinedMap.put(ID2, m.get(ID2));
+				fundingJoinedMap.put(PREF_LABEL, m.get(PREF_LABEL));
+				f.put("fundingJoined", fundingJoinedMap);
+				f.put("fundingProgramJoined", fundingProgram.get(i));
+				f.put("projectIdJoined", projectId.get(i));
+				joinedFundings.add(f);
+				i++;
+			}
+
+			rdf.put("joinedFunding", joinedFundings);
+			rdf.put("fundingId", fundingId);
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, Object>> fundingId =
+					(List<Map<String, Object>>) rdf.get("fundingId");
+			if (fundingId == null) {
+				fundingId = new ArrayList<>();
+			}
+			List<String> fundings = (List<String>) rdf.get("funding");
+			if (fundings != null) {
+				for (String funding : fundings) {
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+					fundingJoinedMap.put(PREF_LABEL, funding);
+					fundingId.add(fundingJoinedMap);
+				}
+				rdf.remove("funding");
+			}
+			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+			List<String> projectId = (List<String>) rdf.get("projectId");
+
+			List<Map<String, Object>> joinedFundings = new ArrayList<>();
+			if (fundingId.isEmpty())
+				return;
+			for (int i = 0; i < fundingId.size(); i++) {
+				// play.Logger.info(fundingId.get(i));
+				Map<String, Object> f = new LinkedHashMap<>();
+				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+				fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
+				fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
+				f.put("fundingJoined", fundingJoinedMap);
+				f.put("fundingProgramJoined", fundingProgram.get(i));
+				f.put("projectIdJoined", projectId.get(i));
+				joinedFundings.add(f);
+			}
+			rdf.put("joinedFunding", joinedFundings);
+			rdf.put("fundingId", fundingId);
+		}
+
+	}
 
 	private static void addParts(Map<String, Object> rdf) {
 		Read read = new Read();
