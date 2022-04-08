@@ -478,7 +478,8 @@ public class XmlUtils {
 			if (nodeList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
-				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent()));
+				rdf.put("title", Arrays.asList(
+						nodeList.item(0).getTextContent().trim().replaceAll("  +", " ")));
 			}
 
 			/* Autor */
@@ -634,6 +635,8 @@ public class XmlUtils {
 			} /* end of loop over pub-date nodes) */
 			rdf.put("issued", pubYear);
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
+			if (epubDay == null)
+				publicationDateStr = epubYear + "-" + epubMonth;
 			rdf.put("publicationYear", Arrays.asList(publicationDateStr));
 
 			if (embargo_duration > 0) {
