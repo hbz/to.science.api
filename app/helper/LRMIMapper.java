@@ -381,7 +381,28 @@ public class LRMIMapper {
 			throw new RuntimeException("LRMI.json could not be modified or created !",
 					e);
 		}
+	}
 
+	/**
+	 * Check if JSONObject has Array or Object structure and returns an iterator
+	 * either
+	 * 
+	 * @param rdf
+	 * @param arrayKey
+	 * @return
+	 */
+	public Iterator getLobid2Iterator(Object iObj) {
+		Iterator lIterator = null;
+		if (iObj instanceof java.util.ArrayList) {
+			ArrayList<Map<String, Object>> jList =
+					(ArrayList<Map<String, Object>>) iObj;
+			lIterator = jList.iterator();
+		} else if (iObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> jHashSet =
+					(HashSet<Map<String, Object>>) iObj;
+			lIterator = jHashSet.iterator();
+		}
+		return lIterator;
 	}
 
 	/**
@@ -406,7 +427,7 @@ public class LRMIMapper {
 		return lIterator;
 	}
 
-	/**
+  /**
 	 * convert a three letter ISO639-2 uri into two letter ISO639-1 tag on the
 	 * base of java.util.Locale example: given Uri
 	 * "http://id.loc.gov/vocabulary/iso639-2/eng" will be converted in "en"
@@ -431,5 +452,4 @@ public class LRMIMapper {
 		}
 		return result;
 	}
-
 }
