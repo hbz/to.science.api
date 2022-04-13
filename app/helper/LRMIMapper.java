@@ -20,14 +20,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
@@ -107,25 +104,20 @@ public class LRMIMapper {
 					format, profile.getContext().get("@context"));
 			/**
 			 * - gehe die lobid-Daten durch (Mapping lobid => LRMI !) und überschreibe
-			 * die entsrpechenden Felder in den LRMI-Daten oder füge sie neu ein.
+			 * die entsprechenden Felder in den LRMI-Daten oder füge sie neu ein.
 			 * Anmerkung: Löschen kann man mit dieser Methode nicht (das macht auch
 			 * hier keinen Sinn, da die LRMI-Daten i.d.R. reicher sein werden als die
 			 * gesendeten lobid-Daten, und man will nicht die gesamte Differenz
 			 * löschen).
 			 */
 			/* Rückabbildung lobid2 => LRMI (vgl. JsonMapper.getLd2Lobidify2Lrmi */
-			HashSet<Map<String, Object>> hashSet = null;
-			ArrayList<Map<String, Object>> arrayList = null;
-			HashSet<String> arrOfString = null;
-			ArrayList<String> arrListOfString = null;
 			Iterator iterator = null;
 			Map<String, Object> map = null;
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
 
 			/*** Begin Mapping lobid2 => LRMI ***/
 			if (rdf.containsKey("language")) {
-				myObj = rdf.get("language");
-				iterator = getLobid2Iterator(myObj);
+				iterator = getLobid2Iterator(myObj = rdf.get("language"));
 				// 1. Suche Objekt "@language" im JSONArray "@context"
 				// leave @context @language unchanged
 				/*
@@ -162,14 +154,7 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("contentType")) {
-				myObj = rdf.get("contentTyp");
-				if (myObj instanceof java.util.ArrayList) {
-					arrListOfString = (ArrayList<String>) rdf.get("contentType");
-					iterator = arrListOfString.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					arrOfString = (HashSet<String>) rdf.get("contentType");
-					iterator = arrOfString.iterator();
-				}
+				iterator = getLobid2Iterator(rdf.get("contentTyp"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					arr.put(iterator.next());
@@ -178,26 +163,13 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("title")) {
-				myObj = rdf.get("title");
-				if (myObj instanceof java.util.ArrayList) {
-					arrListOfString = (ArrayList<String>) rdf.get("title");
-					iterator = arrListOfString.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					arrOfString = (HashSet<String>) rdf.get("title");
-					iterator = arrOfString.iterator();
-				}
+				iterator = getLobid2Iterator(rdf.get("title"));
+				// lrmiData only supports one title
 				jcontent.put("name", iterator.next());
 			}
 
 			if (rdf.containsKey("medium")) {
-				myObj = rdf.get("medium");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("medium");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("medium");
-					iterator = hashSet.iterator();
-				}
+				iterator = getLobid2Iterator(rdf.get("medium"));
 				// Hole ein Objekt aus LRMI-JSON oder lege es neu an
 				obj = null;
 				if (jcontent.has("learningResourceType")) {
@@ -237,15 +209,44 @@ public class LRMIMapper {
 				jcontent.put("learningResourceType", arr);
 			}
 
-			if (rdf.containsKey("creator")) {
-				myObj = rdf.get("creator");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("creator");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("creator");
-					iterator = hashSet.iterator();
+			if (node.getLd2().containsKey("creator")) {
+				arr = new JSONArray();
+				iterator = getLobid2Iterator(node.getLd2().get("creator"));
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					obj = new JSONObject();
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", map.get("type"));
+					obj.put("honoricPrefix", map.get("academicTitle"));
+					if (map.containsKey("affiliation")) {
+						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
+						while (aIterator.hasNext()) {
+							Map aMap = (Map<String, Object>) aIterator.next();
+							JSONObject aObj = new JSONObject();
+							aObj.put("name", aMap.get("prefLabel"));
+							aObj.put("id", aMap.get("@id"));
+							aObj.put("type", "Organization");
+							obj.put("affiliation", aObj);
+							break; // es gibt nur eine Affiliation pro Autor (?)
+						}
+					}
+					arr.put(obj);
 				}
+				jcontent.put("creator", arr);
+			}
+
+			if (rdf.containsKey("academicTitle")) {
+				iterator = getLobid2Iterator(rdf.get("academicTitle"));
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					play.Logger.debug("found affiliation" + map.toString());
+				}
+
+			}
+
+			if (rdf.containsKey("creator")) {
+				iterator = getLobid2Iterator(rdf.get("creator"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
@@ -253,6 +254,29 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess */
+					Iterator mIterator = null;
+					if (map.containsKey("affiliation")) {
+						play.Logger.debug("key affiliation found in rdf");
+						mIterator = getLobid2Iterator(map.get("affiliation"));
+					}
+					if (mIterator != null) {
+						while (mIterator.hasNext()) {
+							Map aMap = (Map<String, Object>) mIterator.next();
+							JSONObject mObj = new JSONObject();
+							mObj.put("name", aMap.get("prefLabel"));
+							mObj.put("id", aMap.get("@id"));
+							mObj.put("type", "Organization"); /* guess */
+							obj.put("affiliation", mObj);
+							break; // es gibt nur eine Affiliation pro Creator (?)
+						}
+					} else {
+						play.Logger.warn("found no affiliation associated with creator");
+						JSONObject dummyObj = new JSONObject();
+						dummyObj.put("name", "Example Affiliation");
+						dummyObj.put("id", "https://example.org");
+						dummyObj.put("type", "Organization"); /* guess */
+						obj.put("affiliation", dummyObj);
+					}
 					arr.put(obj);
 				}
 				jcontent.put("creator", arr);
@@ -260,14 +284,7 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("contributor")) {
-				myObj = rdf.get("contributor");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("contributor");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("contributor");
-					iterator = hashSet.iterator();
-				}
+				iterator = getLobid2Iterator(rdf.get("contributor"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
@@ -280,28 +297,17 @@ public class LRMIMapper {
 				jcontent.put("contributor", arr);
 			}
 
-			if (rdf.containsKey("description")) {
-				myObj = rdf.get("description");
-				if (myObj instanceof java.util.ArrayList) {
-					arrListOfString = (ArrayList<String>) rdf.get("description");
-					iterator = arrListOfString.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					arrOfString = (HashSet<String>) rdf.get("description");
-					iterator = arrOfString.iterator();
+			if (rdf.containsKey("subject")) {
+				iterator = getLobid2Iterator(rdf.get("subject"));
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					jcontent.put("keywords", map.get("prefLabel"));
 				}
-				jcontent.put("description", iterator.next());
 			}
 
 			if (rdf.containsKey("license")) {
-				myObj = rdf.get("license");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("license");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("license");
-					iterator = hashSet.iterator();
-				}
 				arr = new JSONArray();
+				iterator = getLobid2Iterator(rdf.get("license"));
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
@@ -313,14 +319,7 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("institution")) {
-				myObj = rdf.get("institution");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("institution");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("institution");
-					iterator = hashSet.iterator();
-				}
+				iterator = getLobid2Iterator(rdf.get("institution"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
@@ -337,20 +336,12 @@ public class LRMIMapper {
 			// add child data url as encoding contentUrl to make content accessible
 			if (rdf.containsKey("hasPart")) {
 				play.Logger.debug("Child Node exists and is found");
-				myObj = rdf.get("hasPart");
-				if (myObj instanceof java.util.ArrayList) {
-					arrayList = (ArrayList<Map<String, Object>>) rdf.get("hasPart");
-					iterator = arrayList.iterator();
-				} else if (myObj instanceof java.util.HashSet) {
-					hashSet = (HashSet<Map<String, Object>>) rdf.get("hasPart");
-					iterator = hashSet.iterator();
-				}
-
+				iterator = getLobid2Iterator(rdf.get("hasPart"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
-					obj.put("type", "MediaType");
+					obj.put("type", "MediaObject");
 					obj.put("contentUrl", Globals.protocol + Globals.server + "/resource/"
 							+ map.get("@id").toString() + "/data");
 					arr.put(obj);
@@ -360,21 +351,14 @@ public class LRMIMapper {
 			} else {
 				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
 				Map<String, Object> l1rdf = node.getLd1();
-				myObj = l1rdf.get("hasPart");
 				if (l1rdf.containsKey("hasPart")) {
 					play.Logger.debug("found Child in lobid");
-					if (myObj instanceof java.util.ArrayList) {
-						arrayList = (ArrayList<Map<String, Object>>) l1rdf.get("hasPart");
-						iterator = arrayList.iterator();
-					} else if (myObj instanceof java.util.HashSet) {
-						hashSet = (HashSet<Map<String, Object>>) l1rdf.get("hasPart");
-						iterator = hashSet.iterator();
-					}
+					iterator = getLobid2Iterator(l1rdf.get("hasPart"));
 					arr = new JSONArray();
 					while (iterator.hasNext()) {
 						map = (Map<String, Object>) iterator.next();
 						obj = new JSONObject();
-						obj.put("type", "MediaType");
+						obj.put("type", "MediaObject");
 						obj.put("contentUrl", Globals.protocol + Globals.server
 								+ "/resource/" + map.get("@id").toString() + "/data");
 					}
@@ -382,7 +366,6 @@ public class LRMIMapper {
 					play.Logger.debug("Added new encoding-field");
 				}
 				jcontent.put("encoding", arr);
-
 			}
 
 			/**
@@ -423,6 +406,28 @@ public class LRMIMapper {
 	}
 
 	/**
+	 * Check if JSONObject has Array or Object structure and returns an iterator
+	 * either
+	 * 
+	 * @param iObj a list type object (ArrayList or HashSet), which has an
+	 *          iterator
+	 * @return an Iterator for the list type object
+	 */
+	public Iterator getLobid2Iterator(Object iObj) {
+		Iterator lIterator = null;
+		if (iObj instanceof java.util.ArrayList) {
+			ArrayList<Map<String, Object>> jList =
+					(ArrayList<Map<String, Object>>) iObj;
+			lIterator = jList.iterator();
+		} else if (iObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> jHashSet =
+					(HashSet<Map<String, Object>>) iObj;
+			lIterator = jHashSet.iterator();
+		}
+		return lIterator;
+	}
+
+  /**
 	 * convert a three letter ISO639-2 uri into two letter ISO639-1 tag on the
 	 * base of java.util.Locale example: given Uri
 	 * "http://id.loc.gov/vocabulary/iso639-2/eng" will be converted in "en"

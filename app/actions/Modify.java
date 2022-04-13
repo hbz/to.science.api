@@ -288,16 +288,14 @@ public class Modify extends RegalAction {
 			alephid = alephid.replaceAll("#.*", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
 			updateMetadata2(node, content);
-
 			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
-		} else {
-			updateMetadata2(node, content);
-			String enrichMessage = Enrich.enrichMetadata2(node);
-			return pid + " metadata successfully updated, and enriched! "
-					+ enrichMessage;
 		}
+		updateMetadata2(node, content);
+		String enrichMessage = Enrich.enrichMetadata2(node);
+		return pid + " metadata successfully updated, and enriched! "
+				+ enrichMessage;
 	}
 
 	/**
@@ -364,6 +362,31 @@ public class Modify extends RegalAction {
 		String enrichMessage = new Enrich().enrichLrmiData(node);
 		return pid + " LRMI-metadata successfully updated and enriched! "
 				+ enrichMessage;
+	}
+
+	/**
+	 * Diese Methode fügt ein Kind-Objekt zu den LRMI-Daten eines Elternobjektes
+	 * hinzu.
+	 * 
+	 * @param parent The node of the parent resource that must be updated
+	 * @param child The node of the child resource that must be added to the
+	 *          parent
+	 * @return a short message
+	 */
+	public String updateLrmiDataByChild(Node parent, Node child) {
+
+		play.Logger.debug("Start method updateLrmiDataByChild");
+		String pid = parent.getPid();
+		play.Logger.debug("parentPid=" + pid);
+
+		String lrmiContent = new JsonMapper().addLrmiChildToParent(parent, child);
+		play.Logger
+				.debug("Added child in LRMI content. Content is now: " + lrmiContent);
+		updateLrmiData(parent, lrmiContent);
+		play.Logger.debug("Updated LRMI datastream!");
+
+		// String enrichMessage = new Enrich().enrichLrmiData(parent);
+		return pid + " Added a child in LRMI-metadata ! ";
 	}
 
 	/**

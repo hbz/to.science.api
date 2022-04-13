@@ -232,6 +232,8 @@ public class Create extends RegalAction {
 
 	private void linkWithParent(String parentPid, Node node) {
 		try {
+			play.Logger.debug("Begin linkWithParent, parentPid=" + parentPid
+					+ ", childPid=" + node.getPid());
 			Node parent = new Read().readNode(parentPid);
 			unlinkOldParent(node);
 			linkToNewParent(parent, node);
@@ -255,7 +257,10 @@ public class Create extends RegalAction {
 
 	private static void linkToNewParent(Node parent, Node child) {
 		Globals.fedora.linkToParent(child, parent.getPid());
-		Globals.fedora.linkParentToNode(parent.getPid(), child.getPid());
+		Node modifiedParent =
+				Globals.fedora.linkParentToNode(parent.getPid(), child.getPid());
+		// Den Link auch in den LRMI-Daten des Parent setzen
+		new Modify().updateLrmiDataByChild(modifiedParent, child);
 	}
 
 	private void unlinkOldParent(Node node) {

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -388,6 +389,9 @@ public class JsonMapper {
 		return rdf;
 	}
 
+	/**
+	 * @param rdf
+	 */
 	private void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
@@ -442,6 +446,10 @@ public class JsonMapper {
 		}
 	}
 
+	/**
+	 * @param key
+	 * @param rdf
+	 */
 	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
 		List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
 		if (all == null)
@@ -452,6 +460,9 @@ public class JsonMapper {
 
 	}
 
+	/**
+	 * @param rdf
+	 */
 	private static void postProcessSubjectName(Map<String, Object> rdf) {
 		List<Map<String, Object>> newSubjects = new ArrayList<>();
 		Set<String> subjects = (Set<String>) rdf.get("subjectName");
@@ -476,6 +487,9 @@ public class JsonMapper {
 		rdf.put("subject", oldSubjects);
 	}
 
+	/**
+	 * @param rdf
+	 */
 	private static void createJoinedFunding(Map<String, Object> rdf) {
 
 		List<Map<String, Object>> fundingId =
@@ -945,6 +959,12 @@ public class JsonMapper {
 		return rdf;
 	}
 
+	/**
+	 * provide information about publication dates from JsonNode
+	 * 
+	 * @param hit JsonNode
+	 * @return publication date or date issued
+	 */
 	public static String getPublicationMap(JsonNode hit) {
 		String issued = hit.at("/issued").asText();
 		if (issued != null && !issued.isEmpty()) {
@@ -961,6 +981,10 @@ public class JsonMapper {
 		return null;
 	}
 
+	/**
+	 * @param rdf
+	 * @return
+	 */
 	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 
@@ -989,6 +1013,11 @@ public class JsonMapper {
 		return result;
 	}
 
+	/**
+	 * @param rdf
+	 * @param key
+	 * @return
+	 */
 	private static boolean mediumArrayContains(JsonNode rdf, String key) {
 		boolean result = false;
 		JsonNode mediumArray = rdf.at("/medium");
@@ -1080,6 +1109,77 @@ public class JsonMapper {
 	}
 
 	/**
+	 * Diese Methode fügt ein Kindobjekt zu einem LRMI-Datenstrom hinzu. Zurück
+	 * gegeben wird der modifizierte LRMI-Datenstrom.
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 * @param parent The Node of the parent resource
+	 * @param child The Node of the child resource
+	 * @date 2022-03-10
+	 * 
+	 * @return Die geänderten Daten im Format LRMI JSON
+	 */
+	public String addLrmiChildToParent(Node parent, Node child) {
+		this.node = parent;
+		play.Logger.debug("Start addLrmiChildToParent");
+		try {
+			String lrmiData = node.getLrmiData();
+			// LRMI-Daten nach JSONObject wandeln
+			JSONObject jcontent = null;
+			if (lrmiData == null || lrmiData.isEmpty()) {
+				play.Logger.info("LRMI data of parent pid " + node.getPid()
+						+ " are not existing, yet.");
+				jcontent = new JSONObject();
+			} else {
+				jcontent = new JSONObject(lrmiData);
+			}
+
+			JSONArray arr = null;
+			JSONObject obj = null;
+
+			// Suche nach "encoding"-Array in den vorhandenen LRMI-Daten
+			if (jcontent.has("encoding")) {
+				arr = jcontent.getJSONArray("encoding");
+			} else {
+				arr = new JSONArray();
+			}
+
+			/**
+			 * Gucke, ob dieses Kind am Elternobjekt schon vorhanden ist. Falls ja,
+			 * lösche dieses Kind (um es weiter unten erneut anzuhängen (Patch)).
+			 */
+			// Hilfs-Array, da man aus JSONArray nichts entfernen kann (seufz):
+			ArrayList<JSONObject> hilf = new ArrayList<JSONObject>();
+			for (int i = 0; i < arr.length(); i++) {
+				obj = arr.getJSONObject(i);
+				String contentUrl = obj.getString("contentUrl");
+				if (contentUrl.indexOf(child.getPid()) >= 0) {
+					continue;
+				}
+				hilf.add(obj);
+			}
+			// Neuerzeugung JSON Array aus Hilfs-Array
+			arr = new JSONArray(hilf);
+			// Hänge nun ein neues Kind an den Parent an.
+			obj = new JSONObject();
+			obj.put("contentUrl", new String(Globals.protocol + Globals.server
+					+ "/resource/" + child.getPid() + "/data"));
+			obj.put("type", "MediaObject");
+			arr.put(obj);
+			jcontent.put("encoding", arr);
+
+			// geändertes JSONObject als Zeichenkette zurück geben
+			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
+			return jcontent.toString();
+
+		} catch (JSONException je) {
+			play.Logger.error("Content could not be mapped!", je);
+			throw new RuntimeException(
+					"LRMI.json could not be modified for toscience !", je);
+		}
+	}
+
+	/**
 	 * Holt Metadaten im Format lobid2 (falls vorhanden) und mappt Felder aus
 	 * LRMI-Daten darauf.
 	 * 
@@ -1122,6 +1222,11 @@ public class JsonMapper {
 				// eine Struktur {} anlegen:
 				Map<String, Object> languageMap = new TreeMap<>();
 				if (language != null && !language.trim().isEmpty()) {
+					// fix the wrong language tag provided by lrmi
+					/*
+					 * if (language.equals("de") || language.equals("deu")) { language =
+					 * "ger"; }
+					 */
 					if (language.length() == 2) {
 						Locale loc = Locale.forLanguageTag(language);
 						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
@@ -1197,6 +1302,8 @@ public class JsonMapper {
 			}
 
 			String creatorName = null;
+			String affiliationId = null;
+			String affiliationType = null;
 			if (jcontent.has("creator")) {
 				List<Map<String, Object>> creators = new ArrayList<>();
 				arr = jcontent.getJSONArray("creator");
@@ -1219,12 +1326,21 @@ public class JsonMapper {
 						play.Logger.warn(
 								"Dem Creator \"" + creatorName + "\" fehlt eine URI/id !");
 					}
-					/*
-					 * if (obj.has("affiliation")) { creatorMap.put("affiliation",
-					 * obj.get("affiliation"));
-					 * 
-					 * }
-					 */
+
+					if (obj.has("honoricPrefix")) {
+						creatorMap.put("academicTitle", obj.getString("honoricPrefix"));
+					}
+					if (obj.has("affiliation")) {
+						JSONObject obj2 = obj.getJSONObject("affiliation");
+						affiliationId = new String(obj2.getString("id"));
+						affiliationType = new String(obj2.getString("type"));
+
+						Map<String, Object> affiliationMap = new TreeMap<>();
+						affiliationMap.put("@id", affiliationId);
+						affiliationMap.put("type", affiliationType);
+						creatorMap.put("affiliation", affiliationMap);
+					}
+
 					creators.add(creatorMap);
 				}
 				rdf.put("creator", creators);
@@ -1240,6 +1356,20 @@ public class JsonMapper {
 					if (obj.has("id")) {
 						contributorMap.put("@id", obj.getString("id"));
 					}
+					if (obj.has("honoricPrefix")) {
+						contributorMap.put("academicTitle", obj.getString("honoricPrefix"));
+					}
+					if (obj.has("affiliation")) {
+						JSONObject obj2 = obj.getJSONObject("affiliation");
+						affiliationId = new String(obj2.getString("id"));
+						affiliationType = new String(obj2.getString("type"));
+
+						Map<String, Object> affiliationMap = new TreeMap<>();
+						affiliationMap.put("@id", affiliationId);
+						affiliationMap.put("type", affiliationType);
+						contributorMap.put("affiliation", affiliationMap);
+					}
+
 					contributors.add(contributorMap);
 				}
 				rdf.put("contributor", contributors);
