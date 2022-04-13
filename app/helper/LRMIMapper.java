@@ -405,28 +405,6 @@ public class LRMIMapper {
 		return lIterator;
 	}
 
-	/**
-	 * Check if JSONObject has Array or Object structure and returns an iterator
-	 * either
-	 * 
-	 * @param iObj a list type object (ArrayList or HashSet), which has an
-	 *          iterator
-	 * @return an Iterator for the list type object
-	 */
-	public Iterator getLobid2Iterator(Object iObj) {
-		Iterator lIterator = null;
-		if (iObj instanceof java.util.ArrayList) {
-			ArrayList<Map<String, Object>> jList =
-					(ArrayList<Map<String, Object>>) iObj;
-			lIterator = jList.iterator();
-		} else if (iObj instanceof java.util.HashSet) {
-			HashSet<Map<String, Object>> jHashSet =
-					(HashSet<Map<String, Object>>) iObj;
-			lIterator = jHashSet.iterator();
-		}
-		return lIterator;
-	}
-
   /**
 	 * convert a three letter ISO639-2 uri into two letter ISO639-1 tag on the
 	 * base of java.util.Locale example: given Uri
