@@ -45,6 +45,7 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
 import archive.fedora.RdfUtils;
@@ -339,6 +340,8 @@ public class JsonMapper {
 		try {
 			InputStream stream = new ByteArrayInputStream(
 					node.getMetadata2().getBytes(StandardCharsets.UTF_8));
+			play.Logger.debug("node.getMetadata2=" + node.getMetadata2());
+			/* hier ist academicTitle und afiliation am Autor drin */
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
@@ -860,6 +863,13 @@ public class JsonMapper {
 		Map<String, Object> m = getDescriptiveMetadata2();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
+		try {
+			String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
+			play.Logger.debug("asRdf: jsonString=" + jsonString);
+		} catch (Exception e) {
+			play.Logger.error("Fehle beim Logging von jsonString", e);
+		}
+
 		changeDcIsPartOfToRegalIsPartOf(rdf);
 		// rdf.remove("describedby");
 		// rdf.remove("sameAs");
@@ -956,6 +966,7 @@ public class JsonMapper {
 		}
 		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
 		postprocessing(rdf);
+		play.Logger.debug("Exiting JsonMapper.getLd2()");
 		return rdf;
 	}
 
