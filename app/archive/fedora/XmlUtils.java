@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -376,43 +377,32 @@ public class XmlUtils {
 				node = nodeList.item(i);
 
 				attributes = node.getAttributes();
-				if (attributes == null) {
-					continue;
-				}
 				attrib = attributes.getNamedItem("pub-type");
-				if (attrib == null) {
+
+				if (issnAttrExists(nodeList, "epub")) {
+
+					if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
+						lobidId = getLobidId(lobidId, node);
+						break;
+					}
 					continue;
 				}
 
-				if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
-					String issn = node.getTextContent();
-					play.Logger.debug("Found ISSN: " + issn);
-					issn = issn.replaceAll("-", "");
-					play.Logger.debug("ISSN ohne Bindestrich: " + issn);
-					WSResponse response =
-							play.libs.ws.WS
-									.url("https://lobid.org/resources/search?q=issn:" + issn
-											+ "&format=json")
-									.setFollowRedirects(true).get().get(2000);
-					InputStream input = response.getBodyAsStream();
-					String formsResponseBody = CharStreams
-							.toString(new InputStreamReader(input, Charsets.UTF_8));
-					Closeables.closeQuietly(input);
-					// fetch annoying errors from to.science.forms service
-					if (response.getStatus() != 200) {
-						play.Logger
-								.warn("to.science.api service request ISSN search fails for "
-										+ issn + "!");
-					} else {
-						// Parse out ID value from JSON structure
-						// play.Logger.debug("formsResponseBody=" + formsResponseBody);
-						JSONObject jFormsResponse = new JSONObject(formsResponseBody);
-						JSONArray jArr = jFormsResponse.getJSONArray("member");
-						JSONObject jObj = jArr.getJSONObject(0);
-						lobidId = new String(jObj.getString("id"));
-						play.Logger.debug("Found lobid ID: " + lobidId);
+				if (nodeWithoutAttrExists(nodeList)) {
+					if (attributes == null) {
+						lobidId = getLobidId(lobidId, node);
+						break;
+					}
+					continue;
+				}
+
+				if (issnAttrExists(nodeList, "ppub")) {
+					if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
+						lobidId = getLobidId(lobidId, node);
+						break;
 					}
 				}
+
 			}
 
 			/* Zeitschriftentitel */
@@ -478,8 +468,8 @@ public class XmlUtils {
 			if (nodeList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
-				rdf.put("title", Arrays.asList(
-						nodeList.item(0).getTextContent().trim().replaceAll("  +", " ")));
+				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent().trim()
+						.replaceAll("[\\r\\n\\u00a0]+", " ")));
 			}
 
 			/* Autor */
@@ -730,8 +720,8 @@ public class XmlUtils {
 					if (boldNode.getNodeName().equalsIgnoreCase("bold"))
 						paragraphNode.removeChild(boldNode);
 				}
-				rdf.put("abstractText", Arrays.asList(
-						paragraphNode.getTextContent().trim().replaceAll("  +", " ")));
+				rdf.put("abstractText", Arrays.asList(paragraphNode.getTextContent()
+						.trim().replaceAll("[\\r\\n\\u00a0]+", " ")));
 			}
 
 			/* Schlagwörter */
@@ -797,6 +787,64 @@ public class XmlUtils {
 					"DeepGreen-XML could not be mapped to lobid2.json", e);
 		}
 
+	}
+
+	private String getLobidId(String lobidId, Node node)
+			throws UnsupportedEncodingException {
+		String issn = node.getTextContent();
+		play.Logger.debug("Found ISSN: " + issn);
+		issn = issn.replaceAll("-", "");
+		play.Logger.debug("ISSN ohne Bindestrich: " + issn);
+		WSResponse response = play.libs.ws.WS.url(
+				"https://lobid.org/resources/search?q=issn:" + issn + "&format=json")
+				.setFollowRedirects(true).get().get(2000);
+		InputStream input = response.getBodyAsStream();
+		String formsResponseBody =
+				CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
+		Closeables.closeQuietly(input);
+		// fetch annoying errors from to.science.forms service
+		if (response.getStatus() != 200) {
+			play.Logger.warn(
+					"to.science.api service request ISSN search fails for " + issn + "!");
+		} else {
+			// Parse out ID value from JSON structure
+			// play.Logger.debug("formsResponseBody=" + formsResponseBody);
+			JSONObject jFormsResponse = new JSONObject(formsResponseBody);
+			JSONArray jArr = jFormsResponse.getJSONArray("member");
+			JSONObject jObj = jArr.getJSONObject(0);
+			lobidId = new String(jObj.getString("id"));
+			play.Logger.debug("Found lobid ID: " + lobidId);
+		}
+		return lobidId;
+	}
+
+	private static boolean issnAttrExists(NodeList nodeList, String targetValue) {
+		NamedNodeMap attributes = null;
+		Node attrib = null;
+		Node node = null;
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			node = nodeList.item(i);
+
+			attributes = node.getAttributes();
+			attrib = attributes.getNamedItem("pub-type");
+
+			if (attrib.getNodeValue().equalsIgnoreCase(targetValue))
+				return true;
+		}
+		return false;
+	}
+
+	private static boolean nodeWithoutAttrExists(NodeList nodeList) {
+		NamedNodeMap attributes = null;
+		Node node = null;
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			node = nodeList.item(i);
+
+			attributes = node.getAttributes();
+			if (attributes == null)
+				return true;
+		}
+		return false;
 	}
 
 	private static Node getFirstElementNode(Node parentNode) {
