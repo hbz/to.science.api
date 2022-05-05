@@ -818,6 +818,7 @@ public class XmlUtils {
 			return lobidId;
 		} catch (Exception e) {
 			play.Logger.error("Content could not be encoded!", e);
+			return lobidId;
 		}
 	}
 
