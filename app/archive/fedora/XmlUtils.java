@@ -789,37 +789,32 @@ public class XmlUtils {
 
 	}
 
-	private String getLobidId(String lobidId, Node node) {
-		try {
-			String issn = node.getTextContent();
-			play.Logger.debug("Found ISSN: " + issn);
-			issn = issn.replaceAll("-", "");
-			play.Logger.debug("ISSN ohne Bindestrich: " + issn);
-			WSResponse response = play.libs.ws.WS.url(
-					"https://lobid.org/resources/search?q=issn:" + issn + "&format=json")
-					.setFollowRedirects(true).get().get(2000);
-			InputStream input = response.getBodyAsStream();
-			String formsResponseBody =
-					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
-			Closeables.closeQuietly(input);
-			// fetch annoying errors from to.science.forms service
-			if (response.getStatus() != 200) {
-				play.Logger.warn("to.science.api service request ISSN search fails for "
-						+ issn + "!");
-			} else {
-				// Parse out ID value from JSON structure
-				// play.Logger.debug("formsResponseBody=" + formsResponseBody);
-				JSONObject jFormsResponse = new JSONObject(formsResponseBody);
-				JSONArray jArr = jFormsResponse.getJSONArray("member");
-				JSONObject jObj = jArr.getJSONObject(0);
-				lobidId = new String(jObj.getString("id"));
-				play.Logger.debug("Found lobid ID: " + lobidId);
-			}
-			return lobidId;
-		} catch (Exception e) {
-			play.Logger.error("Content could not be encoded!", e);
-			return lobidId;
+	private String getLobidId(String lobidId, Node node) throws Exception {
+		String issn = node.getTextContent();
+		play.Logger.debug("Found ISSN: " + issn);
+		issn = issn.replaceAll("-", "");
+		play.Logger.debug("ISSN ohne Bindestrich: " + issn);
+		WSResponse response = play.libs.ws.WS.url(
+				"https://lobid.org/resources/search?q=issn:" + issn + "&format=json")
+				.setFollowRedirects(true).get().get(2000);
+		InputStream input = response.getBodyAsStream();
+		String formsResponseBody =
+				CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
+		Closeables.closeQuietly(input);
+		// fetch annoying errors from to.science.forms service
+		if (response.getStatus() != 200) {
+			play.Logger.warn(
+					"to.science.api service request ISSN search fails for " + issn + "!");
+		} else {
+			// Parse out ID value from JSON structure
+			// play.Logger.debug("formsResponseBody=" + formsResponseBody);
+			JSONObject jFormsResponse = new JSONObject(formsResponseBody);
+			JSONArray jArr = jFormsResponse.getJSONArray("member");
+			JSONObject jObj = jArr.getJSONObject(0);
+			lobidId = new String(jObj.getString("id"));
+			play.Logger.debug("Found lobid ID: " + lobidId);
 		}
+		return lobidId;
 	}
 
 	private static boolean issnAttrExists(NodeList nodeList, String targetValue) {
