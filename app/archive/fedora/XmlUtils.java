@@ -381,6 +381,14 @@ public class XmlUtils {
 
 				if (issnAttrExists(nodeList, "epub")) {
 
+					if (attributes == null) {
+						continue;
+					}
+
+					if (attrib == null) {
+						continue;
+					}
+
 					if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
 						lobidId = getLobidId(lobidId, node);
 						break;
@@ -397,6 +405,15 @@ public class XmlUtils {
 				}
 
 				if (issnAttrExists(nodeList, "ppub")) {
+
+					if (attributes == null) {
+						continue;
+					}
+
+					if (attrib == null) {
+						continue;
+					}
+
 					if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
 						lobidId = getLobidId(lobidId, node);
 						break;
@@ -825,7 +842,14 @@ public class XmlUtils {
 			node = nodeList.item(i);
 
 			attributes = node.getAttributes();
+			if (attributes == null) {
+				continue;
+			}
+
 			attrib = attributes.getNamedItem("pub-type");
+			if (attrib == null) {
+				continue;
+			}
 
 			if (attrib.getNodeValue().equalsIgnoreCase(targetValue))
 				return true;
