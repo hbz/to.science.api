@@ -507,8 +507,8 @@ public class XmlUtils {
 			if (nodeList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
-				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent().trim()
-						.replaceAll("[\\r\\n\\u00a0]+", " ")));
+				rdf.put("title", Arrays.asList(
+						nodeList.item(0).getTextContent().trim().replaceAll(" +", " ")));
 			}
 
 			/* Autor */
@@ -759,8 +759,8 @@ public class XmlUtils {
 					if (boldNode.getNodeName().equalsIgnoreCase("bold"))
 						paragraphNode.removeChild(boldNode);
 				}
-				rdf.put("abstractText", Arrays.asList(paragraphNode.getTextContent()
-						.trim().replaceAll("[\\r\\n\\u00a0]+", " ")));
+				rdf.put("abstractText", Arrays.asList(
+						paragraphNode.getTextContent().trim().replaceAll(" +", " ")));
 			}
 
 			/* Schlagwörter */
