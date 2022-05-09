@@ -370,17 +370,22 @@ public class Helper {
 	}
 
 	public static List<Map<String, Object>> listAuthors(Map<String, Object> h) {
+		play.Logger.debug("BEGIN Helper.listAuthors()");
 		List<Map<String, Object>> result = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
 		for (JsonNode c : hit.at("/contribution")) {
+			play.Logger.debug("c.asText=" + c.asText());
 			String name = c.at("/agent/0/label").asText();
 			String role = c.at("/role/0/label").asText();
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
 
+			play.Logger.debug("roleUri=" + roleUri);
 			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
 					|| "http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
 				Map<String, Object> contribution = new HashMap<>();
+				play.Logger.debug("id=" + uri + "; label=" + name + "; roleName=" + role
+						+ "; roleId=" + roleUri);
 				contribution.put("id", uri);
 				contribution.put("label", name);
 				contribution.put("roleName", role);
