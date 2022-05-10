@@ -378,8 +378,8 @@ public class Helper {
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
 
-			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
-					|| "http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+			if (roleUri.endsWith("/ctb") || roleUri.endsWith("/cre")
+					|| roleUri.endsWith("/aut") || roleUri.endsWith("/isb")) {
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
 				contribution.put("label", name);
