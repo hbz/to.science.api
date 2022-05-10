@@ -380,6 +380,7 @@ public class Helper {
 
 			if (roleUri.endsWith("/ctb") || roleUri.endsWith("/cre")
 					|| roleUri.endsWith("/aut") || roleUri.endsWith("/isb")) {
+
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
 				contribution.put("label", name);
