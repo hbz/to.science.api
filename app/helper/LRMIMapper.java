@@ -238,35 +238,6 @@ public class LRMIMapper {
 				lrmiJsonContent.put("creator", arr);
 			}
 
-			if (node.getMetadata2().containsKey("creator")) {
-				play.Logger.debug("map creator object from json2 to lrmi");
-				arr = new JSONArray();
-				iterator = getLobid2Iterator(node.getLd2().get("creator"));
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", map.get("academicTitle"));
-					if (map.containsKey("affiliation")) {
-						play.Logger.debug("found affiliation in json2");
-						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
-						while (aIterator.hasNext()) {
-							Map aMap = (Map<String, Object>) aIterator.next();
-							JSONObject aObj = new JSONObject();
-							aObj.put("name", aMap.get("prefLabel"));
-							aObj.put("id", aMap.get("@id"));
-							aObj.put("type", "Organization");
-							obj.put("affiliation", aObj);
-							break; // es gibt nur eine Affiliation pro Autor (?)
-						}
-					}
-					arr.put(obj);
-				}
-				lrmiJsonContent.put("creator", arr);
-			}
-
 			if (rdf.containsKey("creator")) {
 				play.Logger.debug("map creator object from rdf to lrmi");
 				iterator = getLobid2Iterator(rdf.get("creator"));
