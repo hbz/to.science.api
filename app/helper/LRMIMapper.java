@@ -238,7 +238,7 @@ public class LRMIMapper {
 				lrmiJsonContent.put("creator", arr);
 			}
 
-			if (node.getMetadata2()..containsKey("creator")) {
+			if (node.getMetadata2().containsKey("creator")) {
 				play.Logger.debug("map creator object from json2 to lrmi");
 				arr = new JSONArray();
 				iterator = getLobid2Iterator(node.getLd2().get("creator"));
