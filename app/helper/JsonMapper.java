@@ -494,10 +494,10 @@ public class JsonMapper {
 		if (creator == null) {
 			creator = new ArrayList<>();
 		}
-
+		play.Logger.debug("being in processAcademicTitle");
 		for (int i = 0; i < creator.size(); i++) {
 			creator.get(i).put(ID2, Globals.protocol + Globals.server + "/adhoc/uri/"
-					+ helper.MyURLEncoding.encode("Dr."));
+					+ helper.MyURLEncoding.encode("academicTitle"));
 		}
 		rdf.remove("creator");
 		rdf.put("creator", creator);
@@ -593,6 +593,7 @@ public class JsonMapper {
 					Map<String, Object> cmap = new HashMap<>();
 					cmap.put(PREF_LABEL, prefLabel);
 					cmap.put(ID2, id);
+					cmap.put("academicDegree", "Privatdozent");
 					creator.add(cmap);
 				}
 			}
