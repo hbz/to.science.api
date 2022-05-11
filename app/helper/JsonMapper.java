@@ -441,6 +441,7 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
+			processAcademicTitle(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -485,6 +486,21 @@ public class JsonMapper {
 		}
 		oldSubjects.addAll(newSubjects);
 		rdf.put("subject", oldSubjects);
+	}
+
+	private void processAcademicTitle(Map<String, Object> rdf) {
+		List<Map<String, Object>> creator =
+				(List<Map<String, Object>>) rdf.get("creator");
+		if (creator == null) {
+			creator = new ArrayList<>();
+		}
+
+		for (int i = 0; i < creator.size(); i++) {
+			creator.get(i).put(ID2, Globals.protocol + Globals.server + "/adhoc/uri/"
+					+ helper.MyURLEncoding.encode("Dr."));
+		}
+		rdf.remove("creator");
+		rdf.put("creator", creator);
 	}
 
 	/**
@@ -857,15 +873,15 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd2() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata2();
-		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+		Map<String, Object> ld2Map = getDescriptiveMetadata2();
+		Map<String, Object> ld2Rdf = ld2Map == null ? new HashMap<>() : ld2Map;
 
-		changeDcIsPartOfToRegalIsPartOf(rdf);
+		changeDcIsPartOfToRegalIsPartOf(ld2Rdf);
 		// rdf.remove("describedby");
 		// rdf.remove("sameAs");
 
-		rdf.put(ID2, node.getPid());
-		rdf.put(primaryTopic, node.getPid());
+		ld2Rdf.put(ID2, node.getPid());
+		ld2Rdf.put(primaryTopic, node.getPid());
 		for (Link l : ls) {
 			if (HAS_PART.equals(l.getPredicate()))
 				continue;
@@ -873,21 +889,21 @@ public class JsonMapper {
 				continue;
 			if (IS_PART_OF.equals(l.getPredicate()))
 				continue;
-			addLinkToJsonMap(rdf, l);
+			addLinkToJsonMap(ld2Rdf, l);
 		}
-		addPartsToJsonMap(rdf);
-		rdf.remove("isNodeType");
+		addPartsToJsonMap(ld2Rdf);
+		ld2Rdf.remove("isNodeType");
 
-		rdf.put(contentType, node.getContentType());
-		rdf.put(accessScheme, node.getAccessScheme());
-		rdf.put(publishScheme, node.getPublishScheme());
-		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
+		ld2Rdf.put(contentType, node.getContentType());
+		ld2Rdf.put(accessScheme, node.getAccessScheme());
+		ld2Rdf.put(publishScheme, node.getPublishScheme());
+		ld2Rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
-		rdf.put(catalogId, node.getCatalogId());
+		ld2Rdf.put(catalogId, node.getCatalogId());
 		// rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
-			rdf.put(fulltext_ocr, node.getFulltext());
+			ld2Rdf.put(fulltext_ocr, node.getFulltext());
 
 		Map<String, Object> aboutMap = new TreeMap<>();
 		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
@@ -920,16 +936,16 @@ public class JsonMapper {
 		}
 		aboutMap.put(describes, node.getAggregationUri());
 
-		rdf.put(isDescribedBy, aboutMap);
+		ld2Rdf.put(isDescribedBy, aboutMap);
 		if (node.getDoi() != null) {
-			rdf.put(doi, node.getDoi());
+			ld2Rdf.put(doi, node.getDoi());
 		}
 		if (node.getUrn() != null) {
-			rdf.put(urn, node.getUrn());
+			ld2Rdf.put(urn, node.getUrn());
 		}
 
 		if (node.getParentPid() != null)
-			rdf.put(parentPid, node.getParentPid());
+			ld2Rdf.put(parentPid, node.getParentPid());
 
 		if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
 			Map<String, Object> hasDataMap = new TreeMap<>();
@@ -946,17 +962,18 @@ public class JsonMapper {
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
-			rdf.put(hasData, hasDataMap);
+			ld2Rdf.put(hasData, hasDataMap);
 		}
 		ObjectMapper mapper = new ObjectMapper();
 
-		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
+		String issued =
+				getPublicationMap(mapper.convertValue(ld2Rdf, JsonNode.class));
 		if (issued != null) {
-			rdf.put("issued", issued);
+			ld2Rdf.put("issued", issued);
 		}
-		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
-		postprocessing(rdf);
-		return rdf;
+		ld2Rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
+		postprocessing(ld2Rdf);
+		return ld2Rdf;
 	}
 
 	/**
