@@ -472,7 +472,7 @@ public class JsonMapper {
 		}
 		subjects.forEach((subject) -> {
 			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
-					+ helper.MyURLEncoding.encode(subject);
+					+ helper.Base64UrlCoder.encode(subject);
 			Map<String, Object> subjectMap = new HashMap<>();
 			subjectMap.put(PREF_LABEL, subject);
 			subjectMap.put(ID2, id);
@@ -489,18 +489,24 @@ public class JsonMapper {
 	}
 
 	private void processAcademicTitle(Map<String, Object> rdf) {
+		play.Logger.debug("step into processAcademicTitle");
 		List<Map<String, Object>> creator =
 				(List<Map<String, Object>>) rdf.get("creator");
+		List<Map<String, Object>> updatedCreator =
+				new ArrayList<Map<String, Object>>();
 		if (creator == null) {
 			creator = new ArrayList<>();
 		}
-		play.Logger.debug("being in processAcademicTitle");
 		for (int i = 0; i < creator.size(); i++) {
-			creator.get(i).put(ID2, Globals.protocol + Globals.server + "/adhoc/uri/"
-					+ helper.MyURLEncoding.encode("academicTitle"));
+			play.Logger.debug(
+					"processAcademicTitle: found " + creator.size() + " creator objects");
+			Map<String, Object> creatorItem = creator.get(i);
+			creatorItem.put(ID2, Globals.protocol + Globals.server + "/adhoc/uri/"
+					+ helper.Base64UrlCoder.encode("academicTitle"));
+			updatedCreator.add(creatorItem);
 		}
 		rdf.remove("creator");
-		rdf.put("creator", creator);
+		rdf.put("creator", updatedCreator);
 	}
 
 	/**
@@ -518,7 +524,7 @@ public class JsonMapper {
 			for (String funding : fundings) {
 				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
 				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+						+ "/adhoc/uri/" + helper.Base64UrlCoder.encode(funding));
 				fundingJoinedMap.put(PREF_LABEL, funding);
 				fundingId.add(fundingJoinedMap);
 			}
