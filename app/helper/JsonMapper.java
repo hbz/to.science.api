@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -490,21 +491,24 @@ public class JsonMapper {
 
 	private void processAcademicTitle(Map<String, Object> rdf) {
 		play.Logger.debug("step into processAcademicTitle");
-		List<Map<String, Object>> creator =
-				(List<Map<String, Object>>) rdf.get("creator");
-		List<Map<String, Object>> updatedCreator =
-				new ArrayList<Map<String, Object>>();
+		HashSet<Object> creator = (HashSet<Object>) rdf.get("creator");
+		HashSet<Object> updatedCreator = new HashSet<Object>();
 		if (creator == null) {
-			creator = new ArrayList<>();
+			creator = new HashSet<>();
 		}
-		for (int i = 0; i < creator.size(); i++) {
-			play.Logger.debug(
-					"processAcademicTitle: found " + creator.size() + " creator objects");
-			Map<String, Object> creatorItem = creator.get(i);
+		play.Logger.debug(
+				"processAcademicTitle: found " + creator.size() + " creator objects");
+
+		Iterator<Object> cit = creator.iterator();
+		while (cit.hasNext()) {
+			Map<String, Object> creatorItem = (Map<String, Object>) cit.next();
+			play.Logger.debug("processAcademicTitle: found "
+					+ creatorItem.get("prefLabel") + " creator objects");
 			creatorItem.put(ID2, Globals.protocol + Globals.server + "/adhoc/uri/"
 					+ helper.Base64UrlCoder.encode("academicTitle"));
 			updatedCreator.add(creatorItem);
 		}
+
 		rdf.remove("creator");
 		rdf.put("creator", updatedCreator);
 	}
