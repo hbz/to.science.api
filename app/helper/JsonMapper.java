@@ -441,7 +441,7 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			// processAcademicTitle(rdf);
+			processAcademicTitle(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
