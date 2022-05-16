@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -492,7 +493,7 @@ public class JsonMapper {
 	private void processAcademicTitle(Map<String, Object> rdf) {
 		play.Logger.debug("step into processAcademicTitle");
 		Object creatorObj = rdf.get("creator");
-		HashSet<Object> updatedCreator = new HashSet<>();
+		HashSet<Object> updatedCreator = new LinkedHashSet<>();
 		if (creatorObj == null) {
 			creatorObj = new HashSet<>();
 		}
@@ -501,9 +502,10 @@ public class JsonMapper {
 		while (cit.hasNext()) {
 			Map<String, Object> creatorItem = (Map<String, Object>) cit.next();
 			play.Logger.debug("processAcademicTitle: found "
-					+ creatorItem.get("prefLabel") + " creator objects");
-			creatorItem.put(ID2, Globals.protocol + Globals.server + "/adhoc/uri/"
-					+ helper.Base64UrlCoder.encode("academicTitle"));
+					+ creatorItem.get("prefLabel") + " creator Name");
+			play.Logger.debug("processAcademicTitle: found " + creatorItem.get("@id")
+					+ " creator Id");
+			creatorItem.put("academicDegree", "Topfpflanze");
 			updatedCreator.add(creatorItem);
 		}
 
