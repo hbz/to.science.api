@@ -499,7 +499,7 @@ public class JsonMapper {
 		play.Logger.debug(
 				"processAcademicTitle: found " + creator.size() + " creator objects");
 
-		Iterator<Object> cit = creator.iterator();
+		Iterator<Object> cit = getLobid2Iterator(creator);
 		while (cit.hasNext()) {
 			Map<String, Object> creatorItem = (Map<String, Object>) cit.next();
 			play.Logger.debug("processAcademicTitle: found "
@@ -1478,6 +1478,27 @@ public class JsonMapper {
 					e);
 		}
 
+	}
+
+	/**
+	 * This IteratorBuilder checks if JSONObject is in Array (JSONArray) or Object
+	 * (JSONObject) structure and returns an iterator either
+	 * 
+	 * @param iObj a JSONObject of unknown internal structure
+	 * @return an Iterator representing the JSONObject
+	 */
+	public Iterator getLobid2Iterator(Object iObj) {
+		Iterator lIterator = null;
+		if (iObj instanceof java.util.ArrayList) {
+			ArrayList<Map<String, Object>> jList =
+					(ArrayList<Map<String, Object>>) iObj;
+			lIterator = jList.iterator();
+		} else if (iObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> jHashSet =
+					(HashSet<Map<String, Object>>) iObj;
+			lIterator = jHashSet.iterator();
+		}
+		return lIterator;
 	}
 
 }
