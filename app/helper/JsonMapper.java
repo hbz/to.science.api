@@ -491,15 +491,13 @@ public class JsonMapper {
 
 	private void processAcademicTitle(Map<String, Object> rdf) {
 		play.Logger.debug("step into processAcademicTitle");
-		HashSet<Object> creator = (HashSet<Object>) rdf.get("creator");
-		HashSet<Object> updatedCreator = new HashSet<Object>();
-		if (creator == null) {
-			creator = new HashSet<>();
+		Object creatorObj = rdf.get("creator");
+		HashSet<Object> updatedCreator = new HashSet<>();
+		if (creatorObj == null) {
+			creatorObj = new HashSet<>();
 		}
-		play.Logger.debug(
-				"processAcademicTitle: found " + creator.size() + " creator objects");
 
-		Iterator<Object> cit = getLobid2Iterator(creator);
+		Iterator<Object> cit = getLobid2Iterator(creatorObj);
 		while (cit.hasNext()) {
 			Map<String, Object> creatorItem = (Map<String, Object>) cit.next();
 			play.Logger.debug("processAcademicTitle: found "
