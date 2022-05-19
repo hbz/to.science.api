@@ -20929,7 +20929,7 @@
 		"comment": "",
 		"label": "Akademischer Grad",
 		"icon": "",
-		"name": "Akademischer Grad",
+		"name": "academicTitle",
 		"referenceType": "String",
 		"container": "@list",
 		"weight": "5",

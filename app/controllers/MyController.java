@@ -276,6 +276,13 @@ public class MyController extends Controller {
 		return result;
 	}
 
+	/**
+	 * Returns Object as String. Doesn't check if object given is a json Object,
+	 * throws Exception instead
+	 * 
+	 * @param obj
+	 * @return
+	 */
 	protected static String json(Object obj) {
 		try {
 			StringWriter w = new StringWriter();
