@@ -155,7 +155,8 @@ public class Helper {
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
 			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
-					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)
+					&& !"http://id.loc.gov/vocabulary/relators/aut".equals(roleUri)) {
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
 				contribution.put("label", name);
@@ -387,8 +388,9 @@ public class Helper {
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
 
-			if (roleUri.endsWith("/ctb") || roleUri.endsWith("/cre")
-					|| roleUri.endsWith("/aut") || roleUri.endsWith("/isb")) {
+			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
+					|| "http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)
+					|| "http://id.loc.gov/vocabulary/relators/aut".equals(roleUri)) {
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
 				contribution.put("label", name);
@@ -433,7 +435,8 @@ public class Helper {
 		for (JsonNode c : hit.at("/contribution")) {
 			String roleUri = c.at("/role/0/@id").asText();
 			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
-					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)
+					&& !"http://id.loc.gov/vocabulary/relators/aut".equals(roleUri)) {
 				return true;
 			}
 		}
