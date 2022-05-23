@@ -219,7 +219,7 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", map.get("academicTitle"));
+					obj.put("honoricPrefix", map.get("academicDegree"));
 					if (map.containsKey("affiliation")) {
 						play.Logger.debug("found affiliation in json2");
 						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
@@ -248,7 +248,7 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess */
-					obj.put("honoricPrefix", map.get("academicTitle"));
+					obj.put("honoricPrefix", map.get("academicDegree"));
 					Iterator mIterator = null;
 					if (map.containsKey("affiliation")) {
 						play.Logger.debug("key affiliation found in rdf");
@@ -382,12 +382,11 @@ public class LRMIMapper {
 	}
 
 	/**
-	 * Check if JSONObject has Array or Object structure and returns an iterator
-	 * either
+	 * This IteratorBuilder checks if JSONObject is in Array (JSONArray) or Object
+	 * (JSONObject) structure and returns an iterator either
 	 * 
-	 * @param rdf
-	 * @param arrayKey
-	 * @return
+	 * @param iObj a JSONObject of unknown internal structure
+	 * @return an Iterator representing the JSONObject
 	 */
 	public Iterator getLobid2Iterator(Object iObj) {
 		Iterator lIterator = null;
@@ -404,14 +403,16 @@ public class LRMIMapper {
 	}
 
 	/**
-	 * convert a three letter ISO639-2 uri into two letter ISO639-1 tag on the
-	 * base of java.util.Locale example: given Uri
-	 * "http://id.loc.gov/vocabulary/iso639-2/eng" will be converted in "en"
+	 * This Extractor converts a three letter ISO639-2 uri into two letter
+	 * ISO639-1 tag on the base of java.util.Locale.
 	 * 
-	 * @param iso639_2Uri
-	 * @return
+	 * For Instance, the given Uri http://id.loc.gov/vocabulary/iso639-2/eng will
+	 * be converted in en
+	 * 
+	 * @param iso639_2Uri an ISO639-2 URI as String
+	 * @return a two-letter tag representing the ISO639 language
 	 */
-
+	@SuppressWarnings("static-method")
 	private String iso639_1TagExtractor(String iso639_2Uri) {
 		String result = "unknown";
 		Locale loc = Locale.forLanguageTag(

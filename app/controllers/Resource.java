@@ -212,12 +212,13 @@ public class Resource extends MyController {
 				Map<String, Object> rdf = node.getLd2();
 				rdf.put("@context", Globals.profile.getContext().get("@context"));
 				String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
-				play.Logger.debug("asRdf: jsonString=" + jsonString);
+				play.Logger.debug(
+						"Response von node.getLd2() als String \n------QA-----\n-----QA----\n"
+								+ jsonString);
 				/*
 				 * hier sieht alles gut aus, academicTitle und affiliation sind
 				 * Bestandteile von creator
 				 */
-
 				if (request().accepts("application/rdf+xml")) {
 					play.Logger.debug("application/rdf+xml");
 					play.Logger.debug("aggregationUri=" + node.getAggregationUri());

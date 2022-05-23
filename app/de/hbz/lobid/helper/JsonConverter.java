@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Converts ntriples to a map, ennhancing the data with data constructed via
+ * Converts ntriples to a map, enhancing the data with data constructed via
  * {@link EtikettMaker}.
  * 
  * TODO: this class should either return a Json object or be renamed.

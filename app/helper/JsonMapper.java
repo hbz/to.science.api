@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -474,7 +476,7 @@ public class JsonMapper {
 		}
 		subjects.forEach((subject) -> {
 			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
-					+ helper.MyURLEncoding.encode(subject);
+					+ helper.Base64UrlCoder.encode(subject);
 			Map<String, Object> subjectMap = new HashMap<>();
 			subjectMap.put(PREF_LABEL, subject);
 			subjectMap.put(ID2, id);
@@ -505,7 +507,7 @@ public class JsonMapper {
 			for (String funding : fundings) {
 				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
 				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+						+ "/adhoc/uri/" + helper.Base64UrlCoder.encode(funding));
 				fundingJoinedMap.put(PREF_LABEL, funding);
 				fundingId.add(fundingJoinedMap);
 			}
@@ -580,6 +582,7 @@ public class JsonMapper {
 					Map<String, Object> cmap = new HashMap<>();
 					cmap.put(PREF_LABEL, prefLabel);
 					cmap.put(ID2, id);
+					cmap.put("academicDegree", "Privatdozent");
 					creator.add(cmap);
 				}
 			}
@@ -860,22 +863,22 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd2() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata2();
-		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+		Map<String, Object> ld2Map = getDescriptiveMetadata2();
+		Map<String, Object> ld2Rdf = ld2Map == null ? new HashMap<>() : ld2Map;
 
 		try {
-			String jsonString = JsonUtil.mapper().writeValueAsString(rdf);
+			String jsonString = JsonUtil.mapper().writeValueAsString(ld2Rdf);
 			play.Logger.debug("asRdf: jsonString=" + jsonString);
 		} catch (Exception e) {
 			play.Logger.error("Fehle beim Logging von jsonString", e);
 		}
 
-		changeDcIsPartOfToRegalIsPartOf(rdf);
+		changeDcIsPartOfToRegalIsPartOf(ld2Rdf);
 		// rdf.remove("describedby");
 		// rdf.remove("sameAs");
 
-		rdf.put(ID2, node.getPid());
-		rdf.put(primaryTopic, node.getPid());
+		ld2Rdf.put(ID2, node.getPid());
+		ld2Rdf.put(primaryTopic, node.getPid());
 		for (Link l : ls) {
 			if (HAS_PART.equals(l.getPredicate()))
 				continue;
@@ -883,21 +886,21 @@ public class JsonMapper {
 				continue;
 			if (IS_PART_OF.equals(l.getPredicate()))
 				continue;
-			addLinkToJsonMap(rdf, l);
+			addLinkToJsonMap(ld2Rdf, l);
 		}
-		addPartsToJsonMap(rdf);
-		rdf.remove("isNodeType");
+		addPartsToJsonMap(ld2Rdf);
+		ld2Rdf.remove("isNodeType");
 
-		rdf.put(contentType, node.getContentType());
-		rdf.put(accessScheme, node.getAccessScheme());
-		rdf.put(publishScheme, node.getPublishScheme());
-		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
+		ld2Rdf.put(contentType, node.getContentType());
+		ld2Rdf.put(accessScheme, node.getAccessScheme());
+		ld2Rdf.put(publishScheme, node.getPublishScheme());
+		ld2Rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
-		rdf.put(catalogId, node.getCatalogId());
+		ld2Rdf.put(catalogId, node.getCatalogId());
 		// rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
-			rdf.put(fulltext_ocr, node.getFulltext());
+			ld2Rdf.put(fulltext_ocr, node.getFulltext());
 
 		Map<String, Object> aboutMap = new TreeMap<>();
 		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
@@ -930,16 +933,16 @@ public class JsonMapper {
 		}
 		aboutMap.put(describes, node.getAggregationUri());
 
-		rdf.put(isDescribedBy, aboutMap);
+		ld2Rdf.put(isDescribedBy, aboutMap);
 		if (node.getDoi() != null) {
-			rdf.put(doi, node.getDoi());
+			ld2Rdf.put(doi, node.getDoi());
 		}
 		if (node.getUrn() != null) {
-			rdf.put(urn, node.getUrn());
+			ld2Rdf.put(urn, node.getUrn());
 		}
 
 		if (node.getParentPid() != null)
-			rdf.put(parentPid, node.getParentPid());
+			ld2Rdf.put(parentPid, node.getParentPid());
 
 		if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
 			Map<String, Object> hasDataMap = new TreeMap<>();
@@ -956,18 +959,19 @@ public class JsonMapper {
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
-			rdf.put(hasData, hasDataMap);
+			ld2Rdf.put(hasData, hasDataMap);
 		}
 		ObjectMapper mapper = new ObjectMapper();
 
-		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
+		String issued =
+				getPublicationMap(mapper.convertValue(ld2Rdf, JsonNode.class));
 		if (issued != null) {
-			rdf.put("issued", issued);
+			ld2Rdf.put("issued", issued);
 		}
-		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
-		postprocessing(rdf);
+		ld2Rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
+		postprocessing(ld2Rdf);
 		play.Logger.debug("Exiting JsonMapper.getLd2()");
-		return rdf;
+		return ld2Rdf;
 	}
 
 	/**
@@ -1339,7 +1343,7 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-						creatorMap.put("academicTitle", obj.getString("honoricPrefix"));
+						creatorMap.put("academicDegree", obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1368,7 +1372,8 @@ public class JsonMapper {
 						contributorMap.put("@id", obj.getString("id"));
 					}
 					if (obj.has("honoricPrefix")) {
-						contributorMap.put("academicTitle", obj.getString("honoricPrefix"));
+						contributorMap.put("academicDegree",
+								obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1461,6 +1466,27 @@ public class JsonMapper {
 					e);
 		}
 
+	}
+
+	/**
+	 * This IteratorBuilder checks if JSONObject is in Array (JSONArray) or Object
+	 * (JSONObject) structure and returns an iterator either
+	 * 
+	 * @param iObj a JSONObject of unknown internal structure
+	 * @return an Iterator representing the JSONObject
+	 */
+	public Iterator getLobid2Iterator(Object iObj) {
+		Iterator lIterator = null;
+		if (iObj instanceof java.util.ArrayList) {
+			ArrayList<Map<String, Object>> jList =
+					(ArrayList<Map<String, Object>>) iObj;
+			lIterator = jList.iterator();
+		} else if (iObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> jHashSet =
+					(HashSet<Map<String, Object>>) iObj;
+			lIterator = jHashSet.iterator();
+		}
+		return lIterator;
 	}
 
 }
