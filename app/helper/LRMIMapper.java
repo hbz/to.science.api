@@ -219,7 +219,7 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", map.get("academicTitle"));
+					obj.put("honoricPrefix", map.get("academicDegree"));
 					if (map.containsKey("affiliation")) {
 						play.Logger.debug("found affiliation in json2");
 						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
@@ -248,7 +248,7 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess */
-					obj.put("honoricPrefix", map.get("academicTitle"));
+					obj.put("honoricPrefix", map.get("academicDegree"));
 					Iterator mIterator = null;
 					if (map.containsKey("affiliation")) {
 						play.Logger.debug("key affiliation found in rdf");

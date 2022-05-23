@@ -443,7 +443,6 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			processAcademicTitle(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -488,29 +487,6 @@ public class JsonMapper {
 		}
 		oldSubjects.addAll(newSubjects);
 		rdf.put("subject", oldSubjects);
-	}
-
-	private void processAcademicTitle(Map<String, Object> rdf) {
-		play.Logger.debug("step into processAcademicTitle");
-		Object creatorObj = rdf.get("creator");
-		HashSet<Object> updatedCreator = new LinkedHashSet<>();
-		if (creatorObj == null) {
-			creatorObj = new HashSet<>();
-		}
-
-		Iterator<Object> cit = getLobid2Iterator(creatorObj);
-		while (cit.hasNext()) {
-			Map<String, Object> creatorItem = (Map<String, Object>) cit.next();
-			play.Logger.debug("processAcademicTitle: found "
-					+ creatorItem.get("prefLabel") + " creator Name");
-			play.Logger.debug("processAcademicTitle: found " + creatorItem.get("@id")
-					+ " creator Id");
-			creatorItem.put("academicDegree", "Topfpflanze");
-			updatedCreator.add(creatorItem);
-		}
-
-		rdf.remove("creator");
-		rdf.put("creator", updatedCreator);
 	}
 
 	/**
@@ -1356,7 +1332,7 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-						creatorMap.put("academicTitle", obj.getString("honoricPrefix"));
+						creatorMap.put("academicDegree", obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1385,7 +1361,8 @@ public class JsonMapper {
 						contributorMap.put("@id", obj.getString("id"));
 					}
 					if (obj.has("honoricPrefix")) {
-						contributorMap.put("academicTitle", obj.getString("honoricPrefix"));
+						contributorMap.put("academicDegree",
+								obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
