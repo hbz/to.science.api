@@ -1343,7 +1343,9 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-						creatorMap.put("academicDegree", obj.getString("honoricPrefix"));
+						creatorMap.put("academicDegree",
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
+										+ obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1373,7 +1375,8 @@ public class JsonMapper {
 					}
 					if (obj.has("honoricPrefix")) {
 						contributorMap.put("academicDegree",
-								obj.getString("honoricPrefix"));
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
+										+ obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
