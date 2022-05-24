@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -45,6 +47,7 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
 import archive.fedora.RdfUtils;
@@ -339,6 +342,8 @@ public class JsonMapper {
 		try {
 			InputStream stream = new ByteArrayInputStream(
 					node.getMetadata2().getBytes(StandardCharsets.UTF_8));
+			play.Logger.debug("node.getMetadata2=" + node.getMetadata2());
+			/* hier ist academicTitle und afiliation am Autor drin */
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
@@ -471,7 +476,7 @@ public class JsonMapper {
 		}
 		subjects.forEach((subject) -> {
 			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
-					+ helper.MyURLEncoding.encode(subject);
+					+ helper.Base64UrlCoder.encode(subject);
 			Map<String, Object> subjectMap = new HashMap<>();
 			subjectMap.put(PREF_LABEL, subject);
 			subjectMap.put(ID2, id);
@@ -502,7 +507,7 @@ public class JsonMapper {
 			for (String funding : fundings) {
 				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
 				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+						+ "/adhoc/uri/" + helper.Base64UrlCoder.encode(funding));
 				fundingJoinedMap.put(PREF_LABEL, funding);
 				fundingId.add(fundingJoinedMap);
 			}
@@ -577,6 +582,7 @@ public class JsonMapper {
 					Map<String, Object> cmap = new HashMap<>();
 					cmap.put(PREF_LABEL, prefLabel);
 					cmap.put(ID2, id);
+					cmap.put("academicDegree", "Privatdozent");
 					creator.add(cmap);
 				}
 			}
@@ -857,15 +863,22 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd2() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata2();
-		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+		Map<String, Object> ld2Map = getDescriptiveMetadata2();
+		Map<String, Object> ld2Rdf = ld2Map == null ? new HashMap<>() : ld2Map;
 
-		changeDcIsPartOfToRegalIsPartOf(rdf);
+		try {
+			String jsonString = JsonUtil.mapper().writeValueAsString(ld2Rdf);
+			play.Logger.debug("asRdf: jsonString=" + jsonString);
+		} catch (Exception e) {
+			play.Logger.error("Fehle beim Logging von jsonString", e);
+		}
+
+		changeDcIsPartOfToRegalIsPartOf(ld2Rdf);
 		// rdf.remove("describedby");
 		// rdf.remove("sameAs");
 
-		rdf.put(ID2, node.getPid());
-		rdf.put(primaryTopic, node.getPid());
+		ld2Rdf.put(ID2, node.getPid());
+		ld2Rdf.put(primaryTopic, node.getPid());
 		for (Link l : ls) {
 			if (HAS_PART.equals(l.getPredicate()))
 				continue;
@@ -873,21 +886,21 @@ public class JsonMapper {
 				continue;
 			if (IS_PART_OF.equals(l.getPredicate()))
 				continue;
-			addLinkToJsonMap(rdf, l);
+			addLinkToJsonMap(ld2Rdf, l);
 		}
-		addPartsToJsonMap(rdf);
-		rdf.remove("isNodeType");
+		addPartsToJsonMap(ld2Rdf);
+		ld2Rdf.remove("isNodeType");
 
-		rdf.put(contentType, node.getContentType());
-		rdf.put(accessScheme, node.getAccessScheme());
-		rdf.put(publishScheme, node.getPublishScheme());
-		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
+		ld2Rdf.put(contentType, node.getContentType());
+		ld2Rdf.put(accessScheme, node.getAccessScheme());
+		ld2Rdf.put(publishScheme, node.getPublishScheme());
+		ld2Rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
-		rdf.put(catalogId, node.getCatalogId());
+		ld2Rdf.put(catalogId, node.getCatalogId());
 		// rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
-			rdf.put(fulltext_ocr, node.getFulltext());
+			ld2Rdf.put(fulltext_ocr, node.getFulltext());
 
 		Map<String, Object> aboutMap = new TreeMap<>();
 		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
@@ -920,16 +933,16 @@ public class JsonMapper {
 		}
 		aboutMap.put(describes, node.getAggregationUri());
 
-		rdf.put(isDescribedBy, aboutMap);
+		ld2Rdf.put(isDescribedBy, aboutMap);
 		if (node.getDoi() != null) {
-			rdf.put(doi, node.getDoi());
+			ld2Rdf.put(doi, node.getDoi());
 		}
 		if (node.getUrn() != null) {
-			rdf.put(urn, node.getUrn());
+			ld2Rdf.put(urn, node.getUrn());
 		}
 
 		if (node.getParentPid() != null)
-			rdf.put(parentPid, node.getParentPid());
+			ld2Rdf.put(parentPid, node.getParentPid());
 
 		if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
 			Map<String, Object> hasDataMap = new TreeMap<>();
@@ -946,17 +959,19 @@ public class JsonMapper {
 						"http://downlode.org/Code/RDF/File_Properties/schema#Checksum");
 				hasDataMap.put(checksum, checksumMap);
 			}
-			rdf.put(hasData, hasDataMap);
+			ld2Rdf.put(hasData, hasDataMap);
 		}
 		ObjectMapper mapper = new ObjectMapper();
 
-		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
+		String issued =
+				getPublicationMap(mapper.convertValue(ld2Rdf, JsonNode.class));
 		if (issued != null) {
-			rdf.put("issued", issued);
+			ld2Rdf.put("issued", issued);
 		}
-		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
-		postprocessing(rdf);
-		return rdf;
+		ld2Rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
+		postprocessing(ld2Rdf);
+		play.Logger.debug("Exiting JsonMapper.getLd2()");
+		return ld2Rdf;
 	}
 
 	/**
@@ -1045,7 +1060,7 @@ public class JsonMapper {
 		play.Logger.debug("Start getTosciencefyLrmi");
 		try {
 			// LRMI-Daten nach JSONObject wandeln
-			JSONObject jcontent = new JSONObject(content);
+			JSONObject lrmiJSONObject = new JSONObject(content);
 			JSONArray arr = null;
 			JSONObject obj = null;
 
@@ -1056,22 +1071,22 @@ public class JsonMapper {
 
 			// bisherige Top-Level ID
 			String top_level_id = null;
-			if (jcontent.has("id")) {
-				top_level_id = jcontent.getString("id");
+			if (lrmiJSONObject.has("id")) {
+				top_level_id = lrmiJSONObject.getString("id");
 			}
 			if (top_level_id == null) {
 				play.Logger.debug("Adding new top level id: " + toscience_id);
-				jcontent.put("id", toscience_id);
+				lrmiJSONObject.put("id", toscience_id);
 			} else if (!toscience_id.equals(top_level_id)) {
 				play.Logger.info("Found top level id: " + top_level_id
 						+ ". Replacing by toscience id: " + toscience_id);
-				jcontent.put("id", toscience_id);
+				lrmiJSONObject.put("id", toscience_id);
 			}
 
 			// mainEntityOfPage - ID (mit letztem Änderungsdatum)
-			if (jcontent.has("mainEntityOfPage")) {
+			if (lrmiJSONObject.has("mainEntityOfPage")) {
 				// ID in "mainEntityOfPage" wird ersetzt
-				arr = jcontent.getJSONArray("mainEntityOfPage");
+				arr = lrmiJSONObject.getJSONArray("mainEntityOfPage");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
 					if (obj.has("id")) {
@@ -1089,17 +1104,17 @@ public class JsonMapper {
 				mainEntityMap.put("id", toscience_id);
 				mainEntityMap.put("dateCreated", LocalDate.now());
 				mainEntityOfPage.add(mainEntityMap);
-				jcontent.put("mainEntityOfPage", mainEntityOfPage);
+				lrmiJSONObject.put("mainEntityOfPage", mainEntityOfPage);
 			}
 
 			// Anlagedatum generieren (falls noch nicht vorhanden)
-			if (!jcontent.has("dateCreated")) {
-				jcontent.put("dateCreated", LocalDate.now());
+			if (!lrmiJSONObject.has("dateCreated")) {
+				lrmiJSONObject.put("dateCreated", LocalDate.now());
 			}
 
 			// geändertes JSONObject als Zeichenkette zurück geben
-			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
-			return jcontent.toString();
+			play.Logger.debug("Modified LRMI Data to: " + lrmiJSONObject.toString());
+			return lrmiJSONObject.toString();
 
 		} catch (JSONException je) {
 			play.Logger.error("Content could not be mapped!", je);
@@ -1125,21 +1140,21 @@ public class JsonMapper {
 		try {
 			String lrmiData = node.getLrmiData();
 			// LRMI-Daten nach JSONObject wandeln
-			JSONObject jcontent = null;
+			JSONObject lrmiJSONObject = null;
 			if (lrmiData == null || lrmiData.isEmpty()) {
 				play.Logger.info("LRMI data of parent pid " + node.getPid()
 						+ " are not existing, yet.");
-				jcontent = new JSONObject();
+				lrmiJSONObject = new JSONObject();
 			} else {
-				jcontent = new JSONObject(lrmiData);
+				lrmiJSONObject = new JSONObject(lrmiData);
 			}
 
 			JSONArray arr = null;
 			JSONObject obj = null;
 
 			// Suche nach "encoding"-Array in den vorhandenen LRMI-Daten
-			if (jcontent.has("encoding")) {
-				arr = jcontent.getJSONArray("encoding");
+			if (lrmiJSONObject.has("encoding")) {
+				arr = lrmiJSONObject.getJSONArray("encoding");
 			} else {
 				arr = new JSONArray();
 			}
@@ -1166,11 +1181,11 @@ public class JsonMapper {
 					+ "/resource/" + child.getPid() + "/data"));
 			obj.put("type", "MediaObject");
 			arr.put(obj);
-			jcontent.put("encoding", arr);
+			lrmiJSONObject.put("encoding", arr);
 
 			// geändertes JSONObject als Zeichenkette zurück geben
-			play.Logger.debug("Modified LRMI Data to: " + jcontent.toString());
-			return jcontent.toString();
+			play.Logger.debug("Modified LRMI Data to: " + lrmiJSONObject.toString());
+			return lrmiJSONObject.toString();
 
 		} catch (JSONException je) {
 			play.Logger.error("Content could not be mapped!", je);
@@ -1198,15 +1213,15 @@ public class JsonMapper {
 			Map<String, Object> rdf = node.getLd2();
 
 			// LRMIDaten nach JSONObject wandeln
-			JSONObject jcontent = new JSONObject(content);
+			JSONObject lrmiJSONObject = new JSONObject(content);
 			play.Logger.debug("Start mapping of lrmi to lobid2");
 			JSONArray arr = null;
 			JSONObject obj = null;
 			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
 			String prefLabel = null;
 
-			if (jcontent.has("@context")) {
-				arr = jcontent.getJSONArray("@context");
+			if (lrmiJSONObject.has("@context")) {
+				arr = lrmiJSONObject.getJSONArray("@context");
 				play.Logger.debug("Found context: " + arr.getString(0));
 				/* das geht nicht; @context wird in lobid2 automatisch erstellt */
 				/* kann man nicht mappen; soll auch nicht gemappt werden! */
@@ -1250,17 +1265,17 @@ public class JsonMapper {
 			rdf.put(accessScheme, "public");
 			rdf.put(publishScheme, "public");
 
-			arr = jcontent.getJSONArray("type");
+			arr = lrmiJSONObject.getJSONArray("type");
 			rdf.put("contentType", arr.getString(0));
 
 			List<String> names = new ArrayList<>();
-			names.add(jcontent.getString(name));
+			names.add(lrmiJSONObject.getString(name));
 			rdf.put("title", names);
 
-			if (jcontent.has("inLanguage")) {
+			if (lrmiJSONObject.has("inLanguage")) {
 				List<Map<String, Object>> inLangList = new ArrayList<>();
 				String inLang = null;
-				arr = jcontent.getJSONArray("inLanguage");
+				arr = lrmiJSONObject.getJSONArray("inLanguage");
 				for (int i = 0; i < arr.length(); i++) {
 					Map<String, Object> inLangMap = new TreeMap<>();
 					inLang = arr.getString(i);
@@ -1277,9 +1292,9 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-			if (jcontent.has("learningResourceType")) {
+			if (lrmiJSONObject.has("learningResourceType")) {
 				List<Map<String, Object>> media = new ArrayList<>();
-				arr = jcontent.getJSONArray("learningResourceType");
+				arr = lrmiJSONObject.getJSONArray("learningResourceType");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> mediumMap = new TreeMap<>();
@@ -1304,9 +1319,9 @@ public class JsonMapper {
 			String creatorName = null;
 			String affiliationId = null;
 			String affiliationType = null;
-			if (jcontent.has("creator")) {
+			if (lrmiJSONObject.has("creator")) {
 				List<Map<String, Object>> creators = new ArrayList<>();
-				arr = jcontent.getJSONArray("creator");
+				arr = lrmiJSONObject.getJSONArray("creator");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> creatorMap = new TreeMap<>();
@@ -1328,7 +1343,9 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-						creatorMap.put("academicTitle", obj.getString("honoricPrefix"));
+						creatorMap.put("academicDegree",
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
+										+ obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1346,9 +1363,9 @@ public class JsonMapper {
 				rdf.put("creator", creators);
 			}
 
-			if (jcontent.has("contributor")) {
+			if (lrmiJSONObject.has("contributor")) {
 				List<Map<String, Object>> contributors = new ArrayList<>();
-				arr = jcontent.getJSONArray("contributor");
+				arr = lrmiJSONObject.getJSONArray("contributor");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> contributorMap = new TreeMap<>();
@@ -1357,7 +1374,9 @@ public class JsonMapper {
 						contributorMap.put("@id", obj.getString("id"));
 					}
 					if (obj.has("honoricPrefix")) {
-						contributorMap.put("academicTitle", obj.getString("honoricPrefix"));
+						contributorMap.put("academicDegree",
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
+										+ obj.getString("honoricPrefix"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1375,13 +1394,13 @@ public class JsonMapper {
 				rdf.put("contributor", contributors);
 			}
 
-			if (jcontent.has("description")) {
+			if (lrmiJSONObject.has("description")) {
 				List<String> descriptions = new ArrayList<>();
-				myObj = jcontent.get("description");
+				myObj = lrmiJSONObject.get("description");
 				if (myObj instanceof java.lang.String) {
-					descriptions.add(jcontent.getString("description"));
+					descriptions.add(lrmiJSONObject.getString("description"));
 				} else if (myObj instanceof org.json.JSONArray) {
-					arr = jcontent.getJSONArray("description");
+					arr = lrmiJSONObject.getJSONArray("description");
 					for (int i = 0; i < arr.length(); i++) {
 						descriptions.add(arr.getString(i));
 					}
@@ -1389,21 +1408,21 @@ public class JsonMapper {
 				rdf.put("description", descriptions);
 			}
 
-			if (jcontent.has("license")) {
+			if (lrmiJSONObject.has("license")) {
 				List<Map<String, Object>> licenses = new ArrayList<>();
-				myObj = jcontent.get("license");
+				myObj = lrmiJSONObject.get("license");
 				Map<String, Object> licenseMap = null;
 				if (myObj instanceof java.lang.String) {
 					licenseMap = new TreeMap<>();
-					licenseMap.put("@id", jcontent.getString("license"));
+					licenseMap.put("@id", lrmiJSONObject.getString("license"));
 					licenses.add(licenseMap);
 				} else if (myObj instanceof org.json.JSONObject) {
-					obj = jcontent.getJSONObject("license");
+					obj = lrmiJSONObject.getJSONObject("license");
 					licenseMap = new TreeMap<>();
 					licenseMap.put("@id", obj.getString("id"));
 					licenses.add(licenseMap);
 				} else if (myObj instanceof org.json.JSONArray) {
-					arr = jcontent.getJSONArray("license");
+					arr = lrmiJSONObject.getJSONArray("license");
 					for (int i = 0; i < arr.length(); i++) {
 						obj = arr.getJSONObject(i);
 						licenseMap = new TreeMap<>();
@@ -1414,9 +1433,9 @@ public class JsonMapper {
 				rdf.put("license", licenses);
 			}
 
-			if (jcontent.has("publisher")) {
+			if (lrmiJSONObject.has("publisher")) {
 				List<Map<String, Object>> institutions = new ArrayList<>();
-				arr = jcontent.getJSONArray("publisher");
+				arr = lrmiJSONObject.getJSONArray("publisher");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> publisherMap = new TreeMap<>();
@@ -1427,10 +1446,10 @@ public class JsonMapper {
 				rdf.put("institution", institutions);
 			}
 
-			if (jcontent.has("keywords")) {
+			if (lrmiJSONObject.has("keywords")) {
 				String keyword = null;
 				List<Map<String, Object>> subject = new ArrayList<>();
-				arr = jcontent.getJSONArray("keywords");
+				arr = lrmiJSONObject.getJSONArray("keywords");
 				for (int i = 0; i < arr.length(); i++) {
 					Map<String, Object> keywordMap = new TreeMap<>();
 					keyword = arr.getString(i);
@@ -1450,6 +1469,27 @@ public class JsonMapper {
 					e);
 		}
 
+	}
+
+	/**
+	 * This IteratorBuilder checks if JSONObject is in Array (JSONArray) or Object
+	 * (JSONObject) structure and returns an iterator either
+	 * 
+	 * @param iObj a JSONObject of unknown internal structure
+	 * @return an Iterator representing the JSONObject
+	 */
+	public Iterator getLobid2Iterator(Object iObj) {
+		Iterator lIterator = null;
+		if (iObj instanceof java.util.ArrayList) {
+			ArrayList<Map<String, Object>> jList =
+					(ArrayList<Map<String, Object>>) iObj;
+			lIterator = jList.iterator();
+		} else if (iObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> jHashSet =
+					(HashSet<Map<String, Object>>) iObj;
+			lIterator = jHashSet.iterator();
+		}
+		return lIterator;
 	}
 
 }

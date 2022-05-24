@@ -82,11 +82,11 @@ public class LRMIMapper {
 			 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
 			 */
 			// LRMI-Daten nach JSONObject wandeln
-			JSONObject jcontent = null;
+			JSONObject lrmiJsonContent = null;
 			if (oldContent == null) {
-				jcontent = new JSONObject();
+				lrmiJsonContent = new JSONObject();
 			} else {
-				jcontent = new JSONObject(oldContent);
+				lrmiJsonContent = new JSONObject(oldContent);
 			}
 			JSONArray arr = null;
 			JSONObject obj = null;
@@ -150,7 +150,7 @@ public class LRMIMapper {
 				}
 				// leave language unchanged
 				// jcontent.put("@context", arr);
-				jcontent.put("inLanguage", inLanguageArr);
+				lrmiJsonContent.put("inLanguage", inLanguageArr);
 			}
 
 			if (rdf.containsKey("contentType")) {
@@ -159,21 +159,21 @@ public class LRMIMapper {
 				while (iterator.hasNext()) {
 					arr.put(iterator.next());
 				}
-				jcontent.put("type", arr);
+				lrmiJsonContent.put("type", arr);
 			}
 
 			if (rdf.containsKey("title")) {
 				iterator = getLobid2Iterator(rdf.get("title"));
 				// lrmiData only supports one title
-				jcontent.put("name", iterator.next());
+				lrmiJsonContent.put("name", iterator.next());
 			}
 
 			if (rdf.containsKey("medium")) {
 				iterator = getLobid2Iterator(rdf.get("medium"));
 				// Hole ein Objekt aus LRMI-JSON oder lege es neu an
 				obj = null;
-				if (jcontent.has("learningResourceType")) {
-					arr = (JSONArray) jcontent.get("learningResourceType");
+				if (lrmiJsonContent.has("learningResourceType")) {
+					arr = (JSONArray) lrmiJsonContent.get("learningResourceType");
 					for (int i = 0; i < arr.length(); i++) {
 						myObj = arr.get(i);
 						play.Logger
@@ -206,10 +206,11 @@ public class LRMIMapper {
 					obj.put("id", map.get("@id"));
 					break; // nimm nur den ersten Medientypen
 				}
-				jcontent.put("learningResourceType", arr);
+				lrmiJsonContent.put("learningResourceType", arr);
 			}
 
 			if (node.getLd2().containsKey("creator")) {
+				play.Logger.debug("map creator object from json2 to lrmi");
 				arr = new JSONArray();
 				iterator = getLobid2Iterator(node.getLd2().get("creator"));
 				while (iterator.hasNext()) {
@@ -218,8 +219,9 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", map.get("academicTitle"));
+					obj.put("honoricPrefix", map.get("academicDegree"));
 					if (map.containsKey("affiliation")) {
+						play.Logger.debug("found affiliation in json2");
 						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
 						while (aIterator.hasNext()) {
 							Map aMap = (Map<String, Object>) aIterator.next();
@@ -233,19 +235,11 @@ public class LRMIMapper {
 					}
 					arr.put(obj);
 				}
-				jcontent.put("creator", arr);
-			}
-
-			if (rdf.containsKey("academicTitle")) {
-				iterator = getLobid2Iterator(rdf.get("academicTitle"));
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					play.Logger.debug("found affiliation" + map.toString());
-				}
-
+				lrmiJsonContent.put("creator", arr);
 			}
 
 			if (rdf.containsKey("creator")) {
+				play.Logger.debug("map creator object from rdf to lrmi");
 				iterator = getLobid2Iterator(rdf.get("creator"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
@@ -254,6 +248,7 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess */
+					obj.put("honoricPrefix", map.get("academicDegree"));
 					Iterator mIterator = null;
 					if (map.containsKey("affiliation")) {
 						play.Logger.debug("key affiliation found in rdf");
@@ -261,13 +256,13 @@ public class LRMIMapper {
 					}
 					if (mIterator != null) {
 						while (mIterator.hasNext()) {
+							play.Logger.debug("found affiliation in rdf");
 							Map aMap = (Map<String, Object>) mIterator.next();
 							JSONObject mObj = new JSONObject();
 							mObj.put("name", aMap.get("prefLabel"));
 							mObj.put("id", aMap.get("@id"));
 							mObj.put("type", "Organization"); /* guess */
 							obj.put("affiliation", mObj);
-							break; // es gibt nur eine Affiliation pro Creator (?)
 						}
 					} else {
 						play.Logger.warn("found no affiliation associated with creator");
@@ -279,11 +274,13 @@ public class LRMIMapper {
 					}
 					arr.put(obj);
 				}
-				jcontent.put("creator", arr);
+				lrmiJsonContent.put("creator", arr);
 
 			}
 
-			if (rdf.containsKey("contributor")) {
+			if (rdf.containsKey("contributor"))
+
+			{
 				iterator = getLobid2Iterator(rdf.get("contributor"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
@@ -294,14 +291,14 @@ public class LRMIMapper {
 					obj.put("type", "Person"); /* guess; can't match if id is absent */
 					arr.put(obj);
 				}
-				jcontent.put("contributor", arr);
+				lrmiJsonContent.put("contributor", arr);
 			}
 
 			if (rdf.containsKey("subject")) {
 				iterator = getLobid2Iterator(rdf.get("subject"));
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					jcontent.put("keywords", map.get("prefLabel"));
+					lrmiJsonContent.put("keywords", map.get("prefLabel"));
 				}
 			}
 
@@ -315,7 +312,7 @@ public class LRMIMapper {
 					obj.put("id", map.get("@id"));
 					arr.put(obj);
 				}
-				jcontent.put("license", arr);
+				lrmiJsonContent.put("license", arr);
 			}
 
 			if (rdf.containsKey("institution")) {
@@ -329,7 +326,7 @@ public class LRMIMapper {
 					obj.put("type", "Organization");
 					arr.put(obj);
 				}
-				jcontent.put("publisher", arr);
+				lrmiJsonContent.put("publisher", arr);
 			}
 
 			// associate child (content) objects to lmri
@@ -347,7 +344,7 @@ public class LRMIMapper {
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
-				jcontent.put("encoding", arr);
+				lrmiJsonContent.put("encoding", arr);
 			} else {
 				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
 				Map<String, Object> l1rdf = node.getLd1();
@@ -365,7 +362,7 @@ public class LRMIMapper {
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
-				jcontent.put("encoding", arr);
+				lrmiJsonContent.put("encoding", arr);
 			}
 
 			/**
@@ -374,7 +371,8 @@ public class LRMIMapper {
 			 */
 
 			/* zunächst Anreicherung und Update der LRMI-Daten */
-			return new JsonMapper().getTosciencefyLrmi(node, jcontent.toString());
+			return new JsonMapper().getTosciencefyLrmi(node,
+					lrmiJsonContent.toString());
 
 		} catch (Exception e) {
 			play.Logger.error("LRMI Content could not be mapped!", e);
@@ -384,12 +382,11 @@ public class LRMIMapper {
 	}
 
 	/**
-	 * Check if JSONObject has Array or Object structure and returns an iterator
-	 * either
+	 * This IteratorBuilder checks if JSONObject is in Array (JSONArray) or Object
+	 * (JSONObject) structure and returns an iterator either
 	 * 
-	 * @param rdf
-	 * @param arrayKey
-	 * @return
+	 * @param iObj a JSONObject of unknown internal structure
+	 * @return an Iterator representing the JSONObject
 	 */
 	public Iterator getLobid2Iterator(Object iObj) {
 		Iterator lIterator = null;
@@ -405,15 +402,17 @@ public class LRMIMapper {
 		return lIterator;
 	}
 
-  /**
-	 * convert a three letter ISO639-2 uri into two letter ISO639-1 tag on the
-	 * base of java.util.Locale example: given Uri
-	 * "http://id.loc.gov/vocabulary/iso639-2/eng" will be converted in "en"
+	/**
+	 * This Extractor converts a three letter ISO639-2 uri into two letter
+	 * ISO639-1 tag on the base of java.util.Locale.
 	 * 
-	 * @param iso639_2Uri
-	 * @return
+	 * For Instance, the given Uri http://id.loc.gov/vocabulary/iso639-2/eng will
+	 * be converted in en
+	 * 
+	 * @param iso639_2Uri an ISO639-2 URI as String
+	 * @return a two-letter tag representing the ISO639 language
 	 */
-
+	@SuppressWarnings("static-method")
 	private String iso639_1TagExtractor(String iso639_2Uri) {
 		String result = "unknown";
 		Locale loc = Locale.forLanguageTag(

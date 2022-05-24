@@ -110,12 +110,15 @@ public class RdfUtils {
 		try {
 			writer.startRDF();
 			for (Statement st : myGraph) {
+				play.Logger.debug("handle Statement: " + st.toString());
 				writer.handleStatement(st);
 			}
 			writer.endRDF();
 		} catch (RDFHandlerException e) {
 			throw new RdfException(e);
 		}
+		play.Logger.debug(
+				"StringWriter.getBuffer.toString(): " + out.getBuffer().toString());
 		return out.getBuffer().toString();
 	}
 
