@@ -1248,8 +1248,8 @@ public class JsonMapper {
 								+ loc.getISO3Language());
 					} else if (language.length() == 3) {
 						// vermutlich ISO639-2
-						languageMap.put("@id",
-								"http://id.loc.gov/vocabulary/iso639-2/" + language);
+						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
+								+ language.replace("deu", "ger"));
 					} else {
 						play.Logger.warn(
 								"Unbekanntes Vokabluar für Sprachencode! Code=" + language);
@@ -1280,8 +1280,8 @@ public class JsonMapper {
 					Map<String, Object> inLangMap = new TreeMap<>();
 					inLang = arr.getString(i);
 					Locale loc = Locale.forLanguageTag(inLang);
-					inLangMap.put("@id",
-							"http://id.loc.gov/vocabulary/iso639-2/" + loc.getISO3Language());
+					inLangMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
+							+ loc.getISO3Language().replace("deu", "ger"));
 					String langPrefLabel = inLang;
 					if (loc.getDisplayLanguage() != null) {
 						langPrefLabel = loc.getDisplayLanguage();
