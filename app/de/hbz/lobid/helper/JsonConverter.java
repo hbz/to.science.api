@@ -117,7 +117,6 @@ public class JsonConverter {
 
 	private Map<String, Object> convert(String subject, Object context,
 			Collection<Statement> g) {
-		play.Logger.debug("JsonConverter.convert: subject=" + subject);
 		mainSubjectOfTheResource = subject;
 		collect(g);
 		Map<String, Object> result = createMap(g);
@@ -126,16 +125,12 @@ public class JsonConverter {
 	}
 
 	private Map<String, Object> createMap(Collection<Statement> g) {
-		play.Logger.debug("BEGIN JsonConverter.createMap");
 		Map<String, Object> jsonResult = new TreeMap<>();
 		Iterator<Statement> i = g.iterator();
 		jsonResult.put(idAlias, mainSubjectOfTheResource);
 		while (i.hasNext()) {
 			Statement s = i.next();
 			if (mainSubjectOfTheResource.equals(s.getSubject().stringValue())) {
-				play.Logger.debug("Subjekt=" + s.getSubject().stringValue()
-						+ "; Prädikat=" + s.getPredicate().stringValue() + "; Objekt="
-						+ s.getObject().stringValue());
 				Etikett e = etikette.getEtikett(s.getPredicate().stringValue());
 				createObject(jsonResult, s, e);
 			}
@@ -145,30 +140,24 @@ public class JsonConverter {
 
 	private void createObject(Map<String, Object> jsonResult, Statement s,
 			Etikett e) {
-		play.Logger.debug("BEGIN JsonConverter.createObject");
 		try {
 			String key = e.name;
-			play.Logger.debug("Schlüssel=" + key);
 			if (key == null)
 				throw new NullPointerException(
 						"Misconfiguration! Please provide a name for " + e.getUri()
 								+ " in labels.json");
 			if (s.getObject() instanceof org.eclipse.rdf4j.model.Literal) {
-				play.Logger.debug("Literal: " + s.getObject().stringValue());
 				addLiteralToJsonResult(jsonResult, key, s.getObject().stringValue());
 			} else {
 				if (s.getObject() instanceof org.eclipse.rdf4j.model.BNode) {
 					if (isList(s)) {
-						play.Logger.debug("Liste");
 						addListToJsonResult(jsonResult, key,
 								((BNode) s.getObject()).getID());
 					} else {
-						play.Logger.debug("Blanker Knoten");
 						addBlankNodeToJsonResult(jsonResult, key,
 								((BNode) s.getObject()).getID());
 					}
 				} else {
-					play.Logger.debug("Objekt: " + s.getObject().stringValue());
 					addObjectToJsonResult(jsonResult, key, s.getObject().stringValue());
 				}
 			}
@@ -238,22 +227,18 @@ public class JsonConverter {
 	private void addObjectToJsonResult(Map<String, Object> jsonResult, String key,
 			String uri) {
 		if (jsonResult.containsKey(key)) {
-			play.Logger.debug("jsonResult enthält den Schlüssel schon.");
 			if (jsonResult.get(key) instanceof ArrayList<?>) {
-				play.Logger.debug("is array list");
 				@SuppressWarnings("unchecked")
 				ArrayList<Map<String, Object>> literals =
 						(ArrayList<Map<String, Object>>) jsonResult.get(key);
 				literals.add(createObjectWithId(uri));
 			} else {
-				play.Logger.debug("is keine array list, ist \"Set\"");
 				@SuppressWarnings("unchecked")
 				Set<Map<String, Object>> literals =
 						(Set<Map<String, Object>>) jsonResult.get(key);
 				literals.add(createObjectWithId(uri));
 			}
 		} else {
-			play.Logger.debug("Neuer Schlüssel wird in jsonResult angelegt.");
 			Set<Map<String, Object>> literals = new HashSet<>();
 			literals.add(createObjectWithId(uri));
 			jsonResult.put(key, literals);
@@ -275,15 +260,12 @@ public class JsonConverter {
 	}
 
 	private Map<String, Object> createObjectWithId(String uri) {
-		play.Logger.debug("Starte createObjectWithId, uri=" + uri
-				+ ". Objekt für die URI wird angelegt.");
 		Map<String, Object> newObject = new TreeMap<>();
 		if (uri != null) {
 			newObject.put(idAlias, uri);
 			if (etikette.supportsLabelsForValues()) {
 				getLabelFromEtikettMaker(uri, newObject);
 			}
-			play.Logger.debug("Rekursiver Aufruf von createObject");
 			createObject(uri, newObject);
 		}
 		return newObject;
@@ -311,18 +293,12 @@ public class JsonConverter {
 
 	@SuppressWarnings("unchecked")
 	private void createObject(String uri, Map<String, Object> newObject) {
-		play.Logger.debug("createObject: Legt Objekt für URI " + uri + " an.");
 		for (Statement s : find(uri)) {
-			play.Logger.debug("gefundenes Statement für uri: Prädikat: "
-					+ s.getPredicate().stringValue());
 			Etikett e = etikette.getEtikett(s.getPredicate().stringValue());
 			if (labelKey.equals(e.name)) {
-				play.Logger.debug("Fall 1");
 				newObject.put(e.name, s.getObject().stringValue());
 			} else if (s.getObject() instanceof org.eclipse.rdf4j.model.Literal) {
-				play.Logger.debug("Fall 2");
 				if (newObject.containsKey(e.name)) {
-					play.Logger.debug("Fall 2.1");
 					Object existingValue = newObject.get(e.name);
 					if (existingValue instanceof String) {
 						Set<String> icanmany = new HashSet<>();
@@ -333,25 +309,16 @@ public class JsonConverter {
 						((Set<String>) existingValue).add(s.getObject().stringValue());
 					}
 				} else {
-					play.Logger.debug("Fall 2.2"); // academictTitel hier
-					play.Logger.debug("e.name=" + e.name
-							+ ", s.getObject().stringValue()=" + s.getObject().stringValue());
 					newObject.put(e.name, s.getObject().stringValue());
 				}
 			} else {
-				play.Logger.debug("Fall 3"); // kein Literal und auch nicht key=label;
-																			// affiliation hier
 				if (!mainSubjectOfTheResource.equals(s.getObject().stringValue())) {
-					play.Logger.debug("Fall 3.1");
-					play.Logger.debug("e.name=" + e.name
-							+ ", s.getObject().stringValue()=" + s.getObject().stringValue());
 					if (!statementVisited(s)) {
 						createObject(newObject, s, e);
 					} else {
 						createLeafObject(newObject, s, e);
 					}
 				} else {
-					play.Logger.debug("Fall 3.2");
 					if (!statementVisited(s)) {
 						newObject.put(e.name, s.getObject().stringValue());
 					}
@@ -373,9 +340,6 @@ public class JsonConverter {
 		Set<Statement> result = new HashSet<>();
 		for (Statement i : all) {
 			if (uri.equals(i.getSubject().stringValue())) {
-				play.Logger.debug(
-						"find: gefundenes Prädikat: " + i.getPredicate().stringValue()
-								+ "; Objekt: " + i.getObject().stringValue());
 				result.add(i);
 			}
 		}
