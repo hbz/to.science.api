@@ -555,10 +555,9 @@ public class JsonMapper {
 		List<String> affiliation = (List<String>) rdf.get("affiliation");
 		ArrayList<String> agentsSequence =
 				setSequence(new String[] { "creator", "contributor", "other" });
-
+		int i = 0;
 		for (int h = 0; h < agentsSequence.size(); h++) {
 			String key = agentsSequence.get(h);
-			int i = 0;
 			if (rdf.containsKey(key)) {
 				Object agentMap = rdf.get(key);
 				Iterator cit = getLobid2Iterator(agentMap);
@@ -589,9 +588,9 @@ public class JsonMapper {
 		ArrayList<String> agentsSequence =
 				setSequence(new String[] { "creator", "contributor", "other" });
 
+		int i = 0;
 		for (int h = 0; h < agentsSequence.size(); h++) {
 			String key = agentsSequence.get(h);
-			int i = 0;
 			if (rdf.containsKey(key)) {
 				Object agentsMap = rdf.get(key);
 				Iterator cit = getLobid2Iterator(agentsMap);
