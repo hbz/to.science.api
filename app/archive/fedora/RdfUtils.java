@@ -178,6 +178,11 @@ public class RdfUtils {
 		return null;
 	}
 
+	/**
+	 * @param url
+	 * @param accept
+	 * @return
+	 */
 	public static InputStream urlToInputStream(URL url, String accept) {
 		HttpURLConnection con = null;
 		InputStream inputStream = null;

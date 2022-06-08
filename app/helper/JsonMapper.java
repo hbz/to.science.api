@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -536,6 +537,26 @@ public class JsonMapper {
 		}
 		rdf.put("joinedFunding", joinedFundings);
 		rdf.put("fundingId", fundingId);
+	}
+
+	private void applyAffiliations(Map<String, Object> rdf) {
+		List<String> affiliation = (List<String>) rdf.get("affiliation");
+
+		if (rdf.containsKey("creator")) {
+			Object creatorMap = rdf.get("creator");
+			int i = 0;
+			Iterator cit = getLobid2Iterator(creatorMap);
+			while (cit.hasNext()) {
+				i++;
+				Map<String, Object> creator = (Map<String, Object>) cit.next();
+				HashMap<String, String> affiliationId = new HashMap<>();
+				affiliationId.put("@id", affiliation.get(i));
+
+				// creator.put("affiliation", )
+
+			}
+		}
+
 	}
 
 	private void addParts(Map<String, Object> rdf) {
