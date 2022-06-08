@@ -569,7 +569,7 @@ public class JsonMapper {
 	 * @param rdf
 	 */
 	private void applyAcademicDegree(Map<String, Object> rdf) {
-		List<String> academicDegree = (List<String>) rdf.get("acedemicDegree");
+		List<String> academicDegree = (List<String>) rdf.get("academicDegree");
 
 		if (rdf.containsKey("creator")) {
 			Object creatorMap = rdf.get("creator");
@@ -578,12 +578,12 @@ public class JsonMapper {
 			while (cit.hasNext()) {
 				Map<String, Object> creator = (Map<String, Object>) cit.next();
 				HashMap<String, String> acadDegree = new HashMap<>();
-				acadDegree.put("@id", academicDegree.get(i));
+				creator.put("academicDegree", academicDegree.get(i).replace(
+						"https://d-nb.info/standards/elementset/gnd#academicDegree/", ""));
 				play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 						+ " on position " + i);
 				// creator.put("affiliation", )
 				i++;
-
 			}
 		}
 
