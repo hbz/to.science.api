@@ -447,6 +447,10 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
+			List<String> agentSequence = new ArrayList<>();
+			agentSequence.add("creator");
+			agentSequence.add("contributor");
+			agentSequence.add("other");
 			applyAffiliation(rdf);
 			applyAcademicDegree(rdf);
 		} catch (Exception e) {
@@ -543,20 +547,27 @@ public class JsonMapper {
 
 	private void applyAffiliation(Map<String, Object> rdf) {
 		List<String> affiliation = (List<String>) rdf.get("affiliation");
+		ArrayList<String> agentsSequence =
+				setSequence(new String[] { "creator", "contributor", "other" });
 
-		if (rdf.containsKey("creator")) {
-			Object creatorMap = rdf.get("creator");
-			int i = 0;
-			Iterator cit = getLobid2Iterator(creatorMap);
-			while (cit.hasNext()) {
-				Map<String, Object> creator = (Map<String, Object>) cit.next();
-				HashMap<String, String> affiliationId = new HashMap<>();
-				affiliationId.put("@id", affiliation.get(i));
-				play.Logger.debug(
-						"found affiliation: " + affiliation.get(i) + " on position " + i);
-				// creator.put("affiliation", )
-				i++;
+		for (int h = 0; h < agentsSequence.size(); h++) {
+			String key = agentsSequence.get(h);
+			if (rdf.containsKey(key)) {
+				Object agentMap = rdf.get(key);
+				int i = 0;
+				Iterator cit = getLobid2Iterator(agentMap);
+				while (cit.hasNext()) {
+					Map<String, Object> agent = (Map<String, Object>) cit.next();
+					Hashtable<String, String> affilFields = new Hashtable<>();
+					play.Logger.debug(
+							"found affiliation: " + affiliation.get(i) + " on position " + i);
+					affilFields.put("@id", affiliation.get(i));
+					affilFields.put("type", "organization");
+					agent.put("academicDegree", affilFields);
+					// creator.put("affiliation", )
+					i++;
 
+				}
 			}
 		}
 
@@ -570,23 +581,30 @@ public class JsonMapper {
 	 */
 	private void applyAcademicDegree(Map<String, Object> rdf) {
 		List<String> academicDegree = (List<String>) rdf.get("academicDegree");
+		ArrayList<String> agentsSequence =
+				setSequence(new String[] { "creator", "contributor", "other" });
 
-		if (rdf.containsKey("creator")) {
-			Object creatorMap = rdf.get("creator");
-			int i = 0;
-			Iterator cit = getLobid2Iterator(creatorMap);
-			while (cit.hasNext()) {
-				Map<String, Object> creator = (Map<String, Object>) cit.next();
-				HashMap<String, Object> acadDegree = new HashMap<>();
-				Hashtable<String, String> acadDegreeFields = new Hashtable<>();
-				play.Logger.debug("found academicDegree: " + academicDegree.get(i)
-						+ " on position " + i);
-				acadDegreeFields.put("@id", academicDegree.get(i));
-				acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
-						"https://d-nb.info/standards/elementset/gnd#academicDegree/", ""));
-				creator.put("academicDegree", acadDegreeFields);
-				i++;
+		for (int h = 0; h < agentsSequence.size(); h++) {
+			String key = agentsSequence.get(h);
+			if (rdf.containsKey(key)) {
+				Object agentsMap = rdf.get(key);
+				int i = 0;
+				Iterator cit = getLobid2Iterator(agentsMap);
+				while (cit.hasNext()) {
+					Map<String, Object> agent = (Map<String, Object>) cit.next();
+					Hashtable<String, String> acadDegreeFields = new Hashtable<>();
+					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
+							+ " on position " + i);
+					acadDegreeFields.put("@id", academicDegree.get(i));
+					acadDegreeFields.put("prefLabel",
+							academicDegree.get(i).replace(
+									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+									""));
+					agent.put("academicDegree", acadDegreeFields);
+					i++;
+				}
 			}
+
 		}
 
 	}
@@ -1545,4 +1563,11 @@ public class JsonMapper {
 		return lIterator;
 	}
 
+	private ArrayList<String> setSequence(String[] fields) {
+		ArrayList<String> sequence = new ArrayList<>();
+		for (int i = 0; i < fields.length; i++) {
+			sequence.add(fields[i]);
+		}
+		return sequence;
+	}
 }
