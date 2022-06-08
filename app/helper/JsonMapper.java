@@ -554,7 +554,7 @@ public class JsonMapper {
 	private void applyAffiliation(Map<String, Object> rdf) {
 		List<String> affiliation = (List<String>) rdf.get("affiliation");
 		ArrayList<String> agentsSequence =
-				setSequence(new String[] { "creator", "contributor", "other" });
+				setSequence(new String[] { "creator", "contributor" });
 		int i = 0;
 		for (int h = 0; h < agentsSequence.size(); h++) {
 			String key = agentsSequence.get(h);
@@ -567,8 +567,8 @@ public class JsonMapper {
 					play.Logger.debug(
 							"found affiliation: " + affiliation.get(i) + " on position " + i);
 					affilFields.put("@id", affiliation.get(i));
-					affilFields.put("type", "organization");
-					agent.put("academicDegree", affilFields);
+					affilFields.put("type", "Organization");
+					agent.put("affiliation", affilFields);
 					i++;
 
 				}
@@ -586,7 +586,7 @@ public class JsonMapper {
 	private void applyAcademicDegree(Map<String, Object> rdf) {
 		List<String> academicDegree = (List<String>) rdf.get("academicDegree");
 		ArrayList<String> agentsSequence =
-				setSequence(new String[] { "creator", "contributor", "other" });
+				setSequence(new String[] { "creator", "contributor" });
 
 		int i = 0;
 		for (int h = 0; h < agentsSequence.size(); h++) {
