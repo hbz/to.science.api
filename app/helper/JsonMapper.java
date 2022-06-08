@@ -549,13 +549,13 @@ public class JsonMapper {
 			int i = 0;
 			Iterator cit = getLobid2Iterator(creatorMap);
 			while (cit.hasNext()) {
-				i++;
 				Map<String, Object> creator = (Map<String, Object>) cit.next();
 				HashMap<String, String> affiliationId = new HashMap<>();
 				affiliationId.put("@id", affiliation.get(i));
 				play.Logger.debug(
 						"found affiliation: " + affiliation.get(i) + " on position " + i);
 				// creator.put("affiliation", )
+				i++;
 
 			}
 		}
@@ -576,13 +576,13 @@ public class JsonMapper {
 			int i = 0;
 			Iterator cit = getLobid2Iterator(creatorMap);
 			while (cit.hasNext()) {
-				i++;
 				Map<String, Object> creator = (Map<String, Object>) cit.next();
 				HashMap<String, String> acadDegree = new HashMap<>();
 				acadDegree.put("@id", academicDegree.get(i));
 				play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 						+ " on position " + i);
 				// creator.put("affiliation", )
+				i++;
 
 			}
 		}
