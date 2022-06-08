@@ -577,12 +577,14 @@ public class JsonMapper {
 			Iterator cit = getLobid2Iterator(creatorMap);
 			while (cit.hasNext()) {
 				Map<String, Object> creator = (Map<String, Object>) cit.next();
-				HashMap<String, String> acadDegree = new HashMap<>();
-				creator.put("academicDegree", academicDegree.get(i).replace(
-						"https://d-nb.info/standards/elementset/gnd#academicDegree/", ""));
+				HashMap<String, Object> acadDegree = new HashMap<>();
+				Hashtable<String, String> acadDegreeFields = new Hashtable<>();
 				play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 						+ " on position " + i);
-				// creator.put("affiliation", )
+				acadDegreeFields.put("@id", academicDegree.get(i));
+				acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
+						"https://d-nb.info/standards/elementset/gnd#academicDegree/", ""));
+				creator.put("academicDegree", acadDegreeFields);
 				i++;
 			}
 		}
