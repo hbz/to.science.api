@@ -545,6 +545,12 @@ public class JsonMapper {
 		rdf.put("fundingId", fundingId);
 	}
 
+	/**
+	 * fetch the affiliation information from flat rdf statement and put them to
+	 * the according agents object in rdf
+	 * 
+	 * @param rdf
+	 */
 	private void applyAffiliation(Map<String, Object> rdf) {
 		List<String> affiliation = (List<String>) rdf.get("affiliation");
 		ArrayList<String> agentsSequence =
@@ -552,9 +558,9 @@ public class JsonMapper {
 
 		for (int h = 0; h < agentsSequence.size(); h++) {
 			String key = agentsSequence.get(h);
+			int i = 0;
 			if (rdf.containsKey(key)) {
 				Object agentMap = rdf.get(key);
-				int i = 0;
 				Iterator cit = getLobid2Iterator(agentMap);
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
@@ -564,7 +570,6 @@ public class JsonMapper {
 					affilFields.put("@id", affiliation.get(i));
 					affilFields.put("type", "organization");
 					agent.put("academicDegree", affilFields);
-					// creator.put("affiliation", )
 					i++;
 
 				}
@@ -574,8 +579,8 @@ public class JsonMapper {
 	}
 
 	/**
-	 * fetch the academic degree information fram flat rdf and put them to the
-	 * creators object
+	 * fetch the academic degree information from flat rdf statement and put them
+	 * to the according agent object in rdf
 	 * 
 	 * @param rdf
 	 */
@@ -586,9 +591,9 @@ public class JsonMapper {
 
 		for (int h = 0; h < agentsSequence.size(); h++) {
 			String key = agentsSequence.get(h);
+			int i = 0;
 			if (rdf.containsKey(key)) {
 				Object agentsMap = rdf.get(key);
-				int i = 0;
 				Iterator cit = getLobid2Iterator(agentsMap);
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
