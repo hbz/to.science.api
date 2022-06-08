@@ -551,7 +551,8 @@ public class JsonMapper {
 				Map<String, Object> creator = (Map<String, Object>) cit.next();
 				HashMap<String, String> affiliationId = new HashMap<>();
 				affiliationId.put("@id", affiliation.get(i));
-
+				play.Logger.debug(
+						"found affiliation: " + affiliation.get(i) + " on position " + i);
 				// creator.put("affiliation", )
 
 			}
