@@ -447,6 +447,8 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
+			applyAffiliation(rdf);
+			applyAcademicDegree(rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -539,7 +541,7 @@ public class JsonMapper {
 		rdf.put("fundingId", fundingId);
 	}
 
-	private void applyAffiliations(Map<String, Object> rdf) {
+	private void applyAffiliation(Map<String, Object> rdf) {
 		List<String> affiliation = (List<String>) rdf.get("affiliation");
 
 		if (rdf.containsKey("creator")) {
@@ -553,6 +555,33 @@ public class JsonMapper {
 				affiliationId.put("@id", affiliation.get(i));
 				play.Logger.debug(
 						"found affiliation: " + affiliation.get(i) + " on position " + i);
+				// creator.put("affiliation", )
+
+			}
+		}
+
+	}
+
+	/**
+	 * fetch the academic degree information fram flat rdf and put them to the
+	 * creators object
+	 * 
+	 * @param rdf
+	 */
+	private void applyAcademicDegree(Map<String, Object> rdf) {
+		List<String> academicDegree = (List<String>) rdf.get("acedemicDegree");
+
+		if (rdf.containsKey("creator")) {
+			Object creatorMap = rdf.get("creator");
+			int i = 0;
+			Iterator cit = getLobid2Iterator(creatorMap);
+			while (cit.hasNext()) {
+				i++;
+				Map<String, Object> creator = (Map<String, Object>) cit.next();
+				HashMap<String, String> acadDegree = new HashMap<>();
+				acadDegree.put("@id", academicDegree.get(i));
+				play.Logger.debug("found academicDegree: " + academicDegree.get(i)
+						+ " on position " + i);
 				// creator.put("affiliation", )
 
 			}
