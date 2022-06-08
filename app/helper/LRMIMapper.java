@@ -214,24 +214,25 @@ public class LRMIMapper {
 				arr = new JSONArray();
 				iterator = getLobid2Iterator(node.getLd2().get("creator"));
 				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
+					Map<String, Object> creator = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", map.get("academicDegree"));
-					if (map.containsKey("affiliation")) {
+					obj.put("name", creator.get("prefLabel"));
+					obj.put("id", creator.get("@id"));
+					obj.put("type", creator.get("type"));
+					obj.put("honoricPrefix", creator.get("academicDegree"));
+					if (creator.containsKey("affiliation")) {
 						play.Logger.debug("found affiliation in json2");
-						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
-						while (aIterator.hasNext()) {
-							Map aMap = (Map<String, Object>) aIterator.next();
-							JSONObject aObj = new JSONObject();
-							aObj.put("name", aMap.get("prefLabel"));
-							aObj.put("id", aMap.get("@id"));
+						Map<String, Object> affiliation =
+								(Map<String, Object>) creator.get("affiliation");
+						JSONObject aObj = new JSONObject();
+						aObj.put("name", affiliation.get("prefLabel"));
+						aObj.put("id", affiliation.get("@id"));
+						if (affiliation.containsKey("type")) {
+							aObj.put("type", affiliation.get("type"));
+						} else {
 							aObj.put("type", "Organization");
-							obj.put("affiliation", aObj);
-							break; // es gibt nur eine Affiliation pro Autor (?)
 						}
+						obj.put("affiliation", aObj);
 					}
 					arr.put(obj);
 				}
