@@ -343,8 +343,6 @@ public class JsonMapper {
 		try {
 			InputStream stream = new ByteArrayInputStream(
 					node.getMetadata2().getBytes(StandardCharsets.UTF_8));
-			play.Logger.debug("node.getMetadata2=" + node.getMetadata2());
-			/* hier ist academicTitle und afiliation am Autor drin */
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
@@ -946,7 +944,7 @@ public class JsonMapper {
 			String jsonString = JsonUtil.mapper().writeValueAsString(ld2Rdf);
 			play.Logger.debug("asRdf: jsonString=" + jsonString);
 		} catch (Exception e) {
-			play.Logger.error("Fehle beim Logging von jsonString", e);
+			play.Logger.error("Fehler beim Logging von jsonString", e);
 		}
 
 		changeDcIsPartOfToRegalIsPartOf(ld2Rdf);
