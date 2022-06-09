@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -178,7 +179,7 @@ public class LRMIMapper {
 						myObj = arr.get(i);
 						play.Logger
 								.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
-						if (myObj instanceof org.json.JSONObject) {
+						if (myObj instanceof JSONObject) {
 							obj = arr.getJSONObject(i);
 							// nimm nur den ersten learningResourceType und überschreibe ihn
 							// mit dem, was aus RDF kommt
@@ -209,6 +210,29 @@ public class LRMIMapper {
 				lrmiJsonContent.put("learningResourceType", arr);
 			}
 
+			// this is a very fragile hack, due to the usage of flat triples for md
+			// mappings
+			Map<String, Object> acadDegreeMap = null;
+			List<Map> acadDegree = new ArrayList<Map>();
+			if (node.getLd2().containsKey("academicDegree")) {
+				Iterator aDit = getLobid2Iterator(node.getLd2().get("academicDegree"));
+				while (aDit.hasNext()) {
+					acadDegreeMap = (Map<String, Object>) aDit.next();
+					acadDegree.add(acadDegreeMap);
+				}
+			}
+
+			Map<String, Object> affiliationMap = null;
+			List<Map> affiliation = new ArrayList<Map>();
+			if (node.getLd2().containsKey("academicDegree")) {
+				Iterator afIt = getLobid2Iterator(node.getLd2().get("academicDegree"));
+				while (afIt.hasNext()) {
+					affiliationMap = (Map<String, Object>) afIt.next();
+					affiliation.add(affiliationMap);
+				}
+			}
+
+			int attribCounter = 0;
 			if (node.getLd2().containsKey("creator")) {
 				play.Logger.debug("map creator object from json2 to lrmi");
 				arr = new JSONArray();
@@ -219,56 +243,15 @@ public class LRMIMapper {
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
 					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", map.get("academicDegree"));
-					obj.put("affiliation", map.get("affiliation"));
+					obj.put("honoricPrefix", acadDegree.get(attribCounter));
+					obj.put("affiliation", affiliation.get(attribCounter));
 					arr.put(obj);
+					attribCounter++;
 				}
 				lrmiJsonContent.put("creator", arr);
 			}
 
-			if (rdf.containsKey("creator")) {
-				play.Logger.debug("map creator object from rdf to lrmi");
-				iterator = getLobid2Iterator(rdf.get("creator"));
-				arr = new JSONArray();
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", "Person"); /* guess */
-					obj.put("honoricPrefix", map.get("academicDegree"));
-					Iterator mIterator = null;
-					if (map.containsKey("affiliation")) {
-						play.Logger.debug("key affiliation found in rdf");
-						mIterator = getLobid2Iterator(map.get("affiliation"));
-					}
-					if (mIterator != null) {
-						while (mIterator.hasNext()) {
-							play.Logger.debug("found affiliation in rdf");
-							Map aMap = (Map<String, Object>) mIterator.next();
-							JSONObject mObj = new JSONObject();
-							mObj.put("name", aMap.get("prefLabel"));
-							mObj.put("id", aMap.get("@id"));
-							mObj.put("type", "Organization"); /* guess */
-							obj.put("affiliation", mObj);
-						}
-					} else {
-						play.Logger.warn("found no affiliation associated with creator");
-						JSONObject dummyObj = new JSONObject();
-						dummyObj.put("name", "Example Affiliation");
-						dummyObj.put("id", "https://example.org");
-						dummyObj.put("type", "Organization"); /* guess */
-						obj.put("affiliation", dummyObj);
-					}
-					arr.put(obj);
-				}
-				lrmiJsonContent.put("creator", arr);
-
-			}
-
-			if (rdf.containsKey("contributor"))
-
-			{
+			if (rdf.containsKey("contributor")) {
 				iterator = getLobid2Iterator(rdf.get("contributor"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
@@ -278,8 +261,8 @@ public class LRMIMapper {
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess; can't match if id is absent */
 					arr.put(obj);
-					obj.put("honoricPrefix", map.get("academicDegree"));
-					obj.put("affiliation", map.get("affiliation"));
+					obj.put("honoricPrefix", acadDegree.get(attribCounter));
+					obj.put("affiliation", affiliation.get(attribCounter));
 				}
 				lrmiJsonContent.put("contributor", arr);
 			}
