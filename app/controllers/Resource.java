@@ -71,6 +71,7 @@ import models.Message;
 import models.Node;
 import models.ToScienceObject;
 import models.UrlHist;
+import play.api.http.MediaRange;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.libs.F.Function0;
@@ -219,19 +220,27 @@ public class Resource extends MyController {
 				 * hier sieht alles gut aus, academicTitle und affiliation sind
 				 * Bestandteile von creator
 				 */
+				RDFFormat rdfFormat = null;
+				String mimetype = null;
+
+				// Qa: refactored method in order to simplify code via reducing code
+				// duplication
+				// Using the power of RDFFormat.Class
 				if (request().accepts("application/rdf+xml")) {
-					play.Logger.debug("aggregationUri=" + node.getAggregationUri());
+					rdfFormat = RDFFormat.RDFXML;
+					mimetype = rdfFormat.getDefaultMIMEType();
+				} else if (request().accepts("text/plain")) {
+					rdfFormat = RDFFormat.NTRIPLES;
+					mimetype = "text/plain";
+				}
+				if (rdfFormat != null) {
+					play.Logger.debug("Use RDFFormat: " + rdfFormat.getName());
+					play.Logger.debug("aggregationUri= " + node.getAggregationUri());
 					result = RdfUtils.readRdfToString(
 							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
 							RDFFormat.JSONLD, RDFFormat.RDFXML, node.getAggregationUri());
-					response().setContentType("application/rdf+xml");
+					response().setContentType(mimetype);
 					play.Logger.debug("result=" + result);
-					return ok(result);
-				} else if (request().accepts("text/plain")) {
-					result = RdfUtils.readRdfToString(
-							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
-							RDFFormat.JSONLD, RDFFormat.NTRIPLES, node.getAggregationUri());
-					response().setContentType("text/plain");
 					return ok(result);
 				}
 				return JsonMessage(new Message(result));
@@ -239,6 +248,7 @@ public class Resource extends MyController {
 				throw new HttpArchiveException(500, e);
 			}
 		});
+
 	}
 
 	@ApiOperation(produces = "text/plain", nickname = "listMetadata", value = "listMetadata", notes = "Shows Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
@@ -1378,6 +1388,12 @@ public class Resource extends MyController {
 		});
 	}
 
+	/**
+	 * @param pid the resource identifier
+	 * @param format the file format in which metadata wil be provided
+	 * @param topicId unclear
+	 * @return
+	 */
 	@ApiOperation(produces = "application/json", nickname = "edit", value = "edit", notes = "get a form to edit the resources metadata", response = String.class, httpMethod = "POST")
 	public static Promise<Result> edit(@PathParam("pid") String pid,
 			@QueryParam("format") String format,
