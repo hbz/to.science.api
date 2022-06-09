@@ -220,19 +220,7 @@ public class LRMIMapper {
 					obj.put("id", map.get("@id"));
 					obj.put("type", map.get("type"));
 					obj.put("honoricPrefix", map.get("academicDegree"));
-					if (map.containsKey("affiliation")) {
-						play.Logger.debug("found affiliation in json2");
-						Iterator aIterator = getLobid2Iterator(map.get("affilitation"));
-						while (aIterator.hasNext()) {
-							Map aMap = (Map<String, Object>) aIterator.next();
-							JSONObject aObj = new JSONObject();
-							aObj.put("name", aMap.get("prefLabel"));
-							aObj.put("id", aMap.get("@id"));
-							aObj.put("type", "Organization");
-							obj.put("affiliation", aObj);
-							break; // es gibt nur eine Affiliation pro Autor (?)
-						}
-					}
+					obj.put("affiliation", map.get("affiliation"));
 					arr.put(obj);
 				}
 				lrmiJsonContent.put("creator", arr);
@@ -290,6 +278,8 @@ public class LRMIMapper {
 					obj.put("id", map.get("@id"));
 					obj.put("type", "Person"); /* guess; can't match if id is absent */
 					arr.put(obj);
+					obj.put("honoricPrefix", map.get("academicDegree"));
+					obj.put("affiliation", map.get("affiliation"));
 				}
 				lrmiJsonContent.put("contributor", arr);
 			}
