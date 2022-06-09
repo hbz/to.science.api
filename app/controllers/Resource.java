@@ -220,7 +220,6 @@ public class Resource extends MyController {
 				 * Bestandteile von creator
 				 */
 				if (request().accepts("application/rdf+xml")) {
-					play.Logger.debug("application/rdf+xml");
 					play.Logger.debug("aggregationUri=" + node.getAggregationUri());
 					result = RdfUtils.readRdfToString(
 							new ByteArrayInputStream(jsonString.getBytes("utf-8")),
