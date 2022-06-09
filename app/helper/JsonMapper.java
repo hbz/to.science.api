@@ -563,10 +563,11 @@ public class JsonMapper {
 				Iterator cit = getLobid2Iterator(agentMap);
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
-					Hashtable<String, String> affilFields = new Hashtable<>();
+					Map<String, String> affilFields = new LinkedHashMap<>();
 					play.Logger.debug(
 							"found affiliation: " + affiliation.get(i) + " on position " + i);
 					affilFields.put("@id", affiliation.get(i));
+					affilFields.put("prefLabel", affiliation.get(i));
 					affilFields.put("type", "Organization");
 					agent.put("affiliation", affilFields);
 					i++;
@@ -596,7 +597,7 @@ public class JsonMapper {
 				Iterator cit = getLobid2Iterator(agentsMap);
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
-					Hashtable<String, String> acadDegreeFields = new Hashtable<>();
+					Map<String, String> acadDegreeFields = new LinkedHashMap<>();
 					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 							+ " on position " + i);
 					acadDegreeFields.put("@id", academicDegree.get(i));
