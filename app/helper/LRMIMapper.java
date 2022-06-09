@@ -214,8 +214,8 @@ public class LRMIMapper {
 			// mappings
 			Map<String, Object> acadDegreeMap = null;
 			List<Map> acadDegree = new ArrayList<Map>();
-			if (node.getLd2().containsKey("academicDegree")) {
-				Iterator aDit = getLobid2Iterator(node.getLd2().get("academicDegree"));
+			if (rdf.containsKey("academicDegree")) {
+				Iterator aDit = getLobid2Iterator(rdf.get("academicDegree"));
 				while (aDit.hasNext()) {
 					acadDegreeMap = (Map<String, Object>) aDit.next();
 					acadDegree.add(acadDegreeMap);
@@ -224,8 +224,8 @@ public class LRMIMapper {
 
 			Map<String, Object> affiliationMap = null;
 			List<Map> affiliation = new ArrayList<Map>();
-			if (node.getLd2().containsKey("academicDegree")) {
-				Iterator afIt = getLobid2Iterator(node.getLd2().get("academicDegree"));
+			if (rdf.containsKey("affiliation")) {
+				Iterator afIt = getLobid2Iterator(rdf.get("affiliation"));
 				while (afIt.hasNext()) {
 					affiliationMap = (Map<String, Object>) afIt.next();
 					affiliation.add(affiliationMap);
@@ -233,7 +233,7 @@ public class LRMIMapper {
 			}
 
 			int attribCounter = 0;
-			if (node.getLd2().containsKey("creator")) {
+			if (rdf.containsKey("creator")) {
 				play.Logger.debug("map creator object from json2 to lrmi");
 				arr = new JSONArray();
 				iterator = getLobid2Iterator(node.getLd2().get("creator"));
