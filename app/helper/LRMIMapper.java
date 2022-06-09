@@ -262,6 +262,7 @@ public class LRMIMapper {
 					arr.put(obj);
 					obj.put("honoricPrefix", acadDegree.get(attribCounter));
 					obj.put("affiliation", affiliation.get(attribCounter));
+					attribCounter++;
 				}
 				lrmiJsonContent.put("contributor", arr);
 			}
