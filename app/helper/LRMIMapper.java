@@ -212,22 +212,22 @@ public class LRMIMapper {
 
 			// this is a very fragile hack, due to the usage of flat triples for md
 			// mappings
-			ArrayList<Map<String, Object>> acadDegree = new ArrayList<>();
+			ArrayList<String> acadDegree = new ArrayList<>();
 			if (rdf.containsKey("academicDegree")) {
 				iterator = getLobid2Iterator(rdf.get("academicDegree"));
 				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					acadDegree.add(map);
+					String degreeId = (String) iterator.next();
+					acadDegree.add(degreeId);
 				}
 			}
 
 			Map<String, Object> affiliationMap = null;
-			ArrayList<Map<String, Object>> affiliation = new ArrayList<>();
+			ArrayList<String> affiliation = new ArrayList<>();
 			if (rdf.containsKey("affiliation")) {
 				iterator = getLobid2Iterator(rdf.get("affiliation"));
 				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					affiliation.add(map);
+					String rorId = (String) iterator.next();
+					affiliation.add(rorId);
 				}
 			}
 
