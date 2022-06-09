@@ -227,7 +227,7 @@ public class LRMIMapper {
 				iterator = getLobid2Iterator(rdf.get("affiliation"));
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					map.add(affiliationMap);
+					affiliation.add(map);
 				}
 			}
 
