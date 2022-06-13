@@ -46,9 +46,7 @@ public class ResearchDataResource implements java.io.Serializable {
 	/**
 	 * Eigenschaften dieser Klasse.
 	 */
-	private static final long serialVersionUID = 1L;
-	private static final Logger.ALogger ApplicationLogger =
-			Logger.of("application");
+	private static Logger.ALogger ApplicationLogger = Logger.of("application");
 	private Node parentNode = null;
 	private String parentPid = null;
 	private Node researchDataNode = null;
