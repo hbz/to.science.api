@@ -51,7 +51,6 @@ public class ResearchDataResource implements java.io.Serializable {
 	private String parentPid = null;
 	private Node researchDataNode = null;
 	private String researchDataPid = null;
-	private static String baseUrl = Globals.researchDataBaseUrl;
 	private String collectionUrl = null;
 	private String subPath = null;
 	private String filename = null;
@@ -230,6 +229,7 @@ public class ResearchDataResource implements java.io.Serializable {
 	public void buildUrlString() {
 		ApplicationLogger
 				.debug("Begin building url string for filename " + filename);
+		String baseUrl = Globals.researchDataBaseUrl;
 		urlString =
 				new String(baseUrl + "/" + collectionUrl + "/" + researchDataPid);
 		if (subPath != null && !subPath.isEmpty()) {
