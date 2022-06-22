@@ -942,7 +942,7 @@ public class JsonMapper {
 
 		try {
 			String jsonString = JsonUtil.mapper().writeValueAsString(ld2Rdf);
-			play.Logger.debug("asRdf: jsonString=" + jsonString);
+			// play.Logger.debug("asRdf: jsonString=" + jsonString);
 		} catch (Exception e) {
 			play.Logger.error("Fehler beim Logging von jsonString", e);
 		}
