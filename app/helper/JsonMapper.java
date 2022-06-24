@@ -557,8 +557,8 @@ public class JsonMapper {
 		for (int h = 0; h < agentsSequence.size(); h++) {
 			String key = agentsSequence.get(h);
 			if (rdf.containsKey(key)) {
-				Object agentMap = rdf.get(key);
-				Iterator cit = getLobid2Iterator(agentMap);
+				Object agentsMap = rdf.get(key);
+				Iterator cit = getLobid2Iterator(agentsMap);
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
 					Map<String, String> affilFields = new LinkedHashMap<>();
@@ -609,13 +609,25 @@ public class JsonMapper {
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
 					Map<String, String> acadDegreeFields = new LinkedHashMap<>();
-					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
-							+ " on position " + i);
-					acadDegreeFields.put("@id", academicDegree.get(i));
-					acadDegreeFields.put("prefLabel",
-							academicDegree.get(i).replace(
-									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-									""));
+					if (i < academicDegree.size()) {
+						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
+								+ " on position " + i);
+						acadDegreeFields.put("@id", academicDegree.get(i));
+						acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
+					} else {
+						/*
+						 * Es sind nicht genügend akademische Grade in der sequentiellen
+						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
+						 * Default-Wert verwendet.
+						 */
+						play.Logger.debug("Using default academic degree for " + key + " "
+								+ agent.get(PREF_LABEL));
+						acadDegreeFields.put("@id",
+								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
+						acadDegreeFields.put("prefLabel", "keine Angabe");
+					}
 					agent.put("academicDegree", acadDegreeFields);
 					i++;
 				}

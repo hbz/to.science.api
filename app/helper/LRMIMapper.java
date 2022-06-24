@@ -54,7 +54,7 @@ public class LRMIMapper {
 	 * Ein Konstruktor für diese Klasse
 	 */
 	public LRMIMapper() {
-		play.Logger.info("Creating new instance of Class LRMIMapper");
+		play.Logger.trace("Creating new instance of Class LRMIMapper");
 		jsonConverter = new JsonConverter(profile);
 	}
 
