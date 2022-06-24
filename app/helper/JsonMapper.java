@@ -562,11 +562,24 @@ public class JsonMapper {
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
 					Map<String, String> affilFields = new LinkedHashMap<>();
-					play.Logger.debug(
-							"found affiliation: " + affiliation.get(i) + " on position " + i);
-					affilFields.put("@id", affiliation.get(i));
-					affilFields.put("prefLabel", affiliation.get(i));
-					affilFields.put("type", "Organization");
+					if (i < affiliation.size()) {
+						play.Logger.debug("found affiliation: " + affiliation.get(i)
+								+ " on position " + i);
+						affilFields.put("@id", affiliation.get(i));
+						affilFields.put("prefLabel", affiliation.get(i));
+						affilFields.put("type", "Organization");
+					} else {
+						/*
+						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
+						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
+						 * verwendet.
+						 */
+						play.Logger.debug("Using default affiliation for " + key + " "
+								+ agent.get(PREF_LABEL));
+						affilFields.put("@id", "https://ror.org/04tsk2644");
+						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
+						affilFields.put("type", "Organization");
+					}
 					agent.put("affiliation", affilFields);
 					i++;
 
