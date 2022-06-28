@@ -426,7 +426,7 @@ public class LRMIMapper {
 					attribCounter++;
 					arr.put(obj);
 				}
-				lrmiJsonContent.put("creator", arr);
+				lrmiJsonContent.put(authorType, arr);
 			}
 			return attribCounter;
 		} catch (Exception e) {
