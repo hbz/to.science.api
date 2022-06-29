@@ -410,7 +410,10 @@ public class Helper {
 			String role = c.at("/role/0/label").asText();
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
-
+			play.Logger.warn("Name: " + name);
+			play.Logger.warn("Role: " + role);
+			play.Logger.warn("RoleUri: " + roleUri);
+			play.Logger.warn("Uri: " + uri);
 			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)) {
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
