@@ -79,7 +79,7 @@
 							</ol>
 						
 						}else{
-							<ol class="author-title-list">
+							<ol class="creators-title-list">
 							@for(c <-views.Helper.listCreators(hit)){
 									<li>@displayCreators(c.get("id"),c.get("label").toString())</li>
 								}

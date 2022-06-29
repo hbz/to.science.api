@@ -324,7 +324,7 @@ do not show separator before external links
 	font-size:12pt;
 }
 
-.search .author-title-list, .contributors-title-list, .search .publicationYear {
+.search .author-title-list, .search .contributors-title-list, .search .publicationYear {
 	display: inline;
 	list-style: none;
 	list-style-type: none;
@@ -334,7 +334,7 @@ do not show separator before external links
 	font-size:10pt;
 }
 
-.author-title-list, .contributors-title-list {
+.author-title-list, .contributors-title-list, .creators-title-list {
 	display: inline;
 	list-style: none;
 	list-style-type: none;
@@ -342,11 +342,11 @@ do not show separator before external links
 	padding: 0;
 }
 
-.author-title-list li, .contributors-title-list li {
+.author-title-list li, .contributors-title-list li, .creators-title-list li {
 	display: inline;
 }
 
-.author-title-list li:after, .contributors-title-list li:after {
+.author-title-list li:after, .contributors-title-list li:after, .creators-title-list li:after {
 	content: " | ";
 }
 
@@ -354,7 +354,7 @@ do not show separator before external links
 	content: " . ";
 }
 
-.contributors-title-list li:last-child:after {
+.contributors-title-list li:last-child:after, .creators-title-list li:last-child:after {
 	content: "";
 }
 
