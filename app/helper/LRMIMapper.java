@@ -238,11 +238,13 @@ public class LRMIMapper {
 					lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
+				arr = new JSONArray();
 				iterator = getLobid2Iterator(rdf.get("subject"));
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					lrmiJsonContent.put("keywords", map.get("prefLabel"));
+					arr.put(map.get("prefLabel"));
 				}
+				lrmiJsonContent.put("keywords", arr);
 			}
 
 			if (rdf.containsKey("license")) {
