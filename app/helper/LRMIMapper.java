@@ -54,7 +54,7 @@ public class LRMIMapper {
 	 * Ein Konstruktor für diese Klasse
 	 */
 	public LRMIMapper() {
-		play.Logger.info("Creating new instance of Class LRMIMapper");
+		play.Logger.trace("Creating new instance of Class LRMIMapper");
 		jsonConverter = new JsonConverter(profile);
 	}
 
@@ -232,47 +232,19 @@ public class LRMIMapper {
 			}
 
 			int attribCounter = 0;
-			if (rdf.containsKey("creator")) {
-				play.Logger.debug("map creator object from json2 to lrmi");
-				arr = new JSONArray();
-				iterator = getLobid2Iterator(node.getLd2().get("creator"));
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", map.get("type"));
-					obj.put("honoricPrefix", acadDegree.get(attribCounter));
-					obj.put("affiliation", affiliation.get(attribCounter));
-					arr.put(obj);
-					attribCounter++;
-				}
-				lrmiJsonContent.put("creator", arr);
-			}
-
-			if (rdf.containsKey("contributor")) {
-				iterator = getLobid2Iterator(rdf.get("contributor"));
-				arr = new JSONArray();
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					obj.put("type", "Person"); /* guess; can't match if id is absent */
-					arr.put(obj);
-					obj.put("honoricPrefix", acadDegree.get(attribCounter));
-					obj.put("affiliation", affiliation.get(attribCounter));
-					attribCounter++;
-				}
-				lrmiJsonContent.put("contributor", arr);
-			}
+			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
+					lrmiJsonContent, "creator");
+			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
+					lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
+				arr = new JSONArray();
 				iterator = getLobid2Iterator(rdf.get("subject"));
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					lrmiJsonContent.put("keywords", map.get("prefLabel"));
+					arr.put(map.get("prefLabel"));
 				}
+				lrmiJsonContent.put("keywords", arr);
 			}
 
 			if (rdf.containsKey("license")) {
@@ -401,5 +373,69 @@ public class LRMIMapper {
 			result = localeMap.get(loc.getISO3Language()).getLanguage();
 		}
 		return result;
+	}
+
+	/**
+	 * Diese Methode bildet einen Autor (z.B. creator oder contributor) von RDF
+	 * nach LRMI ab. Für das RDF wird angenommen, dass akademische Grade und
+	 * beigeordnete Institutionen (Affiliations) als lineare Liste direkt
+	 * unterhalb der Ressource vorliegen, also nicht schon strukturiert unterhalb
+	 * der Autoren. Die sequentiellen Listen werden an die entsprechenden Autoren
+	 * gemappt.
+	 * 
+	 * @param attribCounter der Zähler für die direkt unter der Ressource
+	 *          sitzenden RDF-Arrays adademicDegree und Affiliation
+	 * @param rdf die linked Data der Ressource im Format RDF als Java Map
+	 * @param authorType z.B. "creator" oder "contributor"
+	 * @return den neuen Zähler für die linearen Listen
+	 */
+	private int mapAuthor(int attribCounter, Map<String, Object> rdf,
+			ArrayList<String> acadDegree, ArrayList<String> affiliation,
+			JSONObject lrmiJsonContent, String authorType) throws RuntimeException {
+		try {
+			if (rdf.containsKey(authorType)) {
+				play.Logger.debug("map " + authorType + " object from json2 to lrmi");
+				JSONArray arr = new JSONArray();
+				Iterator iterator = getLobid2Iterator(rdf.get(authorType));
+				while (iterator.hasNext()) {
+					Map<String, Object> map = (Map<String, Object>) iterator.next();
+					JSONObject obj = new JSONObject();
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", map.get("type"));
+					if (attribCounter < acadDegree.size()) {
+						obj.put("honoricPrefix", acadDegree.get(attribCounter));
+					} else {
+						/*
+						 * Es sind nicht genügend akademische Grade in der sequentiellen
+						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
+						 * Default-Wert verwendet.
+						 */
+						obj.put("honoricPrefix",
+								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
+					}
+					if (attribCounter < affiliation.size()) {
+						obj.put("affiliation", affiliation.get(attribCounter));
+					} else {
+						/*
+						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
+						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
+						 * verwendet.
+						 */
+						obj.put("affiliation", "https://ror.org/04tsk2644"); // Ruhr-Uni
+																																	// Bochum
+					}
+					attribCounter++;
+					arr.put(obj);
+				}
+				lrmiJsonContent.put(authorType, arr);
+			}
+			return attribCounter;
+		} catch (Exception e) {
+			play.Logger.error(authorType + " content could not be mapped!", e);
+			throw new RuntimeException(authorType + " content could not be mapped!",
+					e);
+		}
+
 	}
 }

@@ -557,16 +557,29 @@ public class JsonMapper {
 		for (int h = 0; h < agentsSequence.size(); h++) {
 			String key = agentsSequence.get(h);
 			if (rdf.containsKey(key)) {
-				Object agentMap = rdf.get(key);
-				Iterator cit = getLobid2Iterator(agentMap);
+				Object agentsMap = rdf.get(key);
+				Iterator cit = getLobid2Iterator(agentsMap);
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
 					Map<String, String> affilFields = new LinkedHashMap<>();
-					play.Logger.debug(
-							"found affiliation: " + affiliation.get(i) + " on position " + i);
-					affilFields.put("@id", affiliation.get(i));
-					affilFields.put("prefLabel", affiliation.get(i));
-					affilFields.put("type", "Organization");
+					if (i < affiliation.size()) {
+						play.Logger.debug("found affiliation: " + affiliation.get(i)
+								+ " on position " + i);
+						affilFields.put("@id", affiliation.get(i));
+						affilFields.put("prefLabel", affiliation.get(i));
+						affilFields.put("type", "Organization");
+					} else {
+						/*
+						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
+						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
+						 * verwendet.
+						 */
+						play.Logger.debug("Using default affiliation for " + key + " "
+								+ agent.get(PREF_LABEL));
+						affilFields.put("@id", "https://ror.org/04tsk2644");
+						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
+						affilFields.put("type", "Organization");
+					}
 					agent.put("affiliation", affilFields);
 					i++;
 
@@ -596,13 +609,25 @@ public class JsonMapper {
 				while (cit.hasNext()) {
 					Map<String, Object> agent = (Map<String, Object>) cit.next();
 					Map<String, String> acadDegreeFields = new LinkedHashMap<>();
-					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
-							+ " on position " + i);
-					acadDegreeFields.put("@id", academicDegree.get(i));
-					acadDegreeFields.put("prefLabel",
-							academicDegree.get(i).replace(
-									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-									""));
+					if (i < academicDegree.size()) {
+						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
+								+ " on position " + i);
+						acadDegreeFields.put("@id", academicDegree.get(i));
+						acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
+					} else {
+						/*
+						 * Es sind nicht genügend akademische Grade in der sequentiellen
+						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
+						 * Default-Wert verwendet.
+						 */
+						play.Logger.debug("Using default academic degree for " + key + " "
+								+ agent.get(PREF_LABEL));
+						acadDegreeFields.put("@id",
+								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
+						acadDegreeFields.put("prefLabel", "keine Angabe");
+					}
 					agent.put("academicDegree", acadDegreeFields);
 					i++;
 				}
@@ -814,62 +839,29 @@ public class JsonMapper {
 			return creatorWithoutId;
 		}
 
-		if (m.get("creator") instanceof List
-				&& ((List) m.get("creator")).get(0) instanceof String) {
-			Collection<String> creators = (Collection<String>) m.get("creator");
-			for (String creator : creators) {
-				String currentId = creator;
-				play.Logger.trace(creator + " - " + currentId + " - " + authorsId);
-				if (authorsId.compareTo(currentId) == 0) {
-					Map<String, Object> result = new HashMap<>();
-					result.put(ID2, currentId);
-					return result;
-				}
-			}
-		} else {
-			Collection<Map<String, Object>> creators =
-					(Collection<Map<String, Object>>) m.get("creator");
-			if (creators != null) {
-				for (Map<String, Object> creator : creators) {
-					String currentId = (String) creator.get(ID2);
-					play.Logger.trace(creator + " " + currentId + " " + authorsId);
-					if (authorsId.compareTo(currentId) == 0) {
-						return creator;
-					}
-				}
+		Iterator iterator = new LRMIMapper().getLobid2Iterator(m.get("creator"));
+		while (iterator.hasNext()) {
+			Map<String, Object> creator = (Map<String, Object>) iterator.next();
+			if (authorsId.compareTo((String) creator.get("@id")) == 0) {
+				return creator;
 			}
 		}
+
 		return new HashMap<>();
 	}
 
 	private static Map<String, Object> findContributor(Map<String, Object> m,
 			String authorsId) {
-		if (m.get("contributor") instanceof List) {
-			play.Logger.debug("Casting m.get(\"contributor\") to Collection<String>");
-			Collection<String> creators = (Collection<String>) m.get("contributor");
-			play.Logger.trace("" + creators.getClass());
-			for (String creator : creators) {
-				String currentId = creator;
-				play.Logger.trace(creator + " " + currentId + " " + authorsId);
-				if (authorsId.compareTo(currentId) == 0) {
-					Map<String, Object> result = new HashMap<>();
-					result.put(ID2, currentId);
-					return result;
-				}
-			}
-		} else {
-			Collection<Map<String, Object>> creators =
-					(Collection<Map<String, Object>>) m.get("contributor");
-			if (creators != null) {
-				for (Map<String, Object> creator : creators) {
-					String currentId = (String) creator.get(ID2);
-					play.Logger.debug(creator + " " + currentId + " " + authorsId);
-					if (authorsId.compareTo(currentId) == 0) {
-						return creator;
-					}
-				}
+
+		Iterator iterator =
+				new LRMIMapper().getLobid2Iterator(m.get("contributor"));
+		while (iterator.hasNext()) {
+			Map<String, Object> contributor = (Map<String, Object>) iterator.next();
+			if (authorsId.compareTo((String) contributor.get("@id")) == 0) {
+				return contributor;
 			}
 		}
+
 		return new HashMap<>();
 	}
 
