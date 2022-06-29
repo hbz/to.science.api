@@ -551,6 +551,14 @@ public class JsonMapper {
 	 */
 	private void applyAffiliation(Map<String, Object> rdf) {
 		List<String> affiliation = (List<String>) rdf.get("affiliation");
+		ArrayList<Object> affilConverted =
+				convertAffiliationToObjectList(affiliation);
+		/*
+		 * ToDo: Nach Fertigstellung der Subroutine anstelle von affiliation das
+		 * Objekt "affilConverted" nutzen ! Die folgenden Zeilen umschreiben (nicht
+		 * affiliation.get(i) sondern komplexer. Für academicDegree dann genauso
+		 * verfahren.
+		 */
 		ArrayList<String> agentsSequence =
 				setSequence(new String[] { "creator", "contributor" });
 		int i = 0;
@@ -613,9 +621,10 @@ public class JsonMapper {
 						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 								+ " on position " + i);
 						acadDegreeFields.put("@id", academicDegree.get(i));
-						acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								""));
+						acadDegreeFields.put("prefLabel",
+								academicDegree.get(i).replace(
+										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+										""));
 					} else {
 						/*
 						 * Es sind nicht genügend akademische Grade in der sequentiellen
@@ -1564,5 +1573,27 @@ public class JsonMapper {
 			sequence.add(fields[i]);
 		}
 		return sequence;
+	}
+
+	/**
+	 * Diese Methode schreibt das RDF-Element "affiliation" in eine Liste von
+	 * Objekten (Map<String, Object>) um, falls "affiliation" nicht schon in
+	 * diesem Format vorliegt. Die Objekte sind von der Form { "@id": "...",
+	 * "prefLabel": "..." }, anstatt nur vom Typ String (id), so dass IDs
+	 * angereichert (enriched) werden können, d.h. mit menschenlesbaren Labels
+	 * versehen.
+	 * 
+	 * @param affiliation ein RDF-Element "affiliation"
+	 * @return das RDF-Element "affiliation" als Liste von Objekten
+	 */
+	public ArrayList<Object> convertAffiliationToObjectList(List affiliation) {
+		ArrayList<Map<String, Object>> affilObjList =
+				new ArrayList<Map<String, Object>>();
+		/*
+		 * ToDo: hier Fallunterscheidung machen, von welchem Type "affiliation" ist
+		 * (benutze instanceof), dann je nach dem Uwandlung zu einer Liste von
+		 * Objekten
+		 */
+		return affilObjList;
 	}
 }
