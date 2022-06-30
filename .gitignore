@@ -1,3 +1,5 @@
+pom.xml
+.external*
 logs
 project/target
 target
