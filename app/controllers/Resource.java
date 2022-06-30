@@ -359,7 +359,7 @@ public class Resource extends MyController {
 				play.Logger.debug("Patching Pid: " + pid);
 				String result = "";
 				Node node = readNodeOrNull(pid);
-				ToScienceObject object = getRegalObject(request().body().asJson());
+				ToScienceObject object = getToScienceObject(request().body().asJson());
 				Node newNode = create.patchResource(node, object);
 				result = newNode.getLastModifyMessage();
 				result = result.concat(" " + newNode.getPid() + " created/updated!");
@@ -377,7 +377,7 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> patchResources(@PathParam("pid") String pid) {
 		return new BulkActionAccessor().call((userId) -> {
-			ToScienceObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getToScienceObject(request().body().asJson());
 			List<Node> list = Globals.fedora.listComplexObject(pid);
 			list.removeIf(n -> "D".equals(n.getState()));
 			BulkAction bulk = new BulkAction();
@@ -397,7 +397,7 @@ public class Resource extends MyController {
 			play.Logger.debug("Updating Pid: " + pid);
 			String result = "";
 			Node node = readNodeOrNull(pid);
-			ToScienceObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getToScienceObject(request().body().asJson());
 			Node newNode = null;
 			if (node == null) {
 				String[] namespacePlusId = pid.split(":");
@@ -419,7 +419,7 @@ public class Resource extends MyController {
 	public static Promise<Result> createResource(
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
-			ToScienceObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getToScienceObject(request().body().asJson());
 			if (object.getContentType().equals("webpage")) {
 				object.setAccessScheme("restricted");
 			}
