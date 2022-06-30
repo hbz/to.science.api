@@ -83,10 +83,8 @@ public class LRMIMapper {
 			 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
 			 */
 			// LRMI-Daten nach JSONObject wandeln
-			JSONObject lrmiJsonContent = null;
-			if (oldContent == null) {
-				lrmiJsonContent = new JSONObject();
-			} else {
+			JSONObject lrmiJsonContent = new JSONObject();
+			if (oldContent != null) {
 				lrmiJsonContent = new JSONObject(oldContent);
 			}
 			JSONArray arr = null;
@@ -375,6 +373,11 @@ public class LRMIMapper {
 		return result;
 	}
 
+	private int addAcademicDegreeToAgent(int attribCounter,
+			Map<String, Object> rdf, ArrayList<String> acadDegree) {
+		return 0;
+	}
+
 	/**
 	 * Diese Methode bildet einen Autor (z.B. creator oder contributor) von RDF
 	 * nach LRMI ab. Für das RDF wird angenommen, dass akademische Grade und
@@ -404,15 +407,16 @@ public class LRMIMapper {
 					obj.put("id", map.get("@id"));
 					obj.put("type", map.get("type"));
 					if (attribCounter < acadDegree.size()) {
-						obj.put("honoricPrefix", acadDegree.get(attribCounter));
+						obj.put("honoricPrefix", acadDegree.get(attribCounter).replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
 					} else {
 						/*
 						 * Es sind nicht genügend akademische Grade in der sequentiellen
 						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
 						 * Default-Wert verwendet.
 						 */
-						obj.put("honoricPrefix",
-								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
+						obj.put("honoricPrefix", "Keine Angabe");
 					}
 					if (attribCounter < affiliation.size()) {
 						obj.put("affiliation", affiliation.get(attribCounter));
@@ -422,8 +426,8 @@ public class LRMIMapper {
 						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
 						 * verwendet.
 						 */
-						obj.put("affiliation", "https://ror.org/04tsk2644"); // Ruhr-Uni
-																																	// Bochum
+						obj.put("affiliation", "Ruhr-Universität Bochum"); // Ruhr-Uni
+																																// Bochum
 					}
 					attribCounter++;
 					arr.put(obj);

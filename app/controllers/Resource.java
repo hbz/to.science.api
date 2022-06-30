@@ -430,7 +430,7 @@ public class Resource extends MyController {
 		});
 	}
 
-	private static ToScienceObject getRegalObject(JsonNode json) {
+	private static ToScienceObject getToScienceObject(JsonNode json) {
 		try {
 			ToScienceObject object;
 			play.Logger.debug("Json Body: " + json);
