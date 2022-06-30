@@ -448,7 +448,7 @@ public class JsonMapper {
 			List<String> agentSequence = new ArrayList<>();
 			agentSequence.add("creator");
 			agentSequence.add("contributor");
-			agentSequence.add("other");
+			// agentSequence.add("other");
 			applyAffiliation(rdf);
 			applyAcademicDegree(rdf);
 		} catch (Exception e) {
@@ -555,6 +555,8 @@ public class JsonMapper {
 				setSequence(new String[] { "creator", "contributor" });
 		int i = 0;
 		for (int h = 0; h < agentsSequence.size(); h++) {
+			play.Logger.debug(
+					"Amount of affiliations in flat list: " + affiliation.size() + 1);
 			String key = agentsSequence.get(h);
 			if (rdf.containsKey(key)) {
 				Object agentsMap = rdf.get(key);
@@ -568,6 +570,7 @@ public class JsonMapper {
 						affilFields.put("@id", affiliation.get(i));
 						affilFields.put("prefLabel", affiliation.get(i));
 						affilFields.put("type", "Organization");
+						i++;
 					} else {
 						/*
 						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
@@ -575,13 +578,12 @@ public class JsonMapper {
 						 * verwendet.
 						 */
 						play.Logger.debug("Using default affiliation for " + key + " "
-								+ agent.get(PREF_LABEL));
+								+ agent.get("@id") + " = " + agent.get(PREF_LABEL));
 						affilFields.put("@id", "https://ror.org/04tsk2644");
 						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
 						affilFields.put("type", "Organization");
 					}
 					agent.put("affiliation", affilFields);
-					i++;
 
 				}
 			}

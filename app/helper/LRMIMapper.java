@@ -397,7 +397,7 @@ public class LRMIMapper {
 			JSONObject lrmiJsonContent, String authorType) throws RuntimeException {
 		try {
 			if (rdf.containsKey(authorType)) {
-				play.Logger.debug("map " + authorType + " object from json2 to lrmi");
+				play.Logger.debug("add " + authorType + "\'s attributes to lrmi");
 				JSONArray arr = new JSONArray();
 				Iterator iterator = getLobid2Iterator(rdf.get(authorType));
 				while (iterator.hasNext()) {
