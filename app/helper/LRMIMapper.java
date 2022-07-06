@@ -308,6 +308,10 @@ public class LRMIMapper {
 				lrmiJsonContent.put("encoding", arr);
 			}
 
+			if (rdf.containsKey("funder")) {
+				lrmiJsonContent.put("funder", rdf.get("funder"));
+			}
+
 			/**
 			 * - gib die aktualisierten oder neu angelegten LRMI-Daten zurück (Format
 			 * JSON-String)

@@ -615,9 +615,10 @@ public class JsonMapper {
 						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 								+ " on position " + i);
 						acadDegreeFields.put("@id", academicDegree.get(i));
-						acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								""));
+						acadDegreeFields.put("prefLabel",
+								academicDegree.get(i).replace(
+										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+										""));
 					} else {
 						/*
 						 * Es sind nicht genügend akademische Grade in der sequentiellen
@@ -1527,6 +1528,15 @@ public class JsonMapper {
 				rdf.put("subject", subject);
 			}
 
+			if (lrmiJSONObject.has("funder")) {
+				obj = lrmiJSONObject.getJSONObject("funder");
+				Map<String, Object> funderMap = new TreeMap<>();
+				funderMap.put("type", obj.getString("type"));
+				funderMap.put("@id", obj.getString("url"));
+				funderMap.put("prefLabel", obj.getString("url"));
+				rdf.put("funder", funderMap);
+			}
+
 			postprocessing(rdf);
 
 			play.Logger.debug("Done mapping LRMI data to lobid2.");
@@ -1567,4 +1577,5 @@ public class JsonMapper {
 		}
 		return sequence;
 	}
+
 }
