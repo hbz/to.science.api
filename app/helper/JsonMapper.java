@@ -615,10 +615,9 @@ public class JsonMapper {
 						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 								+ " on position " + i);
 						acadDegreeFields.put("@id", academicDegree.get(i));
-						acadDegreeFields.put("prefLabel",
-								academicDegree.get(i).replace(
-										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-										""));
+						acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
 					} else {
 						/*
 						 * Es sind nicht genügend akademische Grade in der sequentiellen
@@ -1535,6 +1534,20 @@ public class JsonMapper {
 				funderMap.put("@id", obj.getString("url"));
 				funderMap.put("prefLabel", obj.getString("url"));
 				rdf.put("funder", funderMap);
+			}
+
+			// Ansatz Fachbereich Kayhan
+			if (lrmiJSONObject.has("about")) {
+				String about = null;
+				List<Map<String, Object>> department = new ArrayList<>();
+				arr = lrmiJSONObject.getJSONArray("about");
+				for (int i = 0; i < arr.length(); i++) {
+					Map<String, Object> aboutMap = new TreeMap<>();
+					about = arr.getString(i);
+					aboutMap.put("prefLabel", about);
+					department.add(aboutMap);
+				}
+				rdf.put("about", about);
 			}
 
 			postprocessing(rdf);

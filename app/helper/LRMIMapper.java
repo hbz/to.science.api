@@ -312,6 +312,26 @@ public class LRMIMapper {
 				lrmiJsonContent.put("funder", rdf.get("funder"));
 			}
 
+			// Ansatz Fachbereich Kayhan
+			if (rdf.containsKey("department")) {
+				iterator = getLobid2Iterator(myObj = rdf.get("department"));
+				arr = new JSONArray();
+				obj = new JSONObject();
+				arr.put(obj);
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					if (map.containsKey("prefLabel")) {
+						subObj = new JSONObject();
+						subObj.put("de", map.get("prefLabel"));
+						subObj.put("en", map.get("prefLabel"));
+						subObj.put("uk", map.get("prefLabel"));
+						obj.put("prefLabel", subObj);
+					}
+					obj.put("id", map.get("@id"));
+				}
+				lrmiJsonContent.put("about", arr);
+			}
+
 			/**
 			 * - gib die aktualisierten oder neu angelegten LRMI-Daten zurück (Format
 			 * JSON-String)
