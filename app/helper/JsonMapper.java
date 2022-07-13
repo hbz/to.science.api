@@ -550,13 +550,14 @@ public class JsonMapper {
 	 * @param rdf
 	 */
 	private void applyAffiliation(Map<String, Object> rdf) {
-		List<String> affiliation = (List<String>) rdf.get("affiliation");
+		List<String> affiliation = (List<String>) rdf.get("affiliation") != null
+				? (List<String>) rdf.get("affiliation") : new ArrayList<String>();
 		ArrayList<String> agentsSequence =
 				setSequence(new String[] { "creator", "contributor" });
 		int i = 0;
 		for (int h = 0; h < agentsSequence.size(); h++) {
-			play.Logger.debug(
-					"Amount of affiliations in flat list: " + affiliation.size() + 1);
+			play.Logger
+					.debug("Amount of affiliations in flat list: " + affiliation.size());
 			String key = agentsSequence.get(h);
 			if (rdf.containsKey(key)) {
 				Object agentsMap = rdf.get(key);
@@ -615,9 +616,10 @@ public class JsonMapper {
 						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 								+ " on position " + i);
 						acadDegreeFields.put("@id", academicDegree.get(i));
-						acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								""));
+						acadDegreeFields.put("prefLabel",
+								academicDegree.get(i).replace(
+										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+										""));
 					} else {
 						/*
 						 * Es sind nicht genügend akademische Grade in der sequentiellen
@@ -854,7 +856,8 @@ public class JsonMapper {
 
 	private static Map<String, Object> findContributor(Map<String, Object> m,
 			String authorsId) {
-
+		if (m == null)
+			return new HashMap();
 		Iterator iterator =
 				new LRMIMapper().getLobid2Iterator(m.get("contributor"));
 		while (iterator.hasNext()) {
