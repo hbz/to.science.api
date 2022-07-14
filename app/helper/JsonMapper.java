@@ -856,8 +856,6 @@ public class JsonMapper {
 
 	private static Map<String, Object> findContributor(Map<String, Object> m,
 			String authorsId) {
-		if (m == null)
-			return new HashMap();
 		Iterator iterator =
 				new LRMIMapper().getLobid2Iterator(m.get("contributor"));
 		while (iterator.hasNext()) {

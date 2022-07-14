@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -356,7 +357,7 @@ public class LRMIMapper {
 	 * @return an Iterator representing the JSONObject
 	 */
 	public Iterator getLobid2Iterator(Object iObj) {
-		Iterator lIterator = null;
+		Iterator lIterator = Collections.emptyIterator();
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =
 					(ArrayList<Map<String, Object>>) iObj;
