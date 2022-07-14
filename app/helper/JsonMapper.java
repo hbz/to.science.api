@@ -551,7 +551,8 @@ public class JsonMapper {
 	 */
 	private void applyAffiliation(Map<String, Object> rdf) {
 		List<String> affiliation = (List<String>) rdf.get("affiliation") != null
-				? (List<String>) rdf.get("affiliation") : new ArrayList<String>();
+				? (List<String>) rdf.get("affiliation")
+				: new ArrayList<String>();
 		ArrayList<String> agentsSequence =
 				setSequence(new String[] { "creator", "contributor" });
 		int i = 0;
@@ -616,10 +617,9 @@ public class JsonMapper {
 						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 								+ " on position " + i);
 						acadDegreeFields.put("@id", academicDegree.get(i));
-						acadDegreeFields.put("prefLabel",
-								academicDegree.get(i).replace(
-										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-										""));
+						acadDegreeFields.put("prefLabel", academicDegree.get(i).replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
 					} else {
 						/*
 						 * Es sind nicht genügend akademische Grade in der sequentiellen
@@ -1550,7 +1550,7 @@ public class JsonMapper {
 					aboutMap.put("prefLabel", about);
 					department.add(aboutMap);
 				}
-				rdf.put("about", about);
+				rdf.put("department", department);
 			}
 
 			postprocessing(rdf);
