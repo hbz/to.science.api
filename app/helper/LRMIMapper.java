@@ -313,22 +313,19 @@ public class LRMIMapper {
 				lrmiJsonContent.put("funder", rdf.get("funder"));
 			}
 
-			// Ansatz Fachbereich Kayhan
+			// Ansatz Fachbereich Kayhan / Ingolf
 			if (rdf.containsKey("department")) {
-				iterator = getLobid2Iterator(myObj = rdf.get("department"));
+				iterator = getLobid2Iterator(rdf.get("department"));
 				arr = new JSONArray();
-				obj = new JSONObject();
-				arr.put(obj);
 				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					if (map.containsKey("prefLabel")) {
-						subObj = new JSONObject();
-						subObj.put("de", map.get("prefLabel"));
-						subObj.put("en", map.get("prefLabel"));
-						subObj.put("uk", map.get("prefLabel"));
-						obj.put("prefLabel", subObj);
-					}
-					obj.put("id", map.get("@id"));
+					String departmentId = (String) iterator.next();
+					subObj = new JSONObject();
+					subObj.put("de", departmentId);
+					subObj.put("en", departmentId);
+					obj = new JSONObject();
+					obj.put("prefLabel", subObj);
+					obj.put("@id", departmentId);
+					arr.put(obj);
 				}
 				lrmiJsonContent.put("about", arr);
 			}

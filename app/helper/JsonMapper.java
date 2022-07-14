@@ -1537,16 +1537,18 @@ public class JsonMapper {
 				rdf.put("funder", funderMap);
 			}
 
-			// Ansatz Fachbereich Kayhan
+			// Ansatz Fachbereiche Kayhan / Ingolf
 			if (lrmiJSONObject.has("about")) {
-				String about = null;
-				List<Map<String, Object>> department = new ArrayList<>();
+				List<Map<String, Object>> department = rdf.containsKey("department")
+						? (List<Map<String, Object>>) rdf.get("department")
+						: new ArrayList<>();
 				arr = lrmiJSONObject.getJSONArray("about");
 				for (int i = 0; i < arr.length(); i++) {
-					Map<String, Object> aboutMap = new TreeMap<>();
-					about = arr.getString(i);
-					aboutMap.put("prefLabel", about);
-					department.add(aboutMap);
+					obj = arr.getJSONObject(i);
+					Map<String, Object> departmentMap = new TreeMap<>();
+					departmentMap.put("@id", obj.getString("@id"));
+					departmentMap.put("prefLabel", obj.getJSONObject("prefLabel"));
+					department.add(departmentMap);
 				}
 				rdf.put("department", department);
 			}
