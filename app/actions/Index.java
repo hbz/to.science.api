@@ -219,6 +219,7 @@ public class Index {
 			String type, String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
 		try {
+			play.Logger.debug("Trying to index " + data.toString2());
 			Globals.search.index(Globals.PUBLIC_FULLTEXT_INDEX_PREF + namespace, type,
 					pid, data.toString2());
 			msg.append("Metadata of " + pid + " indexed in "
@@ -278,6 +279,7 @@ public class Index {
 			String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
 		try {
+			play.Logger.debug("Trying to index " + data.toString2());
 			Globals.search.index(Globals.PUBLIC_INDEX_PREF + namespace + "2", type,
 					pid, data.toString2());
 			msg.append(
@@ -295,6 +297,7 @@ public class Index {
 			String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
 		try {
+			play.Logger.debug("Trying to index " + data.toString2());
 			Globals.search.index(namespace + "2", type, pid, data.toString2());
 			msg.append(pid + " indexed in " + namespace + "2\n");
 		} catch (Exception e) {
