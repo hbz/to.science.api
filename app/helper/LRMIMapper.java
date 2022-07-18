@@ -229,11 +229,32 @@ public class LRMIMapper {
 					affiliation.add(rorId);
 				}
 			}
+			
+			/////
+			
+			ArrayList<String> contributorAcadDegree = new ArrayList<>();
+			if (rdf.containsKey("contributorAcademicDegree")) {
+				iterator = getLobid2Iterator(rdf.get("contributorAcademicDegree"));
+				while (iterator.hasNext()) {
+					String degreeId = (String) iterator.next();
+					contributorAcadDegree.add(degreeId);
+				}
+			}
+
+			Map<String, Object> contributorAffiliationMap = null;
+			ArrayList<String> contributorAffiliation = new ArrayList<>();
+			if (rdf.containsKey("affilcontributorAffiliationiation")) {
+				iterator = getLobid2Iterator(rdf.get("contributorAffiliation"));
+				while (iterator.hasNext()) {
+					String rorId = (String) iterator.next();
+					contributorAffiliation.add(rorId);
+				}
+			}
 
 			int attribCounter = 0;
 			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
 					lrmiJsonContent, "creator");
-			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
+			attribCounter = mapAuthor(attribCounter, rdf, contributorAcadDegree, contributorAffiliation,
 					lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
