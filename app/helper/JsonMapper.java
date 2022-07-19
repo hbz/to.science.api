@@ -573,7 +573,6 @@ public class JsonMapper {
 						affilFields.put("@id", affiliation.get(i));
 						affilFields.put("prefLabel", affiliation.get(i));
 						affilFields.put("type", "Organization");
-						i++;
 					} else {
 						/*
 						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
@@ -587,7 +586,7 @@ public class JsonMapper {
 						affilFields.put("type", "Organization");
 					}
 					agent.put("affiliation", affilFields);
-
+					i++;
 				}
 			}
 		}
