@@ -339,13 +339,16 @@ public class LRMIMapper {
 				iterator = getLobid2Iterator(rdf.get("department"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
-					String departmentId = (String) iterator.next();
-					subObj = new JSONObject();
-					subObj.put("de", departmentId);
-					subObj.put("en", departmentId);
+					Map<String, Object> departmentMap =
+							(Map<String, Object>) iterator.next();
 					obj = new JSONObject();
-					obj.put("prefLabel", subObj);
-					obj.put("@id", departmentId);
+					if (departmentMap.containsKey("prefLabel")) {
+						subObj = new JSONObject();
+						subObj.put("de", departmentMap.get("prefLabel"));
+						subObj.put("en", departmentMap.get("prefLabel"));
+						obj.put("prefLabel", subObj);
+					}
+					obj.put("@id", departmentMap.get("@id"));
 					arr.put(obj);
 				}
 				lrmiJsonContent.put("about", arr);
