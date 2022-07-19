@@ -617,9 +617,10 @@ public class JsonMapper {
 					if (i < contributorAffiliation.size()) {
 						play.Logger.debug("found contributor affiliation: "
 								+ contributorAffiliation.get(i) + " on position " + i);
-						affilFields.put("@id", contributorAffiliation.get(i));
-						affilFields.put("prefLabel", contributorAffiliation.get(i));
-						affilFields.put("type", "Organization");
+						contributorAffilFields.put("@id", contributorAffiliation.get(i));
+						contributorAffilFields.put("prefLabel",
+								contributorAffiliation.get(i));
+						contributorAffilFields.put("type", "Organization");
 						i++;
 					} else {
 						/*
@@ -630,8 +631,7 @@ public class JsonMapper {
 						play.Logger.debug("Using default contributor affiliation for " + key
 								+ " " + agent.get("@id") + " = " + agent.get(PREF_LABEL));
 						contributorAffilFields.put("@id", "https://ror.org/04tsk2644");
-						afficontributorAffilFieldslFields.put("prefLabel",
-								"Ruhr-Universität Bochum");
+						contributorAffilFields.put("prefLabel", "Ruhr-Universität Bochum");
 						contributorAffilFields.put("type", "Organization");
 					}
 					agent.put("contributorAffiliation", contributorAffilFields);
