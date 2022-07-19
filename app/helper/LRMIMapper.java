@@ -229,9 +229,9 @@ public class LRMIMapper {
 					affiliation.add(rorId);
 				}
 			}
-			
+
 			/////
-			
+
 			ArrayList<String> contributorAcadDegree = new ArrayList<>();
 			if (rdf.containsKey("contributorAcademicDegree")) {
 				iterator = getLobid2Iterator(rdf.get("contributorAcademicDegree"));
@@ -243,7 +243,7 @@ public class LRMIMapper {
 
 			Map<String, Object> contributorAffiliationMap = null;
 			ArrayList<String> contributorAffiliation = new ArrayList<>();
-			if (rdf.containsKey("affilcontributorAffiliationiation")) {
+			if (rdf.containsKey("contributorAffiliation")) {
 				iterator = getLobid2Iterator(rdf.get("contributorAffiliation"));
 				while (iterator.hasNext()) {
 					String rorId = (String) iterator.next();
@@ -254,8 +254,8 @@ public class LRMIMapper {
 			int attribCounter = 0;
 			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
 					lrmiJsonContent, "creator");
-			attribCounter = mapAuthor(attribCounter, rdf, contributorAcadDegree, contributorAffiliation,
-					lrmiJsonContent, "contributor");
+			attribCounter = mapAuthor(attribCounter, rdf, contributorAcadDegree,
+					contributorAffiliation, lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
 				arr = new JSONArray();
