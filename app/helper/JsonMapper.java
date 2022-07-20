@@ -445,10 +445,11 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			applyAgentsAcademicDegree(rdf, "creator");
-			applyAgentsAcademicDegree(rdf, "contributor");
-			applyAgentsAffiliation(rdf, "creator");
-			applyAgentsAffiliation(rdf, "contributor");
+			applyAgentsAcademicDegree(rdf, "creator", "academicDegree");
+			applyAgentsAcademicDegree(rdf, "contributor",
+					"contributorAcademicDegree");
+			applyAgentsAffiliation(rdf, "creator", "affiliation");
+			applyAgentsAffiliation(rdf, "contributor", "contributorAffiliation");
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -542,17 +543,23 @@ public class JsonMapper {
 	}
 
 	/**
+	 * Aneicherung von Autoren ("agents") (Creator oder Contributor) mit
+	 * zugeordneten Institutionen aus der flachen Liste (Mapping RDF => RDF).
 	 * Fetch the affiliation information from flat rdf statement and put them to
-	 * the according agents object in rdf
+	 * the according agents object in rdf.
 	 * 
 	 * @param rdf das gesamte RDF der Ressource
-	 * @param agentId = "creator" oder "contributor"
+	 * @param agentId = "creator" oder "contributor" = der Name des RDF-Elements
+	 *          für die Autorenliste
+	 * @param flatListElementName Der Name des RDF-Elements für die flache Liste
+	 *          mit zugeordneten Institutionen
 	 */
-	private void applyAgentsAffiliation(Map<String, Object> rdf, String agentId) {
+	private void applyAgentsAffiliation(Map<String, Object> rdf, String agentId,
+			String flatListElementName) {
 		// hole flache Liste der Institutionen für diesen Autoren-Typ
 		List<String> agentsAffiliations =
-				(List<String>) rdf.get(agentId + "Affiliation") != null
-						? (List<String>) rdf.get(agentId + "Affiliation")
+				(List<String>) rdf.get(flatListElementName) != null
+						? (List<String>) rdf.get(flatListElementName)
 						: new ArrayList<>();
 		play.Logger.debug("Amount of affiliations in flat list for " + agentId
 				+ ": " + agentsAffiliations.size());
@@ -592,24 +599,28 @@ public class JsonMapper {
 
 	/*
 	 * Aneicherung von Autoren ("agents") (Creator oder Contributor) mit
-	 * akademischen Graden aus der flachen Liste (RDF => RDF). Fetch the academic
-	 * degree information from flat rdf statement and put them to the according
-	 * agent object in rdf.
+	 * akademischen Graden aus der flachen Liste (Mapping RDF => RDF). Fetch the
+	 * academic degree information from flat rdf statement and put them to the
+	 * according agent object in rdf.
 	 * 
 	 * @param rdf Die Ressource im Format RDF
 	 * 
-	 * @param agentId = "creator" oder "contributor"
+	 * @param agentId = "creator" oder "contributor" = der Name des RDF-Elements
+	 * für die Autorenliste
+	 * 
+	 * @param flatListElementName Der Name des RDF-Elements für die flache Liste
+	 * mit akademischen Graden
 	 */
 	private void applyAgentsAcademicDegree(Map<String, Object> rdf,
-			String agentId) {
-		// hole flache Liste agendtId + "AcademicDegree" (forms liefert diese
-		// zurück)
-		List<String> agentsAcademicDegrees =
-				rdf.get(agentId + "AcademicDegree") != null
-						? (List<String>) rdf.get(agentId + "AcademicDegree")
-						: new ArrayList<>();
+			String agentId, String flatListElementName) {
+		// hole die flache Liste mit akademischen Graden (für diesen Autorentyp)
+		List<String> agentsAcademicDegrees = rdf.get(flatListElementName) != null
+				? (List<String>) rdf.get(flatListElementName)
+				: new ArrayList<>();
+		play.Logger.debug("Amount of academic degrees in flat list for " + agentId
+				+ ": " + agentsAcademicDegrees.size());
 
-		// hole Liste der Autoren und webe die akademischen Grade dort ein
+		// hole die Liste der Autoren und webe die akademischen Grade dort ein
 		if (rdf.containsKey(agentId)) {
 			Object agentsMap = rdf.get(agentId);
 			Iterator cit = getLobid2Iterator(agentsMap);
