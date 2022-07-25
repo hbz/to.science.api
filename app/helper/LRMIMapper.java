@@ -209,10 +209,56 @@ public class LRMIMapper {
 				lrmiJsonContent.put("learningResourceType", arr);
 			}
 
-			mapAuthor(rdf, "academicDegree", "affiliation", lrmiJsonContent,
-					"creator");
-			mapAuthor(rdf, "contributorAcademicDegree", "contributorAffiliation",
-					lrmiJsonContent, "contributor");
+			// this is a very fragile hack, due to the usage of flat triples for md
+			// mappings
+			ArrayList<String> acadDegree = new ArrayList<>();
+			if (rdf.containsKey("academicDegree")) {
+				iterator = getLobid2Iterator(rdf.get("academicDegree"));
+				while (iterator.hasNext()) {
+					String degreeId = (String) iterator.next();
+					acadDegree.add(degreeId);
+				}
+			}
+
+			Map<String, Object> affiliationMap = null;
+			ArrayList<String> affiliation = new ArrayList<>();
+			if (rdf.containsKey("affiliation")) {
+				iterator = getLobid2Iterator(rdf.get("affiliation"));
+				while (iterator.hasNext()) {
+					String rorId = (String) iterator.next();
+					affiliation.add(rorId);
+				}
+			}
+
+			int attribCounter = 0;
+			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
+					lrmiJsonContent, "creator");
+
+			/////
+
+			ArrayList<String> contributorAcadDegree = new ArrayList<>();
+			if (rdf.containsKey("contributorAcademicDegree")) {
+				iterator = getLobid2Iterator(rdf.get("contributorAcademicDegree"));
+				while (iterator.hasNext()) {
+					String degreeId = (String) iterator.next();
+					contributorAcadDegree.add(degreeId);
+				}
+			}
+
+			Map<String, Object> contributorAffiliationMap = null;
+			ArrayList<String> contributorAffiliation = new ArrayList<>();
+			if (rdf.containsKey("contributorAffiliation")) {
+				iterator = getLobid2Iterator(rdf.get("contributorAffiliation"));
+				while (iterator.hasNext()) {
+					String rorId = (String) iterator.next();
+					contributorAffiliation.add(rorId);
+				}
+			}
+
+			int attribCounterContributor = 0;
+			attribCounterContributor =
+					mapContributor(attribCounterContributor, rdf, contributorAcadDegree,
+							contributorAffiliation, lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
 				arr = new JSONArray();
@@ -376,64 +422,41 @@ public class LRMIMapper {
 		return result;
 	}
 
+	private int addAcademicDegreeToAgent(int attribCounter,
+			Map<String, Object> rdf, ArrayList<String> acadDegree) {
+		return 0;
+	}
+
 	/**
 	 * Diese Methode bildet einen Autor (z.B. creator oder contributor) von RDF
 	 * nach LRMI ab. Für das RDF wird angenommen, dass akademische Grade und
-	 * beigeordnete Institutionen (Affiliations) als lineare Listen direkt
+	 * beigeordnete Institutionen (Affiliations) als lineare Liste direkt
 	 * unterhalb der Ressource vorliegen, also nicht schon strukturiert unterhalb
 	 * der Autoren. Die sequentiellen Listen werden an die entsprechenden Autoren
 	 * gemappt.
 	 * 
+	 * @param attribCounter der Zähler für die direkt unter der Ressource
+	 *          sitzenden RDF-Arrays adademicDegree und Affiliation
 	 * @param rdf die linked Data der Ressource im Format RDF als Java Map
-	 * @param acadDegreeFlatListElemName der Elementname in RDF für die flache
-	 *          Liste der akademischen Grade
-	 * @param affiliationFlatListElemName der Elementname in RDF für die flache
-	 *          Liste der zugeordneten Institutionen
-	 * @param lrmiJsonContent die LRMI-Daten der Ressource im Format LRMI-JSON als
-	 *          JSONObject
-	 * @param agentId Autoren-Typ, z.B. "creator" oder "contributor"
+	 * @param authorType z.B. "creator" oder "contributor"
+	 * @return den neuen Zähler für die linearen Listen
 	 */
-	private void mapAuthor(Map<String, Object> rdf,
-			String acadDegreeFlatListElemName, String affiliationFlatListElemName,
-			JSONObject lrmiJsonContent, String agentId) throws RuntimeException {
+	private int mapAuthor(int attribCounter, Map<String, Object> rdf,
+			ArrayList<String> acadDegree, ArrayList<String> affiliation,
+			JSONObject lrmiJsonContent, String authorType) throws RuntimeException {
 		try {
-
-			Iterator iterator = null;
-			// This is a very fragile hack, due to the usage of flat triples for md
-			// mappings
-			// academicDegrees : Mapping RDF nach ArrayList
-			ArrayList<String> agentAcadDegree = new ArrayList<>();
-			if (rdf.containsKey(acadDegreeFlatListElemName)) {
-				iterator = getLobid2Iterator(rdf.get(acadDegreeFlatListElemName));
-				while (iterator.hasNext()) {
-					String degreeId = (String) iterator.next();
-					agentAcadDegree.add(degreeId);
-				}
-			}
-
-			// affiliations : Mapping RDF nach ArrayList
-			ArrayList<String> agentAffiliation = new ArrayList<>();
-			if (rdf.containsKey(affiliationFlatListElemName)) {
-				iterator = getLobid2Iterator(rdf.get(affiliationFlatListElemName));
-				while (iterator.hasNext()) {
-					String rorId = (String) iterator.next();
-					agentAffiliation.add(rorId);
-				}
-			}
-
-			if (rdf.containsKey(agentId)) {
-				play.Logger.debug("add " + agentId + "\'s attributes to lrmi");
+			if (rdf.containsKey(authorType)) {
+				play.Logger.debug("add " + authorType + "\'s attributes to lrmi");
 				JSONArray arr = new JSONArray();
-				iterator = getLobid2Iterator(rdf.get(agentId));
-				int agentCounter = 0;
+				Iterator iterator = getLobid2Iterator(rdf.get(authorType));
 				while (iterator.hasNext()) {
-					Map<String, Object> agent = (Map<String, Object>) iterator.next();
+					Map<String, Object> map = (Map<String, Object>) iterator.next();
 					JSONObject obj = new JSONObject();
-					obj.put("name", agent.get("prefLabel"));
-					obj.put("id", agent.get("@id"));
-					obj.put("type", agent.get("type"));
-					if (agentCounter < agentAcadDegree.size()) {
-						obj.put("honoricPrefix", agentAcadDegree.get(agentCounter).replace(
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", map.get("type"));
+					if (attribCounter < acadDegree.size()) {
+						obj.put("honoricPrefix", acadDegree.get(attribCounter).replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 								""));
 					} else {
@@ -444,26 +467,84 @@ public class LRMIMapper {
 						 */
 						obj.put("honoricPrefix", "Keine Angabe");
 					}
-					if (agentCounter < agentAffiliation.size()) {
-						obj.put("affiliation", agentAffiliation.get(agentCounter));
+					if (attribCounter < affiliation.size()) {
+						obj.put("affiliation", affiliation.get(attribCounter));
 					} else {
 						/*
 						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
 						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
 						 * verwendet.
 						 */
-						obj.put("affiliation", "Ruhr-Universität Bochum");
+						obj.put("affiliation", "Ruhr-Universität Bochum"); // Ruhr-Uni
+																																// Bochum
 					}
-					agentCounter++;
+					attribCounter++;
 					arr.put(obj);
 				}
-				lrmiJsonContent.put(agentId, arr);
+				lrmiJsonContent.put(authorType, arr);
 			}
+			return attribCounter;
 		} catch (Exception e) {
-			play.Logger.error(agentId + " content could not be mapped to LRMI!", e);
-			throw new RuntimeException(
-					agentId + " content could not be mapped to LRMI!", e);
+			play.Logger.error(authorType + " content could not be mapped!", e);
+			throw new RuntimeException(authorType + " content could not be mapped!",
+					e);
 		}
 
 	}
+
+	///////////////////
+	private int mapContributor(int attribCounterContributor,
+			Map<String, Object> rdf, ArrayList<String> contributorAcadDegree,
+			ArrayList<String> contributorAffiliation, JSONObject lrmiJsonContent,
+			String authorType) throws RuntimeException {
+		try {
+			if (rdf.containsKey(authorType)) {
+				play.Logger.debug("add " + authorType + "\'s attributes to lrmi");
+				JSONArray arr = new JSONArray();
+				Iterator iterator = getLobid2Iterator(rdf.get(authorType));
+				while (iterator.hasNext()) {
+					Map<String, Object> map = (Map<String, Object>) iterator.next();
+					JSONObject obj = new JSONObject();
+					obj.put("name", map.get("prefLabel"));
+					obj.put("id", map.get("@id"));
+					obj.put("type", map.get("type"));
+					if (attribCounterContributor < contributorAcadDegree.size()) {
+						obj.put("honoricPrefix",
+								contributorAcadDegree.get(attribCounterContributor).replace(
+										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+										""));
+					} else {
+						/*
+						 * Es sind nicht genügend akademische Grade in der sequentiellen
+						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
+						 * Default-Wert verwendet.
+						 */
+						obj.put("honoricPrefix", "Keine Angabe");
+					}
+					if (attribCounterContributor < contributorAffiliation.size()) {
+						obj.put("affiliation",
+								contributorAffiliation.get(attribCounterContributor));
+					} else {
+						/*
+						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
+						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
+						 * verwendet.
+						 */
+						obj.put("affiliation", "Ruhr-Universität Bochum"); // Ruhr-Uni
+																																// Bochum
+					}
+					attribCounterContributor++;
+					arr.put(obj);
+				}
+				lrmiJsonContent.put(authorType, arr);
+			}
+			return attribCounterContributor;
+		} catch (Exception e) {
+			play.Logger.error(authorType + " content could not be mapped!", e);
+			throw new RuntimeException(authorType + " content could not be mapped!",
+					e);
+		}
+
+	}
+
 }
