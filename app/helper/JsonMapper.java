@@ -552,9 +552,12 @@ public class JsonMapper {
 	 * @param rdf
 	 */
 	private void applyAffiliation(Map<String, Object> rdf) {
-		List<String> affiliation = (List<String>) rdf.get("affiliation") != null
-				? (List<String>) rdf.get("affiliation")
-				: new ArrayList<String>();
+		List<String> affiliation = null;
+		if (rdf.get("affiliation") != null) {
+			affiliation = (List<String>) rdf.get("affiliation");
+		} else {
+			affiliation = new ArrayList<String>();
+		}
 		ArrayList<String> agentsSequence = setSequence(new String[] { "creator" });
 		int i = 0;
 		for (int h = 0; h < agentsSequence.size(); h++) {
@@ -596,10 +599,12 @@ public class JsonMapper {
 	///
 
 	private void applyContributorAffiliation(Map<String, Object> rdf) {
-		List<String> contributorAffiliation =
-				(List<String>) rdf.get("contributorAffiliation") != null
-						? (List<String>) rdf.get("contributorAffiliation")
-						: new ArrayList<String>();
+		List<String> contributorAffiliation = null;
+		if (rdf.get("contributorAffiliation") != null) {
+			contributorAffiliation = (List<String>) rdf.get("contributorAffiliation");
+		} else {
+			contributorAffiliation = new ArrayList<String>();
+		}
 		ArrayList<String> agentsSequence =
 				setSequence(new String[] { "contributor" });
 		int i = 0;
@@ -620,7 +625,6 @@ public class JsonMapper {
 						contributorAffilFields.put("prefLabel",
 								contributorAffiliation.get(i));
 						contributorAffilFields.put("type", "Organization");
-						i++;
 					} else {
 						/*
 						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
@@ -634,7 +638,7 @@ public class JsonMapper {
 						contributorAffilFields.put("type", "Organization");
 					}
 					agent.put("contributorAffiliation", contributorAffilFields);
-
+					i++;
 				}
 			}
 		}
@@ -650,7 +654,12 @@ public class JsonMapper {
 	 * @param rdf
 	 */
 	private void applyAcademicDegree(Map<String, Object> rdf) {
-		List<String> academicDegree = (List<String>) rdf.get("academicDegree");
+		List<String> academicDegree = null;
+		if (rdf.get("academicDegree") != null) {
+			academicDegree = (List<String>) rdf.get("academicDegree");
+		} else {
+			academicDegree = new ArrayList<String>();
+		}
 		ArrayList<String> agentsSequence = setSequence(new String[] { "creator" });
 
 		int i = 0;
@@ -692,8 +701,13 @@ public class JsonMapper {
 
 	///
 	private void applyContributorAcademicDegree(Map<String, Object> rdf) {
-		List<String> contributorAcademicDegree =
-				(List<String>) rdf.get("contributorAcademicDegree");
+		List<String> contributorAcademicDegree = null;
+		if (rdf.get("contributorAcademicDegree") != null) {
+			contributorAcademicDegree =
+					(List<String>) rdf.get("contributorAcademicDegree");
+		} else {
+			contributorAcademicDegree = new ArrayList<String>();
+		}
 		ArrayList<String> agentsSequence =
 				setSequence(new String[] { "contributor" });
 
