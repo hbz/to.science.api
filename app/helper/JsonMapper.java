@@ -447,6 +447,7 @@ public class JsonMapper {
 			createJoinedFunding(rdf);
 			applyAffiliation("creator", rdf);
 			applyAffiliation("contributor", rdf);
+			applyAcademicDegree("creator", rdf);
 			applyAcademicDegree("contributor", rdf);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
