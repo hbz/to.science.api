@@ -862,15 +862,16 @@ public class JsonMapper {
 		return new HashMap<>();
 	}
 
-	private static Map<String, Object> findContributor(Map<String, Object> m,
+	private static Map<String, Object> findContributor(Map<String, Object> map,
 			String authorsId) {
-
-		Iterator iterator =
-				new LRMIMapper().getLobid2Iterator(m.get("contributor"));
-		while (iterator.hasNext()) {
-			Map<String, Object> contributor = (Map<String, Object>) iterator.next();
-			if (authorsId.compareTo((String) contributor.get("@id")) == 0) {
-				return contributor;
+		if (map.get("contributor") != null) {
+			Iterator iterator =
+					new LRMIMapper().getLobid2Iterator(map.get("contributor"));
+			while (iterator.hasNext()) {
+				Map<String, Object> contributor = (Map<String, Object>) iterator.next();
+				if (authorsId.compareTo((String) contributor.get("@id")) == 0) {
+					return contributor;
+				}
 			}
 		}
 
