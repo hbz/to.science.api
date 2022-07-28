@@ -445,12 +445,11 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			List<String> agentSequence = new ArrayList<>();
-			agentSequence.add("creator");
-			agentSequence.add("contributor");
-			// agentSequence.add("other");
-			applyAffiliation(rdf);
-			applyAcademicDegree(rdf);
+			applyAffiliation("creator", rdf);
+			applyAffiliation("contributor", rdf);
+			applyAcademicDegree("creator", rdf);
+			applyAcademicDegree("contributor", rdf);
+
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -549,46 +548,49 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAffiliation(Map<String, Object> rdf) {
-		List<String> affiliation = (List<String>) rdf.get("affiliation");
-		ArrayList<String> agentsSequence =
-				setSequence(new String[] { "creator", "contributor" });
-		int i = 0;
-		for (int h = 0; h < agentsSequence.size(); h++) {
-			play.Logger.debug(
-					"Amount of affiliations in flat list: " + affiliation.size() + 1);
-			String key = agentsSequence.get(h);
-			if (rdf.containsKey(key)) {
-				Object agentsMap = rdf.get(key);
-				Iterator cit = getLobid2Iterator(agentsMap);
-				while (cit.hasNext()) {
-					Map<String, Object> agent = (Map<String, Object>) cit.next();
-					Map<String, String> affilFields = new LinkedHashMap<>();
-					if (i < affiliation.size()) {
-						play.Logger.debug("found affiliation: " + affiliation.get(i)
-								+ " on position " + i);
-						affilFields.put("@id", affiliation.get(i));
-						affilFields.put("prefLabel", affiliation.get(i));
-						affilFields.put("type", "Organization");
-						i++;
-					} else {
-						/*
-						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
-						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
-						 * verwendet.
-						 */
-						play.Logger.debug("Using default affiliation for " + key + " "
-								+ agent.get("@id") + " = " + agent.get(PREF_LABEL));
-						affilFields.put("@id", "https://ror.org/04tsk2644");
-						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
-						affilFields.put("type", "Organization");
-					}
-					agent.put("affiliation", affilFields);
+	private void applyAffiliation(String key, Map<String, Object> rdf) {
 
+		// set different variable names for creators and contributors
+		Hashtable<String, String> agentType = new Hashtable<>();
+		agentType.put("creator", "affiliation");
+		agentType.put("contributor", "contributorAffiliation");
+
+		List<String> affiliation = new ArrayList<>();
+		if (rdf.get(agentType.get(key)) != null) {
+			affiliation = (List<String>) rdf.get(agentType.get(key));
+		}
+		play.Logger.debug("Amount of " + key + " " + agentType.get(key)
+				+ " in flat list: " + affiliation.size());
+
+		if (rdf.containsKey(key)) {
+			Object agentsMap = rdf.get(key);
+			Iterator cit = getLobid2Iterator(agentsMap);
+			int i = 0;
+			while (cit.hasNext()) {
+				// write the next creatorObject into map
+				Map<String, Object> agent = (Map<String, Object>) cit.next();
+				Map<String, String> affilFields = new LinkedHashMap<>();
+				// each creator should have one (and only one) affiliation from the
+				// affilition list
+				if (i < affiliation.size()) {
+					play.Logger.debug(
+							"found affiliation: " + affiliation.get(i) + " on position " + i);
+					affilFields.put("@id", affiliation.get(i));
+					affilFields.put("prefLabel", affiliation.get(i));
+					affilFields.put("type", "Organization");
+				} else {
+					// merde: we have more agents than affiliations.
+					// Something went wrong
+					play.Logger.debug("Using default affiliation for " + key + " "
+							+ agent.get("@id") + " = " + agent.get(PREF_LABEL));
+					affilFields.put("@id", "https://ror.org/04tsk2644");
+					affilFields.put("prefLabel", "Ruhr-Universität Bochum");
+					affilFields.put("type", "Organization");
 				}
+				agent.put("affiliation", affilFields);
+				i++;
 			}
 		}
-
 	}
 
 	/**
@@ -597,47 +599,51 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAcademicDegree(Map<String, Object> rdf) {
-		List<String> academicDegree = (List<String>) rdf.get("academicDegree");
-		ArrayList<String> agentsSequence =
-				setSequence(new String[] { "creator", "contributor" });
+	private void applyAcademicDegree(String key, Map<String, Object> rdf) {
 
-		int i = 0;
-		for (int h = 0; h < agentsSequence.size(); h++) {
-			String key = agentsSequence.get(h);
-			if (rdf.containsKey(key)) {
-				Object agentsMap = rdf.get(key);
-				Iterator cit = getLobid2Iterator(agentsMap);
-				while (cit.hasNext()) {
-					Map<String, Object> agent = (Map<String, Object>) cit.next();
-					Map<String, String> acadDegreeFields = new LinkedHashMap<>();
-					if (i < academicDegree.size()) {
-						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
-								+ " on position " + i);
-						acadDegreeFields.put("@id", academicDegree.get(i));
-						acadDegreeFields.put("prefLabel",
-								academicDegree.get(i).replace(
-										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-										""));
-					} else {
-						/*
-						 * Es sind nicht genügend akademische Grade in der sequentiellen
-						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
-						 * Default-Wert verwendet.
-						 */
-						play.Logger.debug("Using default academic degree for " + key + " "
-								+ agent.get(PREF_LABEL));
-						acadDegreeFields.put("@id",
-								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
-						acadDegreeFields.put("prefLabel", "keine Angabe");
-					}
-					agent.put("academicDegree", acadDegreeFields);
-					i++;
-				}
-			}
+		// set different variable names for creators and contributors
+		Hashtable<String, String> agentType = new Hashtable<>();
+		agentType.put("creator", "academicDegree");
+		agentType.put("contributor", "contributorAcademicDegree");
 
+		List<String> academicDegree = new ArrayList<>();
+		if (rdf.get(agentType.get(key)) != null) {
+			academicDegree = (List<String>) rdf.get(agentType.get(key));
 		}
+		play.Logger.debug("Amount of " + key + " " + agentType.get(key)
+				+ " in flat list: " + academicDegree.size());
 
+		if (rdf.containsKey(key)) {
+			Object agentsMap = rdf.get(key);
+			Iterator cit = getLobid2Iterator(agentsMap);
+			int i = 0;
+			while (cit.hasNext()) {
+				Map<String, Object> agent = (Map<String, Object>) cit.next();
+				Map<String, String> acadDegreeFields = new LinkedHashMap<>();
+				if (i < academicDegree.size()) {
+					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
+							+ " on position " + i);
+					acadDegreeFields.put("@id", academicDegree.get(i));
+					acadDegreeFields.put("prefLabel",
+							academicDegree.get(i).replace(
+									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+									""));
+				} else {
+					/*
+					 * Es sind nicht genügend akademische Grade in der sequentiellen Liste
+					 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
+					 * verwendet.
+					 */
+					play.Logger.debug("Using default academic degree for " + key + " "
+							+ agent.get(PREF_LABEL));
+					acadDegreeFields.put("@id",
+							"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
+					acadDegreeFields.put("prefLabel", "keine Angabe");
+				}
+				agent.put("academicDegree", acadDegreeFields);
+				i++;
+			}
+		}
 	}
 
 	private void addParts(Map<String, Object> rdf) {
