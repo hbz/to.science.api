@@ -57,6 +57,7 @@ import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
+import services.GenericPropertiesLoader;
 
 /**
  * @author jan schnasse
@@ -555,6 +556,8 @@ public class JsonMapper {
 		agentType.put("creator", "affiliation");
 		agentType.put("contributor", "contributorAffiliation");
 
+		LinkedHashMap<String, String> affilLabelMap =
+				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
 		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
 			affiliation = (List<String>) rdf.get(agentType.get(key));
@@ -576,7 +579,7 @@ public class JsonMapper {
 					play.Logger.debug(
 							"found affiliation: " + affiliation.get(i) + " on position " + i);
 					affilFields.put("@id", affiliation.get(i));
-					affilFields.put("prefLabel", affiliation.get(i));
+					affilFields.put("prefLabel", affilLabelMap.get(affiliation.get(i)));
 					affilFields.put("type", "Organization");
 				} else {
 					// merde: we have more agents than affiliations.
@@ -1576,12 +1579,16 @@ public class JsonMapper {
 		return lIterator;
 	}
 
-	private ArrayList<String> setSequence(String[] fields) {
-		ArrayList<String> sequence = new ArrayList<>();
-		for (int i = 0; i < fields.length; i++) {
-			sequence.add(fields[i]);
-		}
-		return sequence;
+	/**
+	 * @param properties
+	 * @return
+	 */
+	private static LinkedHashMap<String, String> getPrefLabelMap(
+			String properties) {
+		LinkedHashMap<String, String> map = new LinkedHashMap<>();
+		GenericPropertiesLoader GenProp = new GenericPropertiesLoader();
+		map.putAll(GenProp.loadVocabMap(properties));
+		return map;
 	}
 
 }
