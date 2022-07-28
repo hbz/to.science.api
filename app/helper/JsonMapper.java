@@ -57,7 +57,7 @@ import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
-import services.GenericPropertiesLoader;
+import helper.GenericPropertiesLoader;
 
 /**
  * @author jan schnasse
