@@ -1424,8 +1424,10 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-
-						JSONObject obj2 = obj.getJSONObject("academicDegree");
+						JSONObject obj2 = new JSONObject();
+						if(obj.getJSONObject("academicDegree") != null) {
+							obj2 = obj.getJSONObject("academicDegree");
+						}
 						academicDegreeId = new String(obj2.getString("id"));
 						academicDegreeType = new String(obj2.getString("type"));
 
@@ -1435,7 +1437,10 @@ public class JsonMapper {
 						creatorMap.put("academicDegree", academicDegreeMap);
 					}
 					if (obj.has("affiliation")) {
-						JSONObject obj2 = obj.getJSONObject("affiliation");
+						JSONObject obj2 = new JSONObject();
+						if(obj.getJSONObject("affiliation"){
+							obj2 = obj.getJSONObject("affiliation");
+						}
 						affiliationId = new String(obj2.getString("id"));
 						affiliationType = new String(obj2.getString("type"));
 
