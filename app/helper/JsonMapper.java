@@ -446,10 +446,10 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			// applyAffiliation("creator", rdf);
-			// applyAffiliation("contributor", rdf);
-			// applyAcademicDegree("creator", rdf);
-			// applyAcademicDegree("contributor", rdf);
+			applyAffiliation("creator", rdf);
+			applyAffiliation("contributor", rdf);
+			applyAcademicDegree("creator", rdf);
+			applyAcademicDegree("contributor", rdf);
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);
@@ -1285,7 +1285,7 @@ public class JsonMapper {
 	 * @return Die Daten im Format lobid2-RDF
 	 */
 	public Map<String, Object> getLd2Lobidify2Lrmi(Node n, String content) {
-		/* Mapping von LRMI.json nach lobid2.json */
+		/* Mapping von LRMI.json nach lobid2.json = json2 */
 		this.node = n;
 		try {
 			// Neues JSON-Objekt anlegen; für lobid2-Daten
@@ -1396,6 +1396,8 @@ public class JsonMapper {
 			}
 
 			String creatorName = null;
+			String academicDegreeId = null;
+			String academicDegreeType = null;
 			String affiliationId = null;
 			String affiliationType = null;
 			if (lrmiJSONObject.has("creator")) {
@@ -1425,6 +1427,14 @@ public class JsonMapper {
 						creatorMap.put("academicDegree",
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
 										+ obj.getString("honoricPrefix"));
+						JSONObject obj2 = obj.getJSONObject("academicDegree");
+						academicDegreeId = new String(obj2.getString("id"));
+						academicDegreeType = new String(obj2.getString("type"));
+
+						Map<String, Object> academicDegreeMap = new TreeMap<>();
+						academicDegreeMap.put("@id", academicDegreeId);
+						academicDegreeMap.put("type", academicDegreeType);
+						creatorMap.put("academicDegree", academicDegreeMap);
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
