@@ -1424,9 +1424,7 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-						creatorMap.put("academicDegree",
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-										+ obj.getString("honoricPrefix"));
+
 						JSONObject obj2 = obj.getJSONObject("academicDegree");
 						academicDegreeId = new String(obj2.getString("id"));
 						academicDegreeType = new String(obj2.getString("type"));
