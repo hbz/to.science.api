@@ -1431,11 +1431,11 @@ public class JsonMapper {
 
 						Map<String, Object> academicDegreeMap = new TreeMap<>();
 						academicDegreeMap.put("@id", academicDegreeId);
-						academicDegreeMap.put("prefLabel", academicDegreeType);
+						academicDegreeMap.put("prefLabel", honoricPrefix);
 						creatorMap.put("academicDegree", academicDegreeMap);
 					}
 					if (obj.has("affiliation")) {
-						JSONObject affilObj = new JSONObject("affiliation");
+						JSONObject affilObj = obj.getJSONObject("affiliation");
 						affiliationId = new String(affilObj.getString("id"));
 						affiliationType = new String(affilObj.getString("type"));
 
@@ -1468,7 +1468,7 @@ public class JsonMapper {
 
 						Map<String, Object> academicDegreeMap = new TreeMap<>();
 						academicDegreeMap.put("@id", academicDegreeId);
-						academicDegreeMap.put("prefLabel", academicDegreeType);
+						academicDegreeMap.put("prefLabel", honoricPrefix);
 						contributorMap.put("academicDegree", academicDegreeMap);
 					}
 					if (obj.has("affiliation")) {
