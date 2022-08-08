@@ -1424,13 +1424,14 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-						JSONObject hPrefixObj = new JSONObject("honoricPrefix");
-						academicDegreeId = new String(hPrefixObj.getString("id"));
-						academicDegreeType = new String(hPrefixObj.getString("type"));
+						String honoricPrefix = obj.getString("honoricPrefix");
+						academicDegreeId = new String(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
+										+ honoricPrefix);
 
 						Map<String, Object> academicDegreeMap = new TreeMap<>();
 						academicDegreeMap.put("@id", academicDegreeId);
-						academicDegreeMap.put("type", academicDegreeType);
+						academicDegreeMap.put("prefLabel", academicDegreeType);
 						creatorMap.put("academicDegree", academicDegreeMap);
 					}
 					if (obj.has("affiliation")) {
@@ -1460,9 +1461,15 @@ public class JsonMapper {
 						contributorMap.put("@id", obj.getString("id"));
 					}
 					if (obj.has("honoricPrefix")) {
-						contributorMap.put("academicDegree",
+						String honoricPrefix = obj.getString("honoricPrefix");
+						academicDegreeId = new String(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-										+ obj.getString("honoricPrefix"));
+										+ honoricPrefix);
+
+						Map<String, Object> academicDegreeMap = new TreeMap<>();
+						academicDegreeMap.put("@id", academicDegreeId);
+						academicDegreeMap.put("prefLabel", academicDegreeType);
+						contributorMap.put("academicDegree", academicDegreeMap);
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
