@@ -553,7 +553,7 @@ public class JsonMapper {
 
 		// set different variable names for creators and contributors
 		Hashtable<String, String> agentType = new Hashtable<>();
-		agentType.put("creator", "affiliation");
+		agentType.put("creator", "creatorAffiliation");
 		agentType.put("contributor", "contributorAffiliation");
 
 		LinkedHashMap<String, String> affilLabelMap =
@@ -606,7 +606,7 @@ public class JsonMapper {
 
 		// set different variable names for creators and contributors
 		Hashtable<String, String> agentType = new Hashtable<>();
-		agentType.put("creator", "academicDegree");
+		agentType.put("creator", "creatorAcademicDegree");
 		agentType.put("contributor", "contributorAcademicDegree");
 
 		List<String> academicDegree = new ArrayList<>();
