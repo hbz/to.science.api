@@ -558,14 +558,19 @@ public class JsonMapper {
 
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
-		List<String> affiliation = new ArrayList<>();
+
+		List<String> affiliation = null;
+		// check if creatorAffiliation or contributorAffiliation Array has any
+		// content
 		if (rdf.get(agentType.get(key)) != null) {
 			affiliation = (List<String>) rdf.get(agentType.get(key));
+			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
+					+ " in flat list: " + affiliation.size());
 		}
-		play.Logger.debug("Amount of " + key + " " + agentType.get(key)
-				+ " in flat list: " + affiliation.size());
 
-		if (rdf.containsKey(key)) {
+		// replace existing affiliation if creatorAffiliation or
+		// contributorAffiliation Array has any content only
+		if (affiliation != null && rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
 			Iterator cit = getLobid2Iterator(agentsMap);
 			int i = 0;
@@ -609,14 +614,18 @@ public class JsonMapper {
 		agentType.put("creator", "creatorAcademicDegree");
 		agentType.put("contributor", "contributorAcademicDegree");
 
-		List<String> academicDegree = new ArrayList<>();
+		List<String> academicDegree = null;
+		// check if creatorAcademicDegree or contributorAcademicDegree Array has any
+		// content
 		if (rdf.get(agentType.get(key)) != null) {
 			academicDegree = (List<String>) rdf.get(agentType.get(key));
+			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
+					+ " in flat list: " + academicDegree.size());
 		}
-		play.Logger.debug("Amount of " + key + " " + agentType.get(key)
-				+ " in flat list: " + academicDegree.size());
 
-		if (rdf.containsKey(key)) {
+		// replace existing academicDegree if creatorAcademicDegree or
+		// contributorAcademicDegree Array has any content only
+		if (academicDegree != null && rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
 			Iterator cit = getLobid2Iterator(agentsMap);
 			int i = 0;
