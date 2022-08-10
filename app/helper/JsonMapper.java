@@ -559,18 +559,14 @@ public class JsonMapper {
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
 
-		List<String> affiliation = null;
-		// check if creatorAffiliation or contributorAffiliation Array has any
-		// content
+		List<String> affiliation = new ArrayList<String>();
 		if (rdf.get(agentType.get(key)) != null) {
 			affiliation = (List<String>) rdf.get(agentType.get(key));
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + affiliation.size());
 		}
 
-		// replace existing affiliation if creatorAffiliation or
-		// contributorAffiliation Array has any content only
-		if (affiliation != null && rdf.containsKey(key)) {
+		if (rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
 			Iterator cit = getLobid2Iterator(agentsMap);
 			int i = 0;
@@ -578,8 +574,6 @@ public class JsonMapper {
 				// write the next creatorObject into map
 				Map<String, Object> agent = (Map<String, Object>) cit.next();
 				Map<String, String> affilFields = new LinkedHashMap<>();
-				// each creator should have one (and only one) affiliation from the
-				// affilition list
 				if (i < affiliation.size()) {
 					play.Logger.debug(
 							"found affiliation: " + affiliation.get(i) + " on position " + i);
@@ -589,11 +583,14 @@ public class JsonMapper {
 				} else {
 					// merde: we have more agents than affiliations.
 					// Something went wrong
-					play.Logger.debug("Using default affiliation for " + key + " "
-							+ agent.get("@id") + " = " + agent.get(PREF_LABEL));
-					affilFields.put("@id", "https://ror.org/04tsk2644");
-					affilFields.put("prefLabel", "Ruhr-Universität Bochum");
-					affilFields.put("type", "Organization");
+					// prevent existing affiliations from being overwritten by default
+					if (!agent.containsKey("affiliation")) {
+						play.Logger.debug("Using default affiliation for " + key + " "
+								+ agent.get("@id") + " = " + agent.get(PREF_LABEL));
+						affilFields.put("@id", "https://ror.org/04tsk2644");
+						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
+						affilFields.put("type", "Organization");
+					}
 				}
 				agent.put("affiliation", affilFields);
 				i++;
@@ -614,18 +611,14 @@ public class JsonMapper {
 		agentType.put("creator", "creatorAcademicDegree");
 		agentType.put("contributor", "contributorAcademicDegree");
 
-		List<String> academicDegree = null;
-		// check if creatorAcademicDegree or contributorAcademicDegree Array has any
-		// content
+		List<String> academicDegree = new ArrayList<String>();
 		if (rdf.get(agentType.get(key)) != null) {
 			academicDegree = (List<String>) rdf.get(agentType.get(key));
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + academicDegree.size());
 		}
 
-		// replace existing academicDegree if creatorAcademicDegree or
-		// contributorAcademicDegree Array has any content only
-		if (academicDegree != null && rdf.containsKey(key)) {
+		if (rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
 			Iterator cit = getLobid2Iterator(agentsMap);
 			int i = 0;
@@ -640,19 +633,22 @@ public class JsonMapper {
 							academicDegree.get(i).replace(
 									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 									""));
+					agent.put("academicDegree", acadDegreeFields);
 				} else {
 					/*
 					 * Es sind nicht genügend akademische Grade in der sequentiellen Liste
 					 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
 					 * verwendet.
 					 */
-					play.Logger.debug("Using default academic degree for " + key + " "
-							+ agent.get(PREF_LABEL));
-					acadDegreeFields.put("@id",
-							"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
-					acadDegreeFields.put("prefLabel", "keine Angabe");
+					if (!agent.containsKey("academicDegree")) {
+						play.Logger.debug("Using default academic degree for " + key + " "
+								+ agent.get(PREF_LABEL));
+						acadDegreeFields.put("@id",
+								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
+						acadDegreeFields.put("prefLabel", "keine Angabe");
+						agent.put("academicDegree", acadDegreeFields);
+					}
 				}
-				agent.put("academicDegree", acadDegreeFields);
 				i++;
 			}
 		}
