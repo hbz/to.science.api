@@ -580,6 +580,7 @@ public class JsonMapper {
 					affilFields.put("@id", affiliation.get(i));
 					affilFields.put("prefLabel", affilLabelMap.get(affiliation.get(i)));
 					affilFields.put("type", "Organization");
+					agent.put("affiliation", affilFields);
 				} else {
 					// merde: we have more agents than affiliations.
 					// Something went wrong
@@ -590,9 +591,9 @@ public class JsonMapper {
 						affilFields.put("@id", "https://ror.org/04tsk2644");
 						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
 						affilFields.put("type", "Organization");
+						agent.put("affiliation", affilFields);
 					}
 				}
-				agent.put("affiliation", affilFields);
 				i++;
 			}
 		}
