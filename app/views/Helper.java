@@ -400,9 +400,8 @@ public class Helper {
 		}
 		return result;
 	}
-
-	public static List<Map<String, Object>> listContributors(
-			Map<String, Object> h) {
+	
+	public static List<Map<String, Object>> listContributors(Map<String, Object> h) {
 		List<Map<String, Object>> result = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
 		for (JsonNode c : hit.at("/contribution")) {
@@ -410,10 +409,7 @@ public class Helper {
 			String role = c.at("/role/0/label").asText();
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
-			play.Logger.warn("Name: " + name);
-			play.Logger.warn("Role: " + role);
-			play.Logger.warn("RoleUri: " + roleUri);
-			play.Logger.warn("Uri: " + uri);
+
 			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)) {
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
