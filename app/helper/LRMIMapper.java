@@ -208,35 +208,55 @@ public class LRMIMapper {
 				lrmiJsonContent.put("learningResourceType", arr);
 			}
 
-			// this is a very fragile hack, due to the usage of flat triples for md
-			// mappings
-			ArrayList<String> acadDegree = new ArrayList<>();
-			if (rdf.containsKey("academicDegree")) {
-				iterator = getLobid2Iterator(rdf.get("academicDegree"));
+			ArrayList<String> creatorAcadDegree = new ArrayList<>();
+			if (rdf.containsKey("creatorAcademicDegree")) {
+				iterator = getLobid2Iterator(rdf.get("creatorAcademicDegree"));
 				while (iterator.hasNext()) {
 					String degreeId = (String) iterator.next();
-					acadDegree.add(degreeId);
+					creatorAcadDegree.add(degreeId);
 				}
-				play.Logger.debug(
-						"Amount of academic degrees in flat List: " + acadDegree.size());
+				play.Logger.debug("Amount of creator academic degrees in flat List: "
+						+ creatorAcadDegree.size());
 			}
 
-			ArrayList<String> affiliation = new ArrayList<>();
-			if (rdf.containsKey("affiliation")) {
-				iterator = getLobid2Iterator(rdf.get("affiliation"));
+			ArrayList<String> contributorAcadDegree = new ArrayList<>();
+			if (rdf.containsKey("contributorAcademicDegree")) {
+				iterator = getLobid2Iterator(rdf.get("contributorAcademicDegree"));
+				while (iterator.hasNext()) {
+					String degreeId = (String) iterator.next();
+					contributorAcadDegree.add(degreeId);
+				}
+				play.Logger
+						.debug("Amount of contributor academic degrees in flat List: "
+								+ contributorAcadDegree.size());
+			}
+
+			ArrayList<String> creatorAffiliation = new ArrayList<>();
+			if (rdf.containsKey("creatorAaffiliation")) {
+				iterator = getLobid2Iterator(rdf.get("creatorAffiliation"));
 				while (iterator.hasNext()) {
 					String rorId = (String) iterator.next();
-					affiliation.add(rorId);
+					creatorAffiliation.add(rorId);
 				}
-				play.Logger.debug(
-						"Amount of affiliations in flat List: " + affiliation.size());
+				play.Logger.debug("Amount of creator affiliations in flat List: "
+						+ creatorAffiliation.size());
 			}
 
+			ArrayList<String> contributorAffiliation = new ArrayList<>();
+			if (rdf.containsKey("contributorAffiliation")) {
+				iterator = getLobid2Iterator(rdf.get("contributorAffiliation"));
+				while (iterator.hasNext()) {
+					String rorId = (String) iterator.next();
+					contributorAffiliation.add(rorId);
+				}
+				play.Logger.debug("Amount of contributor affiliations in flat List: "
+						+ contributorAffiliation.size());
+			}
 			int attribCounter = 0;
-			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
-					lrmiJsonContent, "creator");
-			attribCounter = mapAuthor(attribCounter, rdf, acadDegree, affiliation,
-					lrmiJsonContent, "contributor");
+			attribCounter = mapAuthor(attribCounter, rdf, creatorAcadDegree,
+					creatorAffiliation, lrmiJsonContent, "creator");
+			attribCounter = mapAuthor(attribCounter, rdf, contributorAcadDegree,
+					contributorAffiliation, lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
 				arr = new JSONArray();
@@ -428,15 +448,20 @@ public class LRMIMapper {
 						obj.put("honoricPrefix", "Keine Angabe");
 					}
 					if (attribCounter < affiliation.size()) {
-						obj.put("affiliation", affiliation.get(attribCounter));
+						JSONObject affObj = new JSONObject();
+						affObj.put("@id", affiliation.get(attribCounter));
+						affObj.put("type", "Organization");
+						obj.put("affiliation", affObj);
 					} else {
 						/*
 						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
 						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
 						 * verwendet.
 						 */
-						obj.put("affiliation", "Ruhr-Universität Bochum"); // Ruhr-Uni
-																																// Bochum
+						JSONObject affObj = new JSONObject();
+						affObj.put("@id", "");
+						affObj.put("type", "Organization");
+						obj.put("affiliation", affObj);
 					}
 					attribCounter++;
 					arr.put(obj);
