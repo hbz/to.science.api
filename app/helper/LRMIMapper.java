@@ -217,9 +217,10 @@ public class LRMIMapper {
 					String degreeId = (String) iterator.next();
 					acadDegree.add(degreeId);
 				}
+				play.Logger.debug(
+						"Amount of academic degrees in flat List: " + acadDegree.size());
 			}
 
-			Map<String, Object> affiliationMap = null;
 			ArrayList<String> affiliation = new ArrayList<>();
 			if (rdf.containsKey("affiliation")) {
 				iterator = getLobid2Iterator(rdf.get("affiliation"));
@@ -227,6 +228,8 @@ public class LRMIMapper {
 					String rorId = (String) iterator.next();
 					affiliation.add(rorId);
 				}
+				play.Logger.debug(
+						"Amount of affiliations in flat List: " + affiliation.size());
 			}
 
 			int attribCounter = 0;
@@ -246,16 +249,13 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("license")) {
-				arr = new JSONArray();
+				JSONObject licenseObj = new JSONObject();
 				iterator = getLobid2Iterator(rdf.get("license"));
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
-					obj = new JSONObject();
-					// obj.put("name", map.get("prefLabel"));
-					obj.put("id", map.get("@id"));
-					arr.put(obj);
+					licenseObj.put("id", map.get("@id"));
 				}
-				lrmiJsonContent.put("license", arr);
+				lrmiJsonContent.put("license", licenseObj);
 			}
 
 			if (rdf.containsKey("institution")) {
@@ -309,7 +309,13 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("funder")) {
-				lrmiJsonContent.put("funder", rdf.get("funder"));
+				JSONObject funderObj = new JSONObject();
+				iterator = getLobid2Iterator(rdf.get("funder"));
+				while (iterator.hasNext()) {
+					funderObj.put("type", "FunderScheme");
+					funderObj.put("url", map.get("prefLabel"));
+				}
+				lrmiJsonContent.put("funder", funderObj);
 			}
 
 			/**
@@ -409,7 +415,6 @@ public class LRMIMapper {
 					JSONObject obj = new JSONObject();
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
-					obj.put("type", map.get("type"));
 					if (attribCounter < acadDegree.size()) {
 						obj.put("honoricPrefix", acadDegree.get(attribCounter).replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
