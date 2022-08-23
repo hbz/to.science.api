@@ -629,12 +629,10 @@ public class JsonMapper {
 				if (i < academicDegree.size()) {
 					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 							+ " on position " + i);
-					acadDegreeFields.put("@id", academicDegree.get(i));
-					acadDegreeFields.put("prefLabel",
+					agent.put("academicDegree",
 							academicDegree.get(i).replace(
 									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 									""));
-					agent.put("academicDegree", acadDegreeFields);
 				} else {
 					/*
 					 * Es sind nicht genügend akademische Grade in der sequentiellen Liste
@@ -644,10 +642,7 @@ public class JsonMapper {
 					if (!agent.containsKey("academicDegree")) {
 						play.Logger.debug("Using default academic degree for " + key + " "
 								+ agent.get(PREF_LABEL));
-						acadDegreeFields.put("@id",
-								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
-						acadDegreeFields.put("prefLabel", "keine Angabe");
-						agent.put("academicDegree", acadDegreeFields);
+						agent.put("academicDegree", "unknown");
 					}
 				}
 				i++;
@@ -1403,7 +1398,6 @@ public class JsonMapper {
 
 			String creatorName = null;
 			String academicDegreeId = null;
-			String academicDegreeType = null;
 			String affiliationId = null;
 			String affiliationType = null;
 			if (lrmiJSONObject.has("creator")) {
