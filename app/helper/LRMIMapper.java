@@ -167,6 +167,12 @@ public class LRMIMapper {
 				lrmiJsonContent.put("name", iterator.next());
 			}
 
+			if (rdf.containsKey("description")) {
+				iterator = getLobid2Iterator(rdf.get("description"));
+				// lrmiData only supports one description
+				lrmiJsonContent.put("description", iterator.next());
+			}
+
 			if (rdf.containsKey("medium")) {
 				iterator = getLobid2Iterator(rdf.get("medium"));
 				// Hole ein Objekt aus LRMI-JSON oder lege es neu an
@@ -203,7 +209,7 @@ public class LRMIMapper {
 						obj.put("prefLabel", subObj);
 					}
 					obj.put("id", map.get("@id"));
-					break; // nimm nur den ersten Medientypen
+					arr.put(obj);
 				}
 				lrmiJsonContent.put("learningResourceType", arr);
 			}
@@ -253,9 +259,9 @@ public class LRMIMapper {
 						+ contributorAffiliation.size());
 			}
 			int attribCounter = 0;
-			attribCounter = mapAuthor(attribCounter, rdf, creatorAcadDegree,
+			attribCounter = mapAgent(attribCounter, rdf, creatorAcadDegree,
 					creatorAffiliation, lrmiJsonContent, "creator");
-			attribCounter = mapAuthor(attribCounter, rdf, contributorAcadDegree,
+			attribCounter = mapAgent(attribCounter, rdf, contributorAcadDegree,
 					contributorAffiliation, lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
@@ -419,22 +425,26 @@ public class LRMIMapper {
 	 * @param attribCounter der Zähler für die direkt unter der Ressource
 	 *          sitzenden RDF-Arrays adademicDegree und Affiliation
 	 * @param rdf die linked Data der Ressource im Format RDF als Java Map
-	 * @param authorType z.B. "creator" oder "contributor"
+	 * @param agentType z.B. "creator" oder "contributor"
 	 * @return den neuen Zähler für die linearen Listen
 	 */
-	private int mapAuthor(int attribCounter, Map<String, Object> rdf,
+	private int mapAgent(int attribCounter, Map<String, Object> rdf,
 			ArrayList<String> acadDegree, ArrayList<String> affiliation,
-			JSONObject lrmiJsonContent, String authorType) throws RuntimeException {
+			JSONObject lrmiJsonContent, String agentType) throws RuntimeException {
 		try {
-			if (rdf.containsKey(authorType)) {
-				play.Logger.debug("add " + authorType + "\'s attributes to lrmi");
+			if (rdf.containsKey(agentType)) {
+				play.Logger.debug("add " + agentType + "\'s attributes to lrmi");
 				JSONArray arr = new JSONArray();
-				Iterator iterator = getLobid2Iterator(rdf.get(authorType));
+				Iterator iterator = getLobid2Iterator(rdf.get(agentType));
 				while (iterator.hasNext()) {
 					Map<String, Object> map = (Map<String, Object>) iterator.next();
 					JSONObject obj = new JSONObject();
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
+					obj.put("type", "Person");
+					if (map.get("@id").toString().startsWith("https://ror.org")) {
+						obj.put("type", "Organization");
+					}
 					if (attribCounter < acadDegree.size()) {
 						obj.put("honoricPrefix", acadDegree.get(attribCounter).replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
@@ -466,12 +476,12 @@ public class LRMIMapper {
 					attribCounter++;
 					arr.put(obj);
 				}
-				lrmiJsonContent.put(authorType, arr);
+				lrmiJsonContent.put(agentType, arr);
 			}
 			return attribCounter;
 		} catch (Exception e) {
-			play.Logger.error(authorType + " content could not be mapped!", e);
-			throw new RuntimeException(authorType + " content could not be mapped!",
+			play.Logger.error(agentType + " content could not be mapped!", e);
+			throw new RuntimeException(agentType + " content could not be mapped!",
 					e);
 		}
 
