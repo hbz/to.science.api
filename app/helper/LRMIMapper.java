@@ -153,7 +153,7 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("contentType")) {
-				iterator = getLobid2Iterator(rdf.get("contentTyp"));
+				iterator = getLobid2Iterator(rdf.get("contentType"));
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					arr.put(iterator.next());
@@ -238,7 +238,7 @@ public class LRMIMapper {
 			}
 
 			ArrayList<String> creatorAffiliation = new ArrayList<>();
-			if (rdf.containsKey("creatorAaffiliation")) {
+			if (rdf.containsKey("creatorAffiliation")) {
 				iterator = getLobid2Iterator(rdf.get("creatorAffiliation"));
 				while (iterator.hasNext()) {
 					String rorId = (String) iterator.next();
@@ -335,13 +335,8 @@ public class LRMIMapper {
 			}
 
 			if (rdf.containsKey("funder")) {
-				JSONObject funderObj = new JSONObject();
 				iterator = getLobid2Iterator(rdf.get("funder"));
-				while (iterator.hasNext()) {
-					funderObj.put("type", "FunderScheme");
-					funderObj.put("url", map.get("prefLabel"));
-				}
-				lrmiJsonContent.put("funder", funderObj);
+				lrmiJsonContent.put("funder", iterator.next());
 			}
 
 			/**
