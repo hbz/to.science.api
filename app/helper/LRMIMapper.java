@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -455,6 +456,11 @@ public class LRMIMapper {
 					if (attribCounter < affiliation.size()) {
 						JSONObject affObj = new JSONObject();
 						affObj.put("@id", affiliation.get(attribCounter));
+						LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+						GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+						genPropMap.putAll(genProp
+								.loadVocabMap("ResearchOrganizationsRegistry-de.properties"));
+						affObj.put("name", genPropMap.get(affiliation.get(attribCounter)));
 						affObj.put("type", "Organization");
 						obj.put("affiliation", affObj);
 					} else {
