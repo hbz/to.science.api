@@ -58,7 +58,7 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import util.AdHocUriProvider;
-import util.JsonMapperUtils;
+import util.LobidMapperUtils;
 import helper.GenericPropertiesLoader;
 
 /**
@@ -571,7 +571,7 @@ public class JsonMapper {
 
 		if (rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
-			Iterator cit = getJsonObjectIterator(agentsMap);
+			Iterator cit = getLobidObjectIterator(agentsMap);
 			int i = 0;
 			while (cit.hasNext()) {
 				// write the next creatorObject into map
@@ -624,7 +624,7 @@ public class JsonMapper {
 
 		if (rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
-			Iterator cit = getJsonObjectIterator(agentsMap);
+			Iterator cit = getLobidObjectIterator(agentsMap);
 			int i = 0;
 			while (cit.hasNext()) {
 				Map<String, Object> agent = (Map<String, Object>) cit.next();
@@ -1566,11 +1566,10 @@ public class JsonMapper {
 			if (lrmiJSONObject.has("about")) {
 				JSONArray departArr = new JSONArray();
 				JSONArray aboutArray = (JSONArray) lrmiJSONObject.get("about");
-				Iterator<Object> aboutIt = aboutArray.iterator();
 
-				while (aboutIt.hasNext()) {
+				for (int i = 0; i < aboutArray.length(); i++) {
 					JSONObject department = new JSONObject();
-					Map<String, Object> abtMap = (Map<String, Object>) aboutIt.next();
+					Map<String, Object> abtMap = (Map<String, Object>) aboutArray.get(i);
 					if (abtMap.containsKey("inScheme")) {
 						Map<String, Object> inScheme =
 								(Map<String, Object>) abtMap.get("inScheme");
@@ -1605,7 +1604,7 @@ public class JsonMapper {
 	 * @param iObj a JSONObject of unknown internal structure
 	 * @return an Iterator representing the JSONObject
 	 */
-	public Iterator getJsonObjectIterator(Object iObj) {
+	public Iterator getLobidObjectIterator(Object iObj) {
 		Iterator lIterator = null;
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =

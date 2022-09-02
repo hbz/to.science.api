@@ -12,7 +12,7 @@ import java.util.Map;
  * @author aquast
  *
  */
-public class JsonMapperUtils {
+public class LobidMapperUtils {
 
 	/**
 	 * This IteratorBuilder checks if JSONObject is kind of JSONArray or kind of
