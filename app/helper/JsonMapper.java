@@ -1481,6 +1481,7 @@ public class JsonMapper {
 				rdf.put("contributor", contributors);
 			}
 
+			// template for Mapping of Array
 			if (lrmiJSONObject.has("description")) {
 				List<String> descriptions = new ArrayList<>();
 				myObj = lrmiJSONObject.get("description");
@@ -1538,14 +1539,17 @@ public class JsonMapper {
 				List<Map<String, Object>> subject = new ArrayList<>();
 				arr = lrmiJSONObject.getJSONArray("keywords");
 				for (int i = 0; i < arr.length(); i++) {
+					AdHocUriProvider ahu = new AdHocUriProvider();
 					Map<String, Object> keywordMap = new TreeMap<>();
 					keyword = arr.getString(i);
 					keywordMap.put("prefLabel", keyword);
+					keywordMap.put("@id", ahu.getAddhocUri(keyword));
 					subject.add(keywordMap);
 				}
 				rdf.put("subject", subject);
 			}
 
+			// HINT: potential Passepartout for Mapping default JsonObjects
 			if (lrmiJSONObject.has("funder")) {
 				obj = lrmiJSONObject.getJSONObject("funder");
 				Map<String, Object> funderMap = new TreeMap<>();

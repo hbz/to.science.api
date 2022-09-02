@@ -470,8 +470,9 @@ public class LRMIMapper {
 						 * verwendet.
 						 */
 						JSONObject affObj = new JSONObject();
-						affObj.put("@id", "");
+						affObj.put("@id", "https://ror.org/");
 						affObj.put("type", "Organization");
+						affObj.put("name", "keine Angabe");
 						obj.put("affiliation", affObj);
 					}
 					attribCounter++;
