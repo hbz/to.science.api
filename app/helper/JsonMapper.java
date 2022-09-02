@@ -1570,9 +1570,8 @@ public class JsonMapper {
 				for (int i = 0; i < aboutArray.length(); i++) {
 					Map<String, Object> department = new TreeMap<>();
 					JSONObject abtMap = aboutArray.getJSONObject(i);
-					if (abtMap.has("inScheme")) {
-						JSONObject inScheme = abtMap.getJSONObject("inScheme");
-						department.put("@id", inScheme.get("id"));
+					if (abtMap.has("id")) {
+						department.put("@id", abtMap.get("id"));
 					}
 					if (abtMap.has("prefLabel")) {
 						JSONObject prefLabelAbout = abtMap.getJSONObject("prefLabel");
