@@ -1565,9 +1565,8 @@ public class JsonMapper {
 
 			if (lrmiJSONObject.has("about")) {
 				JSONArray departArr = new JSONArray();
-				Object aboutArray = lrmiJSONObject.get("about");
-				JsonMapperUtils jmu = new JsonMapperUtils();
-				Iterator aboutIt = jmu.getJsonObjectIterator(aboutArray);
+				JSONArray aboutArray = (JSONArray) lrmiJSONObject.get("about");
+				Iterator<Object> aboutIt = aboutArray.iterator();
 
 				while (aboutIt.hasNext()) {
 					JSONObject department = new JSONObject();

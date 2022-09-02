@@ -31,6 +31,10 @@ public class JsonMapperUtils {
 			HashSet<Map<String, Object>> jHashSet =
 					(HashSet<Map<String, Object>>) iObj;
 			lIterator = jHashSet.iterator();
+		} else {
+			play.Logger.error(
+					"Can't generate Iterator - Object provided to Method is kind of: "
+							+ iObj.getClass().toString());
 		}
 		return lIterator;
 	}
