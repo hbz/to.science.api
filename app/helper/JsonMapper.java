@@ -1565,19 +1565,17 @@ public class JsonMapper {
 
 			if (lrmiJSONObject.has("about")) {
 				JSONArray departArr = new JSONArray();
-				JSONArray aboutArray = (JSONArray) lrmiJSONObject.get("about");
+				JSONArray aboutArray = lrmiJSONObject.getJSONArray("about");
 
 				for (int i = 0; i < aboutArray.length(); i++) {
 					JSONObject department = new JSONObject();
-					Map<String, Object> abtMap = (Map<String, Object>) aboutArray.get(i);
-					if (abtMap.containsKey("inScheme")) {
-						Map<String, Object> inScheme =
-								(Map<String, Object>) abtMap.get("inScheme");
+					JSONObject abtMap = aboutArray.getJSONObject(i);
+					if (abtMap.has("inScheme")) {
+						JSONObject inScheme = abtMap.getJSONObject("inScheme");
 						department.put("@id", inScheme.get("id"));
 					}
-					if (abtMap.containsKey("prefLabel")) {
-						Map<String, Object> prefLabelAbout =
-								(Map<String, Object>) abtMap.get("prefLabel");
+					if (abtMap.has("prefLabel")) {
+						JSONObject prefLabelAbout = abtMap.getJSONObject("prefLabel");
 						department.put("prefLabel", prefLabelAbout.get("de"));
 					}
 					departArr.put(department);
