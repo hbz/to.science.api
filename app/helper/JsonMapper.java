@@ -57,6 +57,8 @@ import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
+import util.AdHocUriProvider;
+import util.JsonMapperUtils;
 import helper.GenericPropertiesLoader;
 
 /**
@@ -81,6 +83,7 @@ public class JsonMapper {
 	final static String transformer = "transformer";
 	final static String catalogId = "catalogId";
 	final static String createdBy = "createdBy";
+
 	final static String submittedBy = "submittedBy";
 	final static String submittedByEmail = "submittedByEmail";
 	final static String legacyId = "legacyId";
@@ -568,7 +571,7 @@ public class JsonMapper {
 
 		if (rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
-			Iterator cit = getLobid2Iterator(agentsMap);
+			Iterator cit = getJsonObjectIterator(agentsMap);
 			int i = 0;
 			while (cit.hasNext()) {
 				// write the next creatorObject into map
@@ -621,7 +624,7 @@ public class JsonMapper {
 
 		if (rdf.containsKey(key)) {
 			Object agentsMap = rdf.get(key);
-			Iterator cit = getLobid2Iterator(agentsMap);
+			Iterator cit = getJsonObjectIterator(agentsMap);
 			int i = 0;
 			while (cit.hasNext()) {
 				Map<String, Object> agent = (Map<String, Object>) cit.next();
@@ -1534,6 +1537,7 @@ public class JsonMapper {
 				rdf.put("institution", institutions);
 			}
 
+			// example for usage of AdHocUriProvider
 			if (lrmiJSONObject.has("keywords")) {
 				String keyword = null;
 				List<Map<String, Object>> subject = new ArrayList<>();
@@ -1543,7 +1547,7 @@ public class JsonMapper {
 					Map<String, Object> keywordMap = new TreeMap<>();
 					keyword = arr.getString(i);
 					keywordMap.put("prefLabel", keyword);
-					keywordMap.put("@id", ahu.getAddhocUri(keyword));
+					keywordMap.put("@id", ahu.getAdhocUri(keyword));
 					subject.add(keywordMap);
 				}
 				rdf.put("subject", subject);
@@ -1557,6 +1561,30 @@ public class JsonMapper {
 				funderMap.put("@id", obj.getString("url"));
 				funderMap.put("prefLabel", obj.getString("url"));
 				rdf.put("funder", funderMap);
+			}
+
+			if (lrmiJSONObject.has("about")) {
+				JSONArray departArr = new JSONArray();
+				Object aboutArray = lrmiJSONObject.getJSONObject("about");
+				JsonMapperUtils jmu = new JsonMapperUtils();
+				Iterator aboutIt = jmu.getJsonObjectIterator(aboutArray);
+
+				while (aboutIt.hasNext()) {
+					JSONObject department = new JSONObject();
+					Map<String, Object> abtMap = (Map<String, Object>) aboutIt.next();
+					if (abtMap.containsKey("inScheme")) {
+						Map<String, Object> inScheme =
+								(Map<String, Object>) abtMap.get("inScheme");
+						department.put("@id", inScheme.get("id"));
+					}
+					if (abtMap.containsKey("prefLabel")) {
+						Map<String, Object> prefLabelAbout =
+								(Map<String, Object>) abtMap.get("prefLabel");
+						department.put("prefLabel", prefLabelAbout.get("de"));
+					}
+					departArr.put(department);
+				}
+				rdf.put("department", departArr);
 			}
 
 			postprocessing(rdf);
@@ -1578,7 +1606,7 @@ public class JsonMapper {
 	 * @param iObj a JSONObject of unknown internal structure
 	 * @return an Iterator representing the JSONObject
 	 */
-	public Iterator getLobid2Iterator(Object iObj) {
+	public Iterator getJsonObjectIterator(Object iObj) {
 		Iterator lIterator = null;
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =

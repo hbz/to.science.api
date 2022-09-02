@@ -1,7 +1,7 @@
 /**
  * 
  */
-package helper;
+package util;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,17 +39,17 @@ public class AdHocUriProvider {
 	 * @param LabelValue the value for which we like to create an AdHocUri
 	 * @return a AdHocUri representing a newly created to.science.label
 	 */
-	public String getAddhocUri(String LabelValue) {
+	public String getAdhocUri(String LabelValue) {
 
 		String adHocUri = null;
 		this.labelValue = LabelValue;
 
-		adHocUri = generateNewAddHocUri();
+		adHocUri = generateNewAdHocUri();
 
 		return adHocUri;
 	}
 
-	private String generateNewAddHocUri() {
+	private String generateNewAdHocUri() {
 		String adHocUri = null;
 
 		play.Logger.debug("Start AdHocUri generation for" + labelValue);
