@@ -562,7 +562,7 @@ public class LRMIMapper {
 				JSONObject funderObj = new JSONObject();
 				funderObj.put("url", map.get("@id"));
 				funderObj.put("type", "FundingScheme");
-				funderObj.put("prefLabel", genPropMap.get(map.get("@id")));
+				funderObj.put("name", genPropMap.get(map.get("@id")));
 
 				lrmiObj.put("funder", funderObj);
 			}

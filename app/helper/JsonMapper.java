@@ -1555,11 +1555,17 @@ public class JsonMapper {
 
 			// HINT: potential Passepartout for Mapping default JsonObjects
 			if (lrmiJSONObject.has("funder")) {
+
+				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
+				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				genPropMap.putAll(genProp.loadVocabMap("Funder.properties"));
+
 				obj = lrmiJSONObject.getJSONObject("funder");
 				Map<String, Object> funderMap = new TreeMap<>();
 				funderMap.put("type", obj.getString("type"));
 				funderMap.put("@id", obj.getString("url"));
-				funderMap.put("prefLabel", obj.getString("url"));
+				funderMap.put("prefLabel", genPropMap.get(obj.getString("url")));
 				rdf.put("funder", funderMap);
 			}
 
@@ -1567,15 +1573,17 @@ public class JsonMapper {
 				List<Map<String, Object>> departArr = new ArrayList<>();
 				JSONArray aboutArray = lrmiJSONObject.getJSONArray("about");
 
+				// Provide resolving for prefLabels from id via GenericPropertiesLoader
+				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
+
 				for (int i = 0; i < aboutArray.length(); i++) {
 					Map<String, Object> department = new TreeMap<>();
 					JSONObject abtMap = aboutArray.getJSONObject(i);
 					if (abtMap.has("id")) {
 						department.put("@id", abtMap.get("id"));
-					}
-					if (abtMap.has("prefLabel")) {
-						JSONObject prefLabelAbout = abtMap.getJSONObject("prefLabel");
-						department.put("prefLabel", prefLabelAbout.get("de"));
+						department.put("prefLabel", genPropMap.get(abtMap.get("id")));
 					}
 					departArr.add(department);
 				}
