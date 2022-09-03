@@ -340,6 +340,28 @@ public class LRMIMapper {
 				lrmiJsonContent.put("funder", iterator.next());
 			}
 
+			if (rdf.containsKey("department")) {
+				iterator = getLobid2Iterator(rdf.get("department"));
+				JSONArray aboutArray = new JSONArray();
+				while (iterator.hasNext()) {
+					map = (Map<String, Object>) iterator.next();
+					JSONObject aboutObj = new JSONObject();
+					JSONObject inSchemeObj = new JSONObject();
+					JSONObject pLObj = new JSONObject();
+					aboutObj.put("id", map.get("@id"));
+					aboutObj.put("type", "Concept");
+
+					inSchemeObj.put("id",
+							"https://w3id.org/kim/hochschulfaechersystematik/scheme");
+					pLObj.put("de", map.get("prefLabel"));
+
+					aboutObj.put("inScheme", inSchemeObj);
+					aboutObj.put("prefLabel", pLObj);
+					aboutArray.put(aboutObj);
+				}
+				lrmiJsonContent.put("about", aboutArray);
+			}
+
 			/**
 			 * - gib die aktualisierten oder neu angelegten LRMI-Daten zurück (Format
 			 * JSON-String)
