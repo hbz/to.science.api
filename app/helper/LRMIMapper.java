@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import actions.Read;
@@ -502,32 +503,36 @@ public class LRMIMapper {
 	public JSONObject lobidDepartment2LrmiAbout(Map<String, Object> lobidMap,
 			JSONObject lrmiObj) {
 
-		if (lobidMap.containsKey("department")) {
-			Iterator iterator = getLobid2Iterator(lobidMap.get("department"));
-			JSONArray aboutArray = new JSONArray();
+		try {
+			if (lobidMap.containsKey("department")) {
+				Iterator iterator = getLobid2Iterator(lobidMap.get("department"));
+				JSONArray aboutArray = new JSONArray();
 
-			// Provide resolving for prefLabels from @id via GenericPropertiesLoader
-			LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-			GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-			genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
+				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
+				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
 
-			while (iterator.hasNext()) {
-				Map<String, Object> map = (Map<String, Object>) iterator.next();
-				JSONObject aboutObj = new JSONObject();
-				JSONObject inSchemeObj = new JSONObject();
-				JSONObject pLObj = new JSONObject();
-				aboutObj.put("id", map.get("@id"));
-				aboutObj.put("type", "Concept");
+				while (iterator.hasNext()) {
+					Map<String, Object> map = (Map<String, Object>) iterator.next();
+					JSONObject aboutObj = new JSONObject();
+					JSONObject inSchemeObj = new JSONObject();
+					JSONObject pLObj = new JSONObject();
+					aboutObj.put("id", map.get("@id"));
+					aboutObj.put("type", "Concept");
 
-				inSchemeObj.put("id",
-						"https://w3id.org/kim/hochschulfaechersystematik/scheme");
-				pLObj.put("de", genPropMap.get(map.get("@id")));
+					inSchemeObj.put("id",
+							"https://w3id.org/kim/hochschulfaechersystematik/scheme");
+					pLObj.put("de", genPropMap.get(map.get("@id")));
 
-				aboutObj.put("inScheme", inSchemeObj);
-				aboutObj.put("prefLabel", pLObj);
-				aboutArray.put(aboutObj);
+					aboutObj.put("inScheme", inSchemeObj);
+					aboutObj.put("prefLabel", pLObj);
+					aboutArray.put(aboutObj);
+				}
+				lrmiObj.put("about", aboutArray);
 			}
-			lrmiObj.put("about", aboutArray);
+		} catch (JSONException e) {
+			play.Logger.error("unable to apply modified about values to LRMI");
 		}
 
 		return lrmiObj;
@@ -543,22 +548,26 @@ public class LRMIMapper {
 	public JSONObject lobidFunder2LrmiFunder(Map<String, Object> lobidMap,
 			JSONObject lrmiObj) {
 
-		if (lobidMap.containsKey("funder")) {
-			Iterator iterator = getLobid2Iterator(lobidMap.get("funder"));
-			JSONArray funderArray = new JSONArray();
+		try {
+			if (lobidMap.containsKey("funder")) {
+				Iterator iterator = getLobid2Iterator(lobidMap.get("funder"));
+				JSONArray funderArray = new JSONArray();
 
-			// Provide resolving for prefLabels from @id via GenericPropertiesLoader
-			LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-			GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-			genPropMap.putAll(genProp.loadVocabMap("Funder.properties"));
+				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
+				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				genPropMap.putAll(genProp.loadVocabMap("Funder.properties"));
 
-			Map<String, Object> map = (Map<String, Object>) iterator.next();
-			JSONObject funderObj = new JSONObject();
-			funderObj.put("url", map.get("@id"));
-			funderObj.put("type", "FundingScheme");
-			funderObj.put("prefLabel", genPropMap.get(map.get("@id")));
+				Map<String, Object> map = (Map<String, Object>) iterator.next();
+				JSONObject funderObj = new JSONObject();
+				funderObj.put("url", map.get("@id"));
+				funderObj.put("type", "FundingScheme");
+				funderObj.put("prefLabel", genPropMap.get(map.get("@id")));
 
-			lrmiObj.put("about", funderObj);
+				lrmiObj.put("about", funderObj);
+			}
+		} catch (JSONException e) {
+			play.Logger.error("unable to apply modified funder values to LRMI");
 		}
 
 		return lrmiObj;
