@@ -454,6 +454,10 @@ public class JsonMapper {
 			applyAcademicDegree("creator", rdf);
 			applyAcademicDegree("contributor", rdf);
 
+			postProcessWithGenPropLoader("department", "Department-de.properties",
+					rdf);
+			postProcessWithGenPropLoader("funder", "Funder.properties", rdf);
+
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -651,6 +655,30 @@ public class JsonMapper {
 				i++;
 			}
 		}
+	}
+
+	private void postProcessWithGenPropLoader(String key,
+			String propertiesFileName, Map<String, Object> rdf) {
+
+		List<Map<String, Object>> keyList = new ArrayList<>();
+
+		// Provide resolving for prefLabels from @id via GenericPropertiesLoader
+		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+		genPropMap.putAll(genProp.loadVocabMap(propertiesFileName));
+
+		if (rdf.containsKey(key)) {
+			Object obj = rdf.get(key);
+			Iterator oIt = getLobidObjectIterator(obj);
+			while (oIt.hasNext()) {
+				Map<String, Object> map = (Map<String, Object>) oIt.next();
+				map.put("prefLabel", genPropMap.get(map.get("@id")));
+				keyList.add(map);
+			}
+			rdf.put(key, keyList);
+
+		}
+
 	}
 
 	private void addParts(Map<String, Object> rdf) {
