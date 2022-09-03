@@ -564,7 +564,7 @@ public class LRMIMapper {
 				funderObj.put("type", "FundingScheme");
 				funderObj.put("prefLabel", genPropMap.get(map.get("@id")));
 
-				lrmiObj.put("about", funderObj);
+				lrmiObj.put("funder", funderObj);
 			}
 		} catch (JSONException e) {
 			play.Logger.error("unable to apply modified funder values to LRMI");
