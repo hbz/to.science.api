@@ -57,6 +57,9 @@ import de.hbz.lobid.helper.JsonConverter;
 import models.Globals;
 import models.Link;
 import models.Node;
+import util.AdHocUriProvider;
+import util.LobidMapperUtils;
+import helper.GenericPropertiesLoader;
 
 /**
  * @author jan schnasse
@@ -80,6 +83,7 @@ public class JsonMapper {
 	final static String transformer = "transformer";
 	final static String catalogId = "catalogId";
 	final static String createdBy = "createdBy";
+
 	final static String submittedBy = "submittedBy";
 	final static String submittedByEmail = "submittedByEmail";
 	final static String legacyId = "legacyId";
@@ -445,12 +449,15 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			List<String> agentSequence = new ArrayList<>();
-			agentSequence.add("creator");
-			agentSequence.add("contributor");
-			// agentSequence.add("other");
-			applyAffiliation(rdf);
-			applyAcademicDegree(rdf);
+			applyAffiliation("creator", rdf);
+			applyAffiliation("contributor", rdf);
+			applyAcademicDegree("creator", rdf);
+			applyAcademicDegree("contributor", rdf);
+
+			postProcessWithGenPropLoader("department", "Department-de.properties",
+					rdf);
+			postProcessWithGenPropLoader("funder", "Funder.properties", rdf);
+
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 		}
@@ -549,46 +556,54 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAffiliation(Map<String, Object> rdf) {
-		List<String> affiliation = (List<String>) rdf.get("affiliation");
-		ArrayList<String> agentsSequence =
-				setSequence(new String[] { "creator", "contributor" });
-		int i = 0;
-		for (int h = 0; h < agentsSequence.size(); h++) {
-			play.Logger.debug(
-					"Amount of affiliations in flat list: " + affiliation.size() + 1);
-			String key = agentsSequence.get(h);
-			if (rdf.containsKey(key)) {
-				Object agentsMap = rdf.get(key);
-				Iterator cit = getLobid2Iterator(agentsMap);
-				while (cit.hasNext()) {
-					Map<String, Object> agent = (Map<String, Object>) cit.next();
-					Map<String, String> affilFields = new LinkedHashMap<>();
-					if (i < affiliation.size()) {
-						play.Logger.debug("found affiliation: " + affiliation.get(i)
-								+ " on position " + i);
-						affilFields.put("@id", affiliation.get(i));
-						affilFields.put("prefLabel", affiliation.get(i));
-						affilFields.put("type", "Organization");
-						i++;
-					} else {
-						/*
-						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
-						 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
-						 * verwendet.
-						 */
+	private void applyAffiliation(String key, Map<String, Object> rdf) {
+
+		// set different variable names for creators and contributors
+		Hashtable<String, String> agentType = new Hashtable<>();
+		agentType.put("creator", "creatorAffiliation");
+		agentType.put("contributor", "contributorAffiliation");
+
+		LinkedHashMap<String, String> affilLabelMap =
+				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
+
+		List<String> affiliation = new ArrayList<String>();
+		if (rdf.get(agentType.get(key)) != null) {
+			affiliation = (List<String>) rdf.get(agentType.get(key));
+			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
+					+ " in flat list: " + affiliation.size());
+		}
+
+		if (rdf.containsKey(key)) {
+			Object agentsMap = rdf.get(key);
+			Iterator cit = getLobidObjectIterator(agentsMap);
+			int i = 0;
+			while (cit.hasNext()) {
+				// write the next creatorObject into map
+				Map<String, Object> agent = (Map<String, Object>) cit.next();
+				Map<String, String> affilFields = new LinkedHashMap<>();
+				if (i < affiliation.size()) {
+					play.Logger.debug(
+							"found affiliation: " + affiliation.get(i) + " on position " + i);
+					affilFields.put("@id", affiliation.get(i));
+					affilFields.put("prefLabel", affilLabelMap.get(affiliation.get(i)));
+					affilFields.put("type", "Organization");
+					agent.put("affiliation", affilFields);
+				} else {
+					// merde: we have more agents than affiliations.
+					// Something went wrong
+					// prevent existing affiliations from being overwritten by default
+					if (!agent.containsKey("affiliation")) {
 						play.Logger.debug("Using default affiliation for " + key + " "
 								+ agent.get("@id") + " = " + agent.get(PREF_LABEL));
 						affilFields.put("@id", "https://ror.org/04tsk2644");
 						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
 						affilFields.put("type", "Organization");
+						agent.put("affiliation", affilFields);
 					}
-					agent.put("affiliation", affilFields);
-
 				}
+				i++;
 			}
 		}
-
 	}
 
 	/**
@@ -597,44 +612,70 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAcademicDegree(Map<String, Object> rdf) {
-		List<String> academicDegree = (List<String>) rdf.get("academicDegree");
-		ArrayList<String> agentsSequence =
-				setSequence(new String[] { "creator", "contributor" });
+	private void applyAcademicDegree(String key, Map<String, Object> rdf) {
 
-		int i = 0;
-		for (int h = 0; h < agentsSequence.size(); h++) {
-			String key = agentsSequence.get(h);
-			if (rdf.containsKey(key)) {
-				Object agentsMap = rdf.get(key);
-				Iterator cit = getLobid2Iterator(agentsMap);
-				while (cit.hasNext()) {
-					Map<String, Object> agent = (Map<String, Object>) cit.next();
-					Map<String, String> acadDegreeFields = new LinkedHashMap<>();
-					if (i < academicDegree.size()) {
-						play.Logger.debug("found academicDegree: " + academicDegree.get(i)
-								+ " on position " + i);
-						acadDegreeFields.put("@id", academicDegree.get(i));
-						acadDegreeFields.put("prefLabel",
-								academicDegree.get(i).replace(
-										"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-										""));
-					} else {
-						/*
-						 * Es sind nicht genügend akademische Grade in der sequentiellen
-						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
-						 * Default-Wert verwendet.
-						 */
+		// set different variable names for creators and contributors
+		Hashtable<String, String> agentType = new Hashtable<>();
+		agentType.put("creator", "creatorAcademicDegree");
+		agentType.put("contributor", "contributorAcademicDegree");
+
+		List<String> academicDegree = new ArrayList<String>();
+		if (rdf.get(agentType.get(key)) != null) {
+			academicDegree = (List<String>) rdf.get(agentType.get(key));
+			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
+					+ " in flat list: " + academicDegree.size());
+		}
+
+		if (rdf.containsKey(key)) {
+			Object agentsMap = rdf.get(key);
+			Iterator cit = getLobidObjectIterator(agentsMap);
+			int i = 0;
+			while (cit.hasNext()) {
+				Map<String, Object> agent = (Map<String, Object>) cit.next();
+				Map<String, String> acadDegreeFields = new LinkedHashMap<>();
+				if (i < academicDegree.size()) {
+					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
+							+ " on position " + i);
+					agent.put("academicDegree",
+							academicDegree.get(i).replace(
+									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+									""));
+				} else {
+					/*
+					 * Es sind nicht genügend akademische Grade in der sequentiellen Liste
+					 * in RDF vorhanden. Daher wird für diesen Autor ein Default-Wert
+					 * verwendet.
+					 */
+					if (!agent.containsKey("academicDegree")) {
 						play.Logger.debug("Using default academic degree for " + key + " "
 								+ agent.get(PREF_LABEL));
-						acadDegreeFields.put("@id",
-								"https://d.nb.info/standards/elementset/gnd#academicDegree/unknown");
-						acadDegreeFields.put("prefLabel", "keine Angabe");
+						agent.put("academicDegree", "unknown");
 					}
-					agent.put("academicDegree", acadDegreeFields);
-					i++;
 				}
+				i++;
 			}
+		}
+	}
+
+	private void postProcessWithGenPropLoader(String key,
+			String propertiesFileName, Map<String, Object> rdf) {
+
+		List<Map<String, Object>> keyList = new ArrayList<>();
+
+		// Provide resolving for prefLabels from @id via GenericPropertiesLoader
+		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+		genPropMap.putAll(genProp.loadVocabMap(propertiesFileName));
+
+		if (rdf.containsKey(key)) {
+			Object obj = rdf.get(key);
+			Iterator oIt = getLobidObjectIterator(obj);
+			while (oIt.hasNext()) {
+				Map<String, Object> map = (Map<String, Object>) oIt.next();
+				map.put("prefLabel", genPropMap.get(map.get("@id")));
+				keyList.add(map);
+			}
+			rdf.put(key, keyList);
 
 		}
 
@@ -853,15 +894,16 @@ public class JsonMapper {
 		return new HashMap<>();
 	}
 
-	private static Map<String, Object> findContributor(Map<String, Object> m,
+	private static Map<String, Object> findContributor(Map<String, Object> map,
 			String authorsId) {
-
-		Iterator iterator =
-				new LRMIMapper().getLobid2Iterator(m.get("contributor"));
-		while (iterator.hasNext()) {
-			Map<String, Object> contributor = (Map<String, Object>) iterator.next();
-			if (authorsId.compareTo((String) contributor.get("@id")) == 0) {
-				return contributor;
+		if (map.get("contributor") != null) {
+			Iterator iterator =
+					new LRMIMapper().getLobid2Iterator(map.get("contributor"));
+			while (iterator.hasNext()) {
+				Map<String, Object> contributor = (Map<String, Object>) iterator.next();
+				if (authorsId.compareTo((String) contributor.get("@id")) == 0) {
+					return contributor;
+				}
 			}
 		}
 
@@ -1275,7 +1317,7 @@ public class JsonMapper {
 	 * @return Die Daten im Format lobid2-RDF
 	 */
 	public Map<String, Object> getLd2Lobidify2Lrmi(Node n, String content) {
-		/* Mapping von LRMI.json nach lobid2.json */
+		/* Mapping von LRMI.json nach lobid2.json = json2 */
 		this.node = n;
 		try {
 			// Neues JSON-Objekt anlegen; für lobid2-Daten
@@ -1386,6 +1428,7 @@ public class JsonMapper {
 			}
 
 			String creatorName = null;
+			String academicDegreeId = null;
 			String affiliationId = null;
 			String affiliationType = null;
 			if (lrmiJSONObject.has("creator")) {
@@ -1412,14 +1455,17 @@ public class JsonMapper {
 					}
 
 					if (obj.has("honoricPrefix")) {
-						creatorMap.put("academicDegree",
+						String honoricPrefix = obj.getString("honoricPrefix");
+						academicDegreeId = new String(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-										+ obj.getString("honoricPrefix"));
+										+ honoricPrefix);
+
+						creatorMap.put("academicDegree", academicDegreeId);
 					}
 					if (obj.has("affiliation")) {
-						JSONObject obj2 = obj.getJSONObject("affiliation");
-						affiliationId = new String(obj2.getString("id"));
-						affiliationType = new String(obj2.getString("type"));
+						JSONObject affilObj = obj.getJSONObject("affiliation");
+						affiliationId = new String(affilObj.getString("id"));
+						affiliationType = new String(affilObj.getString("type"));
 
 						Map<String, Object> affiliationMap = new TreeMap<>();
 						affiliationMap.put("@id", affiliationId);
@@ -1443,9 +1489,12 @@ public class JsonMapper {
 						contributorMap.put("@id", obj.getString("id"));
 					}
 					if (obj.has("honoricPrefix")) {
-						contributorMap.put("academicDegree",
+						String honoricPrefix = obj.getString("honoricPrefix");
+						academicDegreeId = new String(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-										+ obj.getString("honoricPrefix"));
+										+ honoricPrefix);
+
+						contributorMap.put("academicDegree", academicDegreeId);
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1463,6 +1512,7 @@ public class JsonMapper {
 				rdf.put("contributor", contributors);
 			}
 
+			// template for Mapping of Array
 			if (lrmiJSONObject.has("description")) {
 				List<String> descriptions = new ArrayList<>();
 				myObj = lrmiJSONObject.get("description");
@@ -1515,26 +1565,57 @@ public class JsonMapper {
 				rdf.put("institution", institutions);
 			}
 
+			// example for usage of AdHocUriProvider
 			if (lrmiJSONObject.has("keywords")) {
 				String keyword = null;
 				List<Map<String, Object>> subject = new ArrayList<>();
 				arr = lrmiJSONObject.getJSONArray("keywords");
 				for (int i = 0; i < arr.length(); i++) {
+					AdHocUriProvider ahu = new AdHocUriProvider();
 					Map<String, Object> keywordMap = new TreeMap<>();
 					keyword = arr.getString(i);
 					keywordMap.put("prefLabel", keyword);
+					keywordMap.put("@id", ahu.getAdhocUri(keyword));
 					subject.add(keywordMap);
 				}
 				rdf.put("subject", subject);
 			}
 
+			// HINT: potential Passepartout for Mapping default JsonObjects
 			if (lrmiJSONObject.has("funder")) {
+
+				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
+				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				genPropMap.putAll(genProp.loadVocabMap("Funder.properties"));
+
 				obj = lrmiJSONObject.getJSONObject("funder");
 				Map<String, Object> funderMap = new TreeMap<>();
 				funderMap.put("type", obj.getString("type"));
 				funderMap.put("@id", obj.getString("url"));
-				funderMap.put("prefLabel", obj.getString("url"));
+				funderMap.put("prefLabel", genPropMap.get(obj.getString("url")));
 				rdf.put("funder", funderMap);
+			}
+
+			if (lrmiJSONObject.has("about")) {
+				List<Map<String, Object>> departArr = new ArrayList<>();
+				JSONArray aboutArray = lrmiJSONObject.getJSONArray("about");
+
+				// Provide resolving for prefLabels from id via GenericPropertiesLoader
+				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
+
+				for (int i = 0; i < aboutArray.length(); i++) {
+					Map<String, Object> department = new TreeMap<>();
+					JSONObject abtMap = aboutArray.getJSONObject(i);
+					if (abtMap.has("id")) {
+						department.put("@id", abtMap.get("id"));
+						department.put("prefLabel", genPropMap.get(abtMap.get("id")));
+					}
+					departArr.add(department);
+				}
+				rdf.put("department", departArr);
 			}
 
 			postprocessing(rdf);
@@ -1556,7 +1637,7 @@ public class JsonMapper {
 	 * @param iObj a JSONObject of unknown internal structure
 	 * @return an Iterator representing the JSONObject
 	 */
-	public Iterator getLobid2Iterator(Object iObj) {
+	public Iterator getLobidObjectIterator(Object iObj) {
 		Iterator lIterator = null;
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =
@@ -1570,12 +1651,16 @@ public class JsonMapper {
 		return lIterator;
 	}
 
-	private ArrayList<String> setSequence(String[] fields) {
-		ArrayList<String> sequence = new ArrayList<>();
-		for (int i = 0; i < fields.length; i++) {
-			sequence.add(fields[i]);
-		}
-		return sequence;
+	/**
+	 * @param properties
+	 * @return
+	 */
+	private static LinkedHashMap<String, String> getPrefLabelMap(
+			String properties) {
+		LinkedHashMap<String, String> map = new LinkedHashMap<>();
+		GenericPropertiesLoader GenProp = new GenericPropertiesLoader();
+		map.putAll(GenProp.loadVocabMap(properties));
+		return map;
 	}
 
 }

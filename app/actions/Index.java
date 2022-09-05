@@ -117,18 +117,18 @@ public class Index {
 	/**
 	 * Indexiert eine Ressource in allen verwendeten Indexen.
 	 * 
-	 * @param n the node to index in all indexes
+	 * @param node the node to index in all indexes
 	 * @return a message
 	 */
-	public String index(Node n) {
-		String namespace = n.getNamespace();
-		String pid = n.getPid();
-		String type = n.getContentType();
+	public String index(Node node) {
+		String namespace = node.getNamespace();
+		String pid = node.getPid();
+		String type = node.getContentType();
 		StringBuffer msg = new StringBuffer();
-		msg.append(indexToPrivateIndex(pid, type, namespace, n));
-		msg.append(handlePublicIndex(pid, type, namespace, n));
-		msg.append(handleFulltextIndex(pid, type, namespace, n));
-		msg.append(handlePublicFulltextIndex(pid, type, namespace, n));
+		msg.append(indexToPrivateIndex(pid, type, namespace, node));
+		msg.append(handlePublicIndex(pid, type, namespace, node));
+		msg.append(handleFulltextIndex(pid, type, namespace, node));
+		msg.append(handlePublicFulltextIndex(pid, type, namespace, node));
 		return msg.toString();
 	}
 
@@ -218,6 +218,7 @@ public class Index {
 	private static String indexMetadataToPublicFulltextIndex(String pid,
 			String type, String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
+		play.Logger.debug("Ausgabe Methode toString2: " + data.toString2());
 		try {
 			Globals.search.index(Globals.PUBLIC_FULLTEXT_INDEX_PREF + namespace, type,
 					pid, data.toString2());
@@ -245,6 +246,7 @@ public class Index {
 	private static String indexFulltextToPublicFulltextIndex(String pid,
 			String type, String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
+		play.Logger.debug("Ausgabe Methode toString2: " + data.toString2());
 		try {
 			Globals.search.index(Globals.PUBLIC_FULLTEXT_INDEX_PREF + namespace, type,
 					pid, new Transform().pdfbox(data).toString2());
@@ -261,6 +263,7 @@ public class Index {
 
 	private static String indexToFulltextIndex(String pid, String type,
 			String namespace, Node data) {
+		play.Logger.debug("Ausgabe Methode toString2: " + data.toString2());
 		try {
 			Globals.search.index(Globals.PDFBOX_OCR_INDEX_PREF + namespace, type, pid,
 					new Transform().pdfbox(data).toString2());
@@ -277,6 +280,7 @@ public class Index {
 	private static String indexToPublicIndex(String pid, String type,
 			String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
+		play.Logger.debug("Ausgabe Methode toString2: " + data.toString2());
 		try {
 			Globals.search.index(Globals.PUBLIC_INDEX_PREF + namespace + "2", type,
 					pid, data.toString2());
@@ -294,6 +298,7 @@ public class Index {
 	private static String indexToPrivateIndex(String pid, String type,
 			String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
+		play.Logger.debug("Ausgabe Methode toString2: " + data.toString2());
 		try {
 			Globals.search.index(namespace + "2", type, pid, data.toString2());
 			msg.append(pid + " indexed in " + namespace + "2\n");

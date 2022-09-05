@@ -11,7 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -249,6 +251,7 @@ public class Enrich {
 	 * @return Die angereicherten LRMI-Daten im Format Zeichenkette
 	 */
 	public String enrichLrmiData(String content) {
+
 		try {
 			play.Logger.debug("Start enrichment of lrmi data");
 			// LRMIDaten nach JSONObject wandeln
@@ -256,22 +259,22 @@ public class Enrich {
 			JSONArray arr = null;
 			JSONObject obj = null;
 
-			String creatorName = null;
+			String labelValue = null;
 			if (jcontent.has("creator")) {
 				arr = jcontent.getJSONArray("creator");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
-					creatorName = new String(obj.getString("name"));
+					labelValue = new String(obj.getString("name"));
 					if (!obj.has("id")) {
 						// Autor ohne ID. Das bedeutet in LRMI-Sprache: ohne URI
 						// Mache API-Call an Zettel, um eine ad-hoc-URI zu erhalten
-						creatorName = URLEncoder
-								.encode(creatorName, StandardCharsets.UTF_8.toString())
-								.replaceAll("\\+", "%20").replaceAll("%21", "!")
-								.replaceAll("%27", "'").replaceAll("%28", "(")
-								.replaceAll("%29", ")").replaceAll("%7E", "~");
+						labelValue =
+								URLEncoder.encode(labelValue, StandardCharsets.UTF_8.toString())
+										.replaceAll("\\+", "%20").replaceAll("%21", "!")
+										.replaceAll("%27", "'").replaceAll("%28", "(")
+										.replaceAll("%29", ")").replaceAll("%7E", "~");
 						WSResponse response = play.libs.ws.WS.url(
-								Globals.zettelUrl + "/localAutocomplete" + "?q=" + creatorName)
+								Globals.zettelUrl + "/localAutocomplete" + "?q=" + labelValue)
 								.setFollowRedirects(true).get().get(2000);
 						input = response.getBodyAsStream();
 						String formsResponseBody = CharStreams
@@ -281,7 +284,7 @@ public class Enrich {
 						if (response.getStatus() != 200) {
 							play.Logger.error(
 									"to.science.forms service request localAutocomplete fails for "
-											+ creatorName + "\nUse URI for setting Label now!");
+											+ labelValue + "\nUse URI for setting Label now!");
 						} else {
 							// Parse out uri value from JSON structure
 							JSONArray jFormsResponse = new JSONArray(formsResponseBody);
