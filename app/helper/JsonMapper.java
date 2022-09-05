@@ -1157,7 +1157,7 @@ public class JsonMapper {
 	/**
 	 * Diese Methode modifiziert den LRMI-Datenstrom. Der LRMI-Datenstrom muss im
 	 * Format JSON-String übergeben werden. Es werden IDs darin ersetzt. Der
-	 * LRMI-Datenstrom wird als JSON-String zurück gegeben.
+	 * LRMI-Datenstrom wird auf lobid gemappeter JSON-String zurück gegeben.
 	 * 
 	 * @author Ingolf Kuss, hbz
 	 * @param n The Node of the resource
@@ -1461,6 +1461,8 @@ public class JsonMapper {
 										+ honoricPrefix);
 
 						creatorMap.put("academicDegree", academicDegreeId);
+						// create FlatList required by to.science.forms
+						rdf.put("creatorAcademicDegree", academicDegreeId);
 					}
 					if (obj.has("affiliation")) {
 						JSONObject affilObj = obj.getJSONObject("affiliation");
@@ -1471,6 +1473,9 @@ public class JsonMapper {
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
 						creatorMap.put("affiliation", affiliationMap);
+						// create FlatList required by to.science.forms
+						rdf.put("creatorAffilitation", affiliationId);
+
 					}
 
 					creators.add(creatorMap);
@@ -1493,8 +1498,10 @@ public class JsonMapper {
 						academicDegreeId = new String(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
 										+ honoricPrefix);
-
 						contributorMap.put("academicDegree", academicDegreeId);
+						// create FlatList required by to.science.forms
+						rdf.put("contributorAcademicDegree", academicDegreeId);
+
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1505,6 +1512,8 @@ public class JsonMapper {
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
 						contributorMap.put("affiliation", affiliationMap);
+						// create FlatList required by to.science.forms
+						rdf.put("contributorAffilitation", affiliationId);
 					}
 
 					contributors.add(contributorMap);
