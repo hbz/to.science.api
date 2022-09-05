@@ -565,10 +565,15 @@ public class JsonMapper {
 
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
-
-		List<String> affiliation = new ArrayList<String>();
+		LinkedHashSet<String> affiliationFL = new LinkedHashSet<>();
+		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			affiliation = (List<String>) rdf.get(agentType.get(key));
+			affiliationFL = (LinkedHashSet<String>) rdf.get(agentType.get(key));
+			Iterator<String> affilIt = affiliationFL.iterator();
+			while (affilIt.hasNext()) {
+				affiliation.add(affilIt.next());
+			}
+
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + affiliation.size());
 		}
@@ -619,9 +624,15 @@ public class JsonMapper {
 		agentType.put("creator", "creatorAcademicDegree");
 		agentType.put("contributor", "contributorAcademicDegree");
 
-		List<String> academicDegree = new ArrayList<String>();
+		LinkedHashSet<String> academicDegreeFL = new LinkedHashSet<>();
+		List<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			academicDegree = (List<String>) rdf.get(agentType.get(key));
+			academicDegreeFL = (LinkedHashSet<String>) rdf.get(agentType.get(key));
+			Iterator<String> acadIt = academicDegreeFL.iterator();
+			while (acadIt.hasNext()) {
+				academicDegree.add(acadIt.next());
+			}
+
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + academicDegree.size());
 		}
@@ -632,7 +643,6 @@ public class JsonMapper {
 			int i = 0;
 			while (cit.hasNext()) {
 				Map<String, Object> agent = (Map<String, Object>) cit.next();
-				Map<String, String> acadDegreeFields = new LinkedHashMap<>();
 				if (i < academicDegree.size()) {
 					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 							+ " on position " + i);
