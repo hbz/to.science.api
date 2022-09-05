@@ -565,10 +565,11 @@ public class JsonMapper {
 
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
-		LinkedHashSet<String> affiliationFL = new LinkedHashSet<>();
+
+		HashSet<String> affiliationFL = new HashSet<>();
 		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			affiliationFL = (LinkedHashSet<String>) rdf.get(agentType.get(key));
+			affiliationFL = (HashSet<String>) rdf.get(agentType.get(key));
 			Iterator<String> affilIt = affiliationFL.iterator();
 			while (affilIt.hasNext()) {
 				affiliation.add(affilIt.next());
@@ -624,10 +625,10 @@ public class JsonMapper {
 		agentType.put("creator", "creatorAcademicDegree");
 		agentType.put("contributor", "contributorAcademicDegree");
 
-		LinkedHashSet<String> academicDegreeFL = new LinkedHashSet<>();
+		HashSet<String> academicDegreeFL = new HashSet<>();
 		List<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			academicDegreeFL = (LinkedHashSet<String>) rdf.get(agentType.get(key));
+			academicDegreeFL = (HashSet<String>) rdf.get(agentType.get(key));
 			Iterator<String> acadIt = academicDegreeFL.iterator();
 			while (acadIt.hasNext()) {
 				academicDegree.add(acadIt.next());
@@ -1443,9 +1444,13 @@ public class JsonMapper {
 			String affiliationType = null;
 			if (lrmiJSONObject.has("creator")) {
 				List<Map<String, Object>> creators = new ArrayList<>();
+				ArrayList<String> creatorAcademicDegree = new ArrayList<>();
+				ArrayList<String> creatorAffiliation = new ArrayList<>();
+
 				arr = lrmiJSONObject.getJSONArray("creator");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
+
 					Map<String, Object> creatorMap = new TreeMap<>();
 					creatorName = new String(obj.getString(name));
 					creatorMap.put("prefLabel", creatorName);
@@ -1471,8 +1476,10 @@ public class JsonMapper {
 										+ honoricPrefix);
 
 						creatorMap.put("academicDegree", academicDegreeId);
-						// create FlatList required by to.science.forms
-						rdf.put("creatorAcademicDegree", academicDegreeId);
+
+						// we need to create academicDegree FlatList required by
+						// to.science.forms
+						creatorAcademicDegree.add(academicDegreeId);
 					}
 					if (obj.has("affiliation")) {
 						JSONObject affilObj = obj.getJSONObject("affiliation");
@@ -1483,18 +1490,24 @@ public class JsonMapper {
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
 						creatorMap.put("affiliation", affiliationMap);
-						// create FlatList required by to.science.forms
-						rdf.put("creatorAffilitation", affiliationId);
 
+						// we also need to create Affiliation FlatList required by
+						// to.science.forms
+						creatorAffiliation.add(affiliationId);
 					}
-
 					creators.add(creatorMap);
 				}
+				rdf.put("creatorAcademicDegree", creatorAcademicDegree);
+				rdf.put("creatorAffiliation", creatorAffiliation);
 				rdf.put("creator", creators);
 			}
 
 			if (lrmiJSONObject.has("contributor")) {
+
 				List<Map<String, Object>> contributors = new ArrayList<>();
+				ArrayList<String> contributorAcademicDegree = new ArrayList<>();
+				ArrayList<String> contributorAffiliation = new ArrayList<>();
+
 				arr = lrmiJSONObject.getJSONArray("contributor");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
@@ -1509,8 +1522,10 @@ public class JsonMapper {
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
 										+ honoricPrefix);
 						contributorMap.put("academicDegree", academicDegreeId);
-						// create FlatList required by to.science.forms
-						rdf.put("contributorAcademicDegree", academicDegreeId);
+
+						// we need to create academicDegree FlatList required by
+						// to.science.forms
+						contributorAcademicDegree.add(academicDegreeId);
 
 					}
 					if (obj.has("affiliation")) {
@@ -1522,12 +1537,16 @@ public class JsonMapper {
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
 						contributorMap.put("affiliation", affiliationMap);
-						// create FlatList required by to.science.forms
-						rdf.put("contributorAffilitation", affiliationId);
+
+						// we also need to create Affiliation FlatList required by
+						// to.science.forms
+						contributorAffiliation.add(affiliationId);
 					}
 
 					contributors.add(contributorMap);
 				}
+				rdf.put("contributorAcademicDegree", contributorAcademicDegree);
+				rdf.put("contributorAffiliation", contributorAffiliation);
 				rdf.put("contributor", contributors);
 			}
 
