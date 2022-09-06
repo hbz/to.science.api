@@ -623,7 +623,7 @@ public class JsonMapper {
 
 		List<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			academicDegree = (<List<String>) rdf.get(agentType.get(key)));
+			academicDegree = (List<String>) rdf.get(agentType.get(key));
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + academicDegree.size());
 		}
