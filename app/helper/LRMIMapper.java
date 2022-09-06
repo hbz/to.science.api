@@ -409,11 +409,6 @@ public class LRMIMapper {
 		return result;
 	}
 
-	private int addAcademicDegreeToAgent(int attribCounter,
-			Map<String, Object> rdf, ArrayList<String> acadDegree) {
-		return 0;
-	}
-
 	/**
 	 * Diese Methode bildet einen Autor (z.B. creator oder contributor) von RDF
 	 * nach LRMI ab. Für das RDF wird angenommen, dass akademische Grade und
@@ -460,11 +455,14 @@ public class LRMIMapper {
 					}
 					if (attribCounter < affiliation.size()) {
 						JSONObject affObj = new JSONObject();
-						affObj.put("@id", affiliation.get(attribCounter));
+						affObj.put("@id",
+								affiliation.get(attribCounter).replace(
+										"http://hbz-nrw.de/regal#" + agentType + "Affiliation",
+										"https://ror.org"));
 						LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 						GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-						genPropMap.putAll(genProp
-								.loadVocabMap("ResearchOrganizationsRegistry-de.properties"));
+						genPropMap.putAll(genProp.loadVocabMap(
+								agentType + "ResearchOrganizationsRegistry-de.properties"));
 						affObj.put("name", genPropMap.get(affiliation.get(attribCounter)));
 						affObj.put("type", "Organization");
 						obj.put("affiliation", affObj);
