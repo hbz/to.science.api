@@ -564,13 +564,11 @@ public class JsonMapper {
 		agentType.put("contributor", "contributorAffiliation");
 
 		LinkedHashMap<String, String> affilLabelMap =
-				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
+				getPrefLabelMap(key + "ResearchOrganizationsRegistry-de.properties");
 
 		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
 			affiliation = (List<String>) rdf.get(agentType.get(key));
-			// affiliation = castHashSet((HashSet<String>)
-			// rdf.get(agentType.get(key)));
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + affiliation.size());
 		}
@@ -586,7 +584,10 @@ public class JsonMapper {
 				if (i < affiliation.size()) {
 					play.Logger.debug(
 							"found affiliation: " + affiliation.get(i) + " on position " + i);
-					affilFields.put("@id", affiliation.get(i));
+					affilFields.put("@id",
+							affiliation.get(i).replace(
+									"http://hbz-nrw.de/regal#" + key + "Affiliation",
+									"https://ror.org"));
 					affilFields.put("prefLabel", affilLabelMap.get(affiliation.get(i)));
 					affilFields.put("type", "Organization");
 					agent.put("affiliation", affilFields);
@@ -637,10 +638,8 @@ public class JsonMapper {
 				if (i < academicDegree.size()) {
 					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 							+ " on position " + i);
-					agent.put("academicDegree",
-							academicDegree.get(i).replace(
-									"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-									""));
+					agent.put("academicDegree", academicDegree.get(i).replace(
+							"http://hbz-nrw.de/regal#" + key + "AcademicDegree/", ""));
 				} else {
 					/*
 					 * Es sind nicht genügend akademische Grade in der sequentiellen Liste
