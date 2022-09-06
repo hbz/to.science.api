@@ -566,7 +566,6 @@ public class JsonMapper {
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap("ResearchOrganizationsRegistry-de.properties");
 
-		HashSet<String> affiliationFL = new HashSet<>();
 		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
 			affiliation = castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
