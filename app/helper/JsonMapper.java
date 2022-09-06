@@ -563,6 +563,8 @@ public class JsonMapper {
 		agentType.put("creator", "creatorAffiliation");
 		agentType.put("contributor", "contributorAffiliation");
 
+		play.Logger.debug("concatinated file name: " + key
+				+ "ResearchOrganizationsRegistry-de.properties");
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap(key + "ResearchOrganizationsRegistry-de.properties");
 
