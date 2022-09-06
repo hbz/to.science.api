@@ -261,9 +261,9 @@ public class LRMIMapper {
 						+ contributorAffiliation.size());
 			}
 			int attribCounter = 0;
-			attribCounter = mapAgent(attribCounter, rdf, creatorAcadDegree,
-					creatorAffiliation, lrmiJsonContent, "creator");
-			attribCounter = mapAgent(attribCounter, rdf, contributorAcadDegree,
+			lrmiJsonContent = mapAgent(rdf, creatorAcadDegree, creatorAffiliation,
+					lrmiJsonContent, "creator");
+			lrmiJsonContent = mapAgent(rdf, contributorAcadDegree,
 					contributorAffiliation, lrmiJsonContent, "contributor");
 
 			if (rdf.containsKey("subject")) {
@@ -423,7 +423,7 @@ public class LRMIMapper {
 	 * @param agentType z.B. "creator" oder "contributor"
 	 * @return den neuen Zähler für die linearen Listen
 	 */
-	private int mapAgent(int attribCounter, Map<String, Object> rdf,
+	private JSONObject mapAgent(Map<String, Object> rdf,
 			ArrayList<String> acadDegree, ArrayList<String> affiliation,
 			JSONObject lrmiJsonContent, String agentType) throws RuntimeException {
 		try {
@@ -431,18 +431,20 @@ public class LRMIMapper {
 				play.Logger.debug("add " + agentType + "\'s attributes to lrmi");
 				JSONArray arr = new JSONArray();
 				Iterator iterator = getLobid2Iterator(rdf.get(agentType));
+				int i = 0;
 				while (iterator.hasNext()) {
 					Map<String, Object> map = (Map<String, Object>) iterator.next();
 					JSONObject obj = new JSONObject();
 					obj.put("name", map.get("prefLabel"));
 					obj.put("id", map.get("@id"));
+					// here we set id of agent not the id of affiliation
 					obj.put("type", "Person");
 					if (map.get("@id").toString().startsWith("https://ror.org")) {
 						obj.put("type", "Organization");
 					}
-					if (attribCounter < acadDegree.size()) {
+					if (i < acadDegree.size()) {
 						obj.put("honoricPrefix",
-								acadDegree.get(attribCounter).replace(
+								acadDegree.get().replace(
 										"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/",
 										""));
 					} else {
@@ -453,17 +455,17 @@ public class LRMIMapper {
 						 */
 						obj.put("honoricPrefix", "Keine Angabe");
 					}
-					if (attribCounter < affiliation.size()) {
+					if (i < affiliation.size()) {
 						JSONObject affObj = new JSONObject();
 						affObj.put("@id",
-								affiliation.get(attribCounter).replace(
+								affiliation.get(i).replace(
 										"http://hbz-nrw.de/regal#" + agentType + "Affiliation",
 										"https://ror.org"));
 						LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 						GenericPropertiesLoader genProp = new GenericPropertiesLoader();
 						genPropMap.putAll(genProp.loadVocabMap(
 								agentType + "ResearchOrganizationsRegistry-de.properties"));
-						affObj.put("name", genPropMap.get(affiliation.get(attribCounter)));
+						affObj.put("name", genPropMap.get(affiliation.get(i)));
 						affObj.put("type", "Organization");
 						obj.put("affiliation", affObj);
 					} else {
@@ -478,12 +480,14 @@ public class LRMIMapper {
 						affObj.put("name", "keine Angabe");
 						obj.put("affiliation", affObj);
 					}
-					attribCounter++;
+					// last step to do here: count 1 to i as the internal counter for the
+					// ArrayLists
+					i++;
 					arr.put(obj);
 				}
 				lrmiJsonContent.put(agentType, arr);
 			}
-			return attribCounter;
+			return lrmiJsonContent;
 		} catch (Exception e) {
 			play.Logger.error(agentType + " content could not be mapped!", e);
 			throw new RuntimeException(agentType + " content could not be mapped!",

@@ -1473,7 +1473,7 @@ public class JsonMapper {
 						// to.science.forms
 						creatorAcademicDegree.add(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								"http://hbz-nrw.de/regal#creatorAcademicDegree"));
+								"http://hbz-nrw.de/regal#creatorAcademicDegree/"));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject affilObj = obj.getJSONObject("affiliation");
@@ -1488,7 +1488,7 @@ public class JsonMapper {
 						// we also need to create Affiliation FlatList required by
 						// to.science.forms
 						creatorAffiliation.add(affiliationId.replace("https://ror.org/",
-								"http://hbz-nrw.de/regal#creatorAffiliation"));
+								"http://hbz-nrw.de/regal#creatorAffiliation/"));
 					}
 					creators.add(creatorMap);
 				}
@@ -1522,7 +1522,7 @@ public class JsonMapper {
 						// to.science.forms
 						contributorAcademicDegree.add(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								"http://hbz-nrw.de/regal#contributorAcademicDegree"));
+								"http://hbz-nrw.de/regal#contributorAcademicDegree/"));
 
 					}
 					if (obj.has("affiliation")) {
@@ -1538,7 +1538,7 @@ public class JsonMapper {
 						// we also need to create Affiliation FlatList required by
 						// to.science.forms
 						contributorAffiliation.add(affiliationId.replace("https://ror.org/",
-								"http://hbz-nrw.de/regal#creatorAffiliation"));
+								"http://hbz-nrw.de/regal#creatorAffiliation/"));
 					}
 
 					contributors.add(contributorMap);
