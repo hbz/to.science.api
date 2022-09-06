@@ -563,8 +563,6 @@ public class JsonMapper {
 		agentType.put("creator", "creatorAffiliation");
 		agentType.put("contributor", "contributorAffiliation");
 
-		play.Logger.debug("concatinated file name: " + key
-				+ "ResearchOrganizationsRegistry-de.properties");
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap(key + "ResearchOrganizationsRegistry-de.properties");
 
@@ -586,6 +584,9 @@ public class JsonMapper {
 				if (i < affiliation.size()) {
 					play.Logger.debug(
 							"found affiliation: " + affiliation.get(i) + " on position " + i);
+					play.Logger.debug("Replacement of String results in :" + affiliation
+							.get(i).replace("http://hbz-nrw.de/regal#" + key + "Affiliation",
+									"https://ror.org"));
 					affilFields.put("@id",
 							affiliation.get(i).replace(
 									"http://hbz-nrw.de/regal#" + key + "Affiliation",

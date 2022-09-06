@@ -446,9 +446,10 @@ public class LRMIMapper {
 						obj.put("type", "Organization");
 					}
 					if (attribCounter < acadDegree.size()) {
-						obj.put("honoricPrefix", acadDegree.get(attribCounter).replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								""));
+						obj.put("honoricPrefix",
+								acadDegree.get(attribCounter).replace(
+										"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/",
+										""));
 					} else {
 						/*
 						 * Es sind nicht genügend akademische Grade in der sequentiellen
