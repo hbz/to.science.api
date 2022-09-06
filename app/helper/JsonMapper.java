@@ -569,12 +569,7 @@ public class JsonMapper {
 		HashSet<String> affiliationFL = new HashSet<>();
 		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			affiliationFL = (HashSet<String>) rdf.get(agentType.get(key));
-			Iterator<String> affilIt = affiliationFL.iterator();
-			while (affilIt.hasNext()) {
-				affiliation.add(affilIt.next());
-			}
-
+			affiliation = castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + affiliation.size());
 		}
@@ -625,15 +620,10 @@ public class JsonMapper {
 		agentType.put("creator", "creatorAcademicDegree");
 		agentType.put("contributor", "contributorAcademicDegree");
 
-		HashSet<String> academicDegreeFL = new HashSet<>();
 		List<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			academicDegreeFL = (HashSet<String>) rdf.get(agentType.get(key));
-			Iterator<String> acadIt = academicDegreeFL.iterator();
-			while (acadIt.hasNext()) {
-				academicDegree.add(acadIt.next());
-			}
-
+			academicDegree =
+					castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + academicDegree.size());
 		}
@@ -1699,6 +1689,16 @@ public class JsonMapper {
 		GenericPropertiesLoader GenProp = new GenericPropertiesLoader();
 		map.putAll(GenProp.loadVocabMap(properties));
 		return map;
+	}
+
+	private ArrayList<String> castHashSet(HashSet<String> set) {
+		ArrayList<String> list = new ArrayList<>();
+		Iterator<String> sIt = set.iterator();
+		while (sIt.hasNext()) {
+			list.add(sIt.next());
+		}
+		return list;
+
 	}
 
 }
