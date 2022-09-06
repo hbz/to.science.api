@@ -568,7 +568,11 @@ public class JsonMapper {
 
 		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			affiliation = castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
+			play.Logger
+					.debug("Was bin ich für ein Oject? " + agentType.get(key).getClass());
+			affiliation = (List<String>) rdf.get(agentType.get(key));
+			// affiliation = castHashSet((HashSet<String>)
+			// rdf.get(agentType.get(key)));
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + affiliation.size());
 		}
