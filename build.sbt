@@ -53,7 +53,7 @@ val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers := Seq(Resolver.mavenLocal,"Maven Central Server" at "https://repo1.maven.org/maven2","edoweb releases" at "https://edoweb.github.com/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "https://maven.ontotext.com/content/repositories/aduna/" ,
-"Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "https://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "https://m2.duraspace.org/content/repositories/thirdparty"
+"Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 )
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
