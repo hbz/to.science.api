@@ -1430,7 +1430,6 @@ public class JsonMapper {
 				rdf.put("medium", media);
 			}
 
-			String creatorName = null;
 			String academicDegreeId = null;
 			String affiliationId = null;
 			String affiliationType = null;
@@ -1444,29 +1443,15 @@ public class JsonMapper {
 					obj = arr.getJSONObject(i);
 
 					Map<String, Object> creatorMap = new TreeMap<>();
-					creatorName = new String(obj.getString(name));
-					creatorMap.put("prefLabel", creatorName);
+					creatorMap.put("prefLabel", obj.getString(name));
 					if (obj.has("id")) {
 						creatorMap.put("@id", obj.getString("id"));
-					} else {
-						/*
-						 * Dieser Fall sollte nicht vorkommen, da die LRMI-Daten vorher
-						 * angreichert (enriched) werden, bevor sie auf die Metadata2-Felder
-						 * abgebildet werden. Das passiert in Enrich.enrichLrmiData(). Falls
-						 * man doch hier hin kommt, gibt es eine Warnung:
-						 */
-						play.Logger.warn(
-								"Achtung! Un-angereicherte LMRI-Daten werden nach metadata2 gemappt!!");
-						play.Logger.warn(
-								"Dem Creator \"" + creatorName + "\" fehlt eine URI/id !");
 					}
-
 					if (obj.has("honoricPrefix")) {
 						String honoricPrefix = obj.getString("honoricPrefix");
 						academicDegreeId = new String(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
 										+ honoricPrefix);
-
 						creatorMap.put("academicDegree", academicDegreeId);
 
 						// we need to create academicDegree FlatList required by
@@ -1497,6 +1482,9 @@ public class JsonMapper {
 				rdf.put("creator", creators);
 			}
 
+			academicDegreeId = null;
+			affiliationId = null;
+			affiliationType = null;
 			if (lrmiJSONObject.has("contributor")) {
 
 				List<Map<String, Object>> contributors = new ArrayList<>();
@@ -1540,7 +1528,6 @@ public class JsonMapper {
 						contributorAffiliation.add(affiliationId.replace("https://ror.org/",
 								"http://hbz-nrw.de/regal#creatorAffiliation/"));
 					}
-
 					contributors.add(contributorMap);
 				}
 				rdf.put("contributorAcademicDegree", contributorAcademicDegree);

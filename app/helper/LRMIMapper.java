@@ -442,6 +442,7 @@ public class LRMIMapper {
 					if (map.get("@id").toString().startsWith("https://ror.org")) {
 						obj.put("type", "Organization");
 					}
+
 					if (i < acadDegree.size()) {
 						obj.put("honoricPrefix",
 								acadDegree.get(i).replace(
