@@ -444,7 +444,7 @@ public class LRMIMapper {
 					}
 					if (i < acadDegree.size()) {
 						obj.put("honoricPrefix",
-								acadDegree.get().replace(
+								acadDegree.get(i).replace(
 										"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/",
 										""));
 					} else {
