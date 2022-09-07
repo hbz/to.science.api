@@ -1526,7 +1526,7 @@ public class JsonMapper {
 						// we also need to create Affiliation FlatList required by
 						// to.science.forms
 						contributorAffiliation.add(affiliationId.replace("https://ror.org/",
-								"http://hbz-nrw.de/regal#creatorAffiliation/"));
+								"http://hbz-nrw.de/regal#contributorAffiliation/"));
 					}
 					contributors.add(contributorMap);
 				}
