@@ -336,11 +336,6 @@ public class LRMIMapper {
 				lrmiJsonContent.put("encoding", arr);
 			}
 
-			if (rdf.containsKey("funder")) {
-				iterator = getLobid2Iterator(rdf.get("funder"));
-				lrmiJsonContent.put("funder", iterator.next());
-			}
-
 			lrmiJsonContent = lobidFunder2LrmiFunder(rdf, lrmiJsonContent);
 			lrmiJsonContent = lobidDepartment2LrmiAbout(rdf, lrmiJsonContent);
 

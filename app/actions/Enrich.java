@@ -317,8 +317,7 @@ public class Enrich {
 				}
 			}
 		} catch (Exception e) {
-			play.Logger.error("Content could not be enriched!", e);
-			throw new RuntimeException("LRMI.json could not be enriched", e);
+			play.Logger.error("AddHocUri could not created for " + agentType);
 		}
 		return jcontent;
 	}
