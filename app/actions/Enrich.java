@@ -252,9 +252,14 @@ public class Enrich {
 	 */
 	public String enrichLrmiData(String content) {
 
+		JSONObject jcontent = new JSONObject();
 		play.Logger.debug("Start enrichment of lrmi data");
 		// LRMIDaten nach JSONObject wandeln
-		JSONObject jcontent = new JSONObject(content);
+		try {
+			jcontent = new JSONObject(content);
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+		}
 
 		jcontent = enrichAgent(jcontent, "creator");
 		jcontent = enrichAgent(jcontent, "contributor");
