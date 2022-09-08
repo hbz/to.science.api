@@ -1453,13 +1453,14 @@ public class JsonMapper {
 			String affiliationType = null;
 			if (lrmiJSONObject.has("creator")) {
 				List<Map<String, Object>> creators = new ArrayList<>();
+				ArrayList<String> agent = new ArrayList<>();
 				ArrayList<String> creatorAcademicDegree = new ArrayList<>();
 				ArrayList<String> creatorAffiliation = new ArrayList<>();
 
 				arr = lrmiJSONObject.getJSONArray("creator");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
-
+					StringBuffer agentStr = new StringBuffer();
 					Map<String, Object> creatorMap = new TreeMap<>();
 					creatorMap.put("prefLabel", obj.getString(name));
 					if (obj.has("id")) {
@@ -1477,6 +1478,10 @@ public class JsonMapper {
 						creatorAcademicDegree.add(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 								"http://hbz-nrw.de/regal#creatorAcademicDegree/"));
+						agentStr.append(academicDegreeId.replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
+						agentStr.append(" " + obj.getString(name));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject affilObj = obj.getJSONObject("affiliation");
@@ -1492,12 +1497,19 @@ public class JsonMapper {
 						// to.science.forms
 						creatorAffiliation.add(affiliationId.replace("https://ror.org/",
 								"http://hbz-nrw.de/regal#creatorAffiliation/"));
+						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
+						Map<String, String> cAffil = genPropLoad
+								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
+						agentStr.append(" (" + cAffil.get(affiliationId) + ")");
 					}
+					play.Logger.debug("AgentData in short" + agentStr.toString());
+					agent.add(agentStr.toString());
 					creators.add(creatorMap);
 				}
 				rdf.put("creatorAcademicDegree", creatorAcademicDegree);
 				rdf.put("creatorAffiliation", creatorAffiliation);
 				rdf.put("creator", creators);
+				rdf.put("agent", agent);
 			}
 
 			academicDegreeId = null;
@@ -1508,10 +1520,12 @@ public class JsonMapper {
 				List<Map<String, Object>> contributors = new ArrayList<>();
 				ArrayList<String> contributorAcademicDegree = new ArrayList<>();
 				ArrayList<String> contributorAffiliation = new ArrayList<>();
+				ArrayList<String> agent = new ArrayList<>();
 
 				arr = lrmiJSONObject.getJSONArray("contributor");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
+					StringBuffer agentStr = new StringBuffer();
 					Map<String, Object> contributorMap = new TreeMap<>();
 					contributorMap.put("prefLabel", obj.getString(name));
 					if (obj.has("id")) {
@@ -1529,7 +1543,10 @@ public class JsonMapper {
 						contributorAcademicDegree.add(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 								"http://hbz-nrw.de/regal#contributorAcademicDegree/"));
-
+						agentStr.append(academicDegreeId.replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
+						agentStr.append(" " + obj.getString(name));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1545,12 +1562,20 @@ public class JsonMapper {
 						// to.science.forms
 						contributorAffiliation.add(affiliationId.replace("https://ror.org/",
 								"http://hbz-nrw.de/regal#contributorAffiliation/"));
+						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
+						Map<String, String> cAffil = genPropLoad
+								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
+						agentStr.append(" (" + cAffil.get(affiliationId) + ")");
+						play.Logger.debug("AgentData in short" + agentStr.toString());
 					}
 					contributors.add(contributorMap);
+					agent.add(agentStr.toString());
 				}
 				rdf.put("contributorAcademicDegree", contributorAcademicDegree);
 				rdf.put("contributorAffiliation", contributorAffiliation);
 				rdf.put("contributor", contributors);
+				rdf.put("agent", agent);
+
 			}
 
 			// template for Mapping of Array
