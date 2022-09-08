@@ -147,7 +147,7 @@ public class JsonMapper {
 			"http://purl.org/vocab/frbr/core#Manifestation",
 			"http://purl.org/lobid/lv#Miscellaneous",
 			"http://purl.org/dc/terms/BibliographicResource",
-			"info:regal/zettel/File" };
+			"info:regal/zettel/File", "http://hbz-nrw.de/regal#oerAgent" };
 
 	Node node = null;
 	String toscience_id = null;
@@ -1509,7 +1509,7 @@ public class JsonMapper {
 				rdf.put("creatorAcademicDegree", creatorAcademicDegree);
 				rdf.put("creatorAffiliation", creatorAffiliation);
 				rdf.put("creator", creators);
-				rdf.put("oerAgent", agent);
+				rdf = addToRdfArray(rdf, "oerAgent", agent);
 			}
 
 			academicDegreeId = null;
@@ -1574,8 +1574,7 @@ public class JsonMapper {
 				rdf.put("contributorAcademicDegree", contributorAcademicDegree);
 				rdf.put("contributorAffiliation", contributorAffiliation);
 				rdf.put("contributor", contributors);
-				rdf.put("oerAgent", agent);
-
+				rdf = addToRdfArray(rdf, "oerAgent", agent);
 			}
 
 			// template for Mapping of Array
@@ -1737,6 +1736,17 @@ public class JsonMapper {
 		}
 		return list;
 
+	}
+
+	private Map<String, Object> addToRdfArray(Map<String, Object> rdf, String key,
+			ArrayList<String> valueList) {
+		if (rdf.containsKey(key)) {
+			ArrayList<String> rdfArray = (ArrayList<String>) rdf.get(key);
+			rdfArray.addAll(valueList);
+		} else {
+			rdf.put(key, valueList);
+		}
+		return rdf;
 	}
 
 }
