@@ -1565,7 +1565,7 @@ public class JsonMapper {
 						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
 						Map<String, String> cAffil = genPropLoad
 								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
-						agentStr.append(" (" + cAffil.get(affiliationId) + ")");
+						agentStr.append(" " + cAffil.get(affiliationId));
 						play.Logger.debug("AgentData in short" + agentStr.toString());
 					}
 					contributors.add(contributorMap);
