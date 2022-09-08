@@ -1644,6 +1644,7 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> mapLrmiAgentsToLobid(Map<String, Object> rdf,
 			JSONObject lrmiJSONObject, String agentType) {
+
 		String academicDegreeId = null;
 		String affiliationId = null;
 		String affiliationType = null;
@@ -1654,60 +1655,64 @@ public class JsonMapper {
 			ArrayList<String> contributorAffiliation = new ArrayList<>();
 			ArrayList<String> agent = new ArrayList<>();
 
-			JSONArray arr = lrmiJSONObject.getJSONArray(agentType);
-			for (int i = 0; i < arr.length(); i++) {
-				JSONObject obj = arr.getJSONObject(i);
-				StringBuffer agentStr = new StringBuffer();
-				Map<String, Object> agentMap = new TreeMap<>();
-				agentMap.put("prefLabel", obj.getString(name));
-				if (obj.has("id")) {
-					agentMap.put("@id", obj.getString("id"));
-				}
-				if (obj.has("honoricPrefix")) {
-					String honoricPrefix = obj.getString("honoricPrefix");
-					academicDegreeId = new String(
-							"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-									+ honoricPrefix);
-					agentMap.put("academicDegree", academicDegreeId);
+			try {
+				JSONArray arr = lrmiJSONObject.getJSONArray(agentType);
+				for (int i = 0; i < arr.length(); i++) {
+					JSONObject obj = arr.getJSONObject(i);
+					StringBuffer agentStr = new StringBuffer();
+					Map<String, Object> agentMap = new TreeMap<>();
+					agentMap.put("prefLabel", obj.getString(name));
+					if (obj.has("id")) {
+						agentMap.put("@id", obj.getString("id"));
+					}
+					if (obj.has("honoricPrefix")) {
+						String honoricPrefix = obj.getString("honoricPrefix");
+						academicDegreeId = new String(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
+										+ honoricPrefix);
+						agentMap.put("academicDegree", academicDegreeId);
 
-					// we need to create academicDegree FlatList required by
-					// to.science.forms
-					contributorAcademicDegree.add(academicDegreeId.replace(
-							"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-							"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/"));
-					agentStr.append(academicDegreeId.replace(
-							"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-							""));
-					agentStr.append(" " + obj.getString(name));
-				}
-				if (obj.has("affiliation")) {
-					JSONObject obj2 = obj.getJSONObject("affiliation");
-					affiliationId = new String(obj2.getString("id"));
-					affiliationType = new String(obj2.getString("type"));
+						// we need to create academicDegree FlatList required by
+						// to.science.forms
+						contributorAcademicDegree.add(academicDegreeId.replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/"));
+						agentStr.append(academicDegreeId.replace(
+								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+								""));
+						agentStr.append(" " + obj.getString(name));
+					}
+					if (obj.has("affiliation")) {
+						JSONObject obj2 = obj.getJSONObject("affiliation");
+						affiliationId = new String(obj2.getString("id"));
+						affiliationType = new String(obj2.getString("type"));
 
-					Map<String, Object> affiliationMap = new TreeMap<>();
-					affiliationMap.put("@id", affiliationId);
-					affiliationMap.put("type", affiliationType);
-					agentMap.put("affiliation", affiliationMap);
+						Map<String, Object> affiliationMap = new TreeMap<>();
+						affiliationMap.put("@id", affiliationId);
+						affiliationMap.put("type", affiliationType);
+						agentMap.put("affiliation", affiliationMap);
 
-					// we also need to create Affiliation FlatList required by
-					// to.science.forms
-					contributorAffiliation.add(affiliationId.replace("https://ror.org/",
-							"http://hbz-nrw.de/regal#" + agentType
-									+ "contributorAffiliation/"));
-					GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
-					Map<String, String> cAffil = genPropLoad
-							.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
-					agentStr.append(" " + cAffil.get(affiliationId));
-					play.Logger.debug("AgentData in short" + agentStr.toString());
+						// we also need to create Affiliation FlatList required by
+						// to.science.forms
+						contributorAffiliation.add(affiliationId.replace("https://ror.org/",
+								"http://hbz-nrw.de/regal#" + agentType
+										+ "contributorAffiliation/"));
+						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
+						Map<String, String> cAffil = genPropLoad
+								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
+						agentStr.append(" " + cAffil.get(affiliationId));
+						play.Logger.debug("AgentData in short" + agentStr.toString());
+					}
+					agents.add(agentMap);
+					agent.add(agentStr.toString());
 				}
-				agents.add(agentMap);
-				agent.add(agentStr.toString());
+				rdf.put(agentType + "AcademicDegree", contributorAcademicDegree);
+				rdf.put(agentType + "Affiliation", contributorAffiliation);
+				rdf.put(agentType, agents);
+				rdf = addToRdfArray(rdf, "oerAgent", agent);
+			} catch (Exception e) {
+				play.Logger.error(e.getMessage());
 			}
-			rdf.put(agentType + "AcademicDegree", contributorAcademicDegree);
-			rdf.put(agentType + "Affiliation", contributorAffiliation);
-			rdf.put(agentType, agents);
-			rdf = addToRdfArray(rdf, "oerAgent", agent);
 		}
 
 		return rdf;
