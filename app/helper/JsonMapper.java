@@ -1509,7 +1509,7 @@ public class JsonMapper {
 				rdf.put("creatorAcademicDegree", creatorAcademicDegree);
 				rdf.put("creatorAffiliation", creatorAffiliation);
 				rdf.put("creator", creators);
-				rdf.put("agent", agent);
+				rdf.put("oerAgent", agent);
 			}
 
 			academicDegreeId = null;
@@ -1574,7 +1574,7 @@ public class JsonMapper {
 				rdf.put("contributorAcademicDegree", contributorAcademicDegree);
 				rdf.put("contributorAffiliation", contributorAffiliation);
 				rdf.put("contributor", contributors);
-				rdf.put("agent", agent);
+				rdf.put("oerAgent", agent);
 
 			}
 
