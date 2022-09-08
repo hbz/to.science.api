@@ -566,17 +566,18 @@ public class JsonMapper {
 		LinkedHashMap<String, String> affilLabelMap =
 				getPrefLabelMap(key + "ResearchOrganizationsRegistry-de.properties");
 
-		List<String> affiliation = new ArrayList<>();
+		List<String> agentAffiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
 			try {
-				affiliation = (List<String>) rdf.get(agentType.get(key));
+				agentAffiliation = (List<String>) rdf.get(agentType.get(key));
 			} catch (Exception e) {
-				play.Logger.warn("Found no ArrayList. Try to use HashSet");
-				affiliation =
+				play.Logger.warn(
+						"Found no ArrayList. Try to use HashSet. Sorting is not guaranteed");
+				agentAffiliation =
 						castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
 			}
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
-					+ " in flat list: " + affiliation.size());
+					+ " in flat list: " + agentAffiliation.size());
 		}
 
 		if (rdf.containsKey(key)) {
@@ -587,17 +588,19 @@ public class JsonMapper {
 				// write the next creatorObject into map
 				Map<String, Object> agent = (Map<String, Object>) cit.next();
 				Map<String, String> affilFields = new LinkedHashMap<>();
-				if (i < affiliation.size()) {
+				if (i < agentAffiliation.size()) {
+					play.Logger.debug("found affiliation: " + agentAffiliation.get(i)
+							+ " on position " + i);
 					play.Logger.debug(
-							"found affiliation: " + affiliation.get(i) + " on position " + i);
-					play.Logger.debug("Replacement of String results in :" + affiliation
-							.get(i).replace("http://hbz-nrw.de/regal#" + key + "Affiliation",
-									"https://ror.org"));
+							"Replacement of String results in :" + agentAffiliation.get(i)
+									.replace("http://hbz-nrw.de/regal#" + key + "Affiliation",
+											"https://ror.org"));
 					affilFields.put("@id",
-							affiliation.get(i).replace(
+							agentAffiliation.get(i).replace(
 									"http://hbz-nrw.de/regal#" + key + "Affiliation",
 									"https://ror.org"));
-					affilFields.put("prefLabel", affilLabelMap.get(affiliation.get(i)));
+					affilFields.put("prefLabel",
+							affilLabelMap.get(agentAffiliation.get(i)));
 					affilFields.put("type", "Organization");
 					agent.put("affiliation", affilFields);
 				} else {
@@ -633,12 +636,21 @@ public class JsonMapper {
 
 		List<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			academicDegree = (List<String>) rdf.get(agentType.get(key));
+			try {
+				academicDegree = (List<String>) rdf.get(agentType.get(key));
+			} catch (Exception e) {
+				play.Logger.warn(
+						"Found no ArrayList. Try to use HashSet. Sorting is not guaranteed");
+				academicDegree =
+						castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
+			}
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + academicDegree.size());
 		}
 
-		if (rdf.containsKey(key)) {
+		if (rdf.containsKey(key))
+
+		{
 			Object agentsMap = rdf.get(key);
 			Iterator cit = getLobidObjectIterator(agentsMap);
 			int i = 0;
