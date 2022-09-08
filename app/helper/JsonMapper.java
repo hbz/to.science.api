@@ -568,7 +568,13 @@ public class JsonMapper {
 
 		List<String> affiliation = new ArrayList<>();
 		if (rdf.get(agentType.get(key)) != null) {
-			affiliation = (List<String>) rdf.get(agentType.get(key));
+			try {
+				affiliation = (List<String>) rdf.get(agentType.get(key));
+			} catch (Exception e) {
+				play.Logger.warn("Found no ArrayList. Try to use HashSet");
+				affiliation =
+						castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
+			}
 			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
 					+ " in flat list: " + affiliation.size());
 		}
