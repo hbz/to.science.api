@@ -1448,134 +1448,8 @@ public class JsonMapper {
 				rdf.put("medium", media);
 			}
 
-			String academicDegreeId = null;
-			String affiliationId = null;
-			String affiliationType = null;
-			if (lrmiJSONObject.has("creator")) {
-				List<Map<String, Object>> creators = new ArrayList<>();
-				ArrayList<String> agent = new ArrayList<>();
-				ArrayList<String> creatorAcademicDegree = new ArrayList<>();
-				ArrayList<String> creatorAffiliation = new ArrayList<>();
-
-				arr = lrmiJSONObject.getJSONArray("creator");
-				for (int i = 0; i < arr.length(); i++) {
-					obj = arr.getJSONObject(i);
-					StringBuffer agentStr = new StringBuffer();
-					Map<String, Object> creatorMap = new TreeMap<>();
-					creatorMap.put("prefLabel", obj.getString(name));
-					if (obj.has("id")) {
-						creatorMap.put("@id", obj.getString("id"));
-					}
-					if (obj.has("honoricPrefix")) {
-						String honoricPrefix = obj.getString("honoricPrefix");
-						academicDegreeId = new String(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-										+ honoricPrefix);
-						creatorMap.put("academicDegree", academicDegreeId);
-
-						// we need to create academicDegree FlatList required by
-						// to.science.forms
-						creatorAcademicDegree.add(academicDegreeId.replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								"http://hbz-nrw.de/regal#creatorAcademicDegree/"));
-						agentStr.append(academicDegreeId.replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								""));
-						agentStr.append(" " + obj.getString(name));
-					}
-					if (obj.has("affiliation")) {
-						JSONObject affilObj = obj.getJSONObject("affiliation");
-						affiliationId = new String(affilObj.getString("id"));
-						affiliationType = new String(affilObj.getString("type"));
-
-						Map<String, Object> affiliationMap = new TreeMap<>();
-						affiliationMap.put("@id", affiliationId);
-						affiliationMap.put("type", affiliationType);
-						creatorMap.put("affiliation", affiliationMap);
-
-						// we also need to create Affiliation FlatList required by
-						// to.science.forms
-						creatorAffiliation.add(affiliationId.replace("https://ror.org/",
-								"http://hbz-nrw.de/regal#creatorAffiliation/"));
-						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
-						Map<String, String> cAffil = genPropLoad
-								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
-						agentStr.append(" (" + cAffil.get(affiliationId) + ")");
-					}
-					play.Logger.debug("AgentData in short" + agentStr.toString());
-					agent.add(agentStr.toString());
-					creators.add(creatorMap);
-				}
-				rdf.put("creatorAcademicDegree", creatorAcademicDegree);
-				rdf.put("creatorAffiliation", creatorAffiliation);
-				rdf.put("creator", creators);
-				rdf = addToRdfArray(rdf, "oerAgent", agent);
-			}
-
-			academicDegreeId = null;
-			affiliationId = null;
-			affiliationType = null;
-			if (lrmiJSONObject.has("contributor")) {
-
-				List<Map<String, Object>> contributors = new ArrayList<>();
-				ArrayList<String> contributorAcademicDegree = new ArrayList<>();
-				ArrayList<String> contributorAffiliation = new ArrayList<>();
-				ArrayList<String> agent = new ArrayList<>();
-
-				arr = lrmiJSONObject.getJSONArray("contributor");
-				for (int i = 0; i < arr.length(); i++) {
-					obj = arr.getJSONObject(i);
-					StringBuffer agentStr = new StringBuffer();
-					Map<String, Object> contributorMap = new TreeMap<>();
-					contributorMap.put("prefLabel", obj.getString(name));
-					if (obj.has("id")) {
-						contributorMap.put("@id", obj.getString("id"));
-					}
-					if (obj.has("honoricPrefix")) {
-						String honoricPrefix = obj.getString("honoricPrefix");
-						academicDegreeId = new String(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-										+ honoricPrefix);
-						contributorMap.put("academicDegree", academicDegreeId);
-
-						// we need to create academicDegree FlatList required by
-						// to.science.forms
-						contributorAcademicDegree.add(academicDegreeId.replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								"http://hbz-nrw.de/regal#contributorAcademicDegree/"));
-						agentStr.append(academicDegreeId.replace(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
-								""));
-						agentStr.append(" " + obj.getString(name));
-					}
-					if (obj.has("affiliation")) {
-						JSONObject obj2 = obj.getJSONObject("affiliation");
-						affiliationId = new String(obj2.getString("id"));
-						affiliationType = new String(obj2.getString("type"));
-
-						Map<String, Object> affiliationMap = new TreeMap<>();
-						affiliationMap.put("@id", affiliationId);
-						affiliationMap.put("type", affiliationType);
-						contributorMap.put("affiliation", affiliationMap);
-
-						// we also need to create Affiliation FlatList required by
-						// to.science.forms
-						contributorAffiliation.add(affiliationId.replace("https://ror.org/",
-								"http://hbz-nrw.de/regal#contributorAffiliation/"));
-						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
-						Map<String, String> cAffil = genPropLoad
-								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
-						agentStr.append(" " + cAffil.get(affiliationId));
-						play.Logger.debug("AgentData in short" + agentStr.toString());
-					}
-					contributors.add(contributorMap);
-					agent.add(agentStr.toString());
-				}
-				rdf.put("contributorAcademicDegree", contributorAcademicDegree);
-				rdf.put("contributorAffiliation", contributorAffiliation);
-				rdf.put("contributor", contributors);
-				rdf = addToRdfArray(rdf, "oerAgent", agent);
-			}
+			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
+			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
 
 			// template for Mapping of Array
 			if (lrmiJSONObject.has("description")) {
@@ -1738,14 +1612,104 @@ public class JsonMapper {
 
 	}
 
-	private Map<String, Object> addToRdfArray(Map<String, Object> rdf, String key,
+	/**
+	 * Add an List to existing rdfArray, or create rdfArray if not already exists
+	 * 
+	 * @param rdf
+	 * @param key name of the Array in the rdf
+	 * @param valueList List with Values to be added
+	 * @return
+	 */
+	public Map<String, Object> addToRdfArray(Map<String, Object> rdf, String key,
 			ArrayList<String> valueList) {
 		if (rdf.containsKey(key)) {
 			ArrayList<String> rdfArray = (ArrayList<String>) rdf.get(key);
+			for (int i = 0; i < valueList.size(); i++) {
+				rdfArray.add(valueList.get(i));
+			}
 			rdfArray.addAll(valueList);
 		} else {
 			rdf.put(key, valueList);
 		}
+		return rdf;
+	}
+
+	/**
+	 * Map the creators, contributors etc from lrmi to lobid
+	 * 
+	 * @param rdf
+	 * @param lrmiJSONObject
+	 * @param agentType
+	 * @return
+	 */
+	public Map<String, Object> mapLrmiAgentsToLobid(Map<String, Object> rdf,
+			JSONObject lrmiJSONObject, String agentType) {
+		String academicDegreeId = null;
+		String affiliationId = null;
+		String affiliationType = null;
+		if (lrmiJSONObject.has(agentType)) {
+
+			List<Map<String, Object>> agents = new ArrayList<>();
+			ArrayList<String> contributorAcademicDegree = new ArrayList<>();
+			ArrayList<String> contributorAffiliation = new ArrayList<>();
+			ArrayList<String> agent = new ArrayList<>();
+
+			JSONArray arr = lrmiJSONObject.getJSONArray(agentType);
+			for (int i = 0; i < arr.length(); i++) {
+				JSONObject obj = arr.getJSONObject(i);
+				StringBuffer agentStr = new StringBuffer();
+				Map<String, Object> agentMap = new TreeMap<>();
+				agentMap.put("prefLabel", obj.getString(name));
+				if (obj.has("id")) {
+					agentMap.put("@id", obj.getString("id"));
+				}
+				if (obj.has("honoricPrefix")) {
+					String honoricPrefix = obj.getString("honoricPrefix");
+					academicDegreeId = new String(
+							"https://d-nb.info/standards/elementset/gnd#academicDegree/"
+									+ honoricPrefix);
+					agentMap.put("academicDegree", academicDegreeId);
+
+					// we need to create academicDegree FlatList required by
+					// to.science.forms
+					contributorAcademicDegree.add(academicDegreeId.replace(
+							"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+							"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/"));
+					agentStr.append(academicDegreeId.replace(
+							"https://d-nb.info/standards/elementset/gnd#academicDegree/",
+							""));
+					agentStr.append(" " + obj.getString(name));
+				}
+				if (obj.has("affiliation")) {
+					JSONObject obj2 = obj.getJSONObject("affiliation");
+					affiliationId = new String(obj2.getString("id"));
+					affiliationType = new String(obj2.getString("type"));
+
+					Map<String, Object> affiliationMap = new TreeMap<>();
+					affiliationMap.put("@id", affiliationId);
+					affiliationMap.put("type", affiliationType);
+					agentMap.put("affiliation", affiliationMap);
+
+					// we also need to create Affiliation FlatList required by
+					// to.science.forms
+					contributorAffiliation.add(affiliationId.replace("https://ror.org/",
+							"http://hbz-nrw.de/regal#" + agentType
+									+ "contributorAffiliation/"));
+					GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
+					Map<String, String> cAffil = genPropLoad
+							.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
+					agentStr.append(" " + cAffil.get(affiliationId));
+					play.Logger.debug("AgentData in short" + agentStr.toString());
+				}
+				agents.add(agentMap);
+				agent.add(agentStr.toString());
+			}
+			rdf.put(agentType + "AcademicDegree", contributorAcademicDegree);
+			rdf.put(agentType + "Affiliation", contributorAffiliation);
+			rdf.put(agentType, agents);
+			rdf = addToRdfArray(rdf, "oerAgent", agent);
+		}
+
 		return rdf;
 	}
 
