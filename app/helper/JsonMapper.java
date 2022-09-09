@@ -219,7 +219,9 @@ public class JsonMapper {
 	 * Holt Metadaten im Format lobid --- VERALTET ! DEPRECATED !
 	 * 
 	 * @return a map representing the rdf data on this object
+	 * @deprecated Ld stream is replaced by LD2 stream
 	 */
+	@Deprecated
 	public Map<String, Object> getLd() {
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata1();
@@ -1548,7 +1550,7 @@ public class JsonMapper {
 				rdf.put("department", departArr);
 			}
 
-			postprocessing(rdf);
+			// postprocessing(rdf);
 
 			play.Logger.debug("Done mapping LRMI data to lobid2.");
 			return rdf;
@@ -1594,6 +1596,7 @@ public class JsonMapper {
 	}
 
 	/**
+	 * Cast a HashSet into ArrayList.
 	 * 
 	 * @param set
 	 * @return
