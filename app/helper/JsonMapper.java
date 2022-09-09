@@ -450,10 +450,10 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			applyAffiliation("creator", rdf);
-			applyAffiliation("contributor", rdf);
-			applyAcademicDegree("creator", rdf);
-			applyAcademicDegree("contributor", rdf);
+			// applyAffiliation("creator", rdf);
+			// applyAffiliation("contributor", rdf);
+			// applyAcademicDegree("creator", rdf);
+			// applyAcademicDegree("contributor", rdf);
 
 			postProcessWithGenPropLoader("department", "Department-de.properties",
 					rdf);
@@ -557,7 +557,7 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAffiliation(String agentType, Map<String, Object> rdf) {
+	public void applyAffiliation(String agentType, Map<String, Object> rdf) {
 
 		// set different variable names for creators and contributors
 
@@ -622,7 +622,7 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
+	public void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
 
 		ArrayList<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType + "AcademicDegree") != null) {
