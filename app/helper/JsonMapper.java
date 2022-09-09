@@ -1660,6 +1660,7 @@ public class JsonMapper {
 					if (obj.has("id")) {
 						agentMap.put("@id", obj.getString("id"));
 					}
+					agentStr.append(agentType + " " + Integer.toString(i + 1) + ": ");
 					if (obj.has("honoricPrefix")) {
 						String honoricPrefix = obj.getString("honoricPrefix");
 						academicDegreeId = new String(
@@ -1675,8 +1676,7 @@ public class JsonMapper {
 						agentStr.append(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 								""));
-						agentStr
-								.append(i + 1 + ". " + agentType + ": " + obj.getString(name));
+						agentStr.append(" " + obj.getString(name));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
