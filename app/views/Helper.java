@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -532,7 +532,7 @@ public class Helper {
 			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 		}
-		Map<String, String> result = new TreeMap<>();
+		Map<String, String> result = new LinkedHashMap<>();
 		result.put("fileName", fileName);
 		result.put("fileSize", getPrettySize(fileSize));
 		result.put("md5", md5);

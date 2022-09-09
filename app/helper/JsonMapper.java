@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -255,7 +254,7 @@ public class JsonMapper {
 		if (node.getFulltext() != null)
 			rdf.put(fulltext_ocr, node.getFulltext());
 
-		Map<String, Object> aboutMap = new TreeMap<>();
+		Map<String, Object> aboutMap = new LinkedHashMap<>();
 		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
 		if (node.getCreatedBy() != null)
 			aboutMap.put(createdBy, node.getCreatedBy());
@@ -293,14 +292,14 @@ public class JsonMapper {
 			rdf.put(parentPid, node.getParentPid());
 
 		if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
-			Map<String, Object> hasDataMap = new TreeMap<>();
+			Map<String, Object> hasDataMap = new LinkedHashMap<>();
 			hasDataMap.put(ID2, node.getDataUri());
 			hasDataMap.put(format, node.getMimeType());
 			hasDataMap.put(size, node.getFileSize());
 			if (node.getFileLabel() != null)
 				hasDataMap.put(fileLabel, node.getFileLabel());
 			if (node.getChecksum() != null) {
-				Map<String, Object> checksumMap = new TreeMap<>();
+				Map<String, Object> checksumMap = new LinkedHashMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
 				checksumMap.put(rdftype,
@@ -1024,7 +1023,7 @@ public class JsonMapper {
 		if (node.getFulltext() != null)
 			ld2Rdf.put(fulltext_ocr, node.getFulltext());
 
-		Map<String, Object> aboutMap = new TreeMap<>();
+		Map<String, Object> aboutMap = new LinkedHashMap<>();
 		aboutMap.put(ID2, node.getAggregationUri() + ".rdf");
 		if (node.getCreatedBy() != null)
 			aboutMap.put(createdBy, node.getCreatedBy());
@@ -1067,14 +1066,14 @@ public class JsonMapper {
 			ld2Rdf.put(parentPid, node.getParentPid());
 
 		if (node.getMimeType() != null && !node.getMimeType().isEmpty()) {
-			Map<String, Object> hasDataMap = new TreeMap<>();
+			Map<String, Object> hasDataMap = new LinkedHashMap<>();
 			hasDataMap.put(ID2, node.getDataUri());
 			hasDataMap.put(format, node.getMimeType());
 			hasDataMap.put(size, node.getFileSize());
 			if (node.getFileLabel() != null)
 				hasDataMap.put(fileLabel, node.getFileLabel());
 			if (node.getChecksum() != null) {
-				Map<String, Object> checksumMap = new TreeMap<>();
+				Map<String, Object> checksumMap = new LinkedHashMap<>();
 				checksumMap.put(checksumValue, node.getChecksum());
 				checksumMap.put(generator, "http://en.wikipedia.org/wiki/MD5");
 				checksumMap.put(rdftype,
@@ -1222,7 +1221,7 @@ public class JsonMapper {
 			} else {
 				// Element "mainEntityOfPage" wird neu angelegt
 				Collection<Map<String, Object>> mainEntityOfPage = new ArrayList<>();
-				Map<String, Object> mainEntityMap = new TreeMap<>();
+				Map<String, Object> mainEntityMap = new LinkedHashMap<>();
 				mainEntityMap.put("id", toscience_id);
 				mainEntityMap.put("dateCreated", LocalDate.now());
 				mainEntityOfPage.add(mainEntityMap);
@@ -1357,7 +1356,7 @@ public class JsonMapper {
 				 * "label": "Deutsch","prefLabel":"Deutsch"}]
 				 */
 				// eine Struktur {} anlegen:
-				Map<String, Object> languageMap = new TreeMap<>();
+				Map<String, Object> languageMap = new LinkedHashMap<>();
 				if (language != null && !language.trim().isEmpty()) {
 					// fix the wrong language tag provided by lrmi
 					/*
@@ -1399,7 +1398,7 @@ public class JsonMapper {
 				String inLang = null;
 				arr = lrmiJSONObject.getJSONArray("inLanguage");
 				for (int i = 0; i < arr.length(); i++) {
-					Map<String, Object> inLangMap = new TreeMap<>();
+					Map<String, Object> inLangMap = new LinkedHashMap<>();
 					inLang = arr.getString(i);
 					Locale loc = Locale.forLanguageTag(inLang);
 					inLangMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
@@ -1419,7 +1418,7 @@ public class JsonMapper {
 				arr = lrmiJSONObject.getJSONArray("learningResourceType");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
-					Map<String, Object> mediumMap = new TreeMap<>();
+					Map<String, Object> mediumMap = new LinkedHashMap<>();
 					if (obj.has("prefLabel")) {
 						JSONObject subObj = obj.getJSONObject("prefLabel");
 						prefLabel = subObj.getString("de");
@@ -1463,19 +1462,19 @@ public class JsonMapper {
 				myObj = lrmiJSONObject.get("license");
 				Map<String, Object> licenseMap = null;
 				if (myObj instanceof java.lang.String) {
-					licenseMap = new TreeMap<>();
+					licenseMap = new LinkedHashMap<>();
 					licenseMap.put("@id", lrmiJSONObject.getString("license"));
 					licenses.add(licenseMap);
 				} else if (myObj instanceof org.json.JSONObject) {
 					obj = lrmiJSONObject.getJSONObject("license");
-					licenseMap = new TreeMap<>();
+					licenseMap = new LinkedHashMap<>();
 					licenseMap.put("@id", obj.getString("id"));
 					licenses.add(licenseMap);
 				} else if (myObj instanceof org.json.JSONArray) {
 					arr = lrmiJSONObject.getJSONArray("license");
 					for (int i = 0; i < arr.length(); i++) {
 						obj = arr.getJSONObject(i);
-						licenseMap = new TreeMap<>();
+						licenseMap = new LinkedHashMap<>();
 						licenseMap.put("@id", obj.getString("id"));
 						licenses.add(licenseMap);
 					}
@@ -1488,7 +1487,7 @@ public class JsonMapper {
 				arr = lrmiJSONObject.getJSONArray("publisher");
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
-					Map<String, Object> publisherMap = new TreeMap<>();
+					Map<String, Object> publisherMap = new LinkedHashMap<>();
 					publisherMap.put("prefLabel", obj.getString(name));
 					publisherMap.put("@id", obj.getString("id"));
 					institutions.add(publisherMap);
@@ -1503,7 +1502,7 @@ public class JsonMapper {
 				arr = lrmiJSONObject.getJSONArray("keywords");
 				for (int i = 0; i < arr.length(); i++) {
 					AdHocUriProvider ahu = new AdHocUriProvider();
-					Map<String, Object> keywordMap = new TreeMap<>();
+					Map<String, Object> keywordMap = new LinkedHashMap<>();
 					keyword = arr.getString(i);
 					keywordMap.put("prefLabel", keyword);
 					keywordMap.put("@id", ahu.getAdhocUri(keyword));
@@ -1521,7 +1520,7 @@ public class JsonMapper {
 				genPropMap.putAll(genProp.loadVocabMap("Funder.properties"));
 
 				obj = lrmiJSONObject.getJSONObject("funder");
-				Map<String, Object> funderMap = new TreeMap<>();
+				Map<String, Object> funderMap = new LinkedHashMap<>();
 				funderMap.put("type", obj.getString("type"));
 				funderMap.put("@id", obj.getString("url"));
 				funderMap.put("prefLabel", genPropMap.get(obj.getString("url")));
@@ -1538,7 +1537,7 @@ public class JsonMapper {
 				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
 
 				for (int i = 0; i < aboutArray.length(); i++) {
-					Map<String, Object> department = new TreeMap<>();
+					Map<String, Object> department = new LinkedHashMap<>();
 					JSONObject abtMap = aboutArray.getJSONObject(i);
 					if (abtMap.has("id")) {
 						department.put("@id", abtMap.get("id"));
@@ -1594,7 +1593,12 @@ public class JsonMapper {
 		return map;
 	}
 
-	private ArrayList<String> castHashSet(HashSet<String> set) {
+	/**
+	 * 
+	 * @param set
+	 * @return
+	 */
+	public ArrayList<String> castHashSet(HashSet<String> set) {
 		ArrayList<String> list = new ArrayList<>();
 		Iterator<String> sIt = set.iterator();
 		while (sIt.hasNext()) {
@@ -1655,7 +1659,7 @@ public class JsonMapper {
 				for (int i = 0; i < lrmiJSONArray.length(); i++) {
 					JSONObject obj = lrmiJSONArray.getJSONObject(i);
 					StringBuffer agentStr = new StringBuffer();
-					Map<String, Object> agentMap = new TreeMap<>();
+					Map<String, Object> agentMap = new LinkedHashMap<>();
 					agentMap.put("prefLabel", obj.getString(name));
 					if (obj.has("id")) {
 						agentMap.put("@id", obj.getString("id"));
@@ -1683,7 +1687,7 @@ public class JsonMapper {
 						affiliationId = new String(obj2.getString("id"));
 						affiliationType = new String(obj2.getString("type"));
 
-						Map<String, Object> affiliationMap = new TreeMap<>();
+						Map<String, Object> affiliationMap = new LinkedHashMap<>();
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
 						agentMap.put("affiliation", affiliationMap);
