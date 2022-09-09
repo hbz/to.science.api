@@ -47,10 +47,10 @@ import models.Node;
 
 public class LRMIMapper {
 
-	Node node = null;
-	EtikettMakerInterface profile = Globals.profile;
-	JsonConverter jsonConverter = null;
-	static Read read = new Read();
+	private Node node = null;
+	private EtikettMakerInterface profile = Globals.profile;
+	private JsonConverter jsonConverter = null;
+	private static Read read = new Read();
 
 	/**
 	 * Ein Konstruktor für diese Klasse

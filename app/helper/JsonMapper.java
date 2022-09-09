@@ -556,32 +556,30 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAffiliation(String key, Map<String, Object> rdf) {
+	private void applyAffiliation(String agentType, Map<String, Object> rdf) {
 
 		// set different variable names for creators and contributors
-		Hashtable<String, String> agentType = new Hashtable<>();
-		agentType.put("creator", "creatorAffiliation");
-		agentType.put("contributor", "contributorAffiliation");
 
-		LinkedHashMap<String, String> affilLabelMap =
-				getPrefLabelMap(key + "ResearchOrganizationsRegistry-de.properties");
+		LinkedHashMap<String, String> affilLabelMap = getPrefLabelMap(
+				agentType + "ResearchOrganizationsRegistry-de.properties");
 
 		List<String> agentAffiliation = new ArrayList<>();
-		if (rdf.get(agentType.get(key)) != null) {
+		if (rdf.containsKey(agentType + "Affiliation")) {
 			try {
-				agentAffiliation = (List<String>) rdf.get(agentType.get(key));
+				agentAffiliation =
+						(ArrayList<String>) rdf.get(agentType + "Affiliation");
 			} catch (Exception e) {
 				play.Logger.warn(
 						"Found no ArrayList. Try to use HashSet. Sorting is not guaranteed");
 				agentAffiliation =
-						castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
+						castHashSet((HashSet<String>) rdf.get(agentType + "Affiliation"));
 			}
-			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
-					+ " in flat list: " + agentAffiliation.size());
+			play.Logger.debug("Amount of " + agentType + " " + agentType
+					+ "Affiliation" + " in flat list: " + agentAffiliation.size());
 		}
 
-		if (rdf.containsKey(key)) {
-			Object agentsMap = rdf.get(key);
+		if (rdf.containsKey(agentType)) {
+			Object agentsMap = rdf.get(agentType);
 			Iterator cit = getLobidObjectIterator(agentsMap);
 			int i = 0;
 			while (cit.hasNext()) {
@@ -591,13 +589,9 @@ public class JsonMapper {
 				if (i < agentAffiliation.size()) {
 					play.Logger.debug("found affiliation: " + agentAffiliation.get(i)
 							+ " on position " + i);
-					play.Logger.debug(
-							"Replacement of String results in :" + agentAffiliation.get(i)
-									.replace("http://hbz-nrw.de/regal#" + key + "Affiliation",
-											"https://ror.org"));
 					affilFields.put("@id",
 							agentAffiliation.get(i).replace(
-									"http://hbz-nrw.de/regal#" + key + "Affiliation",
+									"http://hbz-nrw.de/regal#" + agentType + "Affiliation",
 									"https://ror.org"));
 					affilFields.put("prefLabel",
 							affilLabelMap.get(agentAffiliation.get(i)));
@@ -608,7 +602,7 @@ public class JsonMapper {
 					// Something went wrong
 					// prevent existing affiliations from being overwritten by default
 					if (!agent.containsKey("affiliation")) {
-						play.Logger.debug("Using default affiliation for " + key + " "
+						play.Logger.debug("Using default affiliation for " + agentType + " "
 								+ agent.get("@id") + " = " + agent.get(PREF_LABEL));
 						affilFields.put("@id", "https://ror.org/04tsk2644");
 						affilFields.put("prefLabel", "Ruhr-Universität Bochum");
@@ -627,31 +621,27 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	private void applyAcademicDegree(String key, Map<String, Object> rdf) {
+	private void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
 
-		// set different variable names for creators and contributors
-		Hashtable<String, String> agentType = new Hashtable<>();
-		agentType.put("creator", "creatorAcademicDegree");
-		agentType.put("contributor", "contributorAcademicDegree");
-
-		List<String> academicDegree = new ArrayList<>();
-		if (rdf.get(agentType.get(key)) != null) {
+		ArrayList<String> academicDegree = new ArrayList<>();
+		if (rdf.get(agentType + "AcademicDegree") != null) {
 			try {
-				academicDegree = (List<String>) rdf.get(agentType.get(key));
+				academicDegree =
+						(ArrayList<String>) rdf.get(agentType + "AcademicDegree");
 			} catch (Exception e) {
 				play.Logger.warn(
 						"Found no ArrayList. Try to use HashSet. Sorting is not guaranteed");
-				academicDegree =
-						castHashSet((HashSet<String>) rdf.get(agentType.get(key)));
+				academicDegree = castHashSet(
+						(HashSet<String>) rdf.get(agentType + "AcademicDegree"));
 			}
-			play.Logger.debug("Amount of " + key + " " + agentType.get(key)
-					+ " in flat list: " + academicDegree.size());
+			play.Logger.debug("Amount of " + agentType + " " + agentType
+					+ "AcademicDegree" + " in flat list: " + academicDegree.size());
 		}
 
-		if (rdf.containsKey(key))
+		if (rdf.containsKey(agentType))
 
 		{
-			Object agentsMap = rdf.get(key);
+			Object agentsMap = rdf.get(agentType);
 			Iterator cit = getLobidObjectIterator(agentsMap);
 			int i = 0;
 			while (cit.hasNext()) {
@@ -660,7 +650,7 @@ public class JsonMapper {
 					play.Logger.debug("found academicDegree: " + academicDegree.get(i)
 							+ " on position " + i);
 					agent.put("academicDegree", academicDegree.get(i).replace(
-							"http://hbz-nrw.de/regal#" + key + "AcademicDegree/", ""));
+							"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/", ""));
 				} else {
 					/*
 					 * Es sind nicht genügend akademische Grade in der sequentiellen Liste
@@ -668,8 +658,8 @@ public class JsonMapper {
 					 * verwendet.
 					 */
 					if (!agent.containsKey("academicDegree")) {
-						play.Logger.debug("Using default academic degree for " + key + " "
-								+ agent.get(PREF_LABEL));
+						play.Logger.debug("Using default academic degree for " + agentType
+								+ " " + agent.get(PREF_LABEL));
 						agent.put("academicDegree", "unknown");
 					}
 				}
@@ -1274,8 +1264,8 @@ public class JsonMapper {
 			// LRMI-Daten nach JSONObject wandeln
 			JSONObject lrmiJSONObject = null;
 			if (lrmiData == null || lrmiData.isEmpty()) {
-				play.Logger.info("LRMI data of parent pid " + node.getPid()
-						+ " are not existing, yet.");
+				play.Logger.info(
+						"LRMI data of parent pid " + node.getPid() + " do not exist, yet.");
 				lrmiJSONObject = new JSONObject();
 			} else {
 				lrmiJSONObject = new JSONObject(lrmiData);
@@ -1628,6 +1618,8 @@ public class JsonMapper {
 			ArrayList<String> rdfArray = (ArrayList<String>) rdf.get(key);
 			for (int i = 0; i < valueList.size(); i++) {
 				rdfArray.add(valueList.get(i));
+				play.Logger.debug("Added to list " + key + " value " + valueList.get(i)
+						+ " on position " + i);
 			}
 			rdfArray.addAll(valueList);
 		} else {
@@ -1639,28 +1631,29 @@ public class JsonMapper {
 	/**
 	 * Map the creators, contributors etc from lrmi to lobid
 	 * 
-	 * @param rdf
+	 * @param Rdf
 	 * @param lrmiJSONObject
 	 * @param agentType
 	 * @return
 	 */
-	public Map<String, Object> mapLrmiAgentsToLobid(Map<String, Object> rdf,
+	public Map<String, Object> mapLrmiAgentsToLobid(Map<String, Object> Rdf,
 			JSONObject lrmiJSONObject, String agentType) {
 
+		Map<String, Object> rdf = Rdf;
 		String academicDegreeId = null;
 		String affiliationId = null;
 		String affiliationType = null;
 		if (lrmiJSONObject.has(agentType)) {
 
-			List<Map<String, Object>> agents = new ArrayList<>();
+			ArrayList<Map<String, Object>> agents = new ArrayList<>();
 			ArrayList<String> agentAcademicDegree = new ArrayList<>();
 			ArrayList<String> agentAffiliation = new ArrayList<>();
 			ArrayList<String> agent = new ArrayList<>();
 
 			try {
-				JSONArray arr = lrmiJSONObject.getJSONArray(agentType);
-				for (int i = 0; i < arr.length(); i++) {
-					JSONObject obj = arr.getJSONObject(i);
+				JSONArray lrmiJSONArray = lrmiJSONObject.getJSONArray(agentType);
+				for (int i = 0; i < lrmiJSONArray.length(); i++) {
+					JSONObject obj = lrmiJSONArray.getJSONObject(i);
 					StringBuffer agentStr = new StringBuffer();
 					Map<String, Object> agentMap = new TreeMap<>();
 					agentMap.put("prefLabel", obj.getString(name));
@@ -1682,7 +1675,8 @@ public class JsonMapper {
 						agentStr.append(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 								""));
-						agentStr.append(" " + obj.getString(name));
+						agentStr
+								.append(i + 1 + ". " + agentType + ": " + obj.getString(name));
 					}
 					if (obj.has("affiliation")) {
 						JSONObject obj2 = obj.getJSONObject("affiliation");
@@ -1702,14 +1696,13 @@ public class JsonMapper {
 						Map<String, String> cAffil = genPropLoad
 								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
 						agentStr.append(" " + cAffil.get(affiliationId));
-						play.Logger.debug("AgentData in short" + agentStr.toString());
 					}
 					agents.add(agentMap);
 					agent.add(agentStr.toString());
 				}
+				rdf.put(agentType, agents);
 				rdf.put(agentType + "AcademicDegree", agentAcademicDegree);
 				rdf.put(agentType + "Affiliation", agentAffiliation);
-				rdf.put(agentType, agents);
 				rdf = addToRdfArray(rdf, "oerAgent", agent);
 			} catch (Exception e) {
 				play.Logger.error(e.getMessage());
