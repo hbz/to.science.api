@@ -54,12 +54,13 @@ public class AdHocUriProvider {
 
 		play.Logger.debug("Start AdHocUri generation for " + labelValue);
 
+		labelValue.replace(" ", "+");
 		try {
-			String toScienceFormsRequest = URLEncoder
-					.encode(labelValue, StandardCharsets.UTF_8.toString())
-					.replaceAll("\\+", "%20").replaceAll("%21", "!")
-					.replaceAll("\\ ", "%20").replaceAll("%27", "'")
-					.replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~");
+			String toScienceFormsRequest =
+					URLEncoder.encode(labelValue, StandardCharsets.UTF_8.toString())
+							.replaceAll("\\+", "%20").replaceAll("%21", "!")
+							.replaceAll("%27", "'").replaceAll("%28", "(")
+							.replaceAll("%29", ")").replaceAll("%7E", "~");
 			WSResponse response = play.libs.ws.WS
 					.url(Globals.zettelUrl + "/localAutocomplete" + "?q=" + labelValue)
 					.setFollowRedirects(true).get().get(2000);
