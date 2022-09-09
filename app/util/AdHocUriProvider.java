@@ -54,7 +54,7 @@ public class AdHocUriProvider {
 
 		play.Logger.debug("Start AdHocUri generation for " + labelValue);
 
-		labelValue.replace(" ", "+");
+		labelValue = labelValue.replace(" ", "+");
 		try {
 			String toScienceFormsRequest =
 					URLEncoder.encode(labelValue, StandardCharsets.UTF_8.toString())
