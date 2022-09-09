@@ -1448,8 +1448,10 @@ public class JsonMapper {
 				rdf.put("medium", media);
 			}
 
-			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
-			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
+			synchronized (rdf) {
+				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
+				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
+			}
 
 			// template for Mapping of Array
 			if (lrmiJSONObject.has("description")) {
@@ -1651,8 +1653,8 @@ public class JsonMapper {
 		if (lrmiJSONObject.has(agentType)) {
 
 			List<Map<String, Object>> agents = new ArrayList<>();
-			ArrayList<String> contributorAcademicDegree = new ArrayList<>();
-			ArrayList<String> contributorAffiliation = new ArrayList<>();
+			ArrayList<String> agentAcademicDegree = new ArrayList<>();
+			ArrayList<String> agentAffiliation = new ArrayList<>();
 			ArrayList<String> agent = new ArrayList<>();
 
 			try {
@@ -1674,7 +1676,7 @@ public class JsonMapper {
 
 						// we need to create academicDegree FlatList required by
 						// to.science.forms
-						contributorAcademicDegree.add(academicDegreeId.replace(
+						agentAcademicDegree.add(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 								"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/"));
 						agentStr.append(academicDegreeId.replace(
@@ -1694,9 +1696,8 @@ public class JsonMapper {
 
 						// we also need to create Affiliation FlatList required by
 						// to.science.forms
-						contributorAffiliation.add(affiliationId.replace("https://ror.org/",
-								"http://hbz-nrw.de/regal#" + agentType
-										+ "contributorAffiliation/"));
+						agentAffiliation.add(affiliationId.replace("https://ror.org/",
+								"http://hbz-nrw.de/regal#" + agentType + "Affiliation/"));
 						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
 						Map<String, String> cAffil = genPropLoad
 								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
@@ -1706,8 +1707,8 @@ public class JsonMapper {
 					agents.add(agentMap);
 					agent.add(agentStr.toString());
 				}
-				rdf.put(agentType + "AcademicDegree", contributorAcademicDegree);
-				rdf.put(agentType + "Affiliation", contributorAffiliation);
+				rdf.put(agentType + "AcademicDegree", agentAcademicDegree);
+				rdf.put(agentType + "Affiliation", agentAffiliation);
 				rdf.put(agentType, agents);
 				rdf = addToRdfArray(rdf, "oerAgent", agent);
 			} catch (Exception e) {
