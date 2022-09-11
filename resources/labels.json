@@ -7309,7 +7309,19 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "http://hbz-nrw.de/regal#affiliationIndex",
+		"uri": "http://hbz-nrw.de/regal#authorAffiliationIndex",
+		"comment": "",
+		"label": "AdressIndex",
+		"icon": "",
+		"name": "authorAffiliationIndex",
+		"referenceType": "String",
+		"container": "",
+		"weight": "9",
+		"type": "CONTEXT",
+		"multilangLabel": {}
+	},
+	{
+		"uri": "http://hbz-nrw.de/regal#contributorAffiliationIndex",
 		"comment": "",
 		"label": "AdressIndex",
 		"icon": "",
@@ -24770,7 +24782,19 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "http://www.w3.org/2006/vcard/ns#adr",
+		"uri": "http://hbz-nrw.de/regal#authorAffiliation",
+		"comment": "",
+		"label": "Hochschule",
+		"icon": "",
+		"name": "authorAffiliation",
+		"referenceType": "String",
+		"container": "@list",
+		"weight": "5",
+		"type": "CONTEXT",
+		"multilangLabel": {}
+	},
+	{
+		"uri": "http://hbz-nrw.de/regal#contributorAffiliation",
 		"comment": "",
 		"label": "Hochschule",
 		"icon": "",
@@ -24781,6 +24805,7 @@
 		"type": "CONTEXT",
 		"multilangLabel": {}
 	},
+
 	{
 		"uri": "https://d-nb.info/standards/elementset/gnd#academicDegree",
 		"comment": "",
@@ -24806,11 +24831,11 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "http://hbz-nrw.de/rergal#creatorAcademicDegree",
+		"uri": "http://hbz-nrw.de/regal#authorAcademicDegree",
 		"comment": "",
 		"label": "Akademischer Grad",
 		"icon": "",
-		"name": "creatorAcademicDegree",
+		"name": "authorAcademicDegree",
 		"referenceType": "String",
 		"container": "@list",
 		"weight": "5",
@@ -24818,11 +24843,11 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "http://hbz-nrw.de/regal#creatorAcademicDegreeIndex",
+		"uri": "http://hbz-nrw.de/regal#authorAcademicDegreeIndex",
 		"comment": "",
-		"label": "creatorAcademicDegreeIndex",
+		"label": "authorAcademicDegreeIndex",
 		"icon": "",
-		"name": "creatorAcademicDegreeIndex",
+		"name": "authorAcademicDegreeIndex",
 		"referenceType": "String",
 		"container": "@list",
 		"weight": "5",
@@ -24830,7 +24855,7 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "http://hbz-nrw.de/rergal#contributorAcademicDegree",
+		"uri": "http://hbz-nrw.de/regal#contributorAcademicDegree",
 		"comment": "",
 		"label": "Akademischer Grad",
 		"icon": "",
@@ -25967,7 +25992,7 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "ttps://creativecommons.org/publicdomain/zero/1.0/",
+		"uri": "https://creativecommons.org/publicdomain/zero/1.0/",
 		"comment": "",
 		"label": "CC0 1.0",
 		"icon": "",
@@ -25976,5 +26001,41 @@
 		"weight": "",
 		"type": "STORE",
 		"multilangLabel": {}
+	},
+	{
+		"uri": "https://www.dh.nrw/kooperationen",
+		"comment": "",
+		"label": "Förderprogramm",
+		"icon": "",
+		"name": "funder",
+		"container": "",
+		"weight": "5",
+		"referenceType": "@id",
+		"type": "STORE",
+		"multilangLabel": {}
+	},
+	{
+		"uri": "https://w3id.org/kim/hochschulfaechersystematik",
+		"comment": "",
+		"label": "Fachbereich",
+		"icon": "",
+		"name": "department",
+		"container": "@list",
+		"weight": "5",
+		"referenceType": "@id",
+		"type": "STORE",
+		"multilangLabel": {}
+	},
+	{
+		"uri": "http://hbz-nrw.de/regal#agent",
+		"comment": "",
+		"label": "OER-Person",
+		"icon": "",
+		"name": "oerAgent",
+		"container": "@list",
+		"weight": "5",
+		"referenceType": "@id",
+		"type": "STORE",
+		"multilangLabel": {}
 	}
-]
+	]
