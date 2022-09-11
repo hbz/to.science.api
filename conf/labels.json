@@ -24806,11 +24806,11 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "http://hbz-nrw.de/rergal#creatorAcademicDegree",
+		"uri": "http://hbz-nrw.de/rergal#authorAcademicDegree",
 		"comment": "",
 		"label": "Akademischer Grad",
 		"icon": "",
-		"name": "creatorAcademicDegree",
+		"name": "authorAcademicDegree",
 		"referenceType": "String",
 		"container": "@list",
 		"weight": "5",
@@ -24818,11 +24818,11 @@
 		"multilangLabel": {}
 	},
 	{
-		"uri": "http://hbz-nrw.de/regal#creatorAcademicDegreeIndex",
+		"uri": "http://hbz-nrw.de/regal#authorAcademicDegreeIndex",
 		"comment": "",
-		"label": "creatorAcademicDegreeIndex",
+		"label": "authorAcademicDegreeIndex",
 		"icon": "",
-		"name": "creatorAcademicDegreeIndex",
+		"name": "authorAcademicDegreeIndex",
 		"referenceType": "String",
 		"container": "@list",
 		"weight": "5",

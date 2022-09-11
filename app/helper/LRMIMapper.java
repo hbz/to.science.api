@@ -217,8 +217,8 @@ public class LRMIMapper {
 			}
 
 			ArrayList<String> creatorAcadDegree = new ArrayList<>();
-			if (rdf.containsKey("creatorAcademicDegree")) {
-				iterator = getLobid2Iterator(rdf.get("creatorAcademicDegree"));
+			if (rdf.containsKey("authorAcademicDegree")) {
+				iterator = getLobid2Iterator(rdf.get("authorAcademicDegree"));
 				while (iterator.hasNext()) {
 					String degreeId = (String) iterator.next();
 					creatorAcadDegree.add(degreeId);
@@ -239,15 +239,15 @@ public class LRMIMapper {
 								+ contributorAcadDegree.size());
 			}
 
-			ArrayList<String> creatorAffiliation = new ArrayList<>();
-			if (rdf.containsKey("creatorAffiliation")) {
-				iterator = getLobid2Iterator(rdf.get("creatorAffiliation"));
+			ArrayList<String> authorAffiliation = new ArrayList<>();
+			if (rdf.containsKey("authorAffiliation")) {
+				iterator = getLobid2Iterator(rdf.get("authorAffiliation"));
 				while (iterator.hasNext()) {
 					String rorId = (String) iterator.next();
-					creatorAffiliation.add(rorId);
+					authorAffiliation.add(rorId);
 				}
 				play.Logger.debug("Amount of creator affiliations in flat List: "
-						+ creatorAffiliation.size());
+						+ authorAffiliation.size());
 			}
 
 			ArrayList<String> contributorAffiliation = new ArrayList<>();
@@ -261,7 +261,7 @@ public class LRMIMapper {
 						+ contributorAffiliation.size());
 			}
 			int attribCounter = 0;
-			lrmiJsonContent = mapAgent(rdf, creatorAcadDegree, creatorAffiliation,
+			lrmiJsonContent = mapAgent(rdf, creatorAcadDegree, authorAffiliation,
 					lrmiJsonContent, "creator");
 			lrmiJsonContent = mapAgent(rdf, contributorAcadDegree,
 					contributorAffiliation, lrmiJsonContent, "contributor");

@@ -450,10 +450,10 @@ public class JsonMapper {
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
 			createJoinedFunding(rdf);
-			// applyAffiliation("creator", rdf);
-			// applyAffiliation("contributor", rdf);
-			// applyAcademicDegree("creator", rdf);
-			// applyAcademicDegree("contributor", rdf);
+			applyAffiliation("creator", rdf);
+			applyAffiliation("contributor", rdf);
+			applyAcademicDegree("creator", rdf);
+			applyAcademicDegree("contributor", rdf);
 
 			postProcessWithGenPropLoader("department", "Department-de.properties",
 					rdf);
@@ -570,10 +570,9 @@ public class JsonMapper {
 				agentAffiliation =
 						(ArrayList<String>) rdf.get(agentType + "Affiliation");
 			} catch (Exception e) {
-				play.Logger.warn(
-						"Found no ArrayList. Try to use HashSet. Sorting is not guaranteed");
-				agentAffiliation =
-						castHashSet((HashSet<String>) rdf.get(agentType + "Affiliation"));
+				play.Logger.warn("Found no ArrayList");
+				// agentAffiliation =
+				// castHashSet((HashSet<String>) rdf.get(agentType + "Affiliation"));
 			}
 			play.Logger.debug("Amount of " + agentType + " " + agentType
 					+ "Affiliation" + " in flat list: " + agentAffiliation.size());
@@ -630,10 +629,9 @@ public class JsonMapper {
 				academicDegree =
 						(ArrayList<String>) rdf.get(agentType + "AcademicDegree");
 			} catch (Exception e) {
-				play.Logger.warn(
-						"Found no ArrayList. Try to use HashSet. Sorting is not guaranteed");
-				academicDegree = castHashSet(
-						(HashSet<String>) rdf.get(agentType + "AcademicDegree"));
+				play.Logger.warn("Found no ArrayList.");
+				// academicDegree = castHashSet(
+				// (HashSet<String>) rdf.get(agentType + "AcademicDegree"));
 			}
 			play.Logger.debug("Amount of " + agentType + " " + agentType
 					+ "AcademicDegree" + " in flat list: " + academicDegree.size());
