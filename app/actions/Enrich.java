@@ -252,29 +252,54 @@ public class Enrich {
 	 */
 	public String enrichLrmiData(String content) {
 
+		JSONObject jcontent = new JSONObject();
+		play.Logger.debug("Start enrichment of lrmi data");
+		// LRMIDaten nach JSONObject wandeln
 		try {
-			play.Logger.debug("Start enrichment of lrmi data");
-			// LRMIDaten nach JSONObject wandeln
-			JSONObject jcontent = new JSONObject(content);
-			JSONArray arr = null;
-			JSONObject obj = null;
+			jcontent = new JSONObject(content);
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+		}
 
-			String labelValue = null;
-			if (jcontent.has("creator")) {
-				arr = jcontent.getJSONArray("creator");
+		jcontent = enrichAgent(jcontent, "creator");
+		jcontent = enrichAgent(jcontent, "contributor");
+
+		play.Logger.debug("Done enrichment of LRMI data.");
+		return jcontent.toString();
+
+	}
+
+	/**
+	 * Method to enrich an agent (creator or contributor either) with an AdHocUri,
+	 * if required
+	 * 
+	 * @param jcontent
+	 * @param agentType
+	 * @return
+	 */
+	private JSONObject enrichAgent(JSONObject jcontent, String agentType) {
+		JSONArray arr = null;
+		JSONObject obj = null;
+
+		String prefLabel = null;
+
+		try {
+
+			if (jcontent.has(agentType)) {
+				arr = jcontent.getJSONArray(agentType);
 				for (int i = 0; i < arr.length(); i++) {
 					obj = arr.getJSONObject(i);
-					labelValue = new String(obj.getString("name"));
+					prefLabel = new String(obj.getString("name"));
 					if (!obj.has("id")) {
 						// Autor ohne ID. Das bedeutet in LRMI-Sprache: ohne URI
 						// Mache API-Call an Zettel, um eine ad-hoc-URI zu erhalten
-						labelValue =
-								URLEncoder.encode(labelValue, StandardCharsets.UTF_8.toString())
+						prefLabel =
+								URLEncoder.encode(prefLabel, StandardCharsets.UTF_8.toString())
 										.replaceAll("\\+", "%20").replaceAll("%21", "!")
 										.replaceAll("%27", "'").replaceAll("%28", "(")
 										.replaceAll("%29", ")").replaceAll("%7E", "~");
 						WSResponse response = play.libs.ws.WS.url(
-								Globals.zettelUrl + "/localAutocomplete" + "?q=" + labelValue)
+								Globals.zettelUrl + "/localAutocomplete" + "?q=" + prefLabel)
 								.setFollowRedirects(true).get().get(2000);
 						input = response.getBodyAsStream();
 						String formsResponseBody = CharStreams
@@ -284,7 +309,7 @@ public class Enrich {
 						if (response.getStatus() != 200) {
 							play.Logger.error(
 									"to.science.forms service request localAutocomplete fails for "
-											+ labelValue + "\nUse URI for setting Label now!");
+											+ prefLabel + "\nUse URI for setting Label now!");
 						} else {
 							// Parse out uri value from JSON structure
 							JSONArray jFormsResponse = new JSONArray(formsResponseBody);
@@ -293,17 +318,13 @@ public class Enrich {
 							play.Logger.debug("Found adHoc-URI: " + adHocUri);
 							obj.put("id", adHocUri);
 						}
-					} // end of "creator has no id"
-				} // next creator
+					}
+				}
 			}
-
-			play.Logger.debug("Done enrichment of LRMI data.");
-			return jcontent.toString();
 		} catch (Exception e) {
-			play.Logger.error("Content could not be enriched!", e);
-			throw new RuntimeException("LRMI.json could not be enriched", e);
+			play.Logger.error("AddHocUri could not created for " + agentType);
 		}
-
+		return jcontent;
 	}
 
 }

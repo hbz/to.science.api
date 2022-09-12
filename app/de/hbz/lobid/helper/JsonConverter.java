@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.LinkedHashMap;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.rdf4j.model.BNode;
@@ -125,7 +125,7 @@ public class JsonConverter {
 	}
 
 	private Map<String, Object> createMap(Collection<Statement> g) {
-		Map<String, Object> jsonResult = new TreeMap<>();
+		Map<String, Object> jsonResult = new LinkedHashMap<>();
 		Iterator<Statement> i = g.iterator();
 		jsonResult.put(idAlias, mainSubjectOfTheResource);
 		while (i.hasNext()) {
@@ -260,7 +260,7 @@ public class JsonConverter {
 	}
 
 	private Map<String, Object> createObjectWithId(String uri) {
-		Map<String, Object> newObject = new TreeMap<>();
+		Map<String, Object> newObject = new LinkedHashMap<>();
 		if (uri != null) {
 			newObject.put(idAlias, uri);
 			if (etikette.supportsLabelsForValues()) {
@@ -284,7 +284,7 @@ public class JsonConverter {
 	}
 
 	private Map<String, Object> createObjectWithoutId(String uri) {
-		Map<String, Object> newObject = new TreeMap<>();
+		Map<String, Object> newObject = new LinkedHashMap<>();
 		if (uri != null) {
 			createObject(uri, newObject);
 		}
