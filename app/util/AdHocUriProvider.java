@@ -54,9 +54,9 @@ public class AdHocUriProvider {
 
 		play.Logger.debug("Start AdHocUri generation for " + labelValue);
 
-		String encodedValue = labelValue.replace(" ", "+");
+		// String encodedValue = labelValue.replace(" ", "+");
 		try {
-			String toScienceFormsRequest =
+			String encodedValue =
 					URLEncoder.encode(labelValue, StandardCharsets.UTF_8.toString())
 							.replaceAll("\\+", "%20").replaceAll("%21", "!")
 							.replaceAll("%27", "'").replaceAll("%28", "(")
@@ -72,7 +72,7 @@ public class AdHocUriProvider {
 			if (response.getStatus() != 200) {
 				play.Logger.error(
 						"to.science.forms service request localAutocomplete fails for "
-								+ toScienceFormsRequest + "\nUse URI for setting Label now!");
+								+ encodedValue + "\nUse URI for setting Label now!");
 			} else {
 				// Parse out uri value from JSON structure
 				JSONArray jFormsResponse = new JSONArray(formsResponseBody);

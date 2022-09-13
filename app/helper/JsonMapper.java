@@ -570,7 +570,7 @@ public class JsonMapper {
 				agentAffiliation =
 						(ArrayList<String>) rdf.get(agentType + "Affiliation");
 			} catch (Exception e) {
-				play.Logger.warn("Found no ArrayList");
+				play.Logger.warn("Found no ArrayList, found HashSet");
 				// agentAffiliation =
 				// castHashSet((HashSet<String>) rdf.get(agentType + "Affiliation"));
 			}
@@ -619,7 +619,7 @@ public class JsonMapper {
 	 * fetch the academic degree information from flat rdf statement and put them
 	 * to the according agent object in rdf
 	 * 
-	 * @param rdf
+	 * @param rdf a Map
 	 */
 	public void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
 
@@ -667,6 +667,11 @@ public class JsonMapper {
 		}
 	}
 
+	/**
+	 * @param key
+	 * @param propertiesFileName
+	 * @param rdf
+	 */
 	private void postProcessWithGenPropLoader(String key,
 			String propertiesFileName, Map<String, Object> rdf) {
 
@@ -1158,7 +1163,7 @@ public class JsonMapper {
 		boolean result = false;
 		JsonNode mediumArray = rdf.at("/medium");
 		for (JsonNode item : mediumArray) {
-			if (key.equals(item.at("/" + ID2).asText("no Value found")))
+			if (key.equals(item.at("/" + ID2).asText()))
 				result = true;
 		}
 		return result;
@@ -1350,27 +1355,18 @@ public class JsonMapper {
 				obj = arr.getJSONObject(1);
 				String language = obj.getString("@language");
 				play.Logger.debug("Found language: " + language);
-				/*
-				 * So etwas anlegen:
-				 * "language":[{"@id":"http://id.loc.gov/vocabulary/iso639-2/deu",
-				 * "label": "Deutsch","prefLabel":"Deutsch"}]
-				 */
-				// eine Struktur {} anlegen:
+
+				// Mapping of Language with Locale.class as helper
 				Map<String, Object> languageMap = new LinkedHashMap<>();
 				if (language != null && !language.trim().isEmpty()) {
-					// fix the wrong language tag provided by lrmi
-					/*
-					 * if (language.equals("de") || language.equals("deu")) { language =
-					 * "ger"; }
-					 */
 					if (language.length() == 2) {
 						Locale loc = Locale.forLanguageTag(language);
 						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
 								+ loc.getISO3Language());
 					} else if (language.length() == 3) {
 						// vermutlich ISO639-2
-						languageMap.put("@id", "http://id.loc.gov/vocabulary/iso639-2/"
-								+ language.replace("deu", "ger"));
+						languageMap.put("@id",
+								"http://id.loc.gov/vocabulary/iso639-2/" + language);
 					} else {
 						play.Logger.warn(
 								"Unbekanntes Vokabluar für Sprachencode! Code=" + language);
