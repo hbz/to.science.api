@@ -1440,6 +1440,8 @@ public class JsonMapper {
 			synchronized (rdf) {
 				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
 				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
+				mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
+						"medium");
 			}
 
 			// template for Mapping of Array
@@ -1630,6 +1632,57 @@ public class JsonMapper {
 		} else {
 			rdf.put(key, valueList);
 		}
+		return rdf;
+	}
+
+	/**
+	 * Try to create a method for mapping objects with id and prefLabel from lrmi
+	 * to lobid (Kayhan)
+	 * 
+	 * @param Rdf return
+	 * @param lrmiJSONObject lrmi
+	 * @param lrmiObject input String
+	 * @param lobidObject output String
+	 * @return
+	 */
+	public Map<String, Object> mapLrmiObjectToLobid(Map<String, Object> Rdf,
+			JSONObject lrmiJSONObject, String lrmiObject, String lobidObject) {
+
+		Map<String, Object> rdf = Rdf;
+		JSONObject obj = null;
+		JSONArray arr = null;
+		String prefLabel = null;
+
+		try {
+
+			if (lrmiJSONObject.has(lrmiObject)) {
+				List<Map<String, Object>> list = new ArrayList<>();
+				arr = lrmiJSONObject.getJSONArray(lrmiObject);
+
+				for (int i = 0; i < arr.length; i++) {
+					obj = arr.getJSONObject(i);
+					Map<String, Object> map = new LinkedHashMap<>();
+					if (obj.has("prefLabel")) {
+						JSONObject subObj = obj.getJSONObject("prefLabel");
+						prefLabel = subObj.getString("de");
+						map.put("prefLabel", prefLabel);
+						play.Logger.debug(lrmiObject + ": prefLabel: " + prefLabel);
+					}
+					if (obj.has("id")) {
+						map.put("@id", obj.getString("id"));
+					} else { // Dieser Fall sollte nicht vorkommen
+						play.Logger.warn("Achtung! " + lrmiObject + "(" + lobidObject
+								+ ") hat keine ID !");
+					}
+					list.add(map);
+				}
+				rdf.put(lobidObject, list);
+			}
+
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+		}
+
 		return rdf;
 	}
 
