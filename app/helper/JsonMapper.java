@@ -1431,7 +1431,7 @@ public class JsonMapper {
 			synchronized (rdf) {
 				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
 				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
-				mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
+				rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
 						"medium");
 			}
 
