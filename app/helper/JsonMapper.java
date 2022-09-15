@@ -1413,20 +1413,31 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-			/*
-			 * if (lrmiJSONObject.has("learningResourceType")) { List<Map<String,
-			 * Object>> media = new ArrayList<>(); arr =
-			 * lrmiJSONObject.getJSONArray("learningResourceType"); for (int i = 0; i
-			 * < arr.length(); i++) { obj = arr.getJSONObject(i); Map<String, Object>
-			 * mediumMap = new LinkedHashMap<>(); if (obj.has("prefLabel")) {
-			 * JSONObject subObj = obj.getJSONObject("prefLabel"); prefLabel =
-			 * subObj.getString("de"); mediumMap.put("prefLabel", prefLabel);
-			 * play.Logger.debug("learningResourceType: prefLabel: " + prefLabel); }
-			 * if (obj.has("id")) { mediumMap.put("@id", obj.getString("id")); } else
-			 * { // Dieser Fall sollte nicht vorkommen play.Logger
-			 * .warn("Achtung! learningResourceType (Medium) hat keine ID !"); }
-			 * media.add(mediumMap); } rdf.put("medium", media); }
-			 */
+			
+//			if (lrmiJSONObject.has("learningResourceType")) {
+//				List<Map<String, Object>> media = new ArrayList<>();
+//				arr = lrmiJSONObject.getJSONArray("learningResourceType");
+//				for (int i = 0; i < arr.length(); i++) {
+//					obj = arr.getJSONObject(i);
+//					Map<String, Object> mediumMap = new LinkedHashMap<>();
+//					if (obj.has("prefLabel")) {
+//						JSONObject subObj = obj.getJSONObject("prefLabel");
+//						prefLabel = subObj.getString("de");
+//						mediumMap.put("prefLabel", prefLabel);
+//						play.Logger.debug("learningResourceType: prefLabel: " + prefLabel);
+//					}
+//					if (obj.has("id")) {
+//						mediumMap.put("@id", obj.getString("id"));
+//					} else {
+//						// Dieser Fall sollte nicht vorkommen
+//						play.Logger
+//								.warn("Achtung! learningResourceType (Medium) hat keine ID !");
+//					}
+//					media.add(mediumMap);
+//				}
+//				rdf.put("medium", media);
+//			}
+			 
 
 			synchronized (rdf) {
 				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
@@ -1627,8 +1638,8 @@ public class JsonMapper {
 	}
 
 	/**
-	 * Try to create a method for mapping objects with id and prefLabel from lrmi
-	 * to lobid (Kayhan)
+	 * Try to create a method for mapping objects with String-Output from lrmi to
+	 * lobid (Kayhan)
 	 * 
 	 * @param Rdf return
 	 * @param lrmiJSONObject lrmi
