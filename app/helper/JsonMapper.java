@@ -1413,37 +1413,35 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-			
-//			if (lrmiJSONObject.has("learningResourceType")) {
-//				List<Map<String, Object>> media = new ArrayList<>();
-//				arr = lrmiJSONObject.getJSONArray("learningResourceType");
-//				for (int i = 0; i < arr.length(); i++) {
-//					obj = arr.getJSONObject(i);
-//					Map<String, Object> mediumMap = new LinkedHashMap<>();
-//					if (obj.has("prefLabel")) {
-//						JSONObject subObj = obj.getJSONObject("prefLabel");
-//						prefLabel = subObj.getString("de");
-//						mediumMap.put("prefLabel", prefLabel);
-//						play.Logger.debug("learningResourceType: prefLabel: " + prefLabel);
-//					}
-//					if (obj.has("id")) {
-//						mediumMap.put("@id", obj.getString("id"));
-//					} else {
-//						// Dieser Fall sollte nicht vorkommen
-//						play.Logger
-//								.warn("Achtung! learningResourceType (Medium) hat keine ID !");
-//					}
-//					media.add(mediumMap);
-//				}
-//				rdf.put("medium", media);
-//			}
-			 
+//			 if (lrmiJSONObject.has("learningResourceType")) {
+//				 List<Map<String, Object>> media = new ArrayList<>();
+//				 arr = lrmiJSONObject.getJSONArray("learningResourceType");
+//				 for (int i = 0; i < arr.length(); i++) {
+//					 obj = arr.getJSONObject(i);
+//					 Map<String, Object> mediumMap = new LinkedHashMap<>();
+//					 if (obj.has("prefLabel")) {
+//						 JSONObject subObj = obj.getJSONObject("prefLabel");
+//						 prefLabel = subObj.getString("de");
+//						 mediumMap.put("prefLabel", prefLabel);
+//						 play.Logger.debug("learningResourceType: prefLabel: " + prefLabel);
+//					 }
+//					 if (obj.has("id")) {
+//						 mediumMap.put("@id", obj.getString("id"));
+//					 } else {
+//						 // Dieser Fall sollte nicht vorkommen
+//						 play.Logger
+//						 .warn("Achtung! learningResourceType (Medium) hat keine ID !");
+//					 }
+//					 media.add(mediumMap);
+//				 }
+//			 rdf.put("medium", media);
+//			 }
 
 			synchronized (rdf) {
 				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
 				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
-				rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
-						"medium");
+				rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",	"medium", null);
+				rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "about", "department", "Department-de.properties");
 			}
 
 			// template for Mapping of Array
@@ -1531,26 +1529,26 @@ public class JsonMapper {
 				rdf.put("funder", funderMap);
 			}
 
-			if (lrmiJSONObject.has("about")) {
-				List<Map<String, Object>> departArr = new ArrayList<>();
-				JSONArray aboutArray = lrmiJSONObject.getJSONArray("about");
-
-				// Provide resolving for prefLabels from id via GenericPropertiesLoader
-				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
-
-				for (int i = 0; i < aboutArray.length(); i++) {
-					Map<String, Object> department = new LinkedHashMap<>();
-					JSONObject abtMap = aboutArray.getJSONObject(i);
-					if (abtMap.has("id")) {
-						department.put("@id", abtMap.get("id"));
-						department.put("prefLabel", genPropMap.get(abtMap.get("id")));
-					}
-					departArr.add(department);
-				}
-				rdf.put("department", departArr);
-			}
+//			if (lrmiJSONObject.has("about")) {
+//				List<Map<String, Object>> departArr = new ArrayList<>();
+//				JSONArray aboutArray = lrmiJSONObject.getJSONArray("about");
+//
+//				// Provide resolving for prefLabels from id via GenericPropertiesLoader
+//				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+//				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+//				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
+//
+//				for (int i = 0; i < aboutArray.length(); i++) {
+//					Map<String, Object> department = new LinkedHashMap<>();
+//					JSONObject abtMap = aboutArray.getJSONObject(i);
+//					if (abtMap.has("id")) {
+//						department.put("@id", abtMap.get("id"));
+//						department.put("prefLabel", genPropMap.get(abtMap.get("id")));
+//					}
+//					departArr.add(department);
+//				}
+//				rdf.put("department", departArr);
+//			}
 
 			// postprocessing(rdf);
 
@@ -1641,14 +1639,16 @@ public class JsonMapper {
 	 * Try to create a method for mapping objects with String-Output from lrmi to
 	 * lobid (Kayhan)
 	 * 
-	 * @param Rdf return
+	 * @param Rdf add object in rdf=Rdf
 	 * @param lrmiJSONObject lrmi
 	 * @param lrmiObject input String
 	 * @param lobidObject output String
-	 * @return
+	 * @param propertiesFile name of properties File if exists. Else set null
+	 * @return rdf
 	 */
 	public Map<String, Object> mapLrmiObjectToLobid(Map<String, Object> Rdf,
-			JSONObject lrmiJSONObject, String lrmiObject, String lobidObject) {
+			JSONObject lrmiJSONObject, String lrmiObject, String lobidObject,
+			String propertiesFile) {
 
 		Map<String, Object> rdf = Rdf;
 		JSONObject obj = null;
@@ -1664,18 +1664,30 @@ public class JsonMapper {
 				for (int i = 0; i < arr.length; i++) {
 					obj = arr.getJSONObject(i);
 					Map<String, Object> map = new LinkedHashMap<>();
-					if (obj.has("prefLabel")) {
-						JSONObject subObj = obj.getJSONObject("prefLabel");
-						prefLabel = subObj.getString("de");
-						map.put("prefLabel", prefLabel);
-						play.Logger.debug(lrmiObject + ": prefLabel: " + prefLabel);
-					}
+					// verify id
 					if (obj.has("id")) {
 						map.put("@id", obj.getString("id"));
 					} else { // Dieser Fall sollte nicht vorkommen
 						play.Logger.warn("Achtung! " + lrmiObject + "(" + lobidObject
 								+ ") hat keine ID !");
 					}
+					// verify prefLabel
+					if (propertiesFile == null) {
+						if (obj.has("prefLabel")) {
+							JSONObject subObj = obj.getJSONObject("prefLabel");
+							prefLabel = subObj.getString("de");
+							map.put("prefLabel", prefLabel);
+							play.Logger.debug(lrmiObject + ": prefLabel: " + prefLabel);
+						}
+					} else {
+					// provide resolving for prefLabels from id via GenericPropertiesLoader
+						LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+						GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+						genPropMap.putAll(genProp.loadVocabMap(propertiesFile));
+						
+						map.put("prefLabel", genPropMap.get(obj.get("id")));
+					}
+
 					list.add(map);
 				}
 				rdf.put(lobidObject, list);
