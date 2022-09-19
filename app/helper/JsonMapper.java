@@ -562,7 +562,7 @@ public class JsonMapper {
 		// set different variable names for creators and contributors
 
 		LinkedHashMap<String, String> affilLabelMap =
-				getPrefLabelMap(agentType + "affiliation-de.properties");
+				getPrefLabelMap(agentType + "Affiliation-de.properties");
 
 		List<String> agentAffiliation = new ArrayList<>();
 		if (rdf.containsKey(agentType + "Affiliation")) {
