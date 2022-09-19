@@ -510,7 +510,7 @@ public class LRMIMapper {
 				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
 				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
+				genPropMap.putAll(genProp.loadVocabMap("department-de.properties"));
 
 				while (iterator.hasNext()) {
 					Map<String, Object> map = (Map<String, Object>) iterator.next();
@@ -555,7 +555,7 @@ public class LRMIMapper {
 				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
 				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-				genPropMap.putAll(genProp.loadVocabMap("Funder.properties"));
+				genPropMap.putAll(genProp.loadVocabMap("funder-de.properties"));
 
 				Map<String, Object> map = (Map<String, Object>) iterator.next();
 				JSONObject funderObj = new JSONObject();
