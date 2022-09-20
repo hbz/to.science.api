@@ -532,23 +532,6 @@ public class Utils {
 		}
 	}
 
-	void updateLrmiDataStream(Node node) {
-		try {
-			File file = new File(node.getLrmiDataFile());
-			if (dataStreamExists(node.getPid(), "Lrmidata")) {
-				new ModifyDatastream(node.getPid(), "Lrmidata").versionable(true)
-						.dsLabel("LRMI data JSON").dsState("A").controlGroup("M")
-						.mimeType("application/json").content(file).execute();
-			} else {
-				new AddDatastream(node.getPid(), "Lrmidata").versionable(true)
-						.dsState("A").dsLabel("LRMI data JSON").controlGroup("M")
-						.mimeType("application/json").content(file).execute();
-			}
-		} catch (FedoraClientException e) {
-			throw new HttpArchiveException(e.getStatus(), e);
-		}
-	}
-
 	void readRelsExt(Node node) throws FedoraClientException {
 		FedoraResponse response =
 				new GetDatastreamDissemination(node.getPid(), "RELS-EXT").download(true)

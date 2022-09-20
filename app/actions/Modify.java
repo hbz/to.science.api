@@ -192,26 +192,6 @@ public class Modify extends RegalAction {
 	}
 
 	/**
-	 * This method maps LRMI data to the Lobid2 format and creates a datastream
-	 * "metadata2" of the resource
-	 * 
-	 * @param pid The pid of the resource that must be updated
-	 * @param format Das RDF-Format, in das die Metadaten konvertiert werden
-	 *          sollen (z.B. TURTLE, XDFXML, NTRIPLES)
-	 * @param content The metadata in the format lrmi
-	 * @return a short message
-	 */
-	public String updateLobidify2AndEnrichLrmiData(String pid, RDFFormat format,
-			JsonNode content) {
-		try {
-			Node node = new Read().readNode(pid);
-			return updateLobidify2AndEnrichLrmiData(node, format, content.toString());
-		} catch (Exception e) {
-			throw new UpdateNodeException(e);
-		}
-	}
-
-	/**
 	 * This method maps DeepGreen data to the Lobid2 format and creates a
 	 * datastream "metadata2" of the resource
 	 * 
@@ -227,23 +207,6 @@ public class Modify extends RegalAction {
 			Node node = new Read().readNode(pid);
 			return updateLobidify2AndEnrichDeepGreenData(node, embargo_duration,
 					format, content);
-		} catch (Exception e) {
-			throw new UpdateNodeException(e);
-		}
-	}
-
-	/**
-	 * This method creates an LRMI datastream (unmapped) and appends it to a
-	 * ressource.
-	 * 
-	 * @param pid The pid of the ressource that must be updated
-	 * @param content The metadata in the format lrmi
-	 * @return a short message
-	 */
-	public String updateAndEnrichLrmiData(String pid, JsonNode content) {
-		try {
-			Node node = new Read().readNode(pid);
-			return updateAndEnrichLrmiData(node, content.toString());
 		} catch (Exception e) {
 			throw new UpdateNodeException(e);
 		}
@@ -321,39 +284,6 @@ public class Modify extends RegalAction {
 	}
 
 	/**
-	 * The method maps LRMI metadata to the Lobid2 format and creates a data
-	 * stream Metadata2 of the resource
-	 * 
-	 * @param node The node of the resource that must be updated
-	 * @param format RDF-Format, z.B. NTRIPLES
-	 * @param content The metadata as LRMI string
-	 * @return a short message
-	 */
-	public String updateLobidify2AndEnrichLrmiData(Node node, RDFFormat format,
-			String content) {
-
-		play.Logger.debug("Start updateLobidify2AndEnrichLrmiData");
-		String pid = node.getPid();
-		if (content == null) {
-			throw new HttpArchiveException(406,
-					pid + " You've tried to upload an empty string."
-							+ " This action is not supported."
-							+ " Use HTTP DELETE instead.\n");
-		}
-
-		Map<String, Object> rdf =
-				new JsonMapper().getLd2Lobidify2Lrmi(node, content);
-		play.Logger.debug("Mapped LRMI data to lobid2!");
-		updateMetadata2(node, rdfToString(rdf, format));
-		play.Logger.debug("Updated Metadata2 datastream!");
-
-		String enrichMessage = Enrich.enrichMetadata2(node);
-		return pid
-				+ " LRMI-metadata successfully updated, lobidified and enriched! "
-				+ enrichMessage;
-	}
-
-	/**
 	 * The method maps DeepGreen metadata to the Lobid2 format and creates a data
 	 * stream Metadata2 of the resource
 	 * 
@@ -391,40 +321,6 @@ public class Modify extends RegalAction {
 					e);
 			throw new RuntimeException(e);
 		}
-	}
-
-	/**
-	 * This method creates an LRMI data stream (unmapped) of the resource
-	 * 
-	 * @param node The node of the resource that must be updated
-	 * @param content The metadata as LRMI string
-	 * @return a short message
-	 */
-	public String updateAndEnrichLrmiData(Node node, String content) {
-		play.Logger.debug("Start Update and enrich LRMI data.");
-		play.Logger.debug("content: " + content);
-		String pid = node.getPid();
-		if (content == null) {
-			throw new HttpArchiveException(406,
-					pid + " You've tried to upload an empty string."
-							+ " This action is not supported."
-							+ " Use HTTP DELETE instead.\n");
-		}
-
-		String content_toscience =
-				new JsonMapper().getTosciencefyLrmi(node, content);
-		play.Logger.debug(
-				"Substituted IDs in content. Content is now: " + content_toscience);
-		updateLrmiData(node, content_toscience);
-		msg =
-				pid + " LRMI-metadata of " + node.getPid() + " successfully updated! ";
-		play.Logger.debug(msg);
-		return msg;
-
-		// Anreicherung muss erst mal nicht sein, wäre neue Methode:
-		// String enrichMessage = Enrich.enrichLrmiData(node);
-		// return pid + " LRMI-metadata successfully updated and enriched! " +
-		// enrichMessage;
 	}
 
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,
@@ -1222,30 +1118,6 @@ public class Modify extends RegalAction {
 			return pid + " metadata2 successfully updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);
-		} catch (IOException e) {
-			throw new UpdateNodeException(e);
-		}
-	}
-
-	String updateLrmiData(Node node, String content) {
-		try {
-			String pid = node.getPid();
-			if (content == null) {
-				throw new HttpArchiveException(406,
-						pid + " You've tried to upload an empty string."
-								+ " This action is not supported."
-								+ " Use HTTP DELETE instead.\n");
-			}
-			File file = CopyUtils.copyStringToFile(content);
-			node.setLrmiDataFile(file.getAbsolutePath());
-			play.Logger.debug("file.getAbsolutePath(): " + file.getAbsolutePath());
-			node.setLrmiData(content);
-			OaiDispatcher.makeOAISet(node);
-			play.Logger.debug("Re-Indexing node and parent");
-			reindexNodeAndParent(node);
-			msg = "LRMI data successfully updated!";
-			play.Logger.debug(msg);
-			return pid + " " + msg;
 		} catch (IOException e) {
 			throw new UpdateNodeException(e);
 		}

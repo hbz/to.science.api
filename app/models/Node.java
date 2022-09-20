@@ -67,7 +67,6 @@ public class Node implements java.io.Serializable {
 
 	private String metadataFile = null;
 	private String metadata2File = null;
-	private String lrmiDataFile = null;
 	private String seqFile = null;
 	private String confFile = null;
 	private String urlHistFile = null;
@@ -78,7 +77,6 @@ public class Node implements java.io.Serializable {
 
 	private String metadata1 = null;
 	private String metadata2 = null;
-	private String lrmidata = null;
 	private String seq = null;
 
 	private String conf = null;
@@ -326,22 +324,6 @@ public class Node implements java.io.Serializable {
 	 */
 	public void setMetadata2File(String metadataFile) {
 		this.metadata2File = metadataFile;
-	}
-
-	/**
-	 * The LRMI-Data file
-	 * 
-	 * @return the absolute path to file
-	 */
-	public String getLrmiDataFile() {
-		return lrmiDataFile;
-	}
-
-	/**
-	 * @param metadataFile The absolutepath to the metadatafile
-	 */
-	public void setLrmiDataFile(String metadataFile) {
-		this.lrmiDataFile = metadataFile;
 	}
 
 	/**
@@ -657,22 +639,6 @@ public class Node implements java.io.Serializable {
 	 */
 	public Node setMetadata2(String metadata2) {
 		this.metadata2 = metadata2;
-		return this;
-	}
-
-	/**
-	 * @return LRMI metadata as string
-	 */
-	public String getLrmiData() {
-		return lrmidata;
-	}
-
-	/**
-	 * @param metadata LRMI metadata in json format
-	 * @return this
-	 */
-	public Node setLrmiData(String lrmidata) {
-		this.lrmidata = lrmidata;
 		return this;
 	}
 
