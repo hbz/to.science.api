@@ -23,20 +23,35 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+// import javax.activation.MimetypesFileTypeMap;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.MyController;
 import helper.HttpArchiveException;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
-import helper.WpullCrawl;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
-import models.ToScienceObject.Provenience;
+import models.ResearchDataResource;
 import models.ToScienceObject;
+import models.ToScienceObject.Provenience;
 import play.Logger;
 import play.Play;
 
 /**
+ * Legt ein Objekt als to.science-Datenobjekt der Klasse "Node" an. "Node" ist,
+ * neben ToScieneObject, das zentrale Datenmodell für komplexe Objekte in
+ * to.science. "Node" wird auf Basis von "ToScienceObject" erzeugt. Auf Basis
+ * des Node wird ein Fedora-Objekt angelegt (durch Aufruf von
+ * FedoraFacace.updateNode).
+ * 
+ * Zusammenfassend werden Node zusammen mit Fedora-Objekt in to.science als
+ * "Ressource" (Resource) bezeichnet.
+ * 
+ * Diese Klasse macht auch Updates und "Patches" (etwa: Reparaturen) auf
+ * bestehende Ressourcen.
+ * 
  * @author Jan Schnasse
  *
  */
@@ -59,8 +74,12 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * @param node
-	 * @param object
+	 * Diese Methode aktualisiert eine Ressource aufgrund eines
+	 * ToScience-Objektes. Bestehende Eigenschaften des Nodes werden
+	 * überschrieben.
+	 * 
+	 * @param node Der Knoten (muss schon existieren)
+	 * @param object Ein ToScience-Objekt
 	 * @return the updated node
 	 */
 	public Node updateResource(Node node, ToScienceObject object) {
@@ -69,7 +88,7 @@ public class Create extends RegalAction {
 		return updateResource(node);
 	}
 
-	private Node updateResource(Node node) {
+	public Node updateResource(Node node) {
 		play.Logger.debug("Updating Node with Pid " + node.getPid());
 		Globals.fedora.updateNode(node);
 		updateIndex(node.getPid());
@@ -77,8 +96,11 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * @param node
-	 * @param object
+	 * Diese Methode "patcht" (aktualisiert) eine Ressource aufgrund eines
+	 * ToScience-Objektes. Fehlende Eigenschaften werden hinzugefügt.
+	 * 
+	 * @param node Der Knoten (muss schon existieren)
+	 * @param object Ein ToScience-Objekt
 	 * @return the updated node
 	 */
 	public Node patchResource(Node node, ToScienceObject object) {
@@ -91,6 +113,9 @@ public class Create extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode "patcht" ("flickt", aktualisiert) eine Liste von Ressourcen
+	 * anhand ein- und dessselben ToScience-Objektes.
+	 * 
 	 * @param nodes nodes to set new properties for
 	 * @param object the ToScienceObject contains props that will be applied to
 	 *          all nodes in the list
@@ -101,8 +126,11 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * @param namespace
-	 * @param object
+	 * Diese Methode legt eine neue Ressource anhand eines ToScience-Objektes an.
+	 * Die PID wird vom System generiert.
+	 * 
+	 * @param namespace Der Namensraum (z.B. "edoweb" oder "frl")
+	 * @param object Das ToScience-Objekt
 	 * @return the updated node
 	 */
 	public Node createResource(String namespace, ToScienceObject object) {
@@ -111,9 +139,13 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * @param id
-	 * @param namespace
-	 * @param object
+	 * Diese Methode legt eine neue Ressource anhand eines ToScience-Objektes und
+	 * einer gewünschten ID an. Falls die ID schon existiert, wird ein Update
+	 * gemacht.
+	 * 
+	 * @param id Die ID der Ressource
+	 * @param namespace Der Namensraum (z.B. "edoweb" oder "frl")
+	 * @param object Das ToScience-Objekt
 	 * @return the updated node
 	 */
 	public Node createResource(String id, String namespace,
@@ -186,7 +218,7 @@ public class Create extends RegalAction {
 		OaiDispatcher.makeOAISet(node);
 	}
 
-	private void setNodeType(String type, Node node) {
+	private static void setNodeType(String type, Node node) {
 		node.setType(TYPE_OBJECT);
 		node.setContentType(type);
 	}
@@ -214,7 +246,7 @@ public class Create extends RegalAction {
 		}
 	}
 
-	private void linkToNewParent(Node parent, Node child) {
+	private static void linkToNewParent(Node parent, Node child) {
 		Globals.fedora.linkToParent(child, parent.getPid());
 		Globals.fedora.linkParentToNode(parent.getPid(), child.getPid());
 	}
@@ -231,12 +263,15 @@ public class Create extends RegalAction {
 		}
 	}
 
-	private void inheritRights(Node from, Node to) {
+	private static void inheritRights(Node from, Node to) {
 		to.setAccessScheme(from.getAccessScheme());
 		to.setPublishScheme(from.getPublishScheme());
 	}
 
 	/**
+	 * Diese Methode holt einen neuen persistenten Identifikator (PID) aus dem
+	 * Namensraum (Namespace).
+	 * 
 	 * @param namespace a namespace in fedora , corresponds to an index in
 	 *          elasticsearch
 	 * @return a new pid in the namespace
@@ -246,6 +281,9 @@ public class Create extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode legt eine neue Webpage-Version (Objekt-Typ "Node") für einen
+	 * erfolgreich beendeten Crawl an.
+	 * 
 	 * Kurzform von createWepageVersion mit nur 4 Parametern. Dabei werden Label
 	 * und Datestamp aus dem aktuellen Datum erzeugt. Für Neuanlage von
 	 * Website-Versionen direkt nach erfolgreich beendetem Crawl. Für nachträglich
@@ -270,8 +308,8 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * Diese Methode legt eine neue Webpage-Version (Objekt-Typ "Knoten") für
-	 * einen erfolgreich beendeten Crawl an.
+	 * Diese Methode legt eine neue Webpage-Version (Objekt-Typ "Node") für einen
+	 * erfolgreich beendeten Crawl an.
 	 * 
 	 * @param n must be of type webpage: Die Webpage
 	 * @param conf die Gatherconf zu der Webpage
@@ -363,11 +401,11 @@ public class Create extends RegalAction {
 	}
 
 	/**
-	 * Diese Methode legt eine WebpageVersion für eine bestehende WARC-Datei an.
-	 * Es wird angenommen, dass diese WARC-Datei unterhalb des Verzechnisses
-	 * wget-data liegt. Diese Methode wurde bei der Migration der aus EDO2
-	 * stammenden Webschnitte, die ausgepackt und mit wget erneut, lokal gecrawlt
-	 * wurden, angewandt.
+	 * Diese Methode legt eine WebpageVersion (Objekt-Typ "Node") für eine
+	 * bestehende WARC-Datei an. Es wird angenommen, dass diese WARC-Datei
+	 * unterhalb des Verzechnisses wget-data liegt. Diese Methode wurde bei der
+	 * Migration der aus EDO2 stammenden Webschnitte, die ausgepackt und mit wget
+	 * erneut, lokal gecrawlt wurden, angewandt.
 	 * 
 	 * @param n must be of type webpage
 	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch) oder
@@ -421,7 +459,7 @@ public class Create extends RegalAction {
 	 * Es wird angenommen, dass diese WARC-Datei unterhalb des Verzechnisses
 	 * dataDir liegt.
 	 * 
-	 * 27.07.2020 | Ingolf Kuss | Neuanlage für EDOZWO-1020
+	 * @author Ingolf Kuss | 27.07.2020 | Neuanlage für EDOZWO-1020
 	 * 
 	 * @param n Der Knoten der Webpage
 	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch) oder
@@ -555,6 +593,110 @@ public class Create extends RegalAction {
 			ApplicationLogger.error(
 					"Link unpacked website version {} to webpage {} failed !", versionPid,
 					n.getPid());
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Diese Methode legt einen Node vom contentType "researchDataResource"
+	 * (Forschungsdaten-Ressource) an. Eine zu übergebende Datei (URL-Pfad,
+	 * Dateiname) wird als ungemanangter Inhalt (Fedora unmanaged content) mit dem
+	 * Node verknüpft. Der neue Node wird an einen bestehenden Node des
+	 * contentTypes "researchData" (Forschungsdaten) angehängt, oder an eine
+	 * Überordnung, die unterhalb diese Knotens hängt.
+	 * 
+	 * @author Ingolf Kuss 30.11.2020 | Neuanlage für FRL-522
+	 * 
+	 * @param n Der Knoten (Node) vom Typ Forschungsdaten (researchData)
+	 * @param collectionUrl der URL-Pfad unterhalb des Basis-URL, unter der
+	 *          Forschungsdatenressourcen abgelegt sind. Standardwert: "data"
+	 * @param subPath ein optionaler Unterpfad in dem Verzeichnis, in dem für
+	 *          diese PID Forschungsdaten abgelegt sind. Standardwert: "". Falls
+	 *          der Unterpfad nicht leer ist, wird für ihn eine Überordnung
+	 *          angelegt, sofern diese noch nicht vorhanden ist.
+	 * @param filename Der Dateiname der Ressource (ohne Pfadangaben, aber mit
+	 *          Dateiendung)
+	 * @param resourcePid Die gewünschte Pid für die Resssource (7-stellig
+	 *          numerisch) oder leer (Pid wird generiert)
+	 * @return a new node of contentType researchDataResource
+	 */
+	public Node createResearchData(Node n, String collectionUrl, String subPath,
+			String filename, String resourcePid) {
+		try {
+			ApplicationLogger
+					.debug("Create research data resource for PID " + n.getPid());
+
+			ResearchDataResource resource = new ResearchDataResource();
+			resource.setResearchDataNode(n);
+			/* first guess for parent, will be changed if subPath is present */
+			resource.setParentNode(n);
+			resource.setCollectionUrl(collectionUrl);
+			resource.setSubPath(subPath);
+			resource.setFilename(filename);
+			resource.setResourcePid(resourcePid);
+
+			// Gucke, ob eine Überordnung angelegt werden muss und lege sie ggfs. an
+			if (subPath != null && !subPath.isEmpty()) {
+				resource.chkCreatePart();
+			}
+
+			resource.doConsistencyChecks();
+
+			// Erzeuge ein Fedora-Objekt mit ungemanagtem Inhalt,
+			// das auf die Ressource (zugänglich über eine URL) zeigt
+			ToScienceObject toScienceObject = new ToScienceObject();
+			toScienceObject.setContentType("researchDataResource");
+			Provenience prov = toScienceObject.getIsDescribedBy();
+			// prov.setCreatedBy(userId);
+			prov.setName(filename);
+			prov.setImportedFrom(resource.getUrlString());
+			toScienceObject.setIsDescribedBy(prov);
+			toScienceObject.setParentPid(resource.getParentNode().getPid());
+			Node researchDataResource = null;
+			if ((resourcePid != null) && (!resourcePid.isEmpty())) {
+				researchDataResource =
+						createResource(resourcePid, n.getNamespace(), toScienceObject);
+			} else {
+				researchDataResource =
+						createResource(n.getNamespace(), toScienceObject);
+			}
+
+			new Modify().updateLobidifyAndEnrichMetadata(researchDataResource,
+					"<" + researchDataResource.getPid()
+							+ "> <http://purl.org/dc/terms/title> \"" + filename + "\" .");
+			researchDataResource.setLocalData(resource.getUrlString());
+			researchDataResource.setMimeType(resource.getContentType());
+			// Bei Ressourcen vom Typ "File" würde es so gehen (aber wir haben ja
+			// URLs):
+			/*
+			 * researchDataResource.setMimeType( new
+			 * MimetypesFileTypeMap().getContentType(<File>));
+			 */
+			researchDataResource.setFileMimeType(resource.getContentType());
+			ApplicationLogger
+					.info("FileMimeType = " + researchDataResource.getFileMimeType());
+			researchDataResource.setFileLabel(filename);
+			researchDataResource.setAccessScheme(n.getAccessScheme());
+			researchDataResource.setPublishScheme(n.getPublishScheme());
+			/*
+			 * hier werden erst mal standardmäßig im ersten Aufschlag alle
+			 * Forschungsdatenressourcen auf fiktive 100 KB Größe gesetzt
+			 */
+			BigInteger sizeInByte = new BigInteger("100000");
+			researchDataResource.setFileSize(sizeInByte);
+			ApplicationLogger.info("localData = " + resource.getUrlString());
+			researchDataResource = updateResource(researchDataResource);
+
+			ApplicationLogger
+					.info("Successfully created resource " + researchDataResource.getPid()
+							+ "  for research data " + n.getPid() + " !");
+			return researchDataResource;
+
+		} catch (Exception e) {
+			ApplicationLogger.error(
+					"Creation of research data resource {} for research data (Forschungsdaten) of PID {} has failed !\n\tReason: {}",
+					filename, n.getPid(), e.getMessage());
+			ApplicationLogger.debug("", e);
 			throw new RuntimeException(e);
 		}
 	}

@@ -104,6 +104,39 @@ public class Read extends RegalAction {
 		return oldestNode;
 	}
 
+	/**
+	 * Liefert das zuletzt modifizierte Kind vom Type "contentType". Wie
+	 * getLastModifiedChild, jedoch wir Null zurück gegeben, falls: - der
+	 * Inhaltstyp leer ist, oder - kein Kind von dem gewünschten Inhaltstyp
+	 * gefunden wurde. Die Methode getLastModifiedChild liefert dagegen in diesem
+	 * Falle ein Kind irgendeinen Types bzw. den Knoten selber.
+	 * 
+	 * @param node Der Knoten, dessen Kinder gesucht werden.
+	 * @param contentType der Inhaltstyp, von dem das Kind sein muss.
+	 * @return node
+	 */
+	public Node getLastModifiedChildOrNull(Node node, String contentType) {
+		play.Logger.debug("BEGIN getLastModifiedChildOrNull for pidi: "
+				+ node.getPid() + "; contentType: " + contentType);
+		if (contentType == null || contentType.isEmpty()) {
+			return null;
+		}
+		Node oldestNode = null;
+		for (Node n : getParts(node)) {
+			play.Logger.debug("found child with pid: " + n.getPid()
+					+ "; contentType: " + n.getContentType());
+			if (contentType.equals(n.getContentType())) {
+				oldestNode = compareDates(n, oldestNode);
+				play.Logger.debug("oldest node is now: pid: " + oldestNode.getPid());
+			}
+		}
+		if (oldestNode == null)
+			return null;
+		play.Logger.debug("returning oldest node with pid: " + oldestNode.getPid());
+		return oldestNode;
+
+	}
+
 	private Node compareDates(Node currentNode, Node oldestNode) {
 		Date currentNodeDate = currentNode.getObjectTimestamp();
 		if (currentNodeDate == null)
@@ -617,12 +650,16 @@ public class Read extends RegalAction {
 	 * @return a urn object that describes the status of the urn
 	 */
 	public Urn getUrnStatus(Node node) {
-		return getUrnStatus(node.getUrn(), node.getPid());
+		return getUrnStatus(
+				node.getUrn() == null ? node.getUrnFromMetadata() : node.getUrn(),
+				node.getPid());
 	}
 
 	public Urn getUrnStatus(String urn, String pid) {
-		if (urn == null)
+		if (urn == null) {
+			play.Logger.debug("urn == null");
 			return null;
+		}
 		Urn result = new Urn(urn);
 		result.init(Globals.urnbase + pid);
 		return result;
@@ -710,9 +747,11 @@ public class Read extends RegalAction {
 				node.getPid().substring(node.getNamespace().length() + 1));
 		result.put("catalogId", node.getLegacyId());
 		result.put("webgatherer", getGatherStatus(node));
+		play.Logger.debug("node.getUrn()=" + node.getUrn());
 		if (node.getUrn() != null) {
 			result.put("urn", node.getUrn());
 		} else {
+			play.Logger.debug("Got URN from Metadata: " + node.getUrnFromMetadata());
 			result.put("urn", node.getUrnFromMetadata());
 		}
 		return result;
@@ -775,6 +814,7 @@ public class Read extends RegalAction {
 		try {
 			Urn urn = getUrnStatus(node);
 			int urnStatus = urn == null ? 500 : urn.getResolverStatus();
+			play.Logger.debug("urnStatus=" + urnStatus);
 			return urnStatus;
 		} catch (Exception e) {
 			play.Logger.warn("", e);
