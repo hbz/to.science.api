@@ -24,10 +24,13 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +57,7 @@ import play.Play;
 
 /**
  * @author jan schnasse
+ * @author Ingolf Kuss, hbz
  *
  */
 
@@ -134,11 +141,23 @@ public class JsonMapper {
 			"info:regal/zettel/File" };
 
 	Node node = null;
+	String toscience_id = null;
 	EtikettMakerInterface profile = Globals.profile;
 	JsonConverter jsonConverter = null;
 
 	/**
-	 * @param node the node will be mapped to json ld in accordance to the profile
+	 * Ein Konstruktor für diese Klasse
+	 */
+	public JsonMapper() {
+		play.Logger.info("Creating new instance of Class JsonMapper");
+		jsonConverter = new JsonConverter(profile);
+	}
+
+	/**
+	 * Ein Konstruktor für diese Klasse, falls Metadata2-Datenstrom schon
+	 * vorhanden sein muss.
+	 * 
+	 * @param n the node will be mapped to json ld in accordance to the profile
 	 */
 	public JsonMapper(final Node n) {
 		try {
@@ -189,6 +208,8 @@ public class JsonMapper {
 	}
 
 	/**
+	 * Holt Metadaten im Format lobid --- VERALTET ! DEPRECATED !
+	 * 
 	 * @return a map representing the rdf data on this object
 	 */
 	public Map<String, Object> getLd() {
@@ -304,6 +325,11 @@ public class JsonMapper {
 		return null;
 	}
 
+	/**
+	 * Holt Metadaten im Format lobid2 als Java Map
+	 * 
+	 * @return
+	 */
 	private Map<String, Object> getDescriptiveMetadata2() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
@@ -358,7 +384,7 @@ public class JsonMapper {
 		return rdf;
 	}
 
-	private void postprocessing(Map<String, Object> rdf) {
+	public void postprocessing(Map<String, Object> rdf) {
 		try {
 			addCatalogLink(rdf);
 			if ("file".equals(rdf.get("contentType"))) {
@@ -413,13 +439,26 @@ public class JsonMapper {
 	}
 
 	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
-		List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
-		if (all == null)
-			return;
-		for (Map<String, String> m : all) {
-			m.put(PREF_LABEL, m.get(ID2));
+		play.Logger.debug("key=" + key);
+		Object myObj = rdf.get(key);
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, String>> all =
+					(HashSet<Map<String, String>>) rdf.get(key);
+			if (all == null)
+				return;
+			Iterator<Map<String, String>> fit = all.iterator();
+			while (fit.hasNext()) {
+				Map<String, String> m = fit.next();
+				m.put(PREF_LABEL, m.get(ID2));
+			}
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
+			if (all == null)
+				return;
+			for (Map<String, String> m : all) {
+				m.put(PREF_LABEL, m.get(ID2));
+			}
 		}
-
 	}
 
 	private static void postProcessSubjectName(Map<String, Object> rdf) {
@@ -448,63 +487,125 @@ public class JsonMapper {
 
 	private static void createJoinedFunding(Map<String, Object> rdf) {
 
-		List<Map<String, Object>> fundingId =
-				(List<Map<String, Object>>) rdf.get("fundingId");
-		if (fundingId == null) {
-			fundingId = new ArrayList<>();
-		}
-		List<String> fundings = (List<String>) rdf.get("funding");
-		if (fundings != null) {
-			for (String funding : fundings) {
-				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-						+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
-				fundingJoinedMap.put(PREF_LABEL, funding);
-				fundingId.add(fundingJoinedMap);
+		Object myObj = rdf.get("fundingId");
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> fundingId =
+					(HashSet<Map<String, Object>>) rdf.get("fundingId");
+			if (fundingId == null) {
+				fundingId = new HashSet<>();
 			}
-			rdf.remove("funding");
-		}
-		List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
-		/*
-		 * in case of casting problems: List<String> fundingProgram = new
-		 * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
-		 */
-		List<String> projectId = (List<String>) rdf.get("projectId");
+			List<String> fundings = (List<String>) rdf.get("funding");
+			if (fundings != null) {
+				for (String funding : fundings) {
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+					fundingJoinedMap.put(PREF_LABEL, funding);
+					fundingId.add(fundingJoinedMap);
+				}
+				rdf.remove("funding");
+			}
+			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+			List<String> projectId = (List<String>) rdf.get("projectId");
 
-		List<Map<String, Object>> joinedFundings = new ArrayList<>();
-		if (fundingId.isEmpty())
-			return;
-		for (int i = 0; i < fundingId.size(); i++) {
-			// play.Logger.info(fundingId.get(i));
-			Map<String, Object> f = new LinkedHashMap<>();
-			Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-			fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
-			fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
-			f.put("fundingJoined", fundingJoinedMap);
-			f.put("fundingProgramJoined", fundingProgram.get(i));
-			f.put("projectIdJoined", projectId.get(i));
-			joinedFundings.add(f);
+			List<Map<String, Object>> joinedFundings = new ArrayList<>();
+			if (fundingId.isEmpty())
+				return;
+
+			Iterator<Map<String, Object>> fit = fundingId.iterator();
+			int i = 0;
+			while (fit.hasNext()) {
+				Map<String, Object> m = fit.next();
+				Map<String, Object> f = new LinkedHashMap<>();
+				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+				fundingJoinedMap.put(ID2, m.get(ID2));
+				fundingJoinedMap.put(PREF_LABEL, m.get(PREF_LABEL));
+				f.put("fundingJoined", fundingJoinedMap);
+				f.put("fundingProgramJoined", fundingProgram.get(i));
+				f.put("projectIdJoined", projectId.get(i));
+				joinedFundings.add(f);
+				i++;
+			}
+
+			rdf.put("joinedFunding", joinedFundings);
+			rdf.put("fundingId", fundingId);
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, Object>> fundingId =
+					(List<Map<String, Object>>) rdf.get("fundingId");
+			if (fundingId == null) {
+				fundingId = new ArrayList<>();
+			}
+			List<String> fundings = (List<String>) rdf.get("funding");
+			if (fundings != null) {
+				for (String funding : fundings) {
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+					fundingJoinedMap.put(PREF_LABEL, funding);
+					fundingId.add(fundingJoinedMap);
+				}
+				rdf.remove("funding");
+			}
+			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+      /*
+		  * in case of casting problems: List<String> fundingProgram = new
+		  * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
+		 */
+			List<String> projectId = (List<String>) rdf.get("projectId");
+
+			List<Map<String, Object>> joinedFundings = new ArrayList<>();
+			if (fundingId.isEmpty())
+				return;
+			for (int i = 0; i < fundingId.size(); i++) {
+				// play.Logger.info(fundingId.get(i));
+				Map<String, Object> f = new LinkedHashMap<>();
+				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+				fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
+				fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
+				f.put("fundingJoined", fundingJoinedMap);
+				f.put("fundingProgramJoined", fundingProgram.get(i));
+				f.put("projectIdJoined", projectId.get(i));
+				joinedFundings.add(f);
+			}
+			rdf.put("joinedFunding", joinedFundings);
+			rdf.put("fundingId", fundingId);
 		}
-		rdf.put("joinedFunding", joinedFundings);
-		rdf.put("fundingId", fundingId);
+
 	}
 
-	private void addParts(Map<String, Object> rdf) {
+	private static void addParts(Map<String, Object> rdf) {
 		Read read = new Read();
-		List<Map<String, Object>> parts =
-				(List<Map<String, Object>>) rdf.get("hasPart");
-		List<Map<String, Object>> children = new ArrayList();
-		if (parts != null) {
-			for (Map<String, Object> part : parts) {
+		List<Map<String, Object>> children = new ArrayList<>();
+		Object myObj = rdf.get("hasPart");
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> all =
+					(HashSet<Map<String, Object>>) rdf.get("hasPart");
+			if (all == null)
+				return;
+			Iterator<Map<String, Object>> fit = all.iterator();
+			while (fit.hasNext()) {
+				Map<String, Object> m = fit.next();
+				String id = (String) m.get(ID2);
+				Node cn = read.internalReadNode(id);
+				if (!"D".equals(cn.getState())) {
+					children.add(new JsonMapper(cn).getLd2WithoutContext());
+				}
+			}
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, Object>> all =
+					(List<Map<String, Object>>) rdf.get("hasPart");
+			if (all == null)
+				return;
+			for (Map<String, Object> part : all) {
 				String id = (String) part.get(ID2);
 				Node cn = read.internalReadNode(id);
 				if (!"D".equals(cn.getState())) {
 					children.add(new JsonMapper(cn).getLd2WithoutContext());
 				}
 			}
-			if (!children.isEmpty()) {
-				rdf.put("hasPart", children);
-			}
+		}
+		if (!children.isEmpty()) {
+			rdf.put("hasPart", children);
 		}
 	}
 
@@ -805,6 +906,12 @@ public class JsonMapper {
 		return rdf;
 	}
 
+	/**
+	 * Holt Metadaten im Format lobid2 (falls vorhanden) und reichert sie an mit
+	 * Informationen aus dem Node
+	 * 
+	 * @return
+	 */
 	public Map<String, Object> getLd2() {
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata2();

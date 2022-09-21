@@ -20,6 +20,7 @@ data
 bin
 conf/application.conf
 conf/mail.properties
+conf/site.conf
 scripts/variables.conf
 *.HIST
 *~

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -47,12 +48,14 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import com.wordnik.swagger.core.util.JsonUtil;
 
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
@@ -61,6 +64,7 @@ import archive.fedora.XmlUtils;
 import controllers.MyController;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
+import helper.JsonMapper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
@@ -74,6 +78,7 @@ import models.ToScienceObject;
  *
  */
 public class Modify extends RegalAction {
+	String msg = "";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -187,6 +192,28 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * This method maps DeepGreen data to the Lobid2 format and creates a
+	 * datastream "metadata2" of the resource
+	 * 
+	 * @param pid The pid of the resource that must be updated
+	 * @param embargoDuration Die Dauer des Embargos in Monaten
+	 * @param format Das RDF-Format, in das die Metadaten konvertiert werden
+	 *          sollen (z.B. TURTLE, XDFXML, NTRIPLES)
+	 * @param content The metadata in the format DeepGreen-XML
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichDeepGreenData(String pid,
+			int embargoDuration, RDFFormat format, Document content) {
+		try {
+			Node node = new Read().readNode(pid);
+			return updateLobidify2AndEnrichDeepGreenData(node, embargoDuration,
+					format, content);
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * @param node The node that must be updated
 	 * @param content The metadata as rdf string
 	 * @return a short message
@@ -254,6 +281,47 @@ public class Modify extends RegalAction {
 			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage;
+		}
+	}
+
+	/**
+	 * The method maps DeepGreen metadata to the Lobid2 format and creates a data
+	 * stream Metadata2 of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param embargoDuration Die Dauer des Embargos in Monaten
+	 * @param format RDF-Format, z.B. NTRIPLES
+	 * @param content The metadata as DeepGreen XML
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichDeepGreenData(Node node,
+			int embargoDuration, RDFFormat format, Document content) {
+
+		try {
+			play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
+			String pid = node.getPid();
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+
+			Map<String, Object> rdf = new XmlUtils()
+					.getLd2Lobidify2DeepGreen(node.getLd2(), embargoDuration, content);
+			play.Logger.debug("Mapped DeepGrren data to lobid2!");
+			updateMetadata2(node, rdfToString(rdf, format));
+			play.Logger.debug("Updated Metadata2 datastream!");
+
+			String enrichMessage = Enrich.enrichMetadata2(node);
+			return pid
+					+ " DeepGreen-metadata successfully updated, lobidified and enriched! "
+					+ enrichMessage;
+		} catch (Exception e) {
+			play.Logger.error(
+					"Datastream metadata2 with mapped DeepGreen data could not be created!",
+					e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -1030,6 +1098,8 @@ public class Modify extends RegalAction {
 	String updateMetadata2(Node node, String content) {
 		try {
 			String pid = node.getPid();
+			play.Logger.debug("Updating Metadata2 of PID " + pid);
+			play.Logger.debug("content: " + content);
 			if (content == null) {
 				throw new HttpArchiveException(406,
 						pid + " You've tried to upload an empty string."
@@ -1041,6 +1111,8 @@ public class Modify extends RegalAction {
 			content = rewriteContent(content, pid);
 			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
+			play.Logger
+					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
 			node.setMetadata2File(file.getAbsolutePath());
 			node.setMetadata2(content);
 			OaiDispatcher.makeOAISet(node);
@@ -1093,6 +1165,34 @@ public class Modify extends RegalAction {
 			}
 			return result;
 		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	private String rdfToString(Map<String, Object> result, RDFFormat format) {
+		try {
+			String rdf = RdfUtils.readRdfToString(
+					new ByteArrayInputStream(json(result).getBytes("utf-8")),
+					RDFFormat.JSONLD, format, "");
+			return rdf;
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/*
+	 * Mappt Objekt nach JSON-String. "Objekt" ist typischerweise eine Java Map.
+	 */
+	private String json(Object obj) {
+		try {
+			play.Logger.debug("Start json(obj)");
+			StringWriter w = new StringWriter();
+			ObjectMapper mapper = JsonUtil.mapper();
+			mapper.writeValue(w, obj);
+			String result = w.toString();
+			play.Logger.debug("Return result " + result);
+			return result;
+		} catch (IOException e) {
 			throw new HttpArchiveException(500, e);
 		}
 	}
