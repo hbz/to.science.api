@@ -455,9 +455,9 @@ public class JsonMapper {
 			applyAcademicDegree("creator", rdf);
 			applyAcademicDegree("contributor", rdf);
 
-			postProcessWithGenPropLoader("department", "Department-de.properties",
+			postProcessWithGenPropLoader("department", "department-de.properties",
 					rdf);
-			postProcessWithGenPropLoader("funder", "Funder.properties", rdf);
+			postProcessWithGenPropLoader("funder", "funder-de.properties", rdf);
 
 		} catch (Exception e) {
 			play.Logger.debug("", e);
@@ -561,8 +561,8 @@ public class JsonMapper {
 
 		// set different variable names for creators and contributors
 
-		LinkedHashMap<String, String> affilLabelMap = getPrefLabelMap(
-				agentType + "ResearchOrganizationsRegistry-de.properties");
+		LinkedHashMap<String, String> affilLabelMap =
+				getPrefLabelMap(agentType + "ResearchOrganizationsRegistry-de.properties");
 
 		List<String> agentAffiliation = new ArrayList<>();
 		if (rdf.containsKey(agentType + "Affiliation")) {
@@ -1409,34 +1409,12 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-			if (lrmiJSONObject.has("learningResourceType")) {
-				List<Map<String, Object>> media = new ArrayList<>();
-				arr = lrmiJSONObject.getJSONArray("learningResourceType");
-				for (int i = 0; i < arr.length(); i++) {
-					obj = arr.getJSONObject(i);
-					Map<String, Object> mediumMap = new LinkedHashMap<>();
-					if (obj.has("prefLabel")) {
-						JSONObject subObj = obj.getJSONObject("prefLabel");
-						prefLabel = subObj.getString("de");
-						mediumMap.put("prefLabel", prefLabel);
-						play.Logger.debug("learningResourceType: prefLabel: " + prefLabel);
-					}
-					if (obj.has("id")) {
-						mediumMap.put("@id", obj.getString("id"));
-					} else {
-						// Dieser Fall sollte nicht vorkommen
-						play.Logger
-								.warn("Achtung! learningResourceType (Medium) hat keine ID !");
-					}
-					media.add(mediumMap);
-				}
-				rdf.put("medium", media);
-			}
 
-			synchronized (rdf) {
-				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
-				rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
-			}
+			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
+			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
+			rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
+					"medium");
+			rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "about", "department");
 
 			// template for Mapping of Array
 			if (lrmiJSONObject.has("description")) {
@@ -1513,7 +1491,7 @@ public class JsonMapper {
 				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
 				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-				genPropMap.putAll(genProp.loadVocabMap("Funder.properties"));
+				genPropMap.putAll(genProp.loadVocabMap("funder-de.properties"));
 
 				obj = lrmiJSONObject.getJSONObject("funder");
 				Map<String, Object> funderMap = new LinkedHashMap<>();
@@ -1523,26 +1501,6 @@ public class JsonMapper {
 				rdf.put("funder", funderMap);
 			}
 
-			if (lrmiJSONObject.has("about")) {
-				List<Map<String, Object>> departArr = new ArrayList<>();
-				JSONArray aboutArray = lrmiJSONObject.getJSONArray("about");
-
-				// Provide resolving for prefLabels from id via GenericPropertiesLoader
-				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-				genPropMap.putAll(genProp.loadVocabMap("Department-de.properties"));
-
-				for (int i = 0; i < aboutArray.length(); i++) {
-					Map<String, Object> department = new LinkedHashMap<>();
-					JSONObject abtMap = aboutArray.getJSONObject(i);
-					if (abtMap.has("id")) {
-						department.put("@id", abtMap.get("id"));
-						department.put("prefLabel", genPropMap.get(abtMap.get("id")));
-					}
-					departArr.add(department);
-				}
-				rdf.put("department", departArr);
-			}
 
 			// postprocessing(rdf);
 
@@ -1630,6 +1588,60 @@ public class JsonMapper {
 	}
 
 	/**
+	 * Try to create a method for mapping objects with String-Output from lrmi to
+	 * lobid (Kayhan)
+	 * 
+	 * @param Rdf add object in rdf=Rdf
+	 * @param lrmiJSONObject lrmi
+	 * @param lrmiObject input String
+	 * @param lobidObject output String
+	 * @return rdf
+	 */
+	public Map<String, Object> mapLrmiObjectToLobid(Map<String, Object> Rdf,
+			JSONObject lrmiJSONObject, String lrmiObject, String lobidObject) {
+
+		Map<String, Object> rdf = Rdf;
+		JSONObject obj = null;
+		JSONArray arr = null;
+		String prefLabel = null;
+
+		try {
+
+			if (lrmiJSONObject.has(lrmiObject)) {
+				List<Map<String, Object>> list = new ArrayList<>();
+				arr = lrmiJSONObject.getJSONArray(lrmiObject);
+
+				// Provide resolving for prefLabels from id via GenericPropertiesLoader
+				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				genPropMap.putAll(genProp.loadVocabMap(lobidObject + "-de.properties"));
+
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					Map<String, Object> map = new LinkedHashMap<>();
+					// verify id
+					if (obj.has("id")) {
+						map.put("@id", obj.getString("id"));
+						map.put("prefLabel", genPropMap.get(obj.get("id")));
+					} else {
+						// Dieser Fall sollte nicht vorkommen
+						play.Logger.warn("Achtung! " + lrmiObject + "(" + lobidObject
+								+ ") hat keine ID !");
+					}
+
+					list.add(map);
+				}
+				rdf.put(lobidObject, list);
+			}
+
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+		}
+
+		return rdf;
+	}
+
+	/**
 	 * Map the creators, contributors etc from lrmi to lobid
 	 * 
 	 * @param Rdf
@@ -1694,8 +1706,8 @@ public class JsonMapper {
 						agentAffiliation.add(affiliationId.replace("https://ror.org/",
 								"http://hbz-nrw.de/regal#" + agentType + "Affiliation/"));
 						GenericPropertiesLoader genPropLoad = new GenericPropertiesLoader();
-						Map<String, String> cAffil = genPropLoad
-								.loadVocabMap("ResearchOrganizationsRegistry-de.properties");
+						Map<String, String> cAffil =
+								genPropLoad.loadVocabMap("affiliation-de.properties");
 						agentStr.append(" " + cAffil.get(affiliationId));
 					}
 					agents.add(agentMap);
