@@ -31,8 +31,8 @@ import helper.WpullCrawl;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
-import models.RegalObject;
-import models.RegalObject.Provenience;
+import models.ToScienceObject.Provenience;
+import models.ToScienceObject;
 import play.Logger;
 import play.Play;
 
@@ -63,7 +63,7 @@ public class Create extends RegalAction {
 	 * @param object
 	 * @return the updated node
 	 */
-	public Node updateResource(Node node, RegalObject object) {
+	public Node updateResource(Node node, ToScienceObject object) {
 		new Index().remove(node);
 		overrideNodeMembers(node, object);
 		return updateResource(node);
@@ -81,7 +81,7 @@ public class Create extends RegalAction {
 	 * @param object
 	 * @return the updated node
 	 */
-	public Node patchResource(Node node, RegalObject object) {
+	public Node patchResource(Node node, ToScienceObject object) {
 		play.Logger.debug("Patching Node with Pid " + node.getPid());
 		new Index().remove(node);
 		setNodeMembers(node, object);
@@ -92,11 +92,11 @@ public class Create extends RegalAction {
 
 	/**
 	 * @param nodes nodes to set new properties for
-	 * @param object the RegalObject contains props that will be applied to all
-	 *          nodes in the list
+	 * @param object the ToScienceObject contains props that will be applied to
+	 *          all nodes in the list
 	 * @return a message
 	 */
-	public String patchResources(List<Node> nodes, RegalObject object) {
+	public String patchResources(List<Node> nodes, ToScienceObject object) {
 		return apply(nodes, n -> patchResource(n, object).getPid());
 	}
 
@@ -105,7 +105,7 @@ public class Create extends RegalAction {
 	 * @param object
 	 * @return the updated node
 	 */
-	public Node createResource(String namespace, RegalObject object) {
+	public Node createResource(String namespace, ToScienceObject object) {
 		String pid = pid(namespace);
 		return createResource(pid.split(":")[1], namespace, object);
 	}
@@ -116,14 +116,15 @@ public class Create extends RegalAction {
 	 * @param object
 	 * @return the updated node
 	 */
-	public Node createResource(String id, String namespace, RegalObject object) {
+	public Node createResource(String id, String namespace,
+			ToScienceObject object) {
 		Node node = initNode(id, namespace, object);
 		updateResource(node, object);
 		updateIndex(node.getPid());
 		return node;
 	}
 
-	private Node initNode(String id, String namespace, RegalObject object) {
+	private Node initNode(String id, String namespace, ToScienceObject object) {
 		Node node = new Node();
 		node.setNamespace(namespace).setPID(namespace + ":" + id);
 		node.setContentType(object.getContentType());
@@ -139,7 +140,7 @@ public class Create extends RegalAction {
 		return node;
 	}
 
-	private void setNodeMembers(Node node, RegalObject object) {
+	private void setNodeMembers(Node node, ToScienceObject object) {
 		if (object.getContentType() != null)
 			setNodeType(object.getContentType(), node);
 		if (object.getAccessScheme() != null)
@@ -167,7 +168,7 @@ public class Create extends RegalAction {
 		OaiDispatcher.makeOAISet(node);
 	}
 
-	private void overrideNodeMembers(Node node, RegalObject object) {
+	private void overrideNodeMembers(Node node, ToScienceObject object) {
 		setNodeType(object.getContentType(), node);
 		node.setAccessScheme(object.getAccessScheme());
 		node.setPublishScheme(object.getPublishScheme());
@@ -292,7 +293,7 @@ public class Create extends RegalAction {
 		try {
 			// Erzeuge ein Fedora-Objekt mit ungemanagtem Inhalt,
 			// das auf den entsprechenden WARC-Container zeigt.
-			RegalObject regalObject = new RegalObject();
+			ToScienceObject regalObject = new ToScienceObject();
 			regalObject.setContentType("version");
 			Provenience prov = regalObject.getIsDescribedBy();
 			prov.setCreatedBy("webgatherer");
@@ -526,7 +527,7 @@ public class Create extends RegalAction {
 			conf.setOpenWaybackLink(localpath);
 
 			// create Regal object
-			RegalObject regalObject = new RegalObject();
+			ToScienceObject regalObject = new ToScienceObject();
 			regalObject.setContentType("version");
 			Provenience prov = regalObject.getIsDescribedBy();
 			prov.setCreatedBy("webgatherer");

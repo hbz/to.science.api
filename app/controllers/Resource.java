@@ -68,7 +68,7 @@ import models.Link;
 import models.MabRecord;
 import models.Message;
 import models.Node;
-import models.RegalObject;
+import models.ToScienceObject;
 import models.UrlHist;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -316,14 +316,14 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "patchResource", value = "patchResource", notes = "Patches a Resource", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> patchResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			try {
 				play.Logger.debug("Patching Pid: " + pid);
 				String result = "";
 				Node node = readNodeOrNull(pid);
-				RegalObject object = getRegalObject(request().body().asJson());
+				ToScienceObject object = getToScienceObject(request().body().asJson());
 				Node newNode = create.patchResource(node, object);
 				result = newNode.getLastModifyMessage();
 				result = result.concat(" " + newNode.getPid() + " created/updated!");
@@ -338,10 +338,10 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "patchResources", value = "patchResources", notes = "Applies the PATCH object to the resource and to all child resources", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "ToScienceObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> patchResources(@PathParam("pid") String pid) {
 		return new BulkActionAccessor().call((userId) -> {
-			RegalObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getToScienceObject(request().body().asJson());
 			List<Node> list = Globals.fedora.listComplexObject(pid);
 			list.removeIf(n -> "D".equals(n.getState()));
 			BulkAction bulk = new BulkAction();
@@ -355,13 +355,13 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			play.Logger.debug("Updating Pid: " + pid);
 			String result = "";
 			Node node = readNodeOrNull(pid);
-			RegalObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getToScienceObject(request().body().asJson());
 			Node newNode = null;
 			if (node == null) {
 				String[] namespacePlusId = pid.split(":");
@@ -379,11 +379,11 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> createResource(
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
-			RegalObject object = getRegalObject(request().body().asJson());
+			ToScienceObject object = getToScienceObject(request().body().asJson());
 			if (object.getContentType().equals("webpage")) {
 				object.setAccessScheme("restricted");
 			}
@@ -394,13 +394,13 @@ public class Resource extends MyController {
 		});
 	}
 
-	private static RegalObject getRegalObject(JsonNode json) {
+	private static ToScienceObject getToScienceObject(JsonNode json) {
 		try {
-			RegalObject object;
+			ToScienceObject object;
 			play.Logger.debug("Json Body: " + json);
 			if (json != null) {
-				object =
-						MyController.mapper.readValue(json.toString(), RegalObject.class);
+				object = MyController.mapper.readValue(json.toString(),
+						ToScienceObject.class);
 				return object;
 			}
 			throw new NullPointerException(
@@ -1352,7 +1352,7 @@ public class Resource extends MyController {
 				String alephId = form.get("alephId");
 				String namespace = form.get("namespace");
 				String pid = form.get("pid");
-				RegalObject object = new RegalObject();
+				ToScienceObject object = new ToScienceObject();
 				object.setContentType("monograph");
 				Node node = null;
 				if (pid != null && !pid.isEmpty()) {
