@@ -485,16 +485,6 @@ public class JsonMapper {
 		rdf.put("subject", oldSubjects);
 	}
 
-	/*
-	 * if (myObj instanceof java.util.HashSet) { HashSet<Map<String, String>> all
-	 * = (HashSet<Map<String, String>>) rdf.get(key); if (all == null) return;
-	 * Iterator<Map<String, String>> fit = all.iterator(); while (fit.hasNext()) {
-	 * Map<String, String> m = fit.next(); m.put(PREF_LABEL, m.get(ID2)); } } else
-	 * if (myObj instanceof java.util.List) { List<Map<String, String>> all =
-	 * (List<Map<String, String>>) rdf.get(key); if (all == null) return; for
-	 * (Map<String, String> m : all) { m.put(PREF_LABEL, m.get(ID2)); } }
-	 */
-
 	private static void createJoinedFunding(Map<String, Object> rdf) {
 
 		Object myObj = rdf.get("fundingId");
