@@ -196,16 +196,17 @@ public class Modify extends RegalAction {
 	 * datastream "metadata2" of the resource
 	 * 
 	 * @param pid The pid of the resource that must be updated
+	 * @param embargoDuration Die Dauer des Embargos in Monaten
 	 * @param format Das RDF-Format, in das die Metadaten konvertiert werden
 	 *          sollen (z.B. TURTLE, XDFXML, NTRIPLES)
 	 * @param content The metadata in the format DeepGreen-XML
 	 * @return a short message
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(String pid,
-			int embargo_duration, RDFFormat format, Document content) {
+			int embargoDuration, RDFFormat format, Document content) {
 		try {
 			Node node = new Read().readNode(pid);
-			return updateLobidify2AndEnrichDeepGreenData(node, embargo_duration,
+			return updateLobidify2AndEnrichDeepGreenData(node, embargoDuration,
 					format, content);
 		} catch (Exception e) {
 			throw new UpdateNodeException(e);
@@ -288,12 +289,13 @@ public class Modify extends RegalAction {
 	 * stream Metadata2 of the resource
 	 * 
 	 * @param node The node of the resource that must be updated
+	 * @param embargoDuration Die Dauer des Embargos in Monaten
 	 * @param format RDF-Format, z.B. NTRIPLES
 	 * @param content The metadata as DeepGreen XML
 	 * @return a short message
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(Node node,
-			int embargo_duration, RDFFormat format, Document content) {
+			int embargoDuration, RDFFormat format, Document content) {
 
 		try {
 			play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
@@ -306,7 +308,7 @@ public class Modify extends RegalAction {
 			}
 
 			Map<String, Object> rdf = new XmlUtils()
-					.getLd2Lobidify2DeepGreen(node.getLd2(), embargo_duration, content);
+					.getLd2Lobidify2DeepGreen(node.getLd2(), embargoDuration, content);
 			play.Logger.debug("Mapped DeepGrren data to lobid2!");
 			updateMetadata2(node, rdfToString(rdf, format));
 			play.Logger.debug("Updated Metadata2 datastream!");
@@ -1167,8 +1169,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private static String rdfToString(Map<String, Object> result,
-			RDFFormat format) {
+	private String rdfToString(Map<String, Object> result, RDFFormat format) {
 		try {
 			String rdf = RdfUtils.readRdfToString(
 					new ByteArrayInputStream(json(result).getBytes("utf-8")),
@@ -1182,7 +1183,7 @@ public class Modify extends RegalAction {
 	/*
 	 * Mappt Objekt nach JSON-String. "Objekt" ist typischerweise eine Java Map.
 	 */
-	private static String json(Object obj) {
+	private String json(Object obj) {
 		try {
 			play.Logger.debug("Start json(obj)");
 			StringWriter w = new StringWriter();
