@@ -605,18 +605,6 @@ public class JsonMapper {
 		}
 	}
 
-	// alt
-	/*
-	 * private void addParts(Map<String, Object> rdf) { Read read = new Read();
-	 * List<Map<String, Object>> parts = (List<Map<String, Object>>)
-	 * rdf.get("hasPart"); List<Map<String, Object>> children = new ArrayList();
-	 * if (parts != null) { for (Map<String, Object> part : parts) { String id =
-	 * (String) part.get(ID2); Node cn = read.internalReadNode(id); if
-	 * (!"D".equals(cn.getState())) { children.add(new
-	 * JsonMapper(cn).getLd2WithoutContext()); } } if (!children.isEmpty()) {
-	 * rdf.put("hasPart", children); } } }
-	 */
-
 	private void postProcessContribution(Map<String, Object> rdf) {
 		try {
 			List<Map<String, Object>> creator = new ArrayList<>();
