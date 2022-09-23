@@ -509,6 +509,16 @@ public class Resource extends MyController {
 						nodeNode.getMetadata2());
 				play.Logger.debug(result2);
 
+				/**
+				 * 3. lobid2-Metadaten im Format JSON als Datenstrom "toscience.json"
+				 */
+				Result jsonResult = getJsonResult(nodeNode.getLd2());
+				play.Logger
+						.debug("Metadata JSON als Zeichenkette: " + jsonResult.toString());
+				String result3 =
+						modify.updateAndEnrichMetadataJson(nodeNode, jsonResult.toString());
+				play.Logger.debug(result3);
+
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);

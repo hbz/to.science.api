@@ -421,6 +421,34 @@ public class Modify extends RegalAction {
 		return msg;
 	}
 
+	/**
+	 * This method creates a metadata JSON data stream (unmapped) of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param content The metadata as JSON string
+	 * @return a short message
+	 */
+	public String updateAndEnrichMetadataJson(Node node, String content) {
+		play.Logger.debug("Start Update and enrich metadata JSON.");
+		play.Logger.debug("content: " + content);
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		updateMetadataJson(node, content);
+		msg = "Metadata JSON of " + node.getPid() + " successfully updated! ";
+		// Zunächst ist noch keine Anreicherung implementiert
+		// String enrichMessage = new Enrich().enrichMetadataJson(node);
+		// msg = "Metadata JSON of " + node.getPid()
+		// + " successfully updated and enriched! " + enrichMessage;
+		play.Logger.debug(msg);
+		return msg;
+	}
+
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,
 			String content, LocalDate date) {
 		try {
@@ -1238,6 +1266,39 @@ public class Modify extends RegalAction {
 			play.Logger.debug("Re-Indexing node and parent");
 			reindexNodeAndParent(node);
 			msg = "LRMI data successfully updated!";
+			play.Logger.debug(msg);
+			return pid + " " + msg;
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
+	 * Aktualisiert oder legt einen neuartigen Datenstrom "tosciene.json" am
+	 * Node-Objekt an. Das sind lobid2-Daten im Format JSON.
+	 * 
+	 * @author kuss
+	 * @param node
+	 * @param content
+	 * @return
+	 */
+	String updateMetadataJson(Node node, String content) {
+		try {
+			String pid = node.getPid();
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			File file = CopyUtils.copyStringToFile(content);
+			node.setMetadataJsonFile(file.getAbsolutePath());
+			play.Logger.debug("file.getAbsolutePath(): " + file.getAbsolutePath());
+			node.setMetadataJson(content);
+			OaiDispatcher.makeOAISet(node);
+			play.Logger.debug("Re-Indexing node and parent");
+			reindexNodeAndParent(node);
+			msg = "Metadata JSON successfully updated!";
 			play.Logger.debug(msg);
 			return pid + " " + msg;
 		} catch (IOException e) {

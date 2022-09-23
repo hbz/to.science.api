@@ -65,8 +65,13 @@ public class Node implements java.io.Serializable {
 	 */
 	public DublinCoreData dublinCoreData = new DublinCoreData();
 
+	/*
+	 * absolute Pfadnamen (String) zu den verschiedenen Fedora-Datenströmen am
+	 * Node
+	 */
 	private String metadataFile = null;
 	private String metadata2File = null;
+	private String metadataJsonFile = null;
 	private String lrmiDataFile = null;
 	private String seqFile = null;
 	private String confFile = null;
@@ -76,8 +81,11 @@ public class Node implements java.io.Serializable {
 	private List<Link> links = new Vector<Link>();
 	private List<Transformer> transformer = new Vector<Transformer>();
 
+	// die verschiedenen Fedora-Datenströme am Node in der Darstellung als
+	// Zeichenkette (String)
 	private String metadata1 = null;
 	private String metadata2 = null;
+	private String metadataJson = null;
 	private String lrmidata = null;
 	private String seq = null;
 
@@ -112,8 +120,8 @@ public class Node implements java.io.Serializable {
 
 	private String createdBy = null;
 	private String lastModifiedBy = null;
-  private String submittedBy = null;
-  private String submittedByEmail = null;
+	private String submittedBy = null;
+	private String submittedByEmail = null;
 	private String importedFrom = null;
 	private String legacyId = null;
 	private String catalogId = null;
@@ -347,7 +355,23 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * The metadata file
+	 * The metadata JSON file
+	 * 
+	 * @return the absolute path to file
+	 */
+	public String getMetadataJsonFile() {
+		return metadataJsonFile;
+	}
+
+	/**
+	 * @param metadataFile The absolutepath to the metadatafile
+	 */
+	public void setMetadataJsonFile(String metadataFile) {
+		this.metadataJsonFile = metadataFile;
+	}
+
+	/**
+	 * The file containing ordering information
 	 * 
 	 * @return the absolute path to file
 	 */
@@ -654,7 +678,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @param metadata n-triple metadata as string
+	 * @param metadata2 n-triple metadata as string
 	 * @return this
 	 */
 	public Node setMetadata2(String metadata2) {
@@ -670,11 +694,27 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @param metadata LRMI metadata in json format
+	 * @param lrmidata LRMI metadata in json format
 	 * @return this
 	 */
 	public Node setLrmiData(String lrmidata) {
 		this.lrmidata = lrmidata;
+		return this;
+	}
+
+	/**
+	 * @return metadata as JSON string
+	 */
+	public String getMetadataJson() {
+		return metadataJson;
+	}
+
+	/**
+	 * @param metadata metadata in json format as String
+	 * @return this
+	 */
+	public Node setMetadataJson(String metadata) {
+		this.metadataJson = metadata;
 		return this;
 	}
 
@@ -924,38 +964,37 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-   * @return submittedBy
-   */
-  public String getSubmittedBy() {
-    return submittedBy;
-  }
+	 * @return submittedBy
+	 */
+	public String getSubmittedBy() {
+		return submittedBy;
+	}
 
-  /**
-   * @param submittedBy
-   * @return this
-   */
-  public Node setSubmittedBy(String submittedBy) {
-    this.submittedBy = submittedBy;
-    return this;
-  }
+	/**
+	 * @param submittedBy
+	 * @return this
+	 */
+	public Node setSubmittedBy(String submittedBy) {
+		this.submittedBy = submittedBy;
+		return this;
+	}
 
-  /**
-   * @return submittedBy
-   */
-  public String getSubmittedByEmail() {
-    return submittedByEmail;
-  }
+	/**
+	 * @return submittedBy
+	 */
+	public String getSubmittedByEmail() {
+		return submittedByEmail;
+	}
 
-  /**
-   * @param submittedBy
-   * @return this
-   */
-  public Node setSubmittedByEmail(String submittedByEmail) {
-    this.submittedByEmail = submittedByEmail;
-    return this;
-  }
+	/**
+	 * @param submittedBy
+	 * @return this
+	 */
+	public Node setSubmittedByEmail(String submittedByEmail) {
+		this.submittedByEmail = submittedByEmail;
+		return this;
+	}
 
-	
 	/**
 	 * @return importedFrom
 	 */
