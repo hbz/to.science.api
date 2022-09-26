@@ -418,6 +418,9 @@ public class FedoraFacade {
 		if (node.getLrmiDataFile() != null) {
 			utils.updateLrmiDataStream(node);
 		}
+		if (node.getMetadataJsonFile() != null) {
+			utils.updateMetadataJsonStream(node);
+		}
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);
 		}

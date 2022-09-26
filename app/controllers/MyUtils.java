@@ -16,6 +16,8 @@
  */
 package controllers;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +33,7 @@ import javax.ws.rs.QueryParam;
 
 import com.avaje.ebean.Ebean;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
@@ -49,6 +52,8 @@ import models.Globals;
 import models.Message;
 import models.Node;
 import models.ToScienceObject;
+
+import play.core.j.JavaResultExtractor;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -326,6 +331,33 @@ public class MyUtils extends MyController {
 				return JsonMessage(new Message(e.getMessage(), 400));
 			}
 		});
+	}
+
+	/**
+	 * Diese Methode konvertiert das Play-Objekt "Result" in einen JSON-Node
+	 * Quelle:
+	 * https://stackoverflow.com/questions/26301140/how-to-extract-result-content-
+	 * from-play-mvc-result-object-in-play-application
+	 * 
+	 * @author kuss
+	 * @param result ein Result-Objekt (play Framework)
+	 * @return JsoNode-Objekt
+	 */
+	public static JsonNode resultToJsonNode(Result result) {
+
+		byte[] body = JavaResultExtractor.getBody(result, 0L);
+
+		ObjectMapper om = new ObjectMapper();
+		final ObjectReader reader = om.reader();
+		JsonNode newJsonNode = null;
+		try {
+			newJsonNode = reader.readTree(new ByteArrayInputStream(body));
+			play.Logger.debug("Result Body in JsonNode:" + newJsonNode.toString());
+		} catch (IOException e) {
+			play.Logger.error(e.toString());
+			throw new RuntimeException(e);
+		}
+		return newJsonNode;
 	}
 
 }

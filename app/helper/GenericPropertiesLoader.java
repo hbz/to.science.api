@@ -19,6 +19,7 @@ public class GenericPropertiesLoader {
 
 	public Map<String, String> loadVocabMap(String propertiesFileName) {
 		Map<String, String> vocabMap = new LinkedHashMap<>();
+		play.Logger.debug("propertiesFilename=" + propertiesFileName);
 		String propertiesPath =
 				play.Play.application().resource(propertiesFileName).getPath();
 		try {

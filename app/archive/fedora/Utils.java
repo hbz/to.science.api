@@ -557,6 +557,25 @@ public class Utils {
 		}
 	}
 
+	void updateMetadataJsonStream(Node node) {
+		try {
+			File file = new File(node.getMetadataJsonFile());
+			if (dataStreamExists(node.getPid(), "toscience.json")) {
+				new ModifyDatastream(node.getPid(), "toscience.json").versionable(true)
+						.dsLabel("Metadata im Format lobid2 JSON").dsState("A")
+						.controlGroup("M").mimeType("application/json").content(file)
+						.execute();
+			} else {
+				new AddDatastream(node.getPid(), "toscience.json").versionable(true)
+						.dsState("A").dsLabel("Metadata im Format lobid2 JSON")
+						.controlGroup("M").mimeType("application/json").content(file)
+						.execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
 	void readRelsExt(Node node) throws FedoraClientException {
 		FedoraResponse response =
 				new GetDatastreamDissemination(node.getPid(), "RELS-EXT").download(true)
