@@ -337,7 +337,6 @@ public class LRMIMapper {
 			}
 
 			lrmiJsonContent = lobidFunder2LrmiFunder(rdf, lrmiJsonContent);
-			// lrmiJsonContent = lobidDepartment2LrmiAbout(rdf, lrmiJsonContent);
 			lrmiJsonContent =
 					lobidObject2LrmiObject(rdf, lrmiJsonContent, "department");
 
@@ -494,43 +493,6 @@ public class LRMIMapper {
 
 	}
 
-	/**
-	 * Maps department-Object of Lobid into about-Object of LRMI
-	 * 
-	 * @param lobidMap Map representation of the lobid metadata
-	 * @param lrmiObj JSONObject representation of tha lrmi Metadata
-	 * @return lrmiObj with modified about-Object
-	 */
-	/*
-	 * public JSONObject lobidDepartment2LrmiAbout(Map<String, Object> lobidMap,
-	 * JSONObject lrmiObj) {
-	 * 
-	 * try { if (lobidMap.containsKey("department")) { Iterator iterator =
-	 * getLobid2Iterator(lobidMap.get("department")); JSONArray aboutArray = new
-	 * JSONArray();
-	 * 
-	 * // Provide resolving for prefLabels from @id via GenericPropertiesLoader
-	 * LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-	 * GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-	 * genPropMap.putAll(genProp.loadVocabMap("department-de.properties"));
-	 * 
-	 * while (iterator.hasNext()) { Map<String, Object> map = (Map<String,
-	 * Object>) iterator.next(); JSONObject aboutObj = new JSONObject();
-	 * JSONObject inSchemeObj = new JSONObject(); JSONObject pLObj = new
-	 * JSONObject(); aboutObj.put("id", map.get("@id")); aboutObj.put("type",
-	 * "Concept");
-	 * 
-	 * inSchemeObj.put("id",
-	 * "https://w3id.org/kim/hochschulfaechersystematik/scheme"); pLObj.put("de",
-	 * genPropMap.get(map.get("@id")));
-	 * 
-	 * aboutObj.put("inScheme", inSchemeObj); aboutObj.put("prefLabel", pLObj);
-	 * aboutArray.put(aboutObj); } lrmiObj.put("about", aboutArray); } } catch
-	 * (JSONException e) {
-	 * play.Logger.error("unable to apply modified about values to LRMI"); }
-	 * 
-	 * return lrmiObj; }
-	 */
 	/**
 	 * Method converts a lobid object to json object
 	 * 
