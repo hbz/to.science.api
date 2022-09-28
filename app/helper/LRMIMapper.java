@@ -174,48 +174,27 @@ public class LRMIMapper {
 				// lrmiData only supports one description
 				lrmiJsonContent.put("description", iterator.next());
 			}
-
-			if (rdf.containsKey("medium")) {
-				iterator = getLobid2Iterator(rdf.get("medium"));
-				// Hole ein Objekt aus LRMI-JSON oder lege es neu an
-				obj = null;
-				if (lrmiJsonContent.has("learningResourceType")) {
-					arr = (JSONArray) lrmiJsonContent.get("learningResourceType");
-					for (int i = 0; i < arr.length(); i++) {
-						myObj = arr.get(i);
-						play.Logger
-								.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
-						if (myObj instanceof JSONObject) {
-							obj = arr.getJSONObject(i);
-							// nimm nur den ersten learningResourceType und überschreibe ihn
-							// mit dem, was aus RDF kommt
-							break;
-						}
-					}
-					// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
-					if (obj == null) {
-						obj = new JSONObject();
-						arr.put(obj);
-					}
-				} else {
-					arr = new JSONArray();
-					obj = new JSONObject();
-					arr.put(obj);
-				}
-				// Jetzt editiere das JSONObject mit den in RDF gefundenen Informationen
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					if (map.containsKey("prefLabel")) {
-						subObj = new JSONObject();
-						subObj.put("de", map.get("prefLabel"));
-						obj.put("prefLabel", subObj);
-					}
-					obj.put("id", map.get("@id"));
-					arr.put(obj);
-				}
-				lrmiJsonContent.put("learningResourceType", arr);
-			}
-
+			/*
+			 * if (rdf.containsKey("medium")) { iterator =
+			 * getLobid2Iterator(rdf.get("medium")); // Hole ein Objekt aus LRMI-JSON
+			 * oder lege es neu an obj = null; if
+			 * (lrmiJsonContent.has("learningResourceType")) { arr = (JSONArray)
+			 * lrmiJsonContent.get("learningResourceType"); for (int i = 0; i <
+			 * arr.length(); i++) { myObj = arr.get(i); play.Logger .debug("i=" + i +
+			 * "; myObj.getClass()=" + myObj.getClass()); if (myObj instanceof
+			 * JSONObject) { obj = arr.getJSONObject(i); // nimm nur den ersten
+			 * learningResourceType und überschreibe ihn // mit dem, was aus RDF kommt
+			 * break; } } // Falls Objekt nicht gefunden, hänge ein neues Objekt an
+			 * das Array an if (obj == null) { obj = new JSONObject(); arr.put(obj); }
+			 * } else { arr = new JSONArray(); obj = new JSONObject(); arr.put(obj); }
+			 * // Jetzt editiere das JSONObject mit den in RDF gefundenen
+			 * Informationen while (iterator.hasNext()) { map = (Map<String, Object>)
+			 * iterator.next(); if (map.containsKey("prefLabel")) { subObj = new
+			 * JSONObject(); subObj.put("de", map.get("prefLabel"));
+			 * obj.put("prefLabel", subObj); } obj.put("id", map.get("@id"));
+			 * arr.put(obj); } lrmiJsonContent.put("learningResourceType", arr); }
+			 * 
+			 */
 			ArrayList<String> creatorAcadDegree = new ArrayList<>();
 			if (rdf.containsKey("creatorAcademicDegree")) {
 				iterator = getLobid2Iterator(rdf.get("creatorAcademicDegree"));
@@ -339,6 +318,7 @@ public class LRMIMapper {
 			lrmiJsonContent = lobidFunder2LrmiFunder(rdf, lrmiJsonContent);
 			lrmiJsonContent =
 					lobidObject2LrmiObject(rdf, lrmiJsonContent, "department");
+			lrmiJsonContent = lobidObject2LrmiObject(rdf, lrmiJsonContent, "medium");
 
 			/**
 			 * - gib die aktualisierten oder neu angelegten LRMI-Daten zurück (Format
