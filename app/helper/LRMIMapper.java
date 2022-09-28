@@ -519,7 +519,7 @@ public class LRMIMapper {
 					map = (Map<String, Object>) iterator.next();
 					jsonObject.put("id", map.get("@id"));
 					jsonObject.put("type", "Concept");
-					inSchemeObj.put("id", "https://w3id.org/kim/hcrt/application");
+					inSchemeObj.put("id", "https://w3id.org/kim/hcrt/scheme");
 					pLObj.put("de", genPropMap.get(map.get("@id")));
 					jsonObject.put("inScheme", inSchemeObj);
 					jsonObject.put("prefLabel", pLObj);
