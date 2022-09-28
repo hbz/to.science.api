@@ -493,13 +493,13 @@ public class LRMIMapper {
 			switch (lobidObject) {
 			case "department":
 
-				iterator = getLobid2Iterator(lobidMap.get("department"));
+				Iterator it1 = getLobid2Iterator(lobidMap.get("department"));
 				genPropMap.putAll(genProp.loadVocabMap("department-de.properties"));
-				while (iterator.hasNext()) {
+				while (it1.hasNext()) {
 					JSONObject jsonObjectDepartment = new JSONObject();
 					JSONObject pLObj1 = new JSONObject();
 					JSONObject inSchemeObjDepartment = new JSONObject();
-					map = (Map<String, Object>) iterator.next();
+					map = (Map<String, Object>) it1.next();
 					jsonObjectDepartment.put("id", map.get("@id"));
 					jsonObjectDepartment.put("type", "Concept");
 					inSchemeObjDepartment.put("id",
@@ -513,13 +513,13 @@ public class LRMIMapper {
 				break;
 
 			case "medium":
-				iterator = getLobid2Iterator(lobidMap.get("learningResourceType"));
+				Iterator it2 = getLobid2Iterator(lobidMap.get("learningResourceType"));
 				genPropMap.putAll(genProp.loadVocabMap("medium-de.properties"));
-				while (iterator.hasNext()) {
+				while (it2.hasNext()) {
 					JSONObject jsonObjectMedium = new JSONObject();
 					JSONObject inSchemeObjMedium = new JSONObject();
 					JSONObject pLObj2 = new JSONObject();
-					map = (Map<String, Object>) iterator.next();
+					map = (Map<String, Object>) it2.next();
 					jsonObjectMedium.put("id", map.get("@id"));
 					jsonObjectMedium.put("type", "Concept");
 					inSchemeObjMedium.put("id", "https://w3id.org/kim/hcrt/scheme");
