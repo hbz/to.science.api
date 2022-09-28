@@ -499,12 +499,12 @@ public class LRMIMapper {
 					JSONObject jsonObjectDepartment = new JSONObject();
 					JSONObject pLObj1 = new JSONObject();
 					JSONObject inSchemeObjDepartment = new JSONObject();
-					map = (Map<String, Object>) it1.next();
+					Map<String, Object> map1 = (Map<String, Object>) it1.next();
 					jsonObjectDepartment.put("id", map.get("@id"));
 					jsonObjectDepartment.put("type", "Concept");
 					inSchemeObjDepartment.put("id",
 							"https://w3id.org/kim/hochschulfaechersystematik/scheme");
-					pLObj1.put("de", genPropMap.get(map.get("@id")));
+					pLObj1.put("de", genPropMap.get(map1.get("@id")));
 					jsonObjectDepartment.put("inScheme", inSchemeObjDepartment);
 					jsonObjectDepartment.put("prefLabel", pLObj1);
 					jr.put(jsonObjectDepartment);
@@ -519,11 +519,11 @@ public class LRMIMapper {
 					JSONObject jsonObjectMedium = new JSONObject();
 					JSONObject inSchemeObjMedium = new JSONObject();
 					JSONObject pLObj2 = new JSONObject();
-					map = (Map<String, Object>) it2.next();
+					Map<String, Object> map2 = (Map<String, Object>) it2.next();
 					jsonObjectMedium.put("id", map.get("@id"));
 					jsonObjectMedium.put("type", "Concept");
 					inSchemeObjMedium.put("id", "https://w3id.org/kim/hcrt/scheme");
-					pLObj2.put("de", genPropMap.get(map.get("@id")));
+					pLObj2.put("de", genPropMap.get(map2.get("@id")));
 					jsonObjectMedium.put("inScheme", inSchemeObjMedium);
 					jsonObjectMedium.put("prefLabel", pLObj2);
 					jr.put(jsonObjectMedium);
