@@ -484,49 +484,49 @@ public class LRMIMapper {
 	public JSONObject lobidObject2LrmiObject(Map<String, Object> lobidMap,
 			JSONObject lrmiObj, String lobidObject) {
 
+		Iterator iterator = null;
 		Map<String, Object> map = null;
 		JSONArray jr = new JSONArray();
 		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+		JSONObject jsonObject = new JSONObject();
+		JSONObject inSchemeObj = new JSONObject();
+	
 
 		try {
 			switch (lobidObject) {
 			case "department":
-
-				Iterator it1 = getLobid2Iterator(lobidMap.get("department"));
+				
+				iterator = getLobid2Iterator(lobidMap.get("department"));
 				genPropMap.putAll(genProp.loadVocabMap("department-de.properties"));
-				while (it1.hasNext()) {
-					JSONObject jsonObjectDepartment = new JSONObject();
+				while (iterator.hasNext()) {
 					JSONObject pLObj1 = new JSONObject();
-					JSONObject inSchemeObjDepartment = new JSONObject();
-					Map<String, Object> map1 = (Map<String, Object>) it1.next();
-					jsonObjectDepartment.put("id", map.get("@id"));
-					jsonObjectDepartment.put("type", "Concept");
-					inSchemeObjDepartment.put("id",
+					map = (Map<String, Object>) iterator.next();
+					jsonObject.put("id", map.get("@id"));
+					jsonObject.put("type", "Concept");
+					inSchemeObj.put("id",
 							"https://w3id.org/kim/hochschulfaechersystematik/scheme");
-					pLObj1.put("de", genPropMap.get(map1.get("@id")));
-					jsonObjectDepartment.put("inScheme", inSchemeObjDepartment);
-					jsonObjectDepartment.put("prefLabel", pLObj1);
-					jr.put(jsonObjectDepartment);
+					pLObj1.put("de", genPropMap.get(map.get("@id")));
+					jsonObject.put("inScheme", inSchemeObj);
+					jsonObject.put("prefLabel", pLObj1);
+					jr.put(jsonObject);
 				}
 				lrmiObj.put("about", jr);
 				break;
 
 			case "medium":
-				Iterator it2 = getLobid2Iterator(lobidMap.get("learningResourceType"));
+				iterator = getLobid2Iterator(lobidMap.get("learningResourceType"));
 				genPropMap.putAll(genProp.loadVocabMap("medium-de.properties"));
-				while (it2.hasNext()) {
-					JSONObject jsonObjectMedium = new JSONObject();
-					JSONObject inSchemeObjMedium = new JSONObject();
+				while (iterator.hasNext()) {
 					JSONObject pLObj2 = new JSONObject();
-					Map<String, Object> map2 = (Map<String, Object>) it2.next();
-					jsonObjectMedium.put("id", map.get("@id"));
-					jsonObjectMedium.put("type", "Concept");
-					inSchemeObjMedium.put("id", "https://w3id.org/kim/hcrt/scheme");
-					pLObj2.put("de", genPropMap.get(map2.get("@id")));
-					jsonObjectMedium.put("inScheme", inSchemeObjMedium);
-					jsonObjectMedium.put("prefLabel", pLObj2);
-					jr.put(jsonObjectMedium);
+					map = (Map<String, Object>) iterator.next();
+					jsonObject.put("id", map.get("@id"));
+					jsonObject.put("type", "Concept");
+					inSchemeObj.put("id", "https://w3id.org/kim/hcrt/scheme");
+					pLObj2.put("de", genPropMap.get(map.get("@id")));
+					jsonObject.put("inScheme", inSchemeObj);
+					jsonObject.put("prefLabel", pLObj2);
+					jr.put(jsonObject);
 				}
 				lrmiObj.put("learningResourceType", jr);
 				break;
