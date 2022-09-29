@@ -512,16 +512,19 @@ public class Resource extends MyController {
 				/**
 				 * 3. lobid2-Metadaten im Format JSON als Datenstrom "toscience.json"
 				 */
-				Result jsonResult = getJsonResult(nodeNode.getLd2());
-				JsonNode jsonNode = MyUtils.resultToJsonNode(jsonResult);
-				play.Logger
-						.debug("Metadata JSON als Zeichenkette: " + jsonNode.toString());
-				String result3 =
-						modify.updateAndEnrichMetadataJson(nodeNode, jsonNode.toString());
-				play.Logger.debug(result3);
-
-				return JsonMessage(
-						new Message(result1 + "\n" + result2 + "\n" + result3));
+				/**
+				 * NEIN hier kein Update der toscience.json, da es die Reihenfolge
+				 * dieser Daten durcheinanderwürfln würde. Result jsonResult =
+				 * getJsonResult(nodeNode.getLd2()); JsonNode jsonNode =
+				 * MyUtils.resultToJsonNode(jsonResult); play.Logger .debug("Metadata
+				 * JSON als Zeichenkette: " + jsonNode.toString()); String result3 =
+				 * modify.updateAndEnrichMetadataJson(nodeNode, jsonNode.toString());
+				 * play.Logger.debug(result3);
+				 * 
+				 * return JsonMessage( new Message(result1 + "\n" + result2 + "\n" +
+				 * result3));
+				 */
+				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
@@ -556,6 +559,12 @@ public class Resource extends MyController {
 				String result2 = modify.updateLobidify2AndEnrichLrmiData(nodeNode,
 						format, nodeNode.getLrmiData());
 				play.Logger.debug(result2);
+
+				/**
+				 * 3. gemappte LRMI-Daten als Metadata-Strom toscience.json
+				 */
+				// ToDo getLd2Lobidify2Lrmi das hier muss aufgerufen werden => wird
+				// schon unter 2. aufgerufen
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {

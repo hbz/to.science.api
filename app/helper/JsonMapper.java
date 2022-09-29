@@ -18,7 +18,7 @@ package helper;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import static archive.fedora.Vocabulary.REL_HBZ_ID;
+import static archive.fedora.Vocabulary.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -53,6 +53,7 @@ import actions.Read;
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
 import de.hbz.lobid.helper.JsonConverter;
+import models.implementation.*;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -561,8 +562,8 @@ public class JsonMapper {
 
 		// set different variable names for creators and contributors
 
-		LinkedHashMap<String, String> affilLabelMap =
-				getPrefLabelMap(agentType + "ResearchOrganizationsRegistry-de.properties");
+		LinkedHashMap<String, String> affilLabelMap = getPrefLabelMap(
+				agentType + "ResearchOrganizationsRegistry-de.properties");
 
 		List<String> agentAffiliation = new ArrayList<>();
 		if (rdf.containsKey(agentType + "Affiliation")) {
@@ -1321,22 +1322,34 @@ public class JsonMapper {
 	}
 
 	/**
-	 * Holt Metadaten im Format lobid2 (falls vorhanden) und mappt Felder aus
-	 * LRMI-Daten darauf.
+	 * Diese Methode macht 2 Mappings: 1. Holt Metadaten im Format lobid2 (falls
+	 * vorhanden) und mappt Felder aus LRMI-Daten darauf. LRMI => metadata2(rdf).
+	 * 2. Mappt LRMI-Daten => toscience.json. Im Gegensatz zu den in rdf
+	 * verwendeten HashSets, bleibt die Sortierreihenfolge bei den im JSONObject
+	 * verwendeten JSONArrays erhalten.
 	 * 
 	 * @author Ingolf Kuss, hbz
 	 * @param n The Node of the resource
 	 * @param content Die LRMI-Daten im Format JSON
-	 * @date 2021-07-14
+	 * @date 2021-07-14, 2022-09-29
 	 * 
 	 * @return Die Daten im Format lobid2-RDF
 	 */
-	public Map<String, Object> getLd2Lobidify2Lrmi(Node n, String content) {
+	public HashMap<String, Object> getLd2Lobidify2Lrmi(Node n, String content) {
 		/* Mapping von LRMI.json nach lobid2.json = json2 */
 		this.node = n;
 		try {
-			// Neues JSON-Objekt anlegen; für lobid2-Daten
+			HashMap<String, Object> retHash = new HashMap();
+			/*
+			 * Neues JSON-Objekt anlegen für rdf-Daten. Achtung: Die Map erhält die
+			 * Sortierung der Felder nicht !
+			 */
 			Map<String, Object> rdf = node.getLd2();
+			/*
+			 * Neues JSON-Objekt anlegen für Metadaten im Format toscience.json.
+			 * lobid2 Daten im Format JSON.
+			 */
+			MetadataJson metadataJson = new MetadataJson();
 
 			// LRMIDaten nach JSONObject wandeln
 			JSONObject lrmiJSONObject = new JSONObject(content);
@@ -1409,7 +1422,6 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-
 			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
 			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
 			rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
@@ -1432,15 +1444,18 @@ public class JsonMapper {
 			}
 
 			if (lrmiJSONObject.has("license")) {
+				License ambLicense = new License();
 				List<Map<String, Object>> licenses = new ArrayList<>();
 				myObj = lrmiJSONObject.get("license");
 				Map<String, Object> licenseMap = null;
 				if (myObj instanceof java.lang.String) {
+					ambLicense.setById(lrmiJSONObject.getString("license"));
 					licenseMap = new LinkedHashMap<>();
 					licenseMap.put("@id", lrmiJSONObject.getString("license"));
 					licenses.add(licenseMap);
 				} else if (myObj instanceof org.json.JSONObject) {
 					obj = lrmiJSONObject.getJSONObject("license");
+					ambLicense.setById(obj.getString("id"));
 					licenseMap = new LinkedHashMap<>();
 					licenseMap.put("@id", obj.getString("id"));
 					licenses.add(licenseMap);
@@ -1448,12 +1463,14 @@ public class JsonMapper {
 					arr = lrmiJSONObject.getJSONArray("license");
 					for (int i = 0; i < arr.length(); i++) {
 						obj = arr.getJSONObject(i);
+						ambLicense.setById(obj.getString("id"));
 						licenseMap = new LinkedHashMap<>();
 						licenseMap.put("@id", obj.getString("id"));
 						licenses.add(licenseMap);
 					}
 				}
 				rdf.put("license", licenses);
+				metadataJson.put("license", ambLicense.getAmbJSONObject());
 			}
 
 			if (lrmiJSONObject.has("publisher")) {
@@ -1501,11 +1518,12 @@ public class JsonMapper {
 				rdf.put("funder", funderMap);
 			}
 
-
 			// postprocessing(rdf);
 
 			play.Logger.debug("Done mapping LRMI data to lobid2.");
-			return rdf;
+			retHash.put(metadata2, rdf);
+			retHash.put(archive.fedora.Vocabulary.metadataJson, metadataJson);
+			return retHash;
 		} catch (Exception e) {
 			play.Logger.error("Content could not be mapped!", e);
 			throw new RuntimeException("LRMI.json could not be mapped to lobid2.json",

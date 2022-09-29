@@ -59,6 +59,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
+import archive.fedora.Vocabulary.*;
 import archive.fedora.XmlUtils;
 import controllers.MyController;
 import helper.DataciteClient;
@@ -319,8 +320,9 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
-		Map<String, Object> rdf =
-				new JsonMapper().getLd2Lobidify2Lrmi(node, content);
+		Map<String, Object> rdf = (Map<String, Object>) (new JsonMapper())
+				.getLd2Lobidify2Lrmi(node, content)
+				.get(archive.fedora.Vocabulary.metadata2);
 		play.Logger.debug("Mapped LRMI data to lobid2!");
 		updateMetadata2(node, rdfToString(rdf, format));
 		play.Logger.debug("Updated Metadata2 datastream!");

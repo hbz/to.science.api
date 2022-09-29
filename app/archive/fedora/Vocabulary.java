@@ -179,4 +179,8 @@ public abstract class Vocabulary {
 		return relationVocabs;
 	}
 
+	public final static String metadata2 = "metadata2";
+	public final static String lrmiData = "lrmiData";
+	public final static String metadataJson = "toscience.json";
+
 }
