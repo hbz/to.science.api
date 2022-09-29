@@ -486,49 +486,49 @@ public class LRMIMapper {
 		Iterator itr = null;
 		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+		JSONArray jr = new JSONArray();
+		Map<String, Object> map = null;
 
 		try {
 			switch (lobidObject) {
 			case "department":
-				JSONArray jr1 = new JSONArray();
 				itr = getLobid2Iterator(lobidMap.get("department"));
 				genPropMap.putAll(genProp.loadVocabMap("department-de.properties"));
 				while (itr.hasNext()) {
 					JSONObject aboutObj = new JSONObject();
 					JSONObject pLObj1 = new JSONObject();
 					JSONObject inSchemeAbout = new JSONObject();
-					Map<String, Object> map1 = (Map<String, Object>) itr.next();
-					aboutObj.put("id", map1.get("@id"));
+					map = (Map<String, Object>) itr.next();
+					aboutObj.put("id", map.get("@id"));
 					aboutObj.put("type", "Concept");
 					inSchemeAbout.put("id",
 							"https://w3id.org/kim/hochschulfaechersystematik/scheme");
-					pLObj1.put("de", genPropMap.get(map1.get("@id")));
+					pLObj1.put("de", genPropMap.get(map.get("@id")));
 					aboutObj.put("inScheme", inSchemeAbout);
 					aboutObj.put("prefLabel", pLObj1);
-					jr1.put(aboutObj);
+					jr.put(aboutObj);
 				}
-				lrmiObj.put("about", jr1);
+				lrmiObj.put("about", jr);
 				break;
 
 			case "medium":
-				JSONArray jr2 = new JSONArray();
 				itr = getLobid2Iterator(lobidMap.get("medium"));
 				genPropMap.putAll(genProp.loadVocabMap("medium-de.properties"));
 				while (itr.hasNext()) {
 					JSONObject learningResourceType = new JSONObject();
 					JSONObject pLObj2 = new JSONObject();
 					JSONObject inSchemeLearningResourceType = new JSONObject();
-					Map<String, Object> map2 = (Map<String, Object>) itr.next();
-					learningResourceType.put("id", map2.get("@id"));
+					map = (Map<String, Object>) itr.next();
+					learningResourceType.put("id", map.get("@id"));
 					learningResourceType.put("type", "Concept");
 					inSchemeLearningResourceType.put("id",
 							"https://w3id.org/kim/hcrt/scheme");
-					pLObj2.put("de", genPropMap.get(map2.get("@id")));
+					pLObj2.put("de", genPropMap.get(map.get("@id")));
 					learningResourceType.put("inScheme", inSchemeLearningResourceType);
 					learningResourceType.put("prefLabel", pLObj2);
-					jr2.put(learningResourceType);
+					jr.put(learningResourceType);
 				}
-				lrmiObj.put("learningResourceType", jr2);
+				lrmiObj.put("learningResourceType", jr);
 				break;
 			default:
 				play.Logger.error(
