@@ -174,48 +174,27 @@ public class LRMIMapper {
 				// lrmiData only supports one description
 				lrmiJsonContent.put("description", iterator.next());
 			}
-
-			if (rdf.containsKey("medium")) {
-				iterator = getLobid2Iterator(rdf.get("medium"));
-				// Hole ein Objekt aus LRMI-JSON oder lege es neu an
-				obj = null;
-				if (lrmiJsonContent.has("learningResourceType")) {
-					arr = (JSONArray) lrmiJsonContent.get("learningResourceType");
-					for (int i = 0; i < arr.length(); i++) {
-						myObj = arr.get(i);
-						play.Logger
-								.debug("i=" + i + "; myObj.getClass()=" + myObj.getClass());
-						if (myObj instanceof JSONObject) {
-							obj = arr.getJSONObject(i);
-							// nimm nur den ersten learningResourceType und überschreibe ihn
-							// mit dem, was aus RDF kommt
-							break;
-						}
-					}
-					// Falls Objekt nicht gefunden, hänge ein neues Objekt an das Array an
-					if (obj == null) {
-						obj = new JSONObject();
-						arr.put(obj);
-					}
-				} else {
-					arr = new JSONArray();
-					obj = new JSONObject();
-					arr.put(obj);
-				}
-				// Jetzt editiere das JSONObject mit den in RDF gefundenen Informationen
-				while (iterator.hasNext()) {
-					map = (Map<String, Object>) iterator.next();
-					if (map.containsKey("prefLabel")) {
-						subObj = new JSONObject();
-						subObj.put("de", map.get("prefLabel"));
-						obj.put("prefLabel", subObj);
-					}
-					obj.put("id", map.get("@id"));
-					arr.put(obj);
-				}
-				lrmiJsonContent.put("learningResourceType", arr);
-			}
-
+			/*
+			 * if (rdf.containsKey("medium")) { iterator =
+			 * getLobid2Iterator(rdf.get("medium")); // Hole ein Objekt aus LRMI-JSON
+			 * oder lege es neu an obj = null; if
+			 * (lrmiJsonContent.has("learningResourceType")) { arr = (JSONArray)
+			 * lrmiJsonContent.get("learningResourceType"); for (int i = 0; i <
+			 * arr.length(); i++) { myObj = arr.get(i); play.Logger .debug("i=" + i +
+			 * "; myObj.getClass()=" + myObj.getClass()); if (myObj instanceof
+			 * JSONObject) { obj = arr.getJSONObject(i); // nimm nur den ersten
+			 * learningResourceType und überschreibe ihn // mit dem, was aus RDF kommt
+			 * break; } } // Falls Objekt nicht gefunden, hänge ein neues Objekt an
+			 * das Array an if (obj == null) { obj = new JSONObject(); arr.put(obj); }
+			 * } else { arr = new JSONArray(); obj = new JSONObject(); arr.put(obj); }
+			 * // Jetzt editiere das JSONObject mit den in RDF gefundenen
+			 * Informationen while (iterator.hasNext()) { map = (Map<String, Object>)
+			 * iterator.next(); if (map.containsKey("prefLabel")) { subObj = new
+			 * JSONObject(); subObj.put("de", map.get("prefLabel"));
+			 * obj.put("prefLabel", subObj); } obj.put("id", map.get("@id"));
+			 * arr.put(obj); } lrmiJsonContent.put("learningResourceType", arr); }
+			 * 
+			 */
 			ArrayList<String> creatorAcadDegree = new ArrayList<>();
 			if (rdf.containsKey("creatorAcademicDegree")) {
 				iterator = getLobid2Iterator(rdf.get("creatorAcademicDegree"));
@@ -337,7 +316,9 @@ public class LRMIMapper {
 			}
 
 			lrmiJsonContent = lobidFunder2LrmiFunder(rdf, lrmiJsonContent);
-			lrmiJsonContent = lobidDepartment2LrmiAbout(rdf, lrmiJsonContent);
+			lrmiJsonContent =
+					lobidObject2LrmiObject(rdf, lrmiJsonContent, "department");
+			lrmiJsonContent = lobidObject2LrmiObject(rdf, lrmiJsonContent, "medium");
 
 			/**
 			 * - gib die aktualisierten oder neu angelegten LRMI-Daten zurück (Format
@@ -493,48 +474,75 @@ public class LRMIMapper {
 	}
 
 	/**
-	 * Maps department-Object of Lobid into about-Object of LRMI
+	 * Method converts a lobid object to json object
 	 * 
-	 * @param lobidMap Map representation of the lobid metadata
-	 * @param lrmiObj JSONObject representation of tha lrmi Metadata
-	 * @return lrmiObj with modified about-Object
+	 * @param lobidMap
+	 * @param lrmiObj Output variable
+	 * @param lobidObject what should be checked as input
+	 * @return Json-Object of LRMI (@param lrmiObj)
 	 */
-	public JSONObject lobidDepartment2LrmiAbout(Map<String, Object> lobidMap,
-			JSONObject lrmiObj) {
+	public JSONObject lobidObject2LrmiObject(Map<String, Object> lobidMap,
+			JSONObject lrmiObj, String lobidObject) {
+		Iterator itr = null;
+		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+		JSONArray jr = new JSONArray();
+		Map<String, Object> map = null;
 
 		try {
-			if (lobidMap.containsKey("department")) {
-				Iterator iterator = getLobid2Iterator(lobidMap.get("department"));
-				JSONArray aboutArray = new JSONArray();
-
-				// Provide resolving for prefLabels from @id via GenericPropertiesLoader
-				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+			switch (lobidObject) {
+			case "department":
+				itr = getLobid2Iterator(lobidMap.get("department"));
 				genPropMap.putAll(genProp.loadVocabMap("department-de.properties"));
-
-				while (iterator.hasNext()) {
-					Map<String, Object> map = (Map<String, Object>) iterator.next();
+				while (itr.hasNext()) {
 					JSONObject aboutObj = new JSONObject();
-					JSONObject inSchemeObj = new JSONObject();
-					JSONObject pLObj = new JSONObject();
+					JSONObject pLObj1 = new JSONObject();
+					JSONObject inSchemeAbout = new JSONObject();
+					map = (Map<String, Object>) itr.next();
 					aboutObj.put("id", map.get("@id"));
 					aboutObj.put("type", "Concept");
-
-					inSchemeObj.put("id",
+					inSchemeAbout.put("id",
 							"https://w3id.org/kim/hochschulfaechersystematik/scheme");
-					pLObj.put("de", genPropMap.get(map.get("@id")));
-
-					aboutObj.put("inScheme", inSchemeObj);
-					aboutObj.put("prefLabel", pLObj);
-					aboutArray.put(aboutObj);
+					pLObj1.put("de", genPropMap.get(map.get("@id")));
+					aboutObj.put("inScheme", inSchemeAbout);
+					aboutObj.put("prefLabel", pLObj1);
+					jr.put(aboutObj);
 				}
-				lrmiObj.put("about", aboutArray);
-			}
-		} catch (JSONException e) {
-			play.Logger.error("unable to apply modified about values to LRMI");
-		}
+				lrmiObj.put("about", jr);
+				break;
 
+			case "medium":
+				itr = getLobid2Iterator(lobidMap.get("medium"));
+				genPropMap.putAll(genProp.loadVocabMap("medium-de.properties"));
+				while (itr.hasNext()) {
+					JSONObject learningResourceType = new JSONObject();
+					JSONObject pLObj2 = new JSONObject();
+					JSONObject inSchemeLearningResourceType = new JSONObject();
+					map = (Map<String, Object>) itr.next();
+					learningResourceType.put("id", map.get("@id"));
+					learningResourceType.put("type", "Concept");
+					inSchemeLearningResourceType.put("id",
+							"https://w3id.org/kim/hcrt/scheme");
+					pLObj2.put("de", genPropMap.get(map.get("@id")));
+					learningResourceType.put("inScheme", inSchemeLearningResourceType);
+					learningResourceType.put("prefLabel", pLObj2);
+					jr.put(learningResourceType);
+				}
+				lrmiObj.put("learningResourceType", jr);
+				break;
+			default:
+				play.Logger.error(
+						"unable to modify " + lobidObject + "-Object to to LRMI-Object");
+				break;
+
+			}
+
+		} catch (Exception e) {
+			play.Logger.error(
+					"unable to modify " + lobidObject + "-Object to to LRMI-Object");
+		}
 		return lrmiObj;
+
 	}
 
 	/**
