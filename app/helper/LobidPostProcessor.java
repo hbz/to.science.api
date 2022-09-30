@@ -32,7 +32,7 @@ public class LobidPostProcessor {
 			}
 
 			Collection<Map<String, Object>> t =
-					getType(new ObjectMapper().valueToTree(rdf));
+					jm.getType(new ObjectMapper().valueToTree(rdf));
 			if (t != null && t.size() != 0)
 				rdf.put(rdftype, t);
 

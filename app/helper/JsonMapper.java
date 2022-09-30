@@ -934,7 +934,7 @@ public class JsonMapper {
 	 * @param rdf
 	 * @return
 	 */
-	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
+	Collection<Map<String, Object>> getType(final JsonNode rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 
 		// Special case medium is video - override type
