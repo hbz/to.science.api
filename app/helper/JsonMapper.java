@@ -677,7 +677,7 @@ public class JsonMapper {
 		return result;
 	}
 
-	Collection<Map<String, Object>> getSortedListOfContributors(
+	static Collection<Map<String, Object>> getSortedListOfContributors(
 			Map<String, Object> nodeAsMap) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 		Collection<String> carray =
