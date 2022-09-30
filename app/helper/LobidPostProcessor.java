@@ -18,25 +18,23 @@ public class LobidPostProcessor {
 	final String PREF_LABEL = Globals.profile.getLabelKey();
 	final String ID2 = Globals.profile.getIdAlias();
 	final String rdftype = "rdftype";
-	Node node = null;
-	JsonMapper jm = new JsonMapper(node);
 
 	/**
 	 * @param rdf
 	 */
 	void postprocessing(Map<String, Object> rdf) {
 		try {
-			jm.addCatalogLink(rdf);
+			JsonMapper.addCatalogLink(rdf);
 			if ("file".equals(rdf.get("contentType"))) {
 				rdf.put(rdftype, Arrays.asList(new String[] { "File" }));
 			}
 
 			Collection<Map<String, Object>> t =
-					jm.getType(new ObjectMapper().valueToTree(rdf));
+					JsonMapper.getType(new ObjectMapper().valueToTree(rdf));
 			if (t != null && t.size() != 0)
 				rdf.put(rdftype, t);
 
-			jm.sortCreatorAndContributors(rdf);
+			JsonMapper.sortCreatorAndContributors(rdf);
 			postProcessSubjectName(rdf);
 			postProcess(rdf, "subject");
 			postProcess(rdf, "agrovoc");
@@ -72,11 +70,11 @@ public class LobidPostProcessor {
 			postProcessLinkFields("additionalMaterial", rdf);
 			postProcessLinkFields("publisherVersion", rdf);
 			postProcessLinkFields("fulltextVersion", rdf);
-			jm.createJoinedFunding(rdf);
-			jm.applyAffiliation("creator", rdf);
-			jm.applyAffiliation("contributor", rdf);
-			jm.applyAcademicDegree("creator", rdf);
-			jm.applyAcademicDegree("contributor", rdf);
+			JsonMapper.createJoinedFunding(rdf);
+			JsonMapper.applyAffiliation("creator", rdf);
+			JsonMapper.applyAffiliation("contributor", rdf);
+			JsonMapper.applyAcademicDegree("creator", rdf);
+			JsonMapper.applyAcademicDegree("contributor", rdf);
 
 			postProcessWithGenPropLoader("department", "department-de.properties",
 					rdf);
@@ -94,7 +92,7 @@ public class LobidPostProcessor {
 			if (fields != null) {
 				play.Logger.trace("Found roles: " + fields);
 				for (Map<String, Object> r : fields) {
-					String prefLabel = jm.findLabel(r);
+					String prefLabel = JsonMapper.findLabel(r);
 					play.Logger.trace("Found label " + prefLabel + " for role " + r);
 					r.put(PREF_LABEL, prefLabel);
 				}
@@ -162,7 +160,7 @@ public class LobidPostProcessor {
 
 		if (rdf.containsKey(key)) {
 			Object obj = rdf.get(key);
-			Iterator oIt = jm.getLobidObjectIterator(obj);
+			Iterator oIt = JsonMapper.getLobidObjectIterator(obj);
 			while (oIt.hasNext()) {
 				Map<String, Object> map = (Map<String, Object>) oIt.next();
 				map.put("prefLabel", genPropMap.get(map.get("@id")));
@@ -186,7 +184,7 @@ public class LobidPostProcessor {
 						((Collection<Map<String, Object>>) contribution.get("agent"))
 								.iterator().next();
 				if (agent != null) {
-					String prefLabel = jm.findLabel(agent);
+					String prefLabel = JsonMapper.findLabel(agent);
 					agent.put(PREF_LABEL, prefLabel);
 					String id = null;
 					if (agent.containsKey(ID2)) {

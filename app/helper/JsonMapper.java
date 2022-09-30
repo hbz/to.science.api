@@ -398,7 +398,7 @@ public class JsonMapper {
 	/**
 	 * @param rdf
 	 */
-	void createJoinedFunding(Map<String, Object> rdf) {
+	static void createJoinedFunding(Map<String, Object> rdf) {
 
 		List<Map<String, Object>> fundingId =
 				(List<Map<String, Object>>) rdf.get("fundingId");
@@ -447,7 +447,7 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	public void applyAffiliation(String agentType, Map<String, Object> rdf) {
+	static void applyAffiliation(String agentType, Map<String, Object> rdf) {
 
 		// set different variable names for creators and contributors
 
@@ -511,7 +511,7 @@ public class JsonMapper {
 	 * 
 	 * @param rdf a Map
 	 */
-	public void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
+	static void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
 
 		ArrayList<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType + "AcademicDegree") != null) {
@@ -576,7 +576,7 @@ public class JsonMapper {
 		}
 	}
 
-	void addCatalogLink(Map<String, Object> rdf) {
+	static void addCatalogLink(Map<String, Object> rdf) {
 		try {
 			String hbzId = ((Collection<String>) rdf.get("hbzId")).iterator().next();
 			Collection<Map<String, Object>> catalogLink = new ArrayList<>();
@@ -590,7 +590,7 @@ public class JsonMapper {
 		}
 	}
 
-	void sortCreatorAndContributors(Map<String, Object> rdf) {
+	static void sortCreatorAndContributors(Map<String, Object> rdf) {
 		try {
 			Collection<Map<String, Object>> cr = getSortedListOfCreators(rdf);
 			if (!cr.isEmpty()) {
@@ -658,7 +658,7 @@ public class JsonMapper {
 		}
 	}
 
-	Collection<Map<String, Object>> getSortedListOfCreators(
+	static Collection<Map<String, Object>> getSortedListOfCreators(
 			Map<String, Object> nodeAsMap) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 		Collection<String> carray =
@@ -733,7 +733,7 @@ public class JsonMapper {
 		return new HashMap<>();
 	}
 
-	String findLabel(Map<String, Object> map) {
+	static String findLabel(Map<String, Object> map) {
 
 		if (map.containsKey("preferredNameForTheWork"))
 			return (String) map.get("preferredNameForTheWork");
@@ -934,7 +934,7 @@ public class JsonMapper {
 	 * @param rdf
 	 * @return
 	 */
-	Collection<Map<String, Object>> getType(final JsonNode rdf) {
+	static Collection<Map<String, Object>> getType(final JsonNode rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 
 		// Special case medium is video - override type
@@ -1327,7 +1327,7 @@ public class JsonMapper {
 	 * @param iObj a JSONObject of unknown internal structure
 	 * @return an Iterator representing the JSONObject
 	 */
-	public Iterator getLobidObjectIterator(Object iObj) {
+	static Iterator getLobidObjectIterator(Object iObj) {
 		Iterator lIterator = null;
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =
