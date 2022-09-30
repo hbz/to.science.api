@@ -178,7 +178,7 @@ public class JsonMapper {
 			// if (node.getMetadata1() == null)
 			// throw new NullPointerException(
 			// node.getPid() + " metadata stream is NULL!");
-			if (node.getMetadata2() == null)
+			if (node.getMetadata(metadata2) == null)
 				throw new NullPointerException(
 						node.getPid() + " metadata2 stream is NULL!");
 		} catch (Exception e) {
@@ -328,7 +328,7 @@ public class JsonMapper {
 	private Map<String, Object> getDescriptiveMetadata1() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata1().getBytes(StandardCharsets.UTF_8));
+					node.getMetadata("metadata").getBytes(StandardCharsets.UTF_8));
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
@@ -348,7 +348,7 @@ public class JsonMapper {
 	private Map<String, Object> getDescriptiveMetadata2() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata2().getBytes(StandardCharsets.UTF_8));
+					node.getMetadata(metadata2).getBytes(StandardCharsets.UTF_8));
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
@@ -1265,7 +1265,7 @@ public class JsonMapper {
 		this.node = parent;
 		play.Logger.debug("Start addLrmiChildToParent");
 		try {
-			String lrmiData = node.getLrmiData();
+			String lrmiData = node.getMetadata(archive.fedora.Vocabulary.lrmiData);
 			// LRMI-Daten nach JSONObject wandeln
 			JSONObject lrmiJSONObject = null;
 			if (lrmiData == null || lrmiData.isEmpty()) {
@@ -1330,10 +1330,13 @@ public class JsonMapper {
 	 * 
 	 * @author Ingolf Kuss, hbz
 	 * @param n The Node of the resource
-	 * @param content Die LRMI-Daten im Format JSON
+	 * @param content Die LRMI-Daten im Format JSON String
 	 * @date 2021-07-14, 2022-09-29
 	 * 
-	 * @return Die Daten im Format lobid2-RDF
+	 * @return eine Hash-Map mit folgenden Ingalten: key="metadata2" : value= RDF
+	 *         metadaten als Map<String, Object>; key="toscience.json" : value=
+	 *         lobid2 Metadaten als toscience Objekt MetadataJson (implementiert
+	 *         letztendes JSONObject)
 	 */
 	public HashMap<String, Object> getLd2Lobidify2Lrmi(Node n, String content) {
 		/* Mapping von LRMI.json nach lobid2.json = json2 */

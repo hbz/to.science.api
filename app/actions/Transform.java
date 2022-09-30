@@ -66,8 +66,8 @@ public class Transform {
 		try {
 			RegalToMabMapper mapper = new RegalToMabMapper();
 			MabRecord record;
-			record = mapper.map(
-					new ByteArrayInputStream(node.getMetadata2().getBytes("utf-8")),
+			record = mapper.map(new ByteArrayInputStream(node
+					.getMetadata(archive.fedora.Vocabulary.metadata2).getBytes("utf-8")),
 					node.getPid());
 			record.httpAdresse = Globals.urnbase + node.getPid();
 			record.doi = node.getDoi();

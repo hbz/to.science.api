@@ -506,7 +506,7 @@ public class Resource extends MyController {
 				// play.Logger.debug("request body=" + request().body().asText());
 				Node nodeNode = new Read().readNode(pid);
 				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
-						nodeNode.getMetadata2());
+						nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 				play.Logger.debug(result2);
 
 				/**
@@ -538,7 +538,8 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, node -> {
 			play.Logger.debug("Starting updateLrmiData with pid=" + pid);
 			play.Logger
-					.debug("request().body().asJson()=" + request().body().asJson());
+					.debug("The LRMI data that has been sent: request().body().asJson()="
+							+ request().body().asJson());
 			try {
 				/**
 				 * Wir legen 2 Datenströme an:
@@ -546,25 +547,21 @@ public class Resource extends MyController {
 				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
 				 * Datenstrom "Lrmidata"
 				 */
-				String result1 =
+				String content =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
-				play.Logger.debug(result1);
+				play.Logger.debug("The updated and enriched LRMI data: " + content);
+				String result1 = "LRMI metadata successfully updated and enriched.";
 
 				/**
-				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom
+				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom und als
+				 * toscience.json-Datenstrom
 				 */
-				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
+				/* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein: */
 				RDFFormat format = RDFFormat.NTRIPLES;
 				Node nodeNode = new Read().readNode(pid);
-				String result2 = modify.updateLobidify2AndEnrichLrmiData(nodeNode,
-						format, nodeNode.getLrmiData());
+				String result2 =
+						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content);
 				play.Logger.debug(result2);
-
-				/**
-				 * 3. gemappte LRMI-Daten als Metadata-Strom toscience.json
-				 */
-				// ToDo getLd2Lobidify2Lrmi das hier muss aufgerufen werden => wird
-				// schon unter 2. aufgerufen
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
@@ -1422,7 +1419,7 @@ public class Resource extends MyController {
 			try {
 				Node node = readNodeOrNull(pid);
 				if ("monograph".equals(node.getContentType())) {
-					return redirect(routes.Forms.getCatalogForm(node.getPid()));
+					return redirect(Forms.getCatalogForm(node.getPid()).toString());
 				}
 				String zettelType = node.getContentType();
 				String rdf = RdfUtils.readRdfToString(
@@ -1465,7 +1462,7 @@ public class Resource extends MyController {
 				}
 				String message = modify.lobidify2(node, alephId);
 				flash("message", message);
-				return redirect(routes.Resource.listResource(node.getPid(), null));
+				return redirect(Resource.listResource(node.getPid(), null).toString());
 			} catch (Exception e) {
 				return JsonMessage(new Message(json(e)));
 			}

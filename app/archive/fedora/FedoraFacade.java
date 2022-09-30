@@ -330,7 +330,7 @@ public class FedoraFacade {
 		try {
 			FedoraResponse response =
 					new GetDatastreamDissemination(node.getPid(), "metadata").execute();
-			node.setMetadata1(
+			node.setMetadata("metadata",
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -341,7 +341,7 @@ public class FedoraFacade {
 		try {
 			FedoraResponse response =
 					new GetDatastreamDissemination(node.getPid(), "metadata2").execute();
-			node.setMetadata2(
+			node.setMetadata(archive.fedora.Vocabulary.metadata2,
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -352,7 +352,7 @@ public class FedoraFacade {
 		try {
 			FedoraResponse response =
 					new GetDatastreamDissemination(node.getPid(), "Lrmidata").execute();
-			node.setLrmiData(
+			node.setMetadata(archive.fedora.Vocabulary.lrmiData,
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name lrmiData is optional
@@ -409,16 +409,16 @@ public class FedoraFacade {
 			}
 			play.Logger.debug("Updated stream");
 		}
-		if (node.getMetadataFile() != null) {
+		if (node.getMetadataFile("metadata") != null) {
 			utils.updateMetadataStream(node);
 		}
-		if (node.getMetadata2File() != null) {
+		if (node.getMetadataFile(archive.fedora.Vocabulary.metadata2) != null) {
 			utils.updateMetadata2Stream(node);
 		}
-		if (node.getLrmiDataFile() != null) {
+		if (node.getMetadataFile(archive.fedora.Vocabulary.lrmiData) != null) {
 			utils.updateLrmiDataStream(node);
 		}
-		if (node.getMetadataJsonFile() != null) {
+		if (node.getMetadataFile(archive.fedora.Vocabulary.metadataJson) != null) {
 			utils.updateMetadataJsonStream(node);
 		}
 		if (node.getSeqFile() != null) {

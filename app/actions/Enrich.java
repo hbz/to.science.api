@@ -65,7 +65,7 @@ public class Enrich {
 	public static String enrichMetadata2(Node node) {
 		try {
 			play.Logger.info("Enrich 2 " + node.getPid());
-			String metadata = node.getMetadata2();
+			String metadata = node.getMetadata(archive.fedora.Vocabulary.metadata2);
 			if (metadata == null || metadata.isEmpty()) {
 				play.Logger.info("No metadata2 to enrich " + node.getPid());
 				return "No metadata2 to enrich " + node.getPid();
@@ -85,7 +85,7 @@ public class Enrich {
 	public static String enrichMetadata1(Node node) {
 		try {
 			play.Logger.info("Enrich " + node.getPid());
-			String metadata = node.getMetadata1();
+			String metadata = node.getMetadata("metadata");
 			if (metadata == null || metadata.isEmpty()) {
 				play.Logger.info("Not metadata to enrich " + node.getPid());
 				return "Not metadata to enrich " + node.getPid();
@@ -108,24 +108,24 @@ public class Enrich {
 	 * Diese Methode reichert LRMI-Daten an.
 	 * 
 	 * @param node Der Knoten der Ressource
-	 * @return Nachricht (Zeichenkette)
+	 * @return die angereicherten LRMI-Daten als String
 	 */
 	public String enrichLrmiData(Node node) {
+		play.Logger.info("Enrich LRMI data of " + node.getPid());
+		String lrmiData = node.getMetadata(archive.fedora.Vocabulary.lrmiData);
 		try {
-			play.Logger.info("Enrich LRMI data of " + node.getPid());
-			String lrmiData = node.getLrmiData();
 			if (lrmiData == null || lrmiData.isEmpty()) {
 				play.Logger.info("No LRMI data to enrich " + node.getPid());
-				return "No LRMI data to enrich " + node.getPid();
+				return lrmiData;
 			}
 			lrmiData = enrichLrmiData(lrmiData);
 			new Modify().updateLrmiData(node, lrmiData);
 		} catch (Exception e) {
-			play.Logger.debug("", e);
-			return "Enrichment of LRMI data of " + node.getPid() + " failed !\n"
-					+ e.getMessage();
+			play.Logger.debug("", e.getMessage());
+			play.Logger
+					.debug("Enrichment of LRMI data of " + node.getPid() + " failed !\n");
 		}
-		return "Enrichment LRMI data of " + node.getPid() + " succeeded !";
+		return lrmiData;
 	}
 
 	private static void enrichAll(Node node, String metadata,

@@ -123,7 +123,7 @@ public class MyController extends Controller {
 				"\nResponse: " + msg.toString() + "\nSession " + ctx().session());
 		if (request().accepts("text/html")) {
 			flash("message", "You must be logged in to perform this action!");
-			return redirect(routes.Forms.getLoginForm());
+			return redirect(Forms.getLoginForm().toString());
 		} else {
 			return JsonMessage(msg);
 		}

@@ -64,8 +64,8 @@ public class RepositoryTest extends BaseModelTest {
 		object.setContentType("monograph");
 		object.dublinCoreData.addTitle("Ein Testtitel");
 		object.dublinCoreData.addCreator("Jan Schnasse");
-		object.setMetadataFile(Thread.currentThread().getContextClassLoader()
-				.getResource("test.nt").getFile());
+		object.setMetadataFile("metadata", Thread.currentThread()
+				.getContextClassLoader().getResource("test.nt").getFile());
 
 		object.addTransformer(new Transformer("testepicur", "epicur",
 				server + "/resource/(pid).epicur"));
