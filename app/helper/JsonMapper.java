@@ -1425,8 +1425,16 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
-			rdf = mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
+			HashMap<String, Object> lrmiAgentsToLobid =
+					mapLrmiAgentsToLobid(rdf, metadataJson, lrmiJSONObject, "creator");
+			rdf = lrmiAgentsToLobid.get(metadata2);
+			metadataJson =
+					lrmiAgentsToLobid.get(archive.fedora.Vocabulary.metadataJson);
+			lrmiAgentsToLobid = mapLrmiAgentsToLobid(rdf, metadataJson,
+					lrmiJSONObject, "contributor");
+			rdf = lrmiAgentsToLobid.get(metadata2);
+			metadataJson =
+					lrmiAgentsToLobid.get(archive.fedora.Vocabulary.metadataJson);
 			rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
 					"medium");
 			rdf = mapLrmiObjectToLobid(rdf, lrmiJSONObject, "about", "department");
@@ -1670,9 +1678,10 @@ public class JsonMapper {
 	 * @param agentType
 	 * @return
 	 */
-	public Map<String, Object> mapLrmiAgentsToLobid(Map<String, Object> Rdf,
-			JSONObject lrmiJSONObject, String agentType) {
+	public HashMap<String, Object> mapLrmiAgentsToLobid(Map<String, Object> Rdf,
+			MetadataJson metadataJson, JSONObject lrmiJSONObject, String agentType) {
 
+		HashMap<String, Object> retHash = new HashMap();
 		Map<String, Object> rdf = Rdf;
 		String academicDegreeId = null;
 		String affiliationId = null;
@@ -1738,12 +1747,14 @@ public class JsonMapper {
 				rdf.put(agentType + "AcademicDegree", agentAcademicDegree);
 				rdf.put(agentType + "Affiliation", agentAffiliation);
 				rdf = addToRdfArray(rdf, "oerAgent", agent);
+				retHash.put(metadata2, rdf);
+				retHash.put(archive.fedora.Vocabulary.metadataJson, metadataJson);
 			} catch (Exception e) {
 				play.Logger.error(e.getMessage());
 			}
 		}
 
-		return rdf;
+		return retHash;
 	}
 
 }
