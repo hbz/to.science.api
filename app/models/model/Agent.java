@@ -65,7 +65,7 @@ public interface Agent extends ToScienceModel {
 	 * 
 	 * @return null
 	 */
-	public LinkedHashMap<String, String> getModel();
+	// public LinkedHashMap<String, String> getModel();
 
 	/**
 	 * @return the agents Name in the format firstname givenname for persons

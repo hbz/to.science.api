@@ -132,10 +132,11 @@ public abstract class AbstractAgent extends AbstractSimpleObject
 			String key = iterator.next();
 			try {
 				jsonObj.put(key, simpleObject.get(key));
+				jsonObj.put("academicDegree", academicDegree.getJSONObject());
 				jsonObj.put("affiliation", affiliation.getJSONObject());
 			} catch (JSONException e) {
-				// TODO Automatisch generierter Erfassungsblock
-				e.printStackTrace();
+				logger.error(e.getMessage());
+				throw new RuntimeException(e);
 			}
 
 		}
@@ -145,7 +146,13 @@ public abstract class AbstractAgent extends AbstractSimpleObject
 	@Override
 	public String getJson() {
 		JSONObject jsonObj = this.getJSONObject();
-		String json = jsonObj.toString(1);
+		String json;
+		try {
+			json = jsonObj.toString(1);
+		} catch (JSONException e) {
+			logger.error(e.getMessage());
+			throw new RuntimeException(e);
+		}
 		logger.info(json);
 		return json;
 	}
@@ -160,13 +167,18 @@ public abstract class AbstractAgent extends AbstractSimpleObject
 			String ambKey = key;
 			ambKey = key.replace("prefLabel", "name");
 			ambKey = ambKey.replace("academicDegree", "honorificDegree");
-			ambJsonObj.put(ambKey, jsonObj.get(key));
+			try {
+				ambJsonObj.put(ambKey, jsonObj.get(key));
+				ambJsonObj.put("affiliation", affiliation.getAmbJSONObject());
+				String json = ambJsonObj.toString(1);
+				logger.debug("AMB: " + json);
+
+			} catch (JSONException e) {
+				logger.error(e.getMessage());
+				throw new RuntimeException(e);
+			}
 
 		}
-		ambJsonObj.put("affiliation", affiliation.getAmbJSONObject());
-		String json = ambJsonObj.toString(1);
-		logger.debug("AMB: " + json);
-
 		return ambJsonObj;
 	}
 
@@ -174,19 +186,24 @@ public abstract class AbstractAgent extends AbstractSimpleObject
 		JSONObject jsonObj = this.getJSONObject();
 		Iterator<String> iterator = ambJSONObject.keys();
 
-		while (iterator.hasNext()) {
-			String ambKey = iterator.next();
-			String key = ambKey;
-			key = ambKey.replace("name", "prefLabel");
-			key = key.replace("honorificDegree", "academicDegree");
-			jsonObj.put(key, ambJSONObject.get(ambKey));
+		try {
+			while (iterator.hasNext()) {
+				String ambKey = iterator.next();
+				String key = ambKey;
+				key = ambKey.replace("name", "prefLabel");
+				key = key.replace("honorificDegree", "academicDegree");
+				jsonObj.put(key, ambJSONObject.get(ambKey));
 
+			}
+			jsonObj.put("affiliation", affiliation
+					.getFromAmbJSONObject(ambJSONObject.getJSONObject("affiliation")));
+			String json = jsonObj.toString(1);
+			logger.debug("toscience: " + json);
+			return jsonObj;
+		} catch (JSONException e) {
+			logger.error(e.getMessage());
+			throw new RuntimeException(e);
 		}
-		jsonObj.put("affiliation", affiliation
-				.getFromAmbJSONObject(ambJSONObject.getJSONObject("affiliation")));
-		String json = jsonObj.toString(1);
-		logger.debug("toscience: " + json);
-		return jsonObj;
 
 	}
 
