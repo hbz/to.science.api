@@ -28,8 +28,11 @@ import helper.GenericPropertiesLoader;
 public class AcademicDegree extends AbstractSimpleObject
 		implements SimpleObject {
 
+	/**
+	 * the standard constructor for AcademicDegree Sets degree to \"unknown\"
+	 */
 	public AcademicDegree() {
-		simpleObject.put("@id",
+		this.setById(
 				"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown");
 	}
 

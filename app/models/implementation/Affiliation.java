@@ -33,8 +33,7 @@ public class Affiliation extends AbstractSimpleObject implements SimpleObject {
 	}
 
 	// private ArrayList<HashMap<String,Object>> affiliation = new ArrayList<>();
-	private String affiliationList =
-			"ResearchOrganizationsRegistry-de.properties";
+	private String affiliationList = "affiliation-de.properties";
 
 	/**
 	 * <p>

@@ -564,8 +564,8 @@ public class JsonMapper {
 
 		// set different variable names for creators and contributors
 
-		LinkedHashMap<String, String> affilLabelMap = getPrefLabelMap(
-				agentType + "ResearchOrganizationsRegistry-de.properties");
+		LinkedHashMap<String, String> affilLabelMap =
+				getPrefLabelMap("affiliation-de.properties");
 
 		List<String> agentAffiliation = new ArrayList<>();
 		if (rdf.containsKey(agentType + "Affiliation")) {
@@ -632,7 +632,7 @@ public class JsonMapper {
 				academicDegree =
 						(ArrayList<String>) rdf.get(agentType + "AcademicDegree");
 			} catch (Exception e) {
-				play.Logger.warn("Found no ArrayList.");
+				play.Logger.warn("Found no ArrayList. Found HashSet");
 				// academicDegree = castHashSet(
 				// (HashSet<String>) rdf.get(agentType + "AcademicDegree"));
 			}
@@ -683,6 +683,7 @@ public class JsonMapper {
 		// Provide resolving for prefLabels from @id via GenericPropertiesLoader
 		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+		play.Logger.debug("loading properties file " + propertiesFileName);
 		genPropMap.putAll(genProp.loadVocabMap(propertiesFileName));
 
 		if (rdf.containsKey(key)) {
@@ -1362,7 +1363,6 @@ public class JsonMapper {
 			JSONArray arr = null;
 			JSONObject obj = null;
 			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
-			String prefLabel = null;
 
 			if (lrmiJSONObject.has("@context")) {
 				arr = lrmiJSONObject.getJSONArray("@context");
@@ -1427,34 +1427,17 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-			// evtl. benötigt man das Zurücklesen aus der HashMap gar nicht
-			// HashMap<String, Object> lrmiAgentsToLobid = mapLrmiAgentsToLobid(rdf,
-			// metadataJsonImpl, lrmiJSONObject, "creator");
-			// rdf = (Map<String, Object>) lrmiAgentsToLobid.get(metadata2);
-			// metadataJsonImpl = (MetadataJson)
-			// lrmiAgentsToLobid.get(archive.fedora.Vocabulary.metadataJson);
+			play.Logger
+					.debug("metadataJsonImpl ist jetzt:" + metadataJsonImpl.getJson());
 			mapLrmiAgentsToLobid(rdf, metadataJsonImpl, lrmiJSONObject, "creator");
-			// lrmiAgentsToLobid = mapLrmiAgentsToLobid(rdf, metadataJsonImpl,
-			// lrmiJSONObject, "contributor");
-			// rdf = (Map<String, Object>) lrmiAgentsToLobid.get(metadata2);
-			// metadataJsonImpl = (MetadataJson)
-			// lrmiAgentsToLobid.get(archive.fedora.Vocabulary.metadataJson);
 			mapLrmiAgentsToLobid(rdf, metadataJsonImpl, lrmiJSONObject,
 					"contributor");
-			// HashMap<String, Object> lrmiObjectToLobid = mapLrmiObjectToLobid(rdf,
-			// metadataJsonImpl, lrmiJSONObject, "learningResourceType", "medium");
-			// rdf = (Map<String, Object>) lrmiObjectToLobid.get(metadata2);
-			// metadataJsonImpl = (MetadataJson)
-			// lrmiObjectToLobid.get(archive.fedora.Vocabulary.metadataJson);
 			mapLrmiObjectToLobid(rdf, metadataJsonImpl, lrmiJSONObject,
 					"learningResourceType", "medium");
-			// lrmiObjectToLobid = mapLrmiObjectToLobid(rdf, metadataJsonImpl,
-			// lrmiJSONObject, "about", "department");
-			// rdf = (Map<String, Object>) lrmiObjectToLobid.get(metadata2);
-			// metadataJsonImpl = (MetadataJson)
-			// lrmiObjectToLobid.get(archive.fedora.Vocabulary.metadataJson);
 			mapLrmiObjectToLobid(rdf, metadataJsonImpl, lrmiJSONObject, "about",
 					"department");
+			play.Logger
+					.debug("metadataJsonImpl ist jetzt:" + metadataJsonImpl.getJson());
 
 			// template for Mapping of Array
 			if (lrmiJSONObject.has("description")) {
@@ -1568,7 +1551,7 @@ public class JsonMapper {
 	 * @return an Iterator representing the JSONObject
 	 */
 	public Iterator getLobidObjectIterator(Object iObj) {
-		Iterator lIterator = null;
+		Iterator<Map<String, Object>> lIterator = null;
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =
 					(ArrayList<Map<String, Object>>) iObj;
@@ -1589,6 +1572,7 @@ public class JsonMapper {
 			String properties) {
 		LinkedHashMap<String, String> map = new LinkedHashMap<>();
 		GenericPropertiesLoader GenProp = new GenericPropertiesLoader();
+		play.Logger.debug("loading properties file " + properties);
 		map.putAll(GenProp.loadVocabMap(properties));
 		return map;
 	}
@@ -1596,8 +1580,8 @@ public class JsonMapper {
 	/**
 	 * Cast a HashSet into ArrayList.
 	 * 
-	 * @param set
-	 * @return
+	 * @param set theh HashSet
+	 * @return the ArrayList
 	 */
 	public ArrayList<String> castHashSet(HashSet<String> set) {
 		ArrayList<String> list = new ArrayList<>();
@@ -1610,31 +1594,9 @@ public class JsonMapper {
 	}
 
 	/**
-	 * Add an List to existing rdfArray, or create rdfArray if not already exists
-	 * 
-	 * @param rdf the lobid2 metadata in format rdf
-	 * @param key name of the Array in the rdf
-	 * @param valueList List with Values to be added
-	 * @return the rdf metadata (output)
-	 */
-	public Map<String, Object> addToRdfArray(Map<String, Object> rdf, String key,
-			ArrayList<String> valueList) {
-		if (rdf.containsKey(key)) {
-			ArrayList<String> rdfArray = (ArrayList<String>) rdf.get(key);
-			for (int i = 0; i < valueList.size(); i++) {
-				rdfArray.add(valueList.get(i));
-				play.Logger.debug("Added to list " + key + " value " + valueList.get(i)
-						+ " on position " + i);
-			}
-			rdfArray.addAll(valueList);
-		} else {
-			rdf.put(key, valueList);
-		}
-		return rdf;
-	}
-
-	/**
-	 * A method for mapping metadata objects from lrmi to lobid (Kayhan)
+	 * A method for mapping metadata objects from lrmi to lobid (Kayhan). It is
+	 * assumed that the lrmi object is fully-fledged, consisting of a JSON array
+	 * of JSON objects.
 	 * 
 	 * @author Kayhan
 	 * @author Ingolf
@@ -1644,10 +1606,8 @@ public class JsonMapper {
 	 * @param lrmiJSONObject the LRMI data as JSONObject
 	 * @param lrmiObject the name of the metadata field in the LRMI/amb vocabulary
 	 * @param lobidObject the name of the metadata field in the lobid2 vocabulary
-	 * @return the lobid2 metadata (output) in the various data formats, collected
-	 *         in a HashMap
 	 */
-	public HashMap<String, Object> mapLrmiObjectToLobid(Map<String, Object> rdf,
+	public void mapLrmiObjectToLobid(Map<String, Object> rdf,
 			MetadataJson metadataJsonImpl, JSONObject lrmiJSONObject,
 			String lrmiObject, String lobidObject) {
 
@@ -1659,34 +1619,36 @@ public class JsonMapper {
 				// Provide resolving for prefLabels from id via GenericPropertiesLoader
 				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
+				play.Logger
+						.debug("loading properties file " + lobidObject + "-de.properties");
 				genPropMap.putAll(genProp.loadVocabMap(lobidObject + "-de.properties"));
 
 				HashMap<String, Object> lrmiSimpleArray =
 						mapLrmiSimpleArrayToLobid(arr, genPropMap);
 				rdf.put(lobidObject, lrmiSimpleArray.get(metadata2));
-				metadataJsonImpl.put(lobidObject, lrmiSimpleArray.get(metadataJson));
+				SimpleArrayImpl simpleArray =
+						(SimpleArrayImpl) lrmiSimpleArray.get(metadataJson);
+				play.Logger.debug("simpleArray.getJson()=" + simpleArray.getJson());
+				metadataJsonImpl.put(lobidObject, simpleArray.getJSONArray());
 			} catch (Exception e) {
 				play.Logger.error(e.getMessage());
 				throw new RuntimeException(e);
 			}
 		}
 
-		HashMap<String, Object> retHash = new HashMap<>();
-		retHash.put(metadata2, rdf);
-		retHash.put(metadataJson, metadataJsonImpl);
-		return retHash;
+		return;
 	}
 
 	/**
-	 * Elementares Mapping eines einfachen LRMI-Array<s nach lobid.
+	 * Elementares Mapping eines einfachen LRMI-Arrays nach lobid.
 	 * 
 	 * @author kuss
 	 * @date 2022-10-05
 	 * @param arr das LRMI-Objekt als JSONArray
 	 * @param genPropMap die Properties-Datei für dieses Datenelement als
 	 *          LinkedHashMap
-	 * @return die lobid2-Objekte für die verschiedenen Datenstromtypen in einer
-	 *         HashMap
+	 * @return die lobid2-Objekte für dieses Datenelements in den verschiedenen
+	 *         Datenstromfromaten in einer HashMap
 	 */
 	public HashMap<String, Object> mapLrmiSimpleArrayToLobid(JSONArray arr,
 			LinkedHashMap<String, String> genPropMap) {
@@ -1697,6 +1659,7 @@ public class JsonMapper {
 		JSONObject obj = null;
 
 		for (int i = 0; i < arr.length(); i++) {
+			play.Logger.debug("Bearbeite LrmiSimpleArray, Index=" + i);
 			try {
 				obj = arr.getJSONObject(i);
 			} catch (JSONException e) {
@@ -1709,8 +1672,13 @@ public class JsonMapper {
 					(Map<String, Object>) lrmiSimpleObject.get(metadata2);
 			SimpleObjectImpl simpleObject =
 					(SimpleObjectImpl) lrmiSimpleObject.get(metadataJson);
+			play.Logger.debug(
+					"Adding simpleObject " + simpleObject.getJson() + " to simpleArray.");
 			list.add(map);
+			play.Logger.debug("list now has " + simpleArray.size() + " elements.");
 			simpleArray.addItem(simpleObject);
+			play.Logger.debug("list now has " + simpleArray.size() + " elements.");
+			play.Logger.debug("simpleArray is now " + simpleArray.getJson());
 		}
 
 		retHash.put(archive.fedora.Vocabulary.metadataJson, simpleArray);
@@ -1728,14 +1696,11 @@ public class JsonMapper {
 	 * @param lrmiJSONObject die LMRI-Daten, die gemappt werden sollen, als
 	 *          JSONObject
 	 * @param agentType welcher Autorentyp es ist: "creator", "contributor"
-	 * @return die lobid2-Zielobjekte für die verschiedenen Datenstromformate in
-	 *         einer HashMap
 	 */
-	public HashMap<String, Object> mapLrmiAgentsToLobid(Map<String, Object> rdf,
+	public void mapLrmiAgentsToLobid(Map<String, Object> rdf,
 			MetadataJson metadataJsonImpl, JSONObject lrmiJSONObject,
 			String agentType) {
 
-		HashMap<String, Object> retHash = new HashMap<>();
 		String academicDegreeId = null;
 		String affiliationId = null;
 		if (lrmiJSONObject.has(agentType)) {
@@ -1755,7 +1720,7 @@ public class JsonMapper {
 					StringBuffer agentStr = new StringBuffer();
 					agentStr.append(agentType + " " + Integer.toString(i + 1) + ": ");
 
-					// do the mapping to lobi2 agent
+					// do the mapping to lobid2 agent
 					HashMap<String, Object> lrmiAgentToLobid = mapLrmiAgentToLobid(obj);
 					Map<String, Object> agentMap =
 							(Map<String, Object>) lrmiAgentToLobid.get(metadata2);
@@ -1774,8 +1739,8 @@ public class JsonMapper {
 						agentStr.append(academicDegreeId.replace(
 								"https://d-nb.info/standards/elementset/gnd#academicDegree/",
 								""));
-						agentStr.append(" " + obj.getString(name));
 					}
+					agentStr.append(" " + obj.getString(name));
 					if (obj.has("affiliation")) {
 						// we need to create Affiliation FlatList required by
 						// to.science.forms
@@ -1795,15 +1760,14 @@ public class JsonMapper {
 				rdf.put(agentType + "Affiliation", agentAffiliation);
 				// add list to the toscience.json format
 				metadataJsonImpl.put(agentType, agentList.getJSONArray());
-				addToRdfArray(rdf, "oerAgent", oerAgent);
+				rdf.put("oerAgent", oerAgent);
 			} catch (Exception e) {
 				play.Logger.error(e.getMessage());
+				throw new RuntimeException(e);
 			}
 		}
 
-		retHash.put(metadata2, rdf);
-		retHash.put(archive.fedora.Vocabulary.metadataJson, metadataJsonImpl);
-		return retHash;
+		return;
 	}
 
 	/**
@@ -1814,8 +1778,8 @@ public class JsonMapper {
 	 * @date 2022-10-05
 	 * @param obj das LRMI-Objekt als JSONObject
 	 * @param genPropMap die Properties-Datei als LinkedHashMap
-	 * @return das lobid2-Objekte für die verschiedenen Datenstromtypen in einer
-	 *         HashMap
+	 * @return die lobid2-Objekte für dieses Datenelement in den verschiedenen
+	 *         Datenstromformaten in einer HashMap
 	 */
 	public HashMap<String, Object> mapLrmiSimpleObjectToLobid(JSONObject obj,
 			LinkedHashMap<String, String> genPropMap) {
@@ -1825,6 +1789,7 @@ public class JsonMapper {
 		// verify id
 		if (obj.has("id")) {
 			try {
+				play.Logger.debug("LrmiSimpleObject id=" + obj.getString("id"));
 				map.put("@id", obj.getString("id"));
 				simpleObject.setId(obj.getString("id"));
 				if (genPropMap != null) {
@@ -1839,6 +1804,7 @@ public class JsonMapper {
 			// Dieser Fall sollte nicht vorkommen
 			play.Logger.warn("Achtung! LRMI-Objekt hat keine ID !");
 		}
+		play.Logger.debug("Created simpleObject " + simpleObject.getJson());
 		retHash.put(archive.fedora.Vocabulary.metadataJson, simpleObject);
 		retHash.put(metadata2, map);
 		return retHash;
@@ -1853,27 +1819,39 @@ public class JsonMapper {
 	 * @author kuss
 	 * @date 2022-10-05
 	 * @param obj das LRMI-Objekt des Agent als JSONObject
-	 * @return das lobid2-Objekte des Agent für die verschiedenen Datenstromtypen
-	 *         in einer HashMap
+	 * @return daielobid2-Objekte des Agent in den verschiedenen
+	 *         Datenstromformaten in einer HashMap
 	 */
 	public HashMap<String, Object> mapLrmiAgentToLobid(JSONObject obj) {
 
-		// first do the elementary mappings: id
-		HashMap<String, Object> retHash = mapLrmiSimpleObjectToLobid(obj, null);
-		AgentImpl agent =
-				(AgentImpl) retHash.get(archive.fedora.Vocabulary.metadataJson);
-		Map<String, Object> agentMap = (Map<String, Object>) retHash.get(metadata2);
-		retHash = new HashMap<>();
+		HashMap<String, Object> retHash = new HashMap<>();
+		AbstractAgent agent = new AgentImpl();
+		Map<String, Object> agentMap = new LinkedHashMap<>();
+
 		try {
+			// first do the elementary mappings: id, prefLabel
+			if (obj.has("id")) {
+				agentMap.put("@id", obj.getString("id"));
+				agentMap.put("prefLabel", obj.getString(name));
+				agent.setId(obj.getString("id"));
+				agent.setPrefLabel(obj.getString(name));
+			} else {
+				// Dieser Fall sollte nicht vorkommen
+				play.Logger.warn("Achtung! LRMI-Objekt \"Agent\" hat keine ID !");
+			}
+
 			// now do some more stuff: add agent name, affiliation, academicDegree
-			agent.setPrefLabel(obj.getString(name));
-			agentMap.put("prefLabel", obj.getString(name));
 			if (obj.has("honoricPrefix")) {
 				String honoricPrefix = obj.getString("honoricPrefix");
 				String academicDegreeId = new String(
 						"https://d-nb.info/standards/elementset/gnd#academicDegree/"
 								+ honoricPrefix);
-				agentMap.put("academicDegree", academicDegreeId);
+
+				Map<String, Object> academicDegreeMap = new LinkedHashMap<>();
+				academicDegreeMap.put("@id", academicDegreeId);
+				academicDegreeMap.put("prefLabel", honoricPrefix);
+				agentMap.put("academicDegree", academicDegreeMap);
+
 				AcademicDegree academicDegree = new AcademicDegree();
 				academicDegree.setById(academicDegreeId);
 				agent.setAcademicDegree(academicDegree);
@@ -1889,6 +1867,7 @@ public class JsonMapper {
 				affiliationMap.put("@id", affiliationId);
 				affiliationMap.put("type", affiliationType);
 				agentMap.put("affiliation", affiliationMap);
+
 				Affiliation affiliation = new Affiliation();
 				affiliation.setById(affiliationId);
 				affiliation.setType(affiliationType);

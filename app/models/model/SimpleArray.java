@@ -12,12 +12,12 @@ public interface SimpleArray {
 	/**
 	 * add new item to Array
 	 */
-	public void addItem(Object item);
+	public void addItem(SimpleObject item);
 
 	/**
 	 * @return get item as String
 	 */
-	public Object getItem(int i);
+	public SimpleObject getItem(int i);
 
 	/**
 	 * @return

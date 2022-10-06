@@ -30,16 +30,15 @@ public abstract class AbstractSimpleArray implements SimpleArray {
 
 	final static Logger logger =
 			LoggerFactory.getLogger(AbstractSimpleArray.class);
-	public ArrayList<Object> list = new ArrayList<Object>();
+	public ArrayList<SimpleObject> list = new ArrayList<SimpleObject>();
 
 	@Override
-	public void addItem(Object item) {
+	public void addItem(SimpleObject item) {
 		list.add(item);
-
 	}
 
 	@Override
-	public Object getItem(int i) {
+	public SimpleObject getItem(int i) {
 		return list.get(i);
 	}
 
@@ -52,7 +51,7 @@ public abstract class AbstractSimpleArray implements SimpleArray {
 	 * @return
 	 */
 	public Iterator getIterator() {
-		Iterator<Object> iterator = list.iterator();
+		Iterator<SimpleObject> iterator = list.iterator();
 		return iterator;
 	}
 
@@ -66,17 +65,21 @@ public abstract class AbstractSimpleArray implements SimpleArray {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
-		logger.info(json);
+		play.Logger.info("getJson=" + json);
 		return json;
 	}
 
 	public JSONArray getJSONArray() {
+		play.Logger.debug("Start getJSONArray");
 		JSONArray jsonArr = new JSONArray();
 
-		Iterator<Object> iterator = this.getIterator();
+		Iterator<SimpleObject> iterator = this.getIterator();
 		while (iterator.hasNext()) {
-			Object obj = iterator.next();
-			jsonArr.put(obj);
+			play.Logger.debug("Reading next list element");
+			SimpleObject obj = iterator.next();
+			play.Logger.debug("Found object of class " + obj.getClass());
+			play.Logger.debug("Objekt.toString=" + obj.toString());
+			jsonArr.put(obj.getJSONObject());
 		}
 		return jsonArr;
 	}
