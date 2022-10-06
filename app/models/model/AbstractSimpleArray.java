@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import models.implementation.*;
+
 /**
  * <p>
  * An abstract model for different implementations of toscience ArrayList of
@@ -30,15 +32,22 @@ public abstract class AbstractSimpleArray implements SimpleArray {
 
 	final static Logger logger =
 			LoggerFactory.getLogger(AbstractSimpleArray.class);
-	public ArrayList<SimpleObject> list = new ArrayList<SimpleObject>();
+	public ArrayList<SimpleObject> simpleObjectList =
+			new ArrayList<SimpleObject>();
+	public ArrayList<SimpleObjectImpl> list = new ArrayList<SimpleObjectImpl>();
 
-	@Override
 	public void addItem(SimpleObject item) {
+		simpleObjectList.add(item);
+	}
+
+	public void addItem(SimpleObjectImpl item) {
+		play.Logger.debug("Adding Item to AbstractSimpleArray");
+		play.Logger.debug("Adding Item " + item.getJson());
 		list.add(item);
 	}
 
 	@Override
-	public SimpleObject getItem(int i) {
+	public SimpleObjectImpl getItem(int i) {
 		return list.get(i);
 	}
 
@@ -51,7 +60,7 @@ public abstract class AbstractSimpleArray implements SimpleArray {
 	 * @return
 	 */
 	public Iterator getIterator() {
-		Iterator<SimpleObject> iterator = list.iterator();
+		Iterator<SimpleObjectImpl> iterator = list.iterator();
 		return iterator;
 	}
 
@@ -73,12 +82,11 @@ public abstract class AbstractSimpleArray implements SimpleArray {
 		play.Logger.debug("Start getJSONArray");
 		JSONArray jsonArr = new JSONArray();
 
-		Iterator<SimpleObject> iterator = this.getIterator();
+		Iterator<SimpleObjectImpl> iterator = this.getIterator();
 		while (iterator.hasNext()) {
 			play.Logger.debug("Reading next list element");
-			SimpleObject obj = iterator.next();
+			SimpleObjectImpl obj = iterator.next();
 			play.Logger.debug("Found object of class " + obj.getClass());
-			play.Logger.debug("Objekt.toString=" + obj.toString());
 			jsonArr.put(obj.getJSONObject());
 		}
 		return jsonArr;
@@ -96,9 +104,9 @@ public abstract class AbstractSimpleArray implements SimpleArray {
 		JSONArray jsonArr = this.getJSONArray();
 
 		for (int i = 0; i < jsonArr.length(); i++) {
-			Object obj;
+			JSONObject obj;
 			try {
-				obj = jsonArr.getString(i);
+				obj = (JSONObject) jsonArr.get(i);
 			} catch (JSONException e) {
 				logger.error(e.getMessage());
 				throw new RuntimeException(e);

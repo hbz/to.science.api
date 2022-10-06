@@ -683,7 +683,6 @@ public class JsonMapper {
 		// Provide resolving for prefLabels from @id via GenericPropertiesLoader
 		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-		play.Logger.debug("loading properties file " + propertiesFileName);
 		genPropMap.putAll(genProp.loadVocabMap(propertiesFileName));
 
 		if (rdf.containsKey(key)) {
@@ -1676,7 +1675,7 @@ public class JsonMapper {
 					"Adding simpleObject " + simpleObject.getJson() + " to simpleArray.");
 			list.add(map);
 			play.Logger.debug("list now has " + simpleArray.size() + " elements.");
-			simpleArray.addItem(simpleObject);
+			simpleArray.addItem((SimpleObjectImpl) simpleObject);
 			play.Logger.debug("list now has " + simpleArray.size() + " elements.");
 			play.Logger.debug("simpleArray is now " + simpleArray.getJson());
 		}

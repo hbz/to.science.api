@@ -23,8 +23,7 @@ public abstract class AbstractAgentList extends AbstractSimpleArray {
 		list.add(agent);
 	}
 
-	@Override
-	public AbstractAgent getItem(int i) {
+	public AbstractAgent getAgentItem(int i) {
 		return list.get(i);
 	}
 
