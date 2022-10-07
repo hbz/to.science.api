@@ -13,7 +13,7 @@ import java.util.Iterator;
 
 // import de.hbz.lobid.helper.JsonConverter;
 
-public class ObjectServiceImpl implements ObjectService{
+public class JsonObjectServiceImpl implements JsonObjectService{
 	
 	/**
 	 * method converts a LearningResourceType-Object to json-object
@@ -45,7 +45,7 @@ public class ObjectServiceImpl implements ObjectService{
 		JSONObject JsonAboutBody = new JSONObject();
 		JSONObject retJsonAbout = new JSONObject();
 		
-		JsonAboutBody.put("@id", abt.getAbtID());
+		JsonAboutBody.put("@id", abt.getiD());
 		JsonAboutBody.put("prefLabel", abt.getPrefLabel());
 		// About in Json = department
 		retJsonAbout.put("department", JsonAboutBody);
@@ -77,9 +77,9 @@ public class ObjectServiceImpl implements ObjectService{
 		while (itr.hasNext()) {
 			map = (Map<String, Object>) itr.next();
 			About abt = new About();
-			abt.setAbtID(String.valueOf(map.get("@id"))); // id ist ein Link
+			abt.setiD(String.valueOf(map.get("@id"))); // id ist ein Link
 			// abt.setPrefLabel(genPropMap.get(map.get("@id"))); // PrefLabel z.B.Chemie
-			abt.setPrefLabel(genPropMap.get(abt.getAbtID()));
+			abt.setPrefLabel(genPropMap.get(abt.getiD()));
 			
 			retHash.put("about", abt);
 		}

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
 
-public interface ObjectService{
+public interface JsonObjectService{
 	
 	public JSONObject getJSONObject(LearningResourceType lrt);
 	
