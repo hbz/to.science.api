@@ -10,8 +10,10 @@ public interface JsonObjectService{
 	
 	public JSONObject getJSONObject(About abt);
 	
-	public HashMap<String, Object> mapRdfToJson(Map rdf);
+	public HashMap<String, Object> mapRdfToJson(Map<String, Object> rdf);
 	
 	public HashMap<String, Object> mapRdfToJson(Map rdf, String lrmiObjName);
+	
+	//public JSONObject mapRdfToJson(Map<String, Object> rdf);
 	
 }

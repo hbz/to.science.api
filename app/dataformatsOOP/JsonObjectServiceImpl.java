@@ -60,39 +60,57 @@ public class JsonObjectServiceImpl implements JsonObjectService{
 	 * @param rdf map is given in the gui (forms)
 	 * @return a hashMap with objects of About
 	 */
-	public HashMap<String, Object> mapRdfToJson(Map rdf) {
+	public HashMap<String, Object> mapRdfToJson(Map<String, Object> rdf) {
 		
-		HashMap retHash = null;
 		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-		genPropMap.putAll(genProp.loadVocabMap("department-de.properties"));
-		
 		LRMIMapper lrmiMapper = new LRMIMapper();
+		About abt = null;
+		HashMap retHash = null;
 		Map<String, Object> map = null;
 		
-		LearningResourceType lrt = new LearningResourceType();
-		Iterator itr = lrmiMapper.getLobid2Iterator(rdf.get("about"));
+		genPropMap.putAll(new GenericPropertiesLoader().loadVocabMap("department-de.properties"));
+		Iterator itr = lrmiMapper.getLobid2Iterator(rdf.get("department"));
 		
-		// erstmal nur fuer about
 		while (itr.hasNext()) {
 			map = (Map<String, Object>) itr.next();
-			About abt = new About();
+			abt = new About();
 			abt.setiD(String.valueOf(map.get("@id"))); // id ist ein Link
 			// abt.setPrefLabel(genPropMap.get(map.get("@id"))); // PrefLabel z.B.Chemie
 			abt.setPrefLabel(genPropMap.get(abt.getiD()));
+			//genPropMap.putAll(new GenericPropertiesLoader().loadVocabMap(abt.getPropertiesFile()))
+			retHash.put("about", abt); // department ??
 			
-			retHash.put("about", abt);
+			// ein About-Json hier zurueckzugeben ist nicht noetig, denn es wurde JSONObject getJSONObject(About abt) implementiert 
 		}
 		
 		return retHash;
-		
 	}
 	
 	public HashMap<String, Object> mapRdfToJson(Map rdf, String lrmiObjName) {
 		
-		JSONObject rdfAbout, rdfLearningResourceType = null;
+		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
+		LRMIMapper lrmiMapper = new LRMIMapper();
+		About abt = null;
+		HashMap retHash = null;
+		Map<String, Object> map = null;
 		
-		return null;
+		genPropMap.putAll(new GenericPropertiesLoader().loadVocabMap("department-de.properties"));
+		Iterator itr = lrmiMapper.getLobid2Iterator(rdf.get("about"));
+		
+		while (itr.hasNext()) {
+			map = (Map<String, Object>) itr.next();
+			abt = new About();
+			abt.setiD(String.valueOf(map.get("@id"))); // id ist ein Link
+			// abt.setPrefLabel(genPropMap.get(map.get("@id"))); // PrefLabel z.B.Chemie
+			abt.setPrefLabel(genPropMap.get(abt.getiD()));
+			//genPropMap.putAll(new GenericPropertiesLoader().loadVocabMap(abt.getPropertiesFile()))
+			
+			retHash.put("about", abt); // department ??
+			
+		}
+		
+		return retHash;
+		
 	}
 	
 }

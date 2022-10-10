@@ -7,6 +7,7 @@ abstract class AbstractJsonObject{
 	private String type = "Concept"; // bei allen Unterklassen gleich 
 	private String prefLabel; // variabel
 	private String iD; // variabel
+	private String propertiesFile;
 	
 	public String getJsonArrayName() {
 		return JsonArrayName;
@@ -42,6 +43,14 @@ abstract class AbstractJsonObject{
 	
 	public String getType() {
 		return type;
+	}
+	
+	public String getPropertiesFile() {
+		return propertiesFile;
+	}
+	
+	public void setPropertiesFile(String propertiesFile) {
+		this.propertiesFile = propertiesFile;
 	}
 	
 }
