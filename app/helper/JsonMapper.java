@@ -19,7 +19,6 @@ package helper;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -39,16 +38,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
-
 import actions.Read;
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
@@ -155,6 +151,7 @@ public class JsonMapper {
 	String toscience_id = null;
 	EtikettMakerInterface profile = Globals.profile;
 	JsonConverter jsonConverter = null;
+	LobidPostProcessor lobidPP = new LobidPostProcessor();
 
 	/**
 	 * Ein Konstruktor für diese Klasse
@@ -314,7 +311,7 @@ public class JsonMapper {
 			rdf.put(hasData, hasDataMap);
 		}
 		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
-		postprocessing(rdf);
+		lobidPP.postprocessing(rdf);
 		rdf.remove("note");
 		return rdf;
 	}
@@ -397,121 +394,14 @@ public class JsonMapper {
 			}
 			rdf.put("hasData", hasDataMap);
 		}
-		postprocessing(rdf);
+		lobidPP.postprocessing(rdf);
 		return rdf;
 	}
 
 	/**
 	 * @param rdf
 	 */
-	private void postprocessing(Map<String, Object> rdf) {
-		try {
-			addCatalogLink(rdf);
-			if ("file".equals(rdf.get("contentType"))) {
-				rdf.put(rdftype, Arrays.asList(new String[] { "File" }));
-			}
-
-			Collection<Map<String, Object>> t =
-					getType(new ObjectMapper().valueToTree(rdf));
-			if (t != null && t.size() != 0)
-				rdf.put(rdftype, t);
-
-			sortCreatorAndContributors(rdf);
-			postProcessSubjectName(rdf);
-			postProcess(rdf, "subject");
-			postProcess(rdf, "agrovoc");
-			postProcess(rdf, "contributor");
-			postProcess(rdf, "redaktor");
-			postProcess(rdf, "actor");
-			postProcess(rdf, "producer");
-			postProcess(rdf, "interviewer");
-			postProcess(rdf, "collaborator");
-			postProcess(rdf, "cartographer");
-			postProcess(rdf, "director");
-			postProcess(rdf, "cinematographer");
-			postProcess(rdf, "photographer");
-			postProcess(rdf, "engraver");
-			postProcess(rdf, "contributor_");
-			postProcess(rdf, "dedicatee");
-			postProcess(rdf, "honoree");
-			postProcess(rdf, "singer");
-			postProcess(rdf, "professionalGroup");
-			postProcess(rdf, "editor");
-			postProcess(rdf, "publisher");
-			postProcess(rdf, "recordingLocation");
-			postProcess(rdf, "recordingCoords");
-			postProcess(rdf, "collectionOne");
-			postProcess(rdf, "medium");
-			postProcess(rdf, "predecessor");
-			postProcess(rdf, "successor");
-			postProcess(rdf, "primaryForm");
-			postProcess(rdf, "natureOfContent");
-			postProcess(rdf, "institution");
-			postProcessContribution(rdf);
-			postProcess(rdf, "creator");
-			postProcessLinkFields("additionalMaterial", rdf);
-			postProcessLinkFields("publisherVersion", rdf);
-			postProcessLinkFields("fulltextVersion", rdf);
-			createJoinedFunding(rdf);
-			applyAffiliation("creator", rdf);
-			applyAffiliation("contributor", rdf);
-			applyAcademicDegree("creator", rdf);
-			applyAcademicDegree("contributor", rdf);
-
-			postProcessWithGenPropLoader("department", "department-de.properties",
-					rdf);
-			postProcessWithGenPropLoader("funder", "funder-de.properties", rdf);
-
-		} catch (Exception e) {
-			play.Logger.debug("", e);
-		}
-	}
-
-	/**
-	 * @param key
-	 * @param rdf
-	 */
-	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
-		List<Map<String, String>> all = (List<Map<String, String>>) rdf.get(key);
-		if (all == null)
-			return;
-		for (Map<String, String> m : all) {
-			m.put(PREF_LABEL, m.get(ID2));
-		}
-
-	}
-
-	/**
-	 * @param rdf
-	 */
-	private static void postProcessSubjectName(Map<String, Object> rdf) {
-		List<Map<String, Object>> newSubjects = new ArrayList<>();
-		Set<String> subjects = (Set<String>) rdf.get("subjectName");
-		if (subjects == null || subjects.isEmpty()) {
-			return;
-		}
-		subjects.forEach((subject) -> {
-			String id = Globals.protocol + Globals.server + "/adhoc/uri/"
-					+ helper.Base64UrlCoder.encode(subject);
-			Map<String, Object> subjectMap = new HashMap<>();
-			subjectMap.put(PREF_LABEL, subject);
-			subjectMap.put(ID2, id);
-			newSubjects.add(subjectMap);
-		});
-		rdf.remove("subjectName");
-		List<Map<String, Object>> oldSubjects =
-				(List<Map<String, Object>>) rdf.get("subject");
-		if (oldSubjects == null) {
-			oldSubjects = new ArrayList<>();
-		}
-		oldSubjects.addAll(newSubjects);
-		rdf.put("subject", oldSubjects);
-	}
-
-	/**
-	 * @param rdf
-	 */
-	private static void createJoinedFunding(Map<String, Object> rdf) {
+	static void createJoinedFunding(Map<String, Object> rdf) {
 
 		List<Map<String, Object>> fundingId =
 				(List<Map<String, Object>>) rdf.get("fundingId");
@@ -560,7 +450,7 @@ public class JsonMapper {
 	 * 
 	 * @param rdf
 	 */
-	public void applyAffiliation(String agentType, Map<String, Object> rdf) {
+	static void applyAffiliation(String agentType, Map<String, Object> rdf) {
 
 		// set different variable names for creators and contributors
 
@@ -624,7 +514,7 @@ public class JsonMapper {
 	 * 
 	 * @param rdf a Map
 	 */
-	public void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
+	static void applyAcademicDegree(String agentType, Map<String, Object> rdf) {
 
 		ArrayList<String> academicDegree = new ArrayList<>();
 		if (rdf.get(agentType + "AcademicDegree") != null) {
@@ -670,35 +560,6 @@ public class JsonMapper {
 		}
 	}
 
-	/**
-	 * @param key
-	 * @param propertiesFileName
-	 * @param rdf
-	 */
-	private void postProcessWithGenPropLoader(String key,
-			String propertiesFileName, Map<String, Object> rdf) {
-
-		List<Map<String, Object>> keyList = new ArrayList<>();
-
-		// Provide resolving for prefLabels from @id via GenericPropertiesLoader
-		LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
-		GenericPropertiesLoader genProp = new GenericPropertiesLoader();
-		genPropMap.putAll(genProp.loadVocabMap(propertiesFileName));
-
-		if (rdf.containsKey(key)) {
-			Object obj = rdf.get(key);
-			Iterator oIt = getLobidObjectIterator(obj);
-			while (oIt.hasNext()) {
-				Map<String, Object> map = (Map<String, Object>) oIt.next();
-				map.put("prefLabel", genPropMap.get(map.get("@id")));
-				keyList.add(map);
-			}
-			rdf.put(key, keyList);
-
-		}
-
-	}
-
 	private void addParts(Map<String, Object> rdf) {
 		Read read = new Read();
 		List<Map<String, Object>> parts =
@@ -718,60 +579,7 @@ public class JsonMapper {
 		}
 	}
 
-	private void postProcessContribution(Map<String, Object> rdf) {
-		try {
-			List<Map<String, Object>> creator = new ArrayList<>();
-			Collection<Map<String, Object>> contributions =
-					(Collection<Map<String, Object>>) rdf.get("contribution");
-			if (contributions == null)
-				return;
-			for (Map<String, Object> contribution : contributions) {
-				Map<String, Object> agent =
-						((Collection<Map<String, Object>>) contribution.get("agent"))
-								.iterator().next();
-				if (agent != null) {
-					String prefLabel = findLabel(agent);
-					agent.put(PREF_LABEL, prefLabel);
-					String id = null;
-					if (agent.containsKey(ID2)) {
-						id = agent.get(ID2).toString();
-					}
-					if (id == null) {
-						id = Globals.protocol + Globals.server + "/adhoc/author/"
-								+ prefLabel;
-					}
-					Map<String, Object> cmap = new HashMap<>();
-					cmap.put(PREF_LABEL, prefLabel);
-					cmap.put(ID2, id);
-					cmap.put("academicDegree", "Privatdozent");
-					creator.add(cmap);
-				}
-			}
-			rdf.put("creator", creator);
-		} catch (Exception e) {
-			play.Logger.debug("Problem processing key contribution.agent", e);
-			// play.Logger.debug("", e);
-		}
-	}
-
-	private static void postProcess(Map<String, Object> m, String field) {
-		try {
-			Collection<Map<String, Object>> fields =
-					(Collection<Map<String, Object>>) m.get(field);
-			if (fields != null) {
-				play.Logger.trace("Found roles: " + fields);
-				for (Map<String, Object> r : fields) {
-					String prefLabel = findLabel(r);
-					play.Logger.trace("Found label " + prefLabel + " for role " + r);
-					r.put(PREF_LABEL, prefLabel);
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.debug("Problem processing key " + field, e);
-		}
-	}
-
-	private static void addCatalogLink(Map<String, Object> rdf) {
+	static void addCatalogLink(Map<String, Object> rdf) {
 		try {
 			String hbzId = ((Collection<String>) rdf.get("hbzId")).iterator().next();
 			Collection<Map<String, Object>> catalogLink = new ArrayList<>();
@@ -785,7 +593,7 @@ public class JsonMapper {
 		}
 	}
 
-	private void sortCreatorAndContributors(Map<String, Object> rdf) {
+	static void sortCreatorAndContributors(Map<String, Object> rdf) {
 		try {
 			Collection<Map<String, Object>> cr = getSortedListOfCreators(rdf);
 			if (!cr.isEmpty()) {
@@ -853,7 +661,7 @@ public class JsonMapper {
 		}
 	}
 
-	Collection<Map<String, Object>> getSortedListOfCreators(
+	static Collection<Map<String, Object>> getSortedListOfCreators(
 			Map<String, Object> nodeAsMap) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 		Collection<String> carray =
@@ -872,7 +680,7 @@ public class JsonMapper {
 		return result;
 	}
 
-	Collection<Map<String, Object>> getSortedListOfContributors(
+	static Collection<Map<String, Object>> getSortedListOfContributors(
 			Map<String, Object> nodeAsMap) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 		Collection<String> carray =
@@ -928,7 +736,7 @@ public class JsonMapper {
 		return new HashMap<>();
 	}
 
-	private static String findLabel(Map<String, Object> map) {
+	static String findLabel(Map<String, Object> map) {
 
 		if (map.containsKey("preferredNameForTheWork"))
 			return (String) map.get("preferredNameForTheWork");
@@ -1098,7 +906,7 @@ public class JsonMapper {
 			ld2Rdf.put("issued", issued);
 		}
 		ld2Rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
-		postprocessing(ld2Rdf);
+		lobidPP.postprocessing(ld2Rdf);
 		play.Logger.debug("Exiting JsonMapper.getLd2()");
 		return ld2Rdf;
 	}
@@ -1129,7 +937,7 @@ public class JsonMapper {
 	 * @param rdf
 	 * @return
 	 */
-	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
+	static Collection<Map<String, Object>> getType(final JsonNode rdf) {
 		Collection<Map<String, Object>> result = new ArrayList<>();
 
 		// Special case medium is video - override type
@@ -1426,8 +1234,6 @@ public class JsonMapper {
 				rdf.put("language", inLangList);
 			}
 
-			play.Logger
-					.debug("metadataJsonImpl ist jetzt:" + metadataJsonImpl.getJson());
 			mapLrmiAgentsToLobid(rdf, metadataJsonImpl, lrmiJSONObject, "creator");
 			mapLrmiAgentsToLobid(rdf, metadataJsonImpl, lrmiJSONObject,
 					"contributor");
@@ -1435,8 +1241,6 @@ public class JsonMapper {
 					"learningResourceType", "medium");
 			mapLrmiObjectToLobid(rdf, metadataJsonImpl, lrmiJSONObject, "about",
 					"department");
-			play.Logger
-					.debug("metadataJsonImpl ist jetzt:" + metadataJsonImpl.getJson());
 
 			// template for Mapping of Array
 			if (lrmiJSONObject.has("description")) {
