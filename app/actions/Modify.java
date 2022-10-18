@@ -73,7 +73,6 @@ import models.DublinCoreData;
 import models.Globals;
 import models.Node;
 import models.ToScienceObject;
-import models.implementation.MetadataJson;
 
 /**
  * @author Jan Schnasse
@@ -302,7 +301,7 @@ public class Modify extends RegalAction {
 
 	/**
 	 * The method maps LRMI metadata to the Lobid2 format and creates two data
-	 * streams of the resource: "metadata2" and "toscience.json"
+	 * streams of the resource: "metadata2" and "toscience"
 	 * 
 	 * @param node The node of the resource that must be updated
 	 * @param format RDF-Format for the metadata2 data stream (should be NTRIPLES)
@@ -331,15 +330,97 @@ public class Modify extends RegalAction {
 		updateMetadata2(node, rdfToString(rdf, format));
 		play.Logger.debug("Updated Metadata2 datastream!");
 
-		// 2. Update or create the toscience.json data stream
-		MetadataJson metadataJson =
-				(MetadataJson) ld2.get(archive.fedora.Vocabulary.metadataJson);
-		updateMetadataJson(node, metadataJson.getJson());
-		play.Logger.debug("Updated toscience.json datastream!");
+		// 2. Update or create the toscience data stream
+		/**
+		 * @Andres: this needs to be coded. The class MetadataJson needs to be
+		 *          defined in to.science.core
+		 */
+		/*
+		 * MetadataJson metadataJson = (MetadataJson)
+		 * ld2.get(archive.fedora.Vocabulary.metadataJson);
+		 */
+
+		// updateMetadataJson(node, metadataJson.getJson());
+		// In the absence of a mapping, we will continue with an example datastream:
+		updateMetadataJson(node, "{\n" + "        \"license\": {\n"
+				+ "                \"prefLabel\": \"CC BY 4.0\",\n"
+				+ "                \"@id\": \"https://creativecommons.org/licenses/by/4.0/\"\n"
+				+ "        },\n" + "        \"creator\": [\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Ruhr-Universität Bochum\",\n"
+				+ "                                \"@id\": \"https://ror.org/04tsk2644\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Andres Quast\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Dr.\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/QW5kcmVzIFF1YXN0\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Bergische Universität Wuppertal\",\n"
+				+ "                                \"@id\": \"https://ror.org/00613ak93\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Ingölf Küss\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Dr.\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/SW5nw7ZsZiBLw7xzcw==\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Universität zu Köln\",\n"
+				+ "                                \"@id\": \"https://ror.org/00rcxh774\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Peter Reimer\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Keine Angabe\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://orcid.org/0000-0002-3187-2536\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"FernUniversität in Hagen\",\n"
+				+ "                                \"@id\": \"https://ror.org/04tkkr536\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Markus Deimann\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Dr.\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://orcid.org/0000-0002-1652-5181\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Hochschule für Musik Detmold\",\n"
+				+ "                                \"@id\": \"https://ror.org/03y02pg02\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Nina Hagen\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Keine Angabe\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/TmluYSBIYWdlbg==\"\n"
+				+ "                }\n" + "        ],\n" + "        \"medium\": [\n"
+				+ "                {\n"
+				+ "                        \"@id\": \"https://w3id.org/orca.nrw/medientypen/diagram\"\n"
+				+ "                }\n" + "        ],\n" + "        \"department\": [\n"
+				+ "                {\n"
+				+ "                        \"prefLabel\": \"Kommunikations- und Informationstechnik\",\n"
+				+ "                        \"@id\": \"https://w3id.org/kim/hochschulfaechersystematik/n222\"\n"
+				+ "                }\n" + "        ]\n" + "}");
+		play.Logger.debug("Updated toscience datastream!");
 
 		String enrichMessage = Enrich.enrichMetadata2(node);
-		// hier könnte noch ein Enrichment des toscience.json Datenstroms
-		// stattfinden.
+		/**
+		 * @Andres: hier könnte noch ein Enrichment des neuen toscience-Datenstroms
+		 *          stattfinden. enrichMessage.append(" " +
+		 *          Enrich().enrichMetadataJson(node));
+		 */
 		return pid
 				+ " LRMI-metadata successfully lobidified, updated and enriched! "
 				+ enrichMessage;
@@ -432,34 +513,6 @@ public class Modify extends RegalAction {
 				+ " successfully updated and enriched! ";
 		play.Logger.debug(msg);
 		return content_toscience;
-	}
-
-	/**
-	 * This method creates a metadata JSON data stream (unmapped) of the resource
-	 * 
-	 * @param node The node of the resource that must be updated
-	 * @param content The metadata as JSON string
-	 * @return a short message
-	 */
-	public String updateAndEnrichMetadataJson(Node node, String content) {
-		play.Logger.debug("Start Update and enrich metadata JSON.");
-		play.Logger.debug("content: " + content);
-		String pid = node.getPid();
-		if (content == null) {
-			throw new HttpArchiveException(406,
-					pid + " You've tried to upload an empty string."
-							+ " This action is not supported."
-							+ " Use HTTP DELETE instead.\n");
-		}
-
-		updateMetadataJson(node, content);
-		msg = "Metadata JSON of " + node.getPid() + " successfully updated! ";
-		// Zunächst ist noch keine Anreicherung implementiert
-		// String enrichMessage = new Enrich().enrichMetadataJson(node);
-		// msg = "Metadata JSON of " + node.getPid()
-		// + " successfully updated and enriched! " + enrichMessage;
-		play.Logger.debug(msg);
-		return msg;
 	}
 
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,

@@ -509,21 +509,6 @@ public class Resource extends MyController {
 						nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 				play.Logger.debug(result2);
 
-				/**
-				 * 3. lobid2-Metadaten im Format JSON als Datenstrom "toscience.json"
-				 */
-				/**
-				 * NEIN hier kein Update der toscience.json, da es die Reihenfolge
-				 * dieser Daten durcheinanderwürfln würde. Result jsonResult =
-				 * getJsonResult(nodeNode.getLd2()); JsonNode jsonNode =
-				 * MyUtils.resultToJsonNode(jsonResult); play.Logger .debug("Metadata
-				 * JSON als Zeichenkette: " + jsonNode.toString()); String result3 =
-				 * modify.updateAndEnrichMetadataJson(nodeNode, jsonNode.toString());
-				 * play.Logger.debug(result3);
-				 * 
-				 * return JsonMessage( new Message(result1 + "\n" + result2 + "\n" +
-				 * result3));
-				 */
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
@@ -554,7 +539,7 @@ public class Resource extends MyController {
 
 				/**
 				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom und als
-				 * toscience.json-Datenstrom
+				 * toscience-Datenstrom
 				 */
 				/* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein: */
 				RDFFormat format = RDFFormat.NTRIPLES;
