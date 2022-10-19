@@ -1629,10 +1629,10 @@ public class JsonMapper {
 						"https://d-nb.info/standards/elementset/gnd#academicDegree/"
 								+ honoricPrefix);
 
-				Map<String, Object> academicDegreeMap = new LinkedHashMap<>();
-				academicDegreeMap.put("@id", academicDegreeId);
-				academicDegreeMap.put("prefLabel", honoricPrefix);
-				agentMap.put("academicDegree", academicDegreeMap);
+				// Map<String, Object> academicDegreeMap = new LinkedHashMap<>();
+				// academicDegreeMap.put("@id", academicDegreeId);
+				// academicDegreeMap.put("prefLabel", honoricPrefix);
+				agentMap.put("academicDegree", academicDegreeId);
 
 				retHash.put("academicDegreeId", academicDegreeId);
 			}
