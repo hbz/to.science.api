@@ -642,12 +642,14 @@ public class XmlUtils {
 			} /* end of loop over pub-date nodes) */
 			rdf.put("issued", pubYear);
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
-			if (epubDay == null)
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			if (epubDay == null) {
 				publicationDateStr = epubYear + "-" + epubMonth;
+				formatter = new SimpleDateFormat("yyyy-MM");
+			}
 			rdf.put("publicationYear", Arrays.asList(publicationDateStr));
 
 			if (embargo_duration > 0) {
-				SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 				Date publicationDate = formatter.parse(publicationDateStr);
 				Date embargoDate =
 						DateUtils.addMonths(publicationDate, embargo_duration);
