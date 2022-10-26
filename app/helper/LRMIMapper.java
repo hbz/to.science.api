@@ -449,6 +449,13 @@ public class LRMIMapper {
 						affObj.put("name", genPropMap.get(affiliation.get(i)));
 						affObj.put("type", "Organization");
 						obj.put("affiliation", affObj);
+
+						// Affiliation element should be omitted, if no specification is
+						// made.
+						String affilName = genPropMap.get(affiliation.get(i));
+						if (affilName != "Bitte wählen Sie...") {
+							obj.put("affiliation", affObj);
+						}
 					} else {
 						/*
 						 * Es sind nicht genügend Affiliationen in der sequentiellen Liste
