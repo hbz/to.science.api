@@ -452,7 +452,7 @@ public class LRMIMapper {
 						// Affiliation element should be omitted, if no specification is
 						// made.
 						String affilId = affiliation.get(i);
-						if (!affilName.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
+						if (!affilId.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
 							obj.put("affiliation", affObj);
 						}
 					} else {
