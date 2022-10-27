@@ -448,12 +448,11 @@ public class LRMIMapper {
 								agentType + "ResearchOrganizationsRegistry-de.properties"));
 						affObj.put("name", genPropMap.get(affiliation.get(i)));
 						affObj.put("type", "Organization");
-						obj.put("affiliation", affObj);
 
 						// Affiliation element should be omitted, if no specification is
 						// made.
-						String affilName = genPropMap.get(affiliation.get(i));
-						if (!affilName.equals("Bitte wählen Sie...")) {
+						String affilId = affiliation.get(i);
+						if (!affilName.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
 							obj.put("affiliation", affObj);
 						}
 					} else {
