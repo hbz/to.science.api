@@ -489,7 +489,7 @@ public class JsonMapper {
 
 					// Affiliation element should be omitted, if no specification is made.
 					String affilPrefLabel = affilLabelMap.get(agentAffiliation.get(i));
-					if (affilPrefLabel != "Bitte wählen Sie...") {
+					if (!affilPrefLabel.equals("Bitte wählen Sie...")) {
 						agent.put("affiliation", affilFields);
 					}
 				} else {
