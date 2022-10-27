@@ -740,7 +740,7 @@ public class XmlUtils {
 						paragraphNode.removeChild(boldNode);
 				}
 				rdf.put("abstractText", Arrays.asList(paragraphNode.getTextContent()
-						.trim().replaceAll("[\\r\\n\\u00a0]+", " ")));
+						.trim().replaceAll("[\\r\\n\\t\\u00a0]+", " ")));
 			}
 
 			/* Schlagwörter */
