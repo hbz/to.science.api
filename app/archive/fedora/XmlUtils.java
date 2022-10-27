@@ -356,7 +356,8 @@ public class XmlUtils {
 	 * @return Die Daten im Format lobid2-RDF
 	 */
 	public Map<String, Object> getLd2Lobidify2DeepGreen(
-			Map<String, Object> metadata2, int embargo_duration, Document content) {
+			Map<String, Object> metadata2, int embargo_duration, String deepgreen_id,
+			Document content) {
 		/* Mapping von DeepGreen.xml nach lobid2.json */
 		try {
 			// Neues JSON-Objekt anlegen; fuer lobid2-Daten
@@ -761,6 +762,10 @@ public class XmlUtils {
 			}
 			rdf.put("subject", keywords);
 			rdf.put("contentType", "article");
+
+			/* Deepgreen-Id */
+			rdf.put("additionalNotes",
+					Arrays.asList("DeepGreen-ID: " + deepgreen_id));
 
 			/* RDF-Type */
 			Map<String, Object> rdftype = new TreeMap<>();
