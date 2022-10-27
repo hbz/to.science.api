@@ -739,8 +739,10 @@ public class XmlUtils {
 					if (boldNode.getNodeName().equalsIgnoreCase("bold"))
 						paragraphNode.removeChild(boldNode);
 				}
-				rdf.put("abstractText", Arrays.asList(paragraphNode.getTextContent()
-						.trim().replaceAll("[\\r\\n\\t\\u00a0]+", " ")));
+				rdf.put("abstractText",
+						Arrays.asList(paragraphNode.getTextContent().trim()
+								.replaceAll("[\\r\\n\\t\\u00a0]+", " ")
+								.replaceAll("\\s+", " ")));
 			}
 
 			/* Schlagwörter */
