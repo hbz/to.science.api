@@ -468,7 +468,7 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
 	public static Promise<Result> updateDeepGreen(@PathParam("pid") String pid,
 			@QueryParam("embargo_duration") int embargo_duration,
-			@QueryParam("deepgreen_id") int deepgreen_id) {
+			@QueryParam("deepgreen_id") String deepgreen_id) {
 		return new ModifyAction().call(pid, node -> {
 			play.Logger.debug("Starting updateDeepGreen data with pid=" + pid);
 			play.Logger.debug("request().body().asXml()=" + request().body().asXml());
