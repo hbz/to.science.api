@@ -20,7 +20,8 @@ Apache License  Version 2.0, January 2004  http://www.apache.org/licenses/
 Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
 
 h1. Update
-# Das ist eine Anleitung, um auf Produktion zu deployen
+
+Das ist eine Anleitung, um auf Produktion zu deployen
 als erstes den Merge der aktuellen Änderungen (PR) machen !!
 cd /opt/toscience/src/to.science.api
 git pull
@@ -35,7 +36,7 @@ rm -r conf
 ln -s /etc/to.science/api.conf conf
 sudo service toscience-api stop
 ps -eaf | grep toscience-server
-# evtl kill <pid>, falls forms noch nicht weg ist!
+evtl kill <pid>, falls forms noch nicht weg ist!
 mv /tmp/regal-api-0.8.0-SNAPSHOT /opt/toscience/toscience-server.<Zeitstempel>
 cd /opt/toscience
 rm toscience-server
