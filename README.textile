@@ -23,8 +23,8 @@ h1. Update
 
 Das ist eine Anleitung, um auf Produktion zu deployen
 als erstes den Merge der aktuellen Änderungen (PR) machen !!
-cd /opt/toscience/src/to.science.api
-git pull
+  cd /opt/toscience/src/to.science.api
+  git pull
 git checkout origin/master-orca
 git status; git log | head > /tmp/formsVERSION   ## um Buchführung zu haben, was denn nun installiert wurde !
 /opt/toscience/activator/activator dist
