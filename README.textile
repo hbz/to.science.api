@@ -37,10 +37,10 @@ ln -s /etc/to.science/api.conf conf
 sudo service toscience-api stop
 ps -eaf | grep toscience-server
 evtl kill <pid>, falls api noch nicht weg ist!
-mv /tmp/regal-api-0.8.0-SNAPSHOT /opt/toscience/toscience-server.<Zeitstempel>
+mv /tmp/regal-api-0.8.0-SNAPSHOT /opt/toscience/toscience-server.Zeitstempel
 cd /opt/toscience
 rm toscience-server
-ln -s toscience-server.<Zeitstempel> toscience-server
+ln -s toscience-server.Zeitstempel toscience-server
 cd /opt/toscience/toscience-server
 mv /tmp/formsVERSION VERSION
 sudo service toscience-api start
