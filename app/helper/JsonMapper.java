@@ -486,7 +486,12 @@ public class JsonMapper {
 					affilFields.put("prefLabel",
 							affilLabelMap.get(agentAffiliation.get(i)));
 					affilFields.put("type", "Organization");
-					agent.put("affiliation", affilFields);
+
+					// Affiliation element should be omitted, if no specification is made.
+					String affilId = agentAffiliation.get(i);
+					if (!affilId.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
+						agent.put("affiliation", affilFields);
+					}
 				} else {
 					// merde: we have more agents than affiliations.
 					// Something went wrong
