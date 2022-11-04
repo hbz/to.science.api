@@ -18,3 +18,28 @@ h1. License
 
 Apache License  Version 2.0, January 2004  http://www.apache.org/licenses/
 Copyright 2014 hbz NRW (http://www.hbz-nrw.de/)
+
+h1. Update
+# Das ist eine Anleitung, um auf Produktion zu deployen
+als erstes den Merge der aktuellen Änderungen (PR) machen !!
+cd /opt/toscience/src/to.science.api
+git pull
+git checkout origin/master-orca
+git status; git log | head > /tmp/formsVERSION   ## um Buchführung zu haben, was denn nun installiert wurde !
+/opt/toscience/activator/activator dist
+cp target/universal/regal-api-0.8.0-SNAPSHOT.zip /tmp
+cd /tmp
+unzip regal-api-0.8.0-SNAPSHOT.zip
+cd /tmp/regal-api-0.8.0-SNAPSHOT
+rm -r conf
+ln -s /etc/to.science/api.conf conf
+sudo service toscience-api stop
+ps -eaf | grep toscience-server
+# evtl kill <pid>, falls forms noch nicht weg ist!
+mv /tmp/regal-api-0.8.0-SNAPSHOT /opt/toscience/toscience-server.<Zeitstempel>
+cd /opt/toscience
+rm toscience-server
+ln -s toscience-server.<Zeitstempel> toscience-server
+cd /opt/toscience/toscience-server
+mv /tmp/formsVERSION VERSION
+sudo service toscience-api start
