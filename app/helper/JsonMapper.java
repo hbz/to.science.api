@@ -617,6 +617,15 @@ public class JsonMapper {
 		String id = l.getObject(); // l.getObject() = node.getPid() = orca:zahl
 		// Read read = new Read();
 		// Node childNode = read.internalReadNode(id);
+		play.Logger.debug(" gelesene l.getObjectLabel() = " + l.getObjectLabel());
+		Node childNode = null;
+		try {
+			childNode = new Read().readNode(id);
+			play.Logger.debug(" gelesene l.getObjectLabel() = " + l.getObjectLabel()
+					+ "childNode = " + childNode.getPid());
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 
 		String value = l.getObjectLabel();
 		String jsonName = getJsonName(l.getPredicate());
@@ -625,25 +634,25 @@ public class JsonMapper {
 			resolvedObject.put(ID2, id);
 			resolvedObject.put(PREF_LABEL, value);
 
-			// if (childNode != null) {
-			//
-			// if (childNode.getFileSizeAsString() != null) {
-			// play.Logger.debug(
-			// " map.get(size).toString() = " + childNode.getFileSizeAsString());
-			// resolvedObject.put(size, childNode.getFileSizeAsString());
-			// } else {
-			// play.Logger.debug("getFileSizeAsString() nicht vorhanden");
-			// }
-			//
-			// if (childNode.getMimeType() != null) {
-			// play.Logger.debug("child.getMimeType() = " + childNode.getMimeType());
-			// resolvedObject.put(encodingFormat, childNode.getMimeType());
-			// } else {
-			// play.Logger.debug("getMimeType() nicht vorhanden");
-			//
-			// }
-			//
-			// }
+			if (childNode != null) {
+
+				if (childNode.getFileSizeAsString() != null) {
+					play.Logger.debug(
+							" map.get(size).toString() = " + childNode.getFileSizeAsString());
+					resolvedObject.put(size, childNode.getFileSizeAsString());
+				} else {
+					play.Logger.debug("getFileSizeAsString() nicht vorhanden");
+				}
+
+				if (childNode.getMimeType() != null) {
+					play.Logger.debug("child.getMimeType() = " + childNode.getMimeType());
+					resolvedObject.put(encodingFormat, childNode.getMimeType());
+				} else {
+					play.Logger.debug("getMimeType() nicht vorhanden");
+
+				}
+
+			}
 
 		}
 		if (jsonName != null && rdf.containsKey(jsonName)) {
