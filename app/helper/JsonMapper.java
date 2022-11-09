@@ -104,6 +104,7 @@ public class JsonMapper {
 	final static String title = "title";
 	final static String fileLabel = "fileLabel";
 	final static String embargoTime = "embargoTime";
+	final static String encodingFormat = "encodingFormat";
 
 	final static String[] typePrios = new String[] {
 			"http://purl.org/lobid/lv#ArchivedWebPage",
