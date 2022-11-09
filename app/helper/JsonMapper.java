@@ -104,7 +104,6 @@ public class JsonMapper {
 	final static String title = "title";
 	final static String fileLabel = "fileLabel";
 	final static String embargoTime = "embargoTime";
-	final static String encodingFormat = "encodingFormat";
 
 	final static String[] typePrios = new String[] {
 			"http://purl.org/lobid/lv#ArchivedWebPage",
@@ -616,10 +615,8 @@ public class JsonMapper {
 	private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
 		Map<String, Object> resolvedObject = null;
 		String id = l.getObject(); // l.getObject() = node.getPid() = orca:zahl
-		Read read = new Read();
-		Node childNode = read.internalReadNode(id);
-		play.Logger.debug(" gelesene l.getObjectLabel() = " + l.getObjectLabel()
-				+ "gelesene ChildNode = " + childNode.getPid());
+		// Read read = new Read();
+		// Node childNode = read.internalReadNode(id);
 
 		String value = l.getObjectLabel();
 		String jsonName = getJsonName(l.getPredicate());
@@ -627,25 +624,26 @@ public class JsonMapper {
 			resolvedObject = new HashMap<>();
 			resolvedObject.put(ID2, id);
 			resolvedObject.put(PREF_LABEL, value);
-			if (childNode != null) {
 
-				if (childNode.getFileSizeAsString() != null) {
-					play.Logger.debug(
-							" map.get(size).toString() = " + childNode.getFileSizeAsString());
-					resolvedObject.put(size, childNode.getFileSizeAsString());
-				} else {
-					play.Logger.debug("getFileSizeAsString() nicht vorhanden");
-				}
-
-				if (childNode.getMimeType() != null) {
-					play.Logger.debug("child.getMimeType() = " + childNode.getMimeType());
-					resolvedObject.put(encodingFormat, childNode.getMimeType());
-				} else {
-					play.Logger.debug("getMimeType() nicht vorhanden");
-
-				}
-
-			}
+			// if (childNode != null) {
+			//
+			// if (childNode.getFileSizeAsString() != null) {
+			// play.Logger.debug(
+			// " map.get(size).toString() = " + childNode.getFileSizeAsString());
+			// resolvedObject.put(size, childNode.getFileSizeAsString());
+			// } else {
+			// play.Logger.debug("getFileSizeAsString() nicht vorhanden");
+			// }
+			//
+			// if (childNode.getMimeType() != null) {
+			// play.Logger.debug("child.getMimeType() = " + childNode.getMimeType());
+			// resolvedObject.put(encodingFormat, childNode.getMimeType());
+			// } else {
+			// play.Logger.debug("getMimeType() nicht vorhanden");
+			//
+			// }
+			//
+			// }
 
 		}
 		if (jsonName != null && rdf.containsKey(jsonName)) {
@@ -668,7 +666,7 @@ public class JsonMapper {
 			if (resolvedObject == null) {
 				if (l.isLiteral()) {
 					list.add(l.getObject());
-				} else {// itemID, isMemberOf (json2) springt hier rein
+				} else {
 					resolvedObject = new HashMap<>();
 					resolvedObject.put(ID2, id);
 					resolvedObject.put(PREF_LABEL, id);
