@@ -104,6 +104,7 @@ public class JsonMapper {
 	final static String title = "title";
 	final static String fileLabel = "fileLabel";
 	final static String embargoTime = "embargoTime";
+	final static String encodingFormat = "encodingFormat";
 
 	final static String[] typePrios = new String[] {
 			"http://purl.org/lobid/lv#ArchivedWebPage",
@@ -614,13 +615,38 @@ public class JsonMapper {
 
 	private void addLinkToJsonMap(Map<String, Object> rdf, Link l) {
 		Map<String, Object> resolvedObject = null;
-		String id = l.getObject();
+		String id = l.getObject(); // l.getObject() = node.getPid() = orca:zahl
+		Read read = new Read();
+		Node childNode = read.internalReadNode(id);
+		play.Logger.debug(" gelesene l.getObjectLabel() = " + l.getObjectLabel()
+				+ "gelesene ChildNode = " + childNode.getPid());
+
 		String value = l.getObjectLabel();
 		String jsonName = getJsonName(l.getPredicate());
-		if (l.getObjectLabel() != null) {
+		if (l.getObjectLabel() != null) { // hasPart json2 springt hier rein
 			resolvedObject = new HashMap<>();
 			resolvedObject.put(ID2, id);
 			resolvedObject.put(PREF_LABEL, value);
+			if (childNode != null) {
+
+				if (childNode.getFileSizeAsString() != null) {
+					play.Logger.debug(
+							" map.get(size).toString() = " + childNode.getFileSizeAsString());
+					resolvedObject.put(size, childNode.getFileSizeAsString());
+				} else {
+					play.Logger.debug("getFileSizeAsString() nicht vorhanden");
+				}
+
+				if (childNode.getMimeType() != null) {
+					play.Logger.debug("child.getMimeType() = " + childNode.getMimeType());
+					resolvedObject.put(encodingFormat, childNode.getMimeType());
+				} else {
+					play.Logger.debug("getMimeType() nicht vorhanden");
+
+				}
+
+			}
+
 		}
 		if (jsonName != null && rdf.containsKey(jsonName)) {
 			Collection<Object> list =
@@ -628,7 +654,7 @@ public class JsonMapper {
 			if (resolvedObject == null) {
 				if (l.isLiteral()) {
 					list.add(l.getObject());
-				} else {
+				} else { // isMemberOf springt hier rein(json2)
 					resolvedObject = new HashMap<>();
 					resolvedObject.put(ID2, id);
 					resolvedObject.put(PREF_LABEL, id);
@@ -642,7 +668,7 @@ public class JsonMapper {
 			if (resolvedObject == null) {
 				if (l.isLiteral()) {
 					list.add(l.getObject());
-				} else {
+				} else {// itemID, isMemberOf (json2) springt hier rein
 					resolvedObject = new HashMap<>();
 					resolvedObject.put(ID2, id);
 					resolvedObject.put(PREF_LABEL, id);
@@ -1119,6 +1145,22 @@ public class JsonMapper {
 			obj.put("contentUrl", new String(Globals.protocol + Globals.server
 					+ "/resource/" + child.getPid() + "/data"));
 			obj.put("type", "MediaObject");
+			if (child.getFileSizeAsString() != null) {
+				play.Logger
+						.debug(" map.get(size).toString()" + child.getFileSizeAsString());
+				obj.put("size", child.getFileSizeAsString());
+			} else {
+				play.Logger.debug("getFileSizeAsString() nicht vorhanden");
+			}
+
+			if (child.getMimeType() != null) {
+				play.Logger.debug("child.getMimeType()" + child.getMimeType());
+				obj.put("encodingFormat", child.getMimeType());
+			} else {
+				play.Logger.debug("getMimeType() nicht vorhanden");
+
+			}
+
 			arr.put(obj);
 			lrmiJSONObject.put("encoding", arr);
 
