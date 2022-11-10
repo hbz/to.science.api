@@ -295,6 +295,21 @@ public class LRMIMapper {
 					obj.put("type", "MediaObject");
 					obj.put("contentUrl", Globals.protocol + Globals.server + "/resource/"
 							+ map.get("@id").toString() + "/data");
+					if (map.containsKey("size")) {
+						play.Logger.debug(
+								" map.get(\"size\").toString()" + map.get("size").toString());
+						obj.put("size", map.get("size").toString());
+					} else {
+						play.Logger.debug("map.get(\"size\").toString() NIcht vorhanden");
+					}
+
+					if (map.containsKey("encodingFormat")) {
+						play.Logger.debug(" map.get(\"encodingFormat\").toString()"
+								+ map.get("encodingFormat").toString());
+						obj.put("encodingFormat", map.get("encodingFormat").toString());
+					} else {
+						play.Logger.debug("encodingFormat NIcht vorhanden");
+					}
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
@@ -312,9 +327,26 @@ public class LRMIMapper {
 						obj.put("type", "MediaObject");
 						obj.put("contentUrl", Globals.protocol + Globals.server
 								+ "/resource/" + map.get("@id").toString() + "/data");
+
+						if (map.containsKey("size")) {
+							play.Logger.debug(
+									" map.get(\"size\").toString()" + map.get("size").toString());
+							obj.put("size", map.get("size").toString());
+						} else {
+							play.Logger.debug("map.get(\"size\").toString() NIcht vorhanden");
+						}
+
+						if (map.containsKey("encodingFormat")) {
+							play.Logger.debug(" map.get(\"encodingFormat\").toString()"
+									+ map.get("encodingFormat").toString());
+							obj.put("encodingFormat", map.get("encodingFormat").toString());
+						} else {
+							play.Logger.debug("encodingFormat NIcht vorhanden");
+						}
+						arr.put(obj);
+						play.Logger.debug("Added new encoding-field");
 					}
-					arr.put(obj);
-					play.Logger.debug("Added new encoding-field");
+
 				}
 				lrmiJsonContent.put("encoding", arr);
 			}
@@ -452,7 +484,8 @@ public class LRMIMapper {
 						// Affiliation element should be omitted, if no specification is
 						// made.
 						String affilId = affiliation.get(i);
-						if (!affilId.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
+						if (!affilId
+								.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
 							obj.put("affiliation", affObj);
 						}
 					} else {
