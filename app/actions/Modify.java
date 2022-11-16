@@ -203,11 +203,12 @@ public class Modify extends RegalAction {
 	 * @return a short message
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(String pid,
-			int embargoDuration, RDFFormat format, Document content) {
+			int embargoDuration, String deepgreenId, RDFFormat format,
+			Document content) {
 		try {
 			Node node = new Read().readNode(pid);
 			return updateLobidify2AndEnrichDeepGreenData(node, embargoDuration,
-					format, content);
+					deepgreenId, format, content);
 		} catch (Exception e) {
 			throw new UpdateNodeException(e);
 		}
@@ -295,7 +296,8 @@ public class Modify extends RegalAction {
 	 * @return a short message
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(Node node,
-			int embargoDuration, RDFFormat format, Document content) {
+			int embargoDuration, String deepgreenId, RDFFormat format,
+			Document content) {
 
 		try {
 			play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
@@ -307,8 +309,8 @@ public class Modify extends RegalAction {
 								+ " Use HTTP DELETE instead.\n");
 			}
 
-			Map<String, Object> rdf = new XmlUtils()
-					.getLd2Lobidify2DeepGreen(node.getLd2(), embargoDuration, content);
+			Map<String, Object> rdf = new XmlUtils().getLd2Lobidify2DeepGreen(
+					node.getLd2(), embargoDuration, deepgreenId, content);
 			play.Logger.debug("Mapped DeepGrren data to lobid2!");
 			updateMetadata2(node, rdfToString(rdf, format));
 			play.Logger.debug("Updated Metadata2 datastream!");
