@@ -702,32 +702,69 @@ public class XmlUtils {
 				break;
 			}
 
-			/* Open-Access Lizenz */
-			nodeList = content.getElementsByTagName("ext-link");
+			/*
+			 * Open-Access Lizenz nodeList = content.getElementsByTagName("ext-link");
+			 * List<Map<String, Object>> licenses = new ArrayList<>(); for (int i = 0;
+			 * i < nodeList.getLength(); i++) { node = nodeList.item(i); String
+			 * parentNodeName = node.getParentNode().getNodeName(); if
+			 * (parentNodeName.equalsIgnoreCase("license") ||
+			 * parentNodeName.equalsIgnoreCase("license-p")) { // wir gehen davon aus,
+			 * dass license-type == open-access ; streng // genommen das hier noch
+			 * prüfen !! attributes = node.getAttributes(); if (attributes == null) {
+			 * continue; } attrib = attributes.getNamedItem("xlink:href"); if (attrib
+			 * == null) { // Hier muss license-p tag ausgelesen werden
+			 * 
+			 * // continue; } String licenseId = attrib.getNodeValue();
+			 * play.Logger.debug("Found LicenseId: " + licenseId); Map<String, Object>
+			 * license = new TreeMap<>(); license.put("@id", licenseId);
+			 * license.put("prefLabel", licenseId); licenses.add(license); } }
+			 * rdf.put("license", licenses);
+			 */
+
+			// Lizenz NEU
+			nodeList = content.getElementsByTagName("license-p");
 			List<Map<String, Object>> licenses = new ArrayList<>();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
-				String parentNodeName = node.getParentNode().getNodeName();
-				if (parentNodeName.equalsIgnoreCase("license-p")
-						|| parentNodeName.equalsIgnoreCase("license")) {
-					// wir gehen davon aus, dass license-type == open-access ; streng
-					// genommen das hier noch prüfen !!
-					attributes = node.getAttributes();
-					if (attributes == null) {
-						continue;
-					}
-					attrib = attributes.getNamedItem("xlink:href");
-					if (attrib == null) {
-						continue;
-					}
-					String licenseId = attrib.getNodeValue();
-					play.Logger.debug("Found LicenseId: " + licenseId);
-					Map<String, Object> license = new TreeMap<>();
-					license.put("@id", licenseId);
-					license.put("prefLabel", licenseId);
-					licenses.add(license);
+
+				Node parentNode = node.getParentNode();
+				NodeList childNodeList = node.getChildNodes();
+
+				attributes = parentNode.getAttributes();
+				attrib = attributes.getNamedItem("xlink:href");
+
+				String licenseId = null;
+
+				if (attrib != null) {
+					licenseId = attrib.getNodeValue();
 				}
+
+				if (attrib == null) {
+					for (int j = 0; j < childNodeList.getLength(); j++) {
+						Node licensepChildNode = childNodeList.item(j);
+
+						if (licensepChildNode.getNodeType() == Node.ELEMENT_NODE
+								&& licensepChildNode.getNodeName()
+										.equalsIgnoreCase("ext-link")) {
+							Node xlinkAttrib =
+									licensepChildNode.getAttributes().getNamedItem("xlink:href");
+							licenseId = xlinkAttrib.getNodeValue();
+						} else {
+							String text = licensepChildNode.getTextContent();
+							licenseId =
+									text.substring(text.indexOf("(") + 1, text.indexOf(")"));
+						}
+						break;
+					}
+				}
+
+				play.Logger.debug("Found LicenseId: " + licenseId);
+				Map<String, Object> license = new TreeMap<>();
+				license.put("@id", licenseId);
+				license.put("prefLabel", licenseId);
+				licenses.add(license);
 			}
+
 			rdf.put("license", licenses);
 
 			/* Abstract */
