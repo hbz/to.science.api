@@ -490,7 +490,7 @@ public class Resource extends MyController {
 				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
 				RDFFormat format = RDFFormat.NTRIPLES;
 				String result2 = modify.updateLobidify2AndEnrichDeepGreenData(pid,
-						embargo_duration, format, request().body().asXml());
+						embargo_duration, deepgreen_id, format, request().body().asXml());
 				play.Logger.debug(result2);
 
 				// return JsonMessage(new Message(result1 + "\n" + result2));
