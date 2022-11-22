@@ -350,6 +350,7 @@ public class XmlUtils {
 	 * @author Alessio Pellerito, hbz
 	 * @param metadata2 RDF-Metadaten im Format lobid2 als Java-Map
 	 * @param embargo_duration : Die Dauer des Embargos in Monaten.
+	 * @param deepgreen_id Die id der von deepgreen importierten Ressource
 	 * @param content Die DeepGreen-Daten im Format Document (XML)
 	 * @date 2022-03-30
 	 * 
