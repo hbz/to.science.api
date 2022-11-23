@@ -753,6 +753,7 @@ public class XmlUtils {
 							licenseId = xlinkAttrib.getNodeValue();
 						} else {
 							String text = licensepChildNode.getTextContent();
+							play.Logger.info("textContent: " + text);
 							licenseId =
 									text.substring(text.indexOf("(") + 1, text.indexOf(")"));
 						}
