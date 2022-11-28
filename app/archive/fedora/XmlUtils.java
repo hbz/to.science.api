@@ -787,7 +787,7 @@ public class XmlUtils {
 				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/spa");
 				language.put("prefLabel", "Spanisch");
 				break;
-			case "ge":
+			case "de":
 				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ger");
 				language.put("prefLabel", "Deutsch");
 				break;
