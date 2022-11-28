@@ -660,34 +660,19 @@ public class XmlUtils {
 
 			/* Zitierangabe */
 			NodeList volumes = content.getElementsByTagName("volume");
-			if (volumes.getLength() > 0) {
-				String volume = "";
-				for (int i = 0; i < volumes.getLength(); i++) {
-					node = volumes.item(i);
-					volume = node.getTextContent();
-					break;
-				}
+			if (volumes.getLength() > 0
+					&& volumes.item(0).getTextContent().equals("-1")) {
+				String volume = volumes.item(0).getTextContent();
+
 				NodeList issues = content.getElementsByTagName("issue");
-				String issue = "";
-				for (int i = 0; i < issues.getLength(); i++) {
-					node = issues.item(i);
-					issue = node.getTextContent();
-					break;
-				}
+				String issue = issues.item(0).getTextContent();
+
 				NodeList fpages = content.getElementsByTagName("fpage");
-				String fpage = "";
-				for (int i = 0; i < fpages.getLength(); i++) {
-					node = fpages.item(i);
-					fpage = node.getTextContent();
-					break;
-				}
+				String fpage = fpages.item(0).getTextContent();
+
 				NodeList lpages = content.getElementsByTagName("lpage");
-				String lpage = "";
-				for (int i = 0; i < lpages.getLength(); i++) {
-					node = lpages.item(i);
-					lpage = node.getTextContent();
-					break;
-				}
+				String lpage = lpages.item(0).getTextContent();
+
 				String bibliographicCitation =
 						new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
 				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
@@ -786,8 +771,31 @@ public class XmlUtils {
 
 			/* Sprache */
 			Map<String, Object> language = new TreeMap<>();
-			language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/eng");
-			language.put("prefLabel", "Englisch");
+			NodeList articleList = content.getElementsByTagName("article");
+			Node xmlLangValue =
+					articleList.item(0).getAttributes().getNamedItem("xml:lang");
+			switch (xmlLangValue.getNodeValue()) {
+			case "fr":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/fra");
+				language.put("prefLabel", "Französisch");
+				break;
+			case "it":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ita");
+				language.put("prefLabel", "Italienisch");
+				break;
+			case "sp":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/spa");
+				language.put("prefLabel", "Spanisch");
+				break;
+			case "ge":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ger");
+				language.put("prefLabel", "Deutsch");
+				break;
+			default:
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/eng");
+				language.put("prefLabel", "Englisch");
+			}
+
 			rdf.put("language", Arrays.asList(language));
 
 			/* DDC */
