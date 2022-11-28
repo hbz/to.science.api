@@ -718,8 +718,6 @@ public class XmlUtils {
 					Node xlinkAttrib = node.getAttributes().getNamedItem("xlink:href");
 					licenseId = xlinkAttrib.getNodeValue();
 					break;
-				} else {
-					continue;
 				}
 			}
 
@@ -732,8 +730,6 @@ public class XmlUtils {
 					if (xLink != null) {
 						licenseId = xLink.getNodeValue();
 						break;
-					} else {
-						continue;
 					}
 				}
 			}
@@ -750,10 +746,7 @@ public class XmlUtils {
 						licenseId =
 								text.substring(text.indexOf("(") + 1, text.indexOf(")"));
 						break;
-					} else {
-						continue;
 					}
-
 				}
 			}
 
