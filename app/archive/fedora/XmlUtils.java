@@ -350,13 +350,15 @@ public class XmlUtils {
 	 * @author Alessio Pellerito, hbz
 	 * @param metadata2 RDF-Metadaten im Format lobid2 als Java-Map
 	 * @param embargo_duration : Die Dauer des Embargos in Monaten.
+	 * @param deepgreen_id Die id der von deepgreen importierten Ressource
 	 * @param content Die DeepGreen-Daten im Format Document (XML)
 	 * @date 2022-03-30
 	 * 
 	 * @return Die Daten im Format lobid2-RDF
 	 */
 	public Map<String, Object> getLd2Lobidify2DeepGreen(
-			Map<String, Object> metadata2, int embargo_duration, Document content) {
+			Map<String, Object> metadata2, int embargo_duration, String deepgreen_id,
+			Document content) {
 		/* Mapping von DeepGreen.xml nach lobid2.json */
 		try {
 			// Neues JSON-Objekt anlegen; fuer lobid2-Daten
@@ -702,32 +704,58 @@ public class XmlUtils {
 				break;
 			}
 
-			/* Open-Access Lizenz */
-			nodeList = content.getElementsByTagName("ext-link");
+			/* Lizenz Neu */
 			List<Map<String, Object>> licenses = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				node = nodeList.item(i);
+			String licenseId = null;
+
+			// Fall 1: ext-link-tag hat xlink:href Attribut
+			NodeList nodeLstExtLink = content.getElementsByTagName("ext-link");
+			for (int i = 0; i < nodeLstExtLink.getLength(); i++) {
+				node = nodeLstExtLink.item(i);
 				String parentNodeName = node.getParentNode().getNodeName();
-				if (parentNodeName.equalsIgnoreCase("license-p")
-						|| parentNodeName.equalsIgnoreCase("license")) {
-					// wir gehen davon aus, dass license-type == open-access ; streng
-					// genommen das hier noch prüfen !!
-					attributes = node.getAttributes();
-					if (attributes == null) {
-						continue;
-					}
-					attrib = attributes.getNamedItem("xlink:href");
-					if (attrib == null) {
-						continue;
-					}
-					String licenseId = attrib.getNodeValue();
-					play.Logger.debug("Found LicenseId: " + licenseId);
-					Map<String, Object> license = new TreeMap<>();
-					license.put("@id", licenseId);
-					license.put("prefLabel", licenseId);
-					licenses.add(license);
+				if (parentNodeName.equalsIgnoreCase("license")
+						|| parentNodeName.equalsIgnoreCase("license-p")) {
+					Node xlinkAttrib = node.getAttributes().getNamedItem("xlink:href");
+					licenseId = xlinkAttrib.getNodeValue();
+					break;
 				}
 			}
+
+			// Fall 2: license-tag hat xlink:href Attribut
+			if (licenseId == null) {
+				NodeList nodeLstLicense = content.getElementsByTagName("license");
+				for (int i = 0; i < nodeLstLicense.getLength(); i++) {
+					node = nodeLstLicense.item(i);
+					Node xLink = node.getAttributes().getNamedItem("xlink:href");
+					if (xLink != null) {
+						licenseId = xLink.getNodeValue();
+						break;
+					}
+				}
+			}
+
+			// Fall 3: license-p-tag Text in Klammern auslesen
+			if (licenseId == null) {
+				NodeList nodeLstLicenseP = content.getElementsByTagName("license-p");
+				for (int i = 0; i < nodeLstLicenseP.getLength(); i++) {
+					node = nodeLstLicenseP.item(i);
+					Node parent = node.getParentNode();
+					if (parent.getAttributes().getNamedItem("xlink:href") == null) {
+						String text = node.getTextContent();
+						play.Logger.info("textContent: " + text);
+						licenseId =
+								text.substring(text.indexOf("(") + 1, text.indexOf(")"));
+						break;
+					}
+				}
+			}
+
+			play.Logger.debug("Found LicenseId: " + licenseId);
+			Map<String, Object> license = new TreeMap<>();
+			license.put("@id", licenseId);
+			license.put("prefLabel", licenseId);
+			licenses.add(license);
+
 			rdf.put("license", licenses);
 
 			/* Abstract */
@@ -763,6 +791,10 @@ public class XmlUtils {
 			}
 			rdf.put("subject", keywords);
 			rdf.put("contentType", "article");
+
+			/* Deepgreen-Id */
+			rdf.put("additionalNotes",
+					Arrays.asList("DeepGreen-ID: " + deepgreen_id));
 
 			/* RDF-Type */
 			Map<String, Object> rdftype = new TreeMap<>();
