@@ -482,11 +482,32 @@ public class XmlUtils {
 
 			/* Aufsatztitel */
 			nodeList = content.getElementsByTagName("article-title");
-			if (nodeList.getLength() > 0) {
+			NodeList subTitleList = content.getElementsByTagName("subtitle");
+			if (nodeList.getLength() > 0 && subTitleList.getLength() == 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent().trim()
 						.replaceAll("[\\r\\n\\u00a0]+", " ")));
+			}
+			if (nodeList.getLength() > 0 && subTitleList.getLength() > 0) {
+				play.Logger
+						.debug("Found article title: " + nodeList.item(0).getTextContent());
+				play.Logger
+						.debug("Found subtitle: " + subTitleList.item(0).getTextContent());
+				rdf.put("title",
+						Arrays.asList(nodeList.item(0).getTextContent().trim()
+								.replaceAll("[\\r\\n\\u00a0]+", " ") + " : "
+								+ subTitleList.item(0).getTextContent().trim()
+										.replaceAll("[\\r\\n\\u00a0]+", " ")));
+			}
+
+			/* Alternative (Trans-title) */
+			nodeList = content.getElementsByTagName("trans-title");
+			if (nodeList.getLength() > 0) {
+				play.Logger
+						.debug("Found trans title: " + nodeList.item(0).getTextContent());
+				rdf.put("alternative", Arrays.asList(nodeList.item(0).getTextContent()
+						.trim().replaceAll("[\\r\\n\\u00a0]+", " ")));
 			}
 
 			/* Autor */
@@ -611,8 +632,10 @@ public class XmlUtils {
 				if (attrib == null) {
 					continue;
 				}
+
+				childNodes = node.getChildNodes();
+
 				if (attrib.getNodeValue().equalsIgnoreCase("subscription-year")) {
-					childNodes = node.getChildNodes();
 					for (int j = 0; j < childNodes.getLength(); j++) {
 						child = childNodes.item(j);
 						String childName = child.getNodeName();
@@ -621,11 +644,11 @@ public class XmlUtils {
 							play.Logger.debug("Found publication year: " + pubYear);
 						}
 					} /* end of child node */
-				} else if (attrib.getNodeValue().equalsIgnoreCase("epub")
-						|| attrib.getNodeValue().equalsIgnoreCase("ppub")) {
-					childNodes = node.getChildNodes();
-					for (int j = 0; j < childNodes.getLength(); j++) {
-						child = childNodes.item(j);
+				}
+
+				if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
+					for (int k = 0; k < childNodes.getLength(); k++) {
+						child = childNodes.item(k);
 						String childName = child.getNodeName();
 						if (childName.equalsIgnoreCase("day")) {
 							epubDay = child.getTextContent();
@@ -638,7 +661,27 @@ public class XmlUtils {
 							play.Logger.debug("Found e-publication year: " + epubYear);
 						}
 					}
+					break;
 				}
+
+				if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
+					for (int k = 0; k < childNodes.getLength(); k++) {
+						child = childNodes.item(k);
+						String childName = child.getNodeName();
+						if (childName.equalsIgnoreCase("day")) {
+							epubDay = child.getTextContent();
+							play.Logger.debug("Found e-publication day: " + epubDay);
+						} else if (childName.equalsIgnoreCase("month")) {
+							epubMonth = child.getTextContent();
+							play.Logger.debug("Found e-publication month: " + epubMonth);
+						} else if (childName.equalsIgnoreCase("year")) {
+							epubYear = child.getTextContent();
+							play.Logger.debug("Found e-publication year: " + epubYear);
+						}
+					}
+					break;
+				}
+
 			} /* end of loop over pub-date nodes) */
 			rdf.put("issued", pubYear);
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
