@@ -401,45 +401,87 @@ public class JsonMapper {
 	 */
 	static void createJoinedFunding(Map<String, Object> rdf) {
 
-		List<Map<String, Object>> fundingId =
-				(List<Map<String, Object>>) rdf.get("fundingId");
-		if (fundingId == null) {
-			fundingId = new ArrayList<>();
-		}
-		List<String> fundings = (List<String>) rdf.get("funding");
-		if (fundings != null) {
-			for (String funding : fundings) {
+		Object myObj = rdf.get("fundingId");
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> fundingId =
+					(HashSet<Map<String, Object>>) rdf.get("fundingId");
+			if (fundingId == null) {
+				fundingId = new HashSet<>();
+			}
+			List<String> fundings = (List<String>) rdf.get("funding");
+			if (fundings != null) {
+				for (String funding : fundings) {
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+					fundingJoinedMap.put(PREF_LABEL, funding);
+					fundingId.add(fundingJoinedMap);
+				}
+				rdf.remove("funding");
+			}
+			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+			List<String> projectId = (List<String>) rdf.get("projectId");
+
+			List<Map<String, Object>> joinedFundings = new ArrayList<>();
+			if (fundingId.isEmpty())
+				return;
+
+			Iterator<Map<String, Object>> fit = fundingId.iterator();
+			int i = 0;
+			while (fit.hasNext()) {
+				Map<String, Object> m = fit.next();
+				Map<String, Object> f = new LinkedHashMap<>();
 				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
 				fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
 						+ "/adhoc/uri/" + helper.Base64UrlCoder.encode(funding));
 				fundingJoinedMap.put(PREF_LABEL, funding);
 				fundingId.add(fundingJoinedMap);
 			}
-			rdf.remove("funding");
-		}
-		List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
-		/*
-		 * in case of casting problems: List<String> fundingProgram = new
-		 * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
-		 */
-		List<String> projectId = (List<String>) rdf.get("projectId");
 
-		List<Map<String, Object>> joinedFundings = new ArrayList<>();
-		if (fundingId.isEmpty())
-			return;
-		for (int i = 0; i < fundingId.size(); i++) {
-			// play.Logger.info(fundingId.get(i));
-			Map<String, Object> f = new LinkedHashMap<>();
-			Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-			fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
-			fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
-			f.put("fundingJoined", fundingJoinedMap);
-			f.put("fundingProgramJoined", fundingProgram.get(i));
-			f.put("projectIdJoined", projectId.get(i));
-			joinedFundings.add(f);
+			rdf.put("joinedFunding", joinedFundings);
+			rdf.put("fundingId", fundingId);
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, Object>> fundingId =
+					(List<Map<String, Object>>) rdf.get("fundingId");
+			if (fundingId == null) {
+				fundingId = new ArrayList<>();
+			}
+			List<String> fundings = (List<String>) rdf.get("funding");
+			if (fundings != null) {
+				for (String funding : fundings) {
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+					fundingJoinedMap.put(PREF_LABEL, funding);
+					fundingId.add(fundingJoinedMap);
+				}
+				rdf.remove("funding");
+			}
+			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+      /*
+		  * in case of casting problems: List<String> fundingProgram = new
+		  * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
+		 */
+			List<String> projectId = (List<String>) rdf.get("projectId");
+
+			List<Map<String, Object>> joinedFundings = new ArrayList<>();
+			if (fundingId.isEmpty())
+				return;
+			for (int i = 0; i < fundingId.size(); i++) {
+				// play.Logger.info(fundingId.get(i));
+				Map<String, Object> f = new LinkedHashMap<>();
+				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+				fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
+				fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
+				f.put("fundingJoined", fundingJoinedMap);
+				f.put("fundingProgramJoined", fundingProgram.get(i));
+				f.put("projectIdJoined", projectId.get(i));
+				joinedFundings.add(f);
+			}
+			rdf.put("joinedFunding", joinedFundings);
+			rdf.put("fundingId", fundingId);
 		}
-		rdf.put("joinedFunding", joinedFundings);
-		rdf.put("fundingId", fundingId);
+
 	}
 
 	/**
@@ -560,20 +602,37 @@ public class JsonMapper {
 
 	private void addParts(Map<String, Object> rdf) {
 		Read read = new Read();
-		List<Map<String, Object>> parts =
-				(List<Map<String, Object>>) rdf.get("hasPart");
-		List<Map<String, Object>> children = new ArrayList();
-		if (parts != null) {
-			for (Map<String, Object> part : parts) {
+		List<Map<String, Object>> children = new ArrayList<>();
+		Object myObj = rdf.get("hasPart");
+		if (myObj instanceof java.util.HashSet) {
+			HashSet<Map<String, Object>> all =
+					(HashSet<Map<String, Object>>) rdf.get("hasPart");
+			if (all == null)
+				return;
+			Iterator<Map<String, Object>> fit = all.iterator();
+			while (fit.hasNext()) {
+				Map<String, Object> m = fit.next();
+				String id = (String) m.get(ID2);
+				Node cn = read.internalReadNode(id);
+				if (!"D".equals(cn.getState())) {
+					children.add(new JsonMapper(cn).getLd2WithoutContext());
+				}
+			}
+		} else if (myObj instanceof java.util.List) {
+			List<Map<String, Object>> all =
+					(List<Map<String, Object>>) rdf.get("hasPart");
+			if (all == null)
+				return;
+			for (Map<String, Object> part : all) {
 				String id = (String) part.get(ID2);
 				Node cn = read.internalReadNode(id);
 				if (!"D".equals(cn.getState())) {
 					children.add(new JsonMapper(cn).getLd2WithoutContext());
 				}
 			}
-			if (!children.isEmpty()) {
-				rdf.put("hasPart", children);
-			}
+		}
+		if (!children.isEmpty()) {
+			rdf.put("hasPart", children);
 		}
 	}
 

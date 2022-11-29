@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   "org.marc4j" % "marc4j" % "2.8.0", 
   "junit" % "junit" % "4.11", 
   "org.apache.pdfbox" % "pdfbox" % "1.8.0",
+  "org.apache.commons" % "commons-lang3" % "3.4",
   "org.bouncycastle" % "bcprov-jdk15" % "1.44",
   "org.bouncycastle" % "bcmail-jdk15" % "1.44", 
   "com.ibm.icu" % "icu4j" % "3.8",

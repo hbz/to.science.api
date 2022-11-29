@@ -117,8 +117,8 @@ public class Create extends RegalAction {
 	 * anhand ein- und dessselben ToScience-Objektes.
 	 * 
 	 * @param nodes nodes to set new properties for
-	 * @param object the RegalObject contains props that will be applied to all
-	 *          nodes in the list
+	 * @param object the ToScienceObject contains props that will be applied to
+	 *          all nodes in the list
 	 * @return a message
 	 */
 	public String patchResources(List<Node> nodes, ToScienceObject object) {

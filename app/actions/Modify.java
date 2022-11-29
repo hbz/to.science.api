@@ -48,6 +48,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -308,17 +309,9 @@ public class Modify extends RegalAction {
 	 * @param content The new metadata as LRMI string
 	 * @return a short message
 	 */
-	public String updateLobidify2AndEnrichLrmiData(Node node, RDFFormat format,
-			String content) {
-
-		play.Logger.debug("Start updateLobidify2AndEnrichLrmiData");
-		String pid = node.getPid();
-		if (content == null) {
-			throw new HttpArchiveException(406,
-					pid + " You've tried to upload an empty string."
-							+ " This action is not supported."
-							+ " Use HTTP DELETE instead.\n");
-		}
+	public String updateLobidify2AndEnrichDeepGreenData(Node node,
+			int embargoDuration, String deepgreenId, RDFFormat format,
+			Document content) {
 
 		// Map LRMI (or amb) metadata to the lobid2 metadata format
 		HashMap<String, Object> ld2 =
@@ -1408,8 +1401,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private static String rdfToString(Map<String, Object> result,
-			RDFFormat format) {
+	private String rdfToString(Map<String, Object> result, RDFFormat format) {
 		try {
 			String rdf = RdfUtils.readRdfToString(
 					new ByteArrayInputStream(json(result).getBytes("utf-8")),
@@ -1423,12 +1415,14 @@ public class Modify extends RegalAction {
 	/*
 	 * Mappt Objekt nach JSON-String. "Objekt" ist typischerweise eine Java Map.
 	 */
-	private static String json(Object obj) {
+	private String json(Object obj) {
 		try {
+			play.Logger.debug("Start json(obj)");
 			StringWriter w = new StringWriter();
 			ObjectMapper mapper = JsonUtil.mapper();
 			mapper.writeValue(w, obj);
 			String result = w.toString();
+			play.Logger.debug("Return result " + result);
 			return result;
 		} catch (IOException e) {
 			throw new HttpArchiveException(500, e);

@@ -6,7 +6,7 @@ h1. About
 
 Regal - repository for electronic documents and bibliographic data 
 
-For more information visit the "wiki":https://github.com/edoweb/edoweb2/wiki/
+For more information visit the "wiki":https://github.com/hbz/to.science/wiki
 
 Releases
 

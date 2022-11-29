@@ -306,18 +306,6 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "text/plain", nickname = "listLrmiData", value = "listLrmiData", notes = "Shows LRMI-Metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
-	public static Promise<Result> listLrmiData(@PathParam("pid") String pid) {
-		return new ReadMetadataAction().call(pid, node -> {
-			response().setHeader("Access-Control-Allow-Origin", "*");
-			String result = read.readLrmiData(node);
-			response().setContentType("application/json");
-			play.Logger.debug("result=" + result);
-			return ok(result);
-		});
-
-	}
-
 	@SuppressWarnings("resource")
 	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listData(@PathParam("pid") String pid) {
@@ -352,7 +340,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "patchResource", value = "patchResource", notes = "Patches a Resource", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> patchResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			try {
@@ -374,7 +362,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "patchResources", value = "patchResources", notes = "Applies the PATCH object to the resource and to all child resources", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "ToScienceObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> patchResources(@PathParam("pid") String pid) {
 		return new BulkActionAccessor().call((userId) -> {
 			ToScienceObject object = getToScienceObject(request().body().asJson());
@@ -391,7 +379,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			play.Logger.debug("Updating Pid: " + pid);
@@ -415,7 +403,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> createResource(
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
@@ -521,7 +509,9 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateLrmiMessageData", value = "updateLrmiData", notes = "Updates the metadata of the resource using Lrmi data.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
-	public static Promise<Result> updateLrmiData(@PathParam("pid") String pid) {
+	public static Promise<Result> updateDeepGreen(@PathParam("pid") String pid,
+			@QueryParam("embargo_duration") int embargo_duration,
+			@QueryParam("deepgreen_id") String deepgreen_id) {
 		return new ModifyAction().call(pid, node -> {
 			play.Logger.debug("Starting updateLrmiData with pid=" + pid);
 			play.Logger
@@ -529,7 +519,7 @@ public class Resource extends MyController {
 							+ request().body().asJson());
 			try {
 				/**
-				 * Wir legen 2 Datenströme an:
+				 * Wir legen 2 Datenstroeme an:
 				 * 
 				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
 				 * Datenstrom "Lrmidata"
@@ -550,7 +540,8 @@ public class Resource extends MyController {
 						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content);
 				play.Logger.debug(result2);
 
-				return JsonMessage(new Message(result1 + "\n" + result2));
+				// return JsonMessage(new Message(result1 + "\n" + result2));
+				return JsonMessage(new Message(result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

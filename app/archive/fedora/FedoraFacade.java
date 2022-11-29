@@ -274,7 +274,6 @@ public class FedoraFacade {
 		getChecksumFromFedora(node);
 		getMetadataFromFedora(node);
 		getMetadata2FromFedora(node);
-		getLrmiDataFromFedora(node);
 		getDataFromFedora(pid, node);
 		getConfFromFedora(pid, node);
 		getUrlHistFromFedora(pid, node);
