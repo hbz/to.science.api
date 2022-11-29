@@ -181,6 +181,6 @@ public abstract class Vocabulary {
 
 	public final static String metadata2 = "metadata2";
 	public final static String lrmiData = "lrmiData";
-	public final static String metadataJson = "toscience.json";
+	public final static String metadataJson = "toscience";
 
 }

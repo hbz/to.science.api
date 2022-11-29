@@ -80,15 +80,19 @@ public class LRMIMapper {
 			/**
 			 * - hole den LRMI-Datenstrom (s. GET /lrmiData)
 			 */
-			String oldContent = read.readLrmiData(node);
+			// get the current lrmiData as String
+			String currentLrmiContent = read.readLrmiData(node);
+			// String currentTosContent = read.
+
 			/**
 			 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
 			 */
 			// LRMI-Daten nach JSONObject wandeln
 			JSONObject lrmiJsonContent = new JSONObject();
-			if (oldContent != null) {
-				lrmiJsonContent = new JSONObject(oldContent);
+			if (currentLrmiContent != null) {
+				lrmiJsonContent = new JSONObject(currentLrmiContent);
 			}
+
 			JSONArray arr = null;
 			JSONObject obj = null;
 			JSONObject subObj = null;

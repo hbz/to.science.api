@@ -536,7 +536,7 @@ public class Utils {
 	}
 
 	void updateMetadataStream(Node node) {
-		updateMetadataStream("metadata", "tex/plain", "n-triple rdf metadata",
+		updateMetadataStream("metadata", "text/plain", "n-triple rdf metadata",
 				node);
 	}
 

@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
+import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 
 import java.io.IOException;
@@ -340,8 +341,8 @@ public class FedoraFacade {
 	private void getMetadata2FromFedora(Node node) {
 		try {
 			FedoraResponse response =
-					new GetDatastreamDissemination(node.getPid(), "metadata2").execute();
-			node.setMetadata(archive.fedora.Vocabulary.metadata2,
+					new GetDatastreamDissemination(node.getPid(), metadata2).execute();
+			node.setMetadata(metadata2,
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -351,8 +352,8 @@ public class FedoraFacade {
 	private void getLrmiDataFromFedora(Node node) {
 		try {
 			FedoraResponse response =
-					new GetDatastreamDissemination(node.getPid(), "Lrmidata").execute();
-			node.setMetadata(archive.fedora.Vocabulary.lrmiData,
+					new GetDatastreamDissemination(node.getPid(), lrmiData).execute();
+			node.setMetadata(lrmiData,
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name lrmiData is optional
@@ -412,13 +413,13 @@ public class FedoraFacade {
 		if (node.getMetadataFile("metadata") != null) {
 			utils.updateMetadataStream(node);
 		}
-		if (node.getMetadataFile(archive.fedora.Vocabulary.metadata2) != null) {
+		if (node.getMetadataFile(metadata2) != null) {
 			utils.updateMetadata2Stream(node);
 		}
-		if (node.getMetadataFile(archive.fedora.Vocabulary.lrmiData) != null) {
+		if (node.getMetadataFile(lrmiData) != null) {
 			utils.updateLrmiDataStream(node);
 		}
-		if (node.getMetadataFile(archive.fedora.Vocabulary.metadataJson) != null) {
+		if (node.getMetadataFile(metadataJson) != null) {
 			utils.updateMetadataJsonStream(node);
 		}
 		if (node.getSeqFile() != null) {

@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
+import archive.fedora.Vocabulary;
 import models.Globals;
 import models.Node;
 

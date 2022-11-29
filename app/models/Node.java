@@ -310,7 +310,7 @@ public class Node implements java.io.Serializable {
 	 * The metadata file
 	 * 
 	 * @param metadataType the type of the metadata: metadata2, lrmiData,
-	 *          toscience.json
+	 *          toscience
 	 * @return the absolute path to file
 	 */
 	public String getMetadataFile(String metadataType) {
@@ -607,7 +607,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @param metadataType the metadata type: metadata2, lrmiData, toscience.json
+	 * @param metadataType the metadata type: metadata2, lrmiData, toscience
 	 * @return the metadata as String (JSON or n-triple)
 	 */
 	@JsonIgnore()
@@ -616,7 +616,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @param metadataType the metadata type: metadata2, lrmiData, toscience.json
+	 * @param metadataType the metadata type: metadata2, lrmiData, toscience
 	 * @param metadata n-triple metadata as string
 	 * @return this
 	 */
