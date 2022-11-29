@@ -507,6 +507,8 @@ public class Resource extends MyController {
 				Node nodeNode = new Read().readNode(pid);
 				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
 						nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
+				// hier sollte evtl. getLd2() anstelle von getMetadata() genutzt werden;
+				// das mal testen. Ingolf/Hasan 10.11.2022
 				play.Logger.debug(result2);
 
 				/**
