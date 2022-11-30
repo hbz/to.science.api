@@ -622,18 +622,21 @@ public class XmlUtils {
 			String epubMonth = null;
 			String epubYear = null;
 			nodeList = content.getElementsByTagName("pub-date");
+
+			// check for epub
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
+				childNodes = node.getChildNodes();
+
 				attributes = node.getAttributes();
 				if (attributes == null) {
 					continue;
 				}
+
 				attrib = attributes.getNamedItem("pub-type");
 				if (attrib == null) {
 					continue;
 				}
-
-				childNodes = node.getChildNodes();
 
 				if (attrib.getNodeValue().equalsIgnoreCase("subscription-year")) {
 					for (int j = 0; j < childNodes.getLength(); j++) {
@@ -643,7 +646,7 @@ public class XmlUtils {
 							pubYear = child.getTextContent();
 							play.Logger.debug("Found publication year: " + pubYear);
 						}
-					} /* end of child node */
+					}
 				}
 
 				if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
@@ -663,26 +666,44 @@ public class XmlUtils {
 					}
 					break;
 				}
+			}
 
-				if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
-					for (int k = 0; k < childNodes.getLength(); k++) {
-						child = childNodes.item(k);
-						String childName = child.getNodeName();
-						if (childName.equalsIgnoreCase("day")) {
-							epubDay = child.getTextContent();
-							play.Logger.debug("Found e-publication day: " + epubDay);
-						} else if (childName.equalsIgnoreCase("month")) {
-							epubMonth = child.getTextContent();
-							play.Logger.debug("Found e-publication month: " + epubMonth);
-						} else if (childName.equalsIgnoreCase("year")) {
-							epubYear = child.getTextContent();
-							play.Logger.debug("Found e-publication year: " + epubYear);
-						}
+			// if epub does not exist, check for ppub
+			if (epubYear == null || epubMonth == null) {
+				for (int i = 0; i < nodeList.getLength(); i++) {
+					node = nodeList.item(i);
+					childNodes = node.getChildNodes();
+
+					attributes = node.getAttributes();
+					if (attributes == null) {
+						continue;
 					}
-					break;
-				}
 
-			} /* end of loop over pub-date nodes) */
+					attrib = attributes.getNamedItem("pub-type");
+					if (attrib == null) {
+						continue;
+					}
+
+					if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
+						for (int k = 0; k < childNodes.getLength(); k++) {
+							child = childNodes.item(k);
+							String childName = child.getNodeName();
+							if (childName.equalsIgnoreCase("day")) {
+								epubDay = child.getTextContent();
+								play.Logger.debug("Found e-publication day: " + epubDay);
+							} else if (childName.equalsIgnoreCase("month")) {
+								epubMonth = child.getTextContent();
+								play.Logger.debug("Found e-publication month: " + epubMonth);
+							} else if (childName.equalsIgnoreCase("year")) {
+								epubYear = child.getTextContent();
+								play.Logger.debug("Found e-publication year: " + epubYear);
+							}
+						}
+						break;
+					}
+				}
+			}
+
 			rdf.put("issued", pubYear);
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -692,6 +713,7 @@ public class XmlUtils {
 			}
 			rdf.put("publicationYear", Arrays.asList(publicationDateStr));
 
+			/* Monate zum Embargodatum hinzufügen */
 			if (embargo_duration > 0) {
 				Date publicationDate = formatter.parse(publicationDateStr);
 				Date embargoDate =
