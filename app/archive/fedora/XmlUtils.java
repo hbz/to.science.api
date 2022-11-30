@@ -661,7 +661,7 @@ public class XmlUtils {
 			/* Zitierangabe */
 			NodeList volumes = content.getElementsByTagName("volume");
 			if (volumes.getLength() > 0
-					&& volumes.item(0).getTextContent().equals("-1")) {
+					&& !volumes.item(0).getTextContent().equals("-1")) {
 				String volume = volumes.item(0).getTextContent();
 
 				NodeList issues = content.getElementsByTagName("issue");
