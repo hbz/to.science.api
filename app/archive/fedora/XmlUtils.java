@@ -549,7 +549,9 @@ public class XmlUtils {
 									continue;
 								}
 								if (childAttrib.getNodeValue().equalsIgnoreCase("orcid")) {
-									orcid = child.getTextContent();
+									String text = child.getTextContent();
+									orcid = "https://orcid.org/"
+											+ text.substring(text.lastIndexOf("/") + 1);
 									play.Logger.debug("Found orcid: " + orcid);
 								}
 							}
