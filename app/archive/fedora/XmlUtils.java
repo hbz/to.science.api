@@ -760,7 +760,7 @@ public class XmlUtils {
 
 			rdf.put("license", licenses);
 
-			/* Abstract */
+			/* Abstract und Trans-abstract */
 			nodeList = content.getElementsByTagName("abstract");
 			if (nodeList.getLength() > 0) {
 				Node paragraphNode = getFirstElementNode(nodeList.item(0));
@@ -774,6 +774,13 @@ public class XmlUtils {
 								.replaceAll("[\\r\\n\\t\\u00a0]+", " ")
 								.replaceAll("\\s+", " ")));
 			}
+			/*
+			 * nodeList = content.getElementsByTagName("trans-abstract"); if
+			 * (nodeList.getLength() > 0) { Node titleNode =
+			 * getFirstElementNode(nodeList.item(0)); if(titleNode != null) { if
+			 * (titleNode.getNodeName().equalsIgnoreCase("title"))
+			 * nodeList.item(0).removeChild(titleNode); } }
+			 */
 
 			/* Schlagwörter */
 			nodeList = content.getElementsByTagName("kwd");
