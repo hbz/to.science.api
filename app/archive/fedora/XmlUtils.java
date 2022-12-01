@@ -488,8 +488,7 @@ public class XmlUtils {
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent().trim()
 						.replaceAll("[\\r\\n\\u00a0]+", " ")));
-			}
-			if (nodeList.getLength() > 0 && subTitleList.getLength() > 0) {
+			} else if (nodeList.getLength() > 0 && subTitleList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				play.Logger
@@ -626,7 +625,11 @@ public class XmlUtils {
 			// check for epub
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
+
 				childNodes = node.getChildNodes();
+				if (childNodes == null) {
+					continue;
+				}
 
 				attributes = node.getAttributes();
 				if (attributes == null) {
@@ -672,7 +675,11 @@ public class XmlUtils {
 			if (epubYear == null || epubMonth == null) {
 				for (int i = 0; i < nodeList.getLength(); i++) {
 					node = nodeList.item(i);
+
 					childNodes = node.getChildNodes();
+					if (childNodes == null) {
+						continue;
+					}
 
 					attributes = node.getAttributes();
 					if (attributes == null) {
