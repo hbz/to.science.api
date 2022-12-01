@@ -488,7 +488,8 @@ public class XmlUtils {
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent().trim()
 						.replaceAll("[\\r\\n\\u00a0]+", " ")));
-			} else if (nodeList.getLength() > 0 && subTitleList.getLength() > 0) {
+			}
+			else if (nodeList.getLength() > 0 && subTitleList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				play.Logger
@@ -626,19 +627,13 @@ public class XmlUtils {
 				node = nodeList.item(i);
 
 				childNodes = node.getChildNodes();
-				if (childNodes == null) {
-					continue;
-				}
+				if( childNodes == null) { continue; }
 
 				attributes = node.getAttributes();
-				if (attributes == null) {
-					continue;
-				}
+				if (attributes == null) { continue; }
 
 				attrib = attributes.getNamedItem("pub-type");
-				if (attrib == null) {
-					continue;
-				}
+				if (attrib == null) { continue; }
 
 				if (attrib.getNodeValue().equalsIgnoreCase("subscription-year")) {
 					for (int j = 0; j < childNodes.getLength(); j++) {
@@ -647,6 +642,7 @@ public class XmlUtils {
 						if (childName.equalsIgnoreCase("year")) {
 							pubYear = child.getTextContent();
 							play.Logger.debug("Found publication year: " + pubYear);
+							break;
 						}
 					}
 					continue;
