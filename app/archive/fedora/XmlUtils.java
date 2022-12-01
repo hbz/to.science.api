@@ -643,8 +643,10 @@ public class XmlUtils {
 						if (childName.equalsIgnoreCase("year")) {
 							pubYear = child.getTextContent();
 							play.Logger.debug("Found publication year: " + pubYear);
+							break;
 						}
 					}
+					continue;
 				}
 
 				if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
