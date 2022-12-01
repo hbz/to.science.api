@@ -764,7 +764,7 @@ public class XmlUtils {
 			List<String> abstracts = new ArrayList<>();
 
 			nodeList = content.getElementsByTagName("abstract");
-			if (nodeList.getLength() > 0) {
+			if (nodeList != null && nodeList.getLength() > 0) {
 				Node paragraphNode = getFirstElementNode(nodeList.item(0));
 				Node boldNode = getFirstElementNode(paragraphNode);
 				if (boldNode != null
@@ -776,9 +776,10 @@ public class XmlUtils {
 			}
 
 			nodeList = content.getElementsByTagName("trans-abstract");
-			if (nodeList.getLength() > 0) {
+			if (nodeList != null && nodeList.getLength() > 0) {
 				childNodes = nodeList.item(0).getChildNodes();
-				for (int i = 0; i < childNodes.getLength(); i++) {
+				int length = childNodes != null ? childNodes.getLength() : 0;
+				for (int i = 0; i < length; i++) {
 					Node childNode = childNodes.item(i);
 					if (childNode.getNodeName().equalsIgnoreCase("title")) {
 						continue;
