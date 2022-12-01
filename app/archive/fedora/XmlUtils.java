@@ -622,7 +622,6 @@ public class XmlUtils {
 			String epubYear = null;
 			nodeList = content.getElementsByTagName("pub-date");
 
-			// check for epub
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				node = nodeList.item(i);
 
@@ -650,6 +649,7 @@ public class XmlUtils {
 							play.Logger.debug("Found publication year: " + pubYear);
 						}
 					}
+					continue;
 				}
 
 				if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
@@ -669,28 +669,8 @@ public class XmlUtils {
 					}
 					break;
 				}
-			}
 
-			// if epub does not exist, check for ppub
-			if (epubYear == null || epubMonth == null) {
-				for (int i = 0; i < nodeList.getLength(); i++) {
-					node = nodeList.item(i);
-
-					childNodes = node.getChildNodes();
-					if (childNodes == null) {
-						continue;
-					}
-
-					attributes = node.getAttributes();
-					if (attributes == null) {
-						continue;
-					}
-
-					attrib = attributes.getNamedItem("pub-type");
-					if (attrib == null) {
-						continue;
-					}
-
+				if (epubYear == null && epubMonth == null) {
 					if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
 						for (int k = 0; k < childNodes.getLength(); k++) {
 							child = childNodes.item(k);
@@ -706,9 +686,10 @@ public class XmlUtils {
 								play.Logger.debug("Found e-publication year: " + epubYear);
 							}
 						}
-						break;
+						continue;
 					}
 				}
+
 			}
 
 			rdf.put("issued", pubYear);
