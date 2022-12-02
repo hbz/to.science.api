@@ -372,8 +372,10 @@ public class XmlUtils {
 			/* Die Zeitschrift bei lobid über die ISSN hinzu lesen */
 			String lobidId = null;
 			Node node = null;
-			NodeList nodeList = content.getElementsByTagName("issn");
-			for (int i = 0; i < nodeList.getLength(); i++) {
+
+			DocumentElementList elemList = new DocumentElementList(content, "issn");
+			NodeList nodeList = elemList.getNodeList();
+			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 
 				attributes = node.getAttributes();
@@ -423,8 +425,9 @@ public class XmlUtils {
 			}
 
 			/* Zeitschriftentitel */
-			nodeList = content.getElementsByTagName("journal-title");
-			if (nodeList.getLength() > 0) {
+			elemList = new DocumentElementList(content, "journal-title");
+			nodeList = elemList.getNodeList();
+			if (elemList.getLength() > 0) {
 				String journalTitle = nodeList.item(0).getTextContent();
 				play.Logger.debug("Found journal title: " + journalTitle);
 				String titleId = null;
@@ -447,9 +450,10 @@ public class XmlUtils {
 			}
 
 			/* DOI */
-			nodeList = content.getElementsByTagName("article-id");
+			elemList = new DocumentElementList(content, "article-id");
+			nodeList = elemList.getNodeList();
 			List<Map<String, Object>> publisherVersions = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
+			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 				attributes = node.getAttributes();
 				if (attributes == null) {
@@ -481,29 +485,35 @@ public class XmlUtils {
 			rdf.put("publisherVersion", publisherVersions);
 
 			/* Aufsatztitel */
-			nodeList = content.getElementsByTagName("article-title");
-			NodeList subTitleList = content.getElementsByTagName("subtitle");
-			if (nodeList.getLength() > 0 && subTitleList.getLength() == 0) {
+			elemList = new DocumentElementList(content, "article-title");
+			nodeList = elemList.getNodeList();
+
+			DocumentElementList subTitleElemList =
+					new DocumentElementList(content, "subtitle");
+			NodeList subTitleNodeList = subTitleElemList.getNodeList();
+
+			if (elemList.getLength() > 0 && subTitleElemList.getLength() == 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent().trim()
 						.replaceAll("[\\r\\n\\u00a0]+", " ")));
-			}
-			else if (nodeList.getLength() > 0 && subTitleList.getLength() > 0) {
+			} else if (elemList.getLength() > 0 && subTitleElemList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
-				play.Logger
-						.debug("Found subtitle: " + subTitleList.item(0).getTextContent());
+				play.Logger.debug(
+						"Found subtitle: " + subTitleNodeList.item(0).getTextContent());
 				rdf.put("title",
 						Arrays.asList(nodeList.item(0).getTextContent().trim()
 								.replaceAll("[\\r\\n\\u00a0]+", " ") + " : "
-								+ subTitleList.item(0).getTextContent().trim()
+								+ subTitleNodeList.item(0).getTextContent().trim()
 										.replaceAll("[\\r\\n\\u00a0]+", " ")));
 			}
 
 			/* Alternative (Trans-title) */
-			nodeList = content.getElementsByTagName("trans-title");
-			if (nodeList.getLength() > 0) {
+			elemList = new DocumentElementList(content, "trans-title");
+			nodeList = elemList.getNodeList();
+
+			if (elemList.getLength() > 0) {
 				play.Logger
 						.debug("Found trans title: " + nodeList.item(0).getTextContent());
 				rdf.put("alternative", Arrays.asList(nodeList.item(0).getTextContent()
@@ -512,11 +522,12 @@ public class XmlUtils {
 
 			/* Autor */
 			String contributorOrder = null;
-			nodeList = content.getElementsByTagName("contrib");
+			elemList = new DocumentElementList(content, "contrib");
+			nodeList = elemList.getNodeList();
 			NodeList childNodes = null;
 			Node child = null;
 			List<Map<String, Object>> creators = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
+			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 				attributes = node.getAttributes();
 				if (attributes == null) {
@@ -621,19 +632,27 @@ public class XmlUtils {
 			String epubDay = null;
 			String epubMonth = null;
 			String epubYear = null;
-			nodeList = content.getElementsByTagName("pub-date");
 
-			for (int i = 0; i < nodeList.getLength(); i++) {
+			elemList = new DocumentElementList(content, "pub-date");
+			nodeList = elemList.getNodeList();
+
+			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 
 				childNodes = node.getChildNodes();
-				if( childNodes == null) { continue; }
+				if (childNodes == null) {
+					continue;
+				}
 
 				attributes = node.getAttributes();
-				if (attributes == null) { continue; }
+				if (attributes == null) {
+					continue;
+				}
 
 				attrib = attributes.getNamedItem("pub-type");
-				if (attrib == null) { continue; }
+				if (attrib == null) {
+					continue;
+				}
 
 				if (attrib.getNodeValue().equalsIgnoreCase("subscription-year")) {
 					for (int j = 0; j < childNodes.getLength(); j++) {
@@ -706,31 +725,39 @@ public class XmlUtils {
 			}
 
 			/* Zitierangabe */
-			NodeList volumes = content.getElementsByTagName("volume");
-			if (volumes.getLength() > 0) {
+			DocumentElementList volumesElemList =
+					new DocumentElementList(content, "volume");
+			NodeList volumes = volumesElemList.getNodeList();
+			if (volumesElemList.getLength() > 0) {
 				String volume = "";
-				for (int i = 0; i < volumes.getLength(); i++) {
+				for (int i = 0; i < volumesElemList.getLength(); i++) {
 					node = volumes.item(i);
 					volume = node.getTextContent();
 					break;
 				}
-				NodeList issues = content.getElementsByTagName("issue");
+				DocumentElementList issuesElemList =
+						new DocumentElementList(content, "issue");
+				NodeList issues = issuesElemList.getNodeList();
 				String issue = "";
-				for (int i = 0; i < issues.getLength(); i++) {
+				for (int i = 0; i < issuesElemList.getLength(); i++) {
 					node = issues.item(i);
 					issue = node.getTextContent();
 					break;
 				}
-				NodeList fpages = content.getElementsByTagName("fpage");
+				DocumentElementList fpageElemList =
+						new DocumentElementList(content, "fpage");
+				NodeList fpages = fpageElemList.getNodeList();
 				String fpage = "";
-				for (int i = 0; i < fpages.getLength(); i++) {
+				for (int i = 0; i < fpageElemList.getLength(); i++) {
 					node = fpages.item(i);
 					fpage = node.getTextContent();
 					break;
 				}
-				NodeList lpages = content.getElementsByTagName("lpage");
+				DocumentElementList lpageElemList =
+						new DocumentElementList(content, "lpage");
+				NodeList lpages = lpageElemList.getNodeList();
 				String lpage = "";
-				for (int i = 0; i < lpages.getLength(); i++) {
+				for (int i = 0; i < lpageElemList.getLength(); i++) {
 					node = lpages.item(i);
 					lpage = node.getTextContent();
 					break;
@@ -744,17 +771,19 @@ public class XmlUtils {
 			}
 
 			/* Copyright-Jahr */
-			nodeList = content.getElementsByTagName("copyright-year");
-			for (int i = 0; i < nodeList.getLength(); i++) {
+			elemList = new DocumentElementList(content, "copyright-year");
+			nodeList = elemList.getNodeList();
+			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 				rdf.put("yearOfCopyright", Arrays.asList(node.getTextContent()));
 				break;
 			}
 
 			/* Open-Access Lizenz */
-			nodeList = content.getElementsByTagName("ext-link");
+			elemList = new DocumentElementList(content, "ext-link");
+			nodeList = elemList.getNodeList();
 			List<Map<String, Object>> licenses = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
+			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 				String parentNodeName = node.getParentNode().getNodeName();
 				if (parentNodeName.equalsIgnoreCase("license-p")
@@ -780,8 +809,9 @@ public class XmlUtils {
 			rdf.put("license", licenses);
 
 			/* Abstract */
-			nodeList = content.getElementsByTagName("abstract");
-			if (nodeList.getLength() > 0) {
+			elemList = new DocumentElementList(content, "abstract");
+			nodeList = elemList.getNodeList();
+			if (elemList.getLength() > 0) {
 				Node paragraphNode = getFirstElementNode(nodeList.item(0));
 				Node boldNode = getFirstElementNode(paragraphNode);
 				if (boldNode != null) {
@@ -795,9 +825,10 @@ public class XmlUtils {
 			}
 
 			/* Schlagwörter */
-			nodeList = content.getElementsByTagName("kwd");
+			elemList = new DocumentElementList(content, "kwd");
+			nodeList = elemList.getNodeList();
 			List<Map<String, Object>> keywords = new ArrayList<>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
+			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 				String keywordStr = node.getTextContent();
 				String keywordId = Globals.protocol + Globals.server + "/adhoc/"
