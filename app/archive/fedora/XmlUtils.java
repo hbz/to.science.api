@@ -837,21 +837,44 @@ public class XmlUtils {
 
 			rdf.put("license", licenses);
 
-			/* Abstract */
+			/* Abstract und Trans-abstract */
+			List<String> abstracts = new ArrayList<>();
 			elemList = new DocumentElementList(content, "abstract");
 			nodeList = elemList.getNodeList();
 			if (elemList.getLength() > 0) {
 				Node paragraphNode = getFirstElementNode(nodeList.item(0));
 				Node boldNode = getFirstElementNode(paragraphNode);
-				if (boldNode != null) {
-					if (boldNode.getNodeName().equalsIgnoreCase("bold"))
-						paragraphNode.removeChild(boldNode);
+				if (boldNode != null
+						&& boldNode.getNodeName().equalsIgnoreCase("bold")) {
+					paragraphNode.removeChild(boldNode);
 				}
-				rdf.put("abstractText",
-						Arrays.asList(paragraphNode.getTextContent().trim()
-								.replaceAll("[\\r\\n\\t\\u00a0]+", " ")
-								.replaceAll("\\s+", " ")));
+				abstracts.add(paragraphNode.getTextContent().trim()
+						.replaceAll("[\\r\\n\\t\\u00a0]+", " ").replaceAll("\\s+", " "));
 			}
+
+			nodeList = content.getElementsByTagName("trans-abstract");
+			if (nodeList != null && nodeList.getLength() > 0) {
+				childNodes = nodeList.item(0).getChildNodes();
+				int length = childNodes != null ? childNodes.getLength() : 0;
+				for (int i = 0; i < length; i++) {
+					Node childNode = childNodes.item(i);
+					if (childNode.getNodeName().equalsIgnoreCase("title")) {
+						continue;
+					}
+					if (childNode.getNodeName().equalsIgnoreCase("p")) {
+						Node boldNode = getFirstElementNode(childNode);
+						if (boldNode != null
+								&& boldNode.getNodeName().equalsIgnoreCase("bold")) {
+							childNode.removeChild(boldNode);
+						}
+						abstracts.add(childNode.getTextContent().trim()
+								.replaceAll("[\\r\\n\\t\\u00a0]+", " ")
+								.replaceAll("\\s+", " "));
+					}
+				}
+			}
+
+			rdf.put("abstractText", abstracts);
 
 			/* Schlagwörter */
 			elemList = new DocumentElementList(content, "kwd");
