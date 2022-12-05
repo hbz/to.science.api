@@ -350,13 +350,15 @@ public class XmlUtils {
 	 * @author Alessio Pellerito, hbz
 	 * @param metadata2 RDF-Metadaten im Format lobid2 als Java-Map
 	 * @param embargo_duration : Die Dauer des Embargos in Monaten.
+	 * @param deepgreen_id Die id der von deepgreen importierten Ressource
 	 * @param content Die DeepGreen-Daten im Format Document (XML)
 	 * @date 2022-03-30
 	 * 
 	 * @return Die Daten im Format lobid2-RDF
 	 */
 	public Map<String, Object> getLd2Lobidify2DeepGreen(
-			Map<String, Object> metadata2, int embargo_duration, Document content) {
+			Map<String, Object> metadata2, int embargo_duration, String deepgreen_id,
+			Document content) {
 		/* Mapping von DeepGreen.xml nach lobid2.json */
 		try {
 			// Neues JSON-Objekt anlegen; fuer lobid2-Daten
@@ -579,7 +581,9 @@ public class XmlUtils {
 									continue;
 								}
 								if (childAttrib.getNodeValue().equalsIgnoreCase("orcid")) {
-									orcid = child.getTextContent();
+									String text = child.getTextContent();
+									orcid = "https://orcid.org/"
+											+ text.substring(text.lastIndexOf("/") + 1);
 									play.Logger.debug("Found orcid: " + orcid);
 								}
 							}
@@ -762,6 +766,7 @@ public class XmlUtils {
 					lpage = node.getTextContent();
 					break;
 				}
+        
 				String bibliographicCitation =
 						new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
 				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
@@ -779,6 +784,7 @@ public class XmlUtils {
 				break;
 			}
 
+
 			/* Open-Access Lizenz */
 			elemList = new DocumentElementList(content, "ext-link");
 			nodeList = elemList.getNodeList();
@@ -786,26 +792,49 @@ public class XmlUtils {
 			for (int i = 0; i < elemList.getLength(); i++) {
 				node = nodeList.item(i);
 				String parentNodeName = node.getParentNode().getNodeName();
-				if (parentNodeName.equalsIgnoreCase("license-p")
-						|| parentNodeName.equalsIgnoreCase("license")) {
-					// wir gehen davon aus, dass license-type == open-access ; streng
-					// genommen das hier noch prüfen !!
-					attributes = node.getAttributes();
-					if (attributes == null) {
-						continue;
-					}
-					attrib = attributes.getNamedItem("xlink:href");
-					if (attrib == null) {
-						continue;
-					}
-					String licenseId = attrib.getNodeValue();
-					play.Logger.debug("Found LicenseId: " + licenseId);
-					Map<String, Object> license = new TreeMap<>();
-					license.put("@id", licenseId);
-					license.put("prefLabel", licenseId);
-					licenses.add(license);
+				if (parentNodeName.equalsIgnoreCase("license")
+						|| parentNodeName.equalsIgnoreCase("license-p")) {
+					Node xlinkAttrib = node.getAttributes().getNamedItem("xlink:href");
+					licenseId = xlinkAttrib.getNodeValue();
+					break;
 				}
 			}
+
+			// Fall 2: license-tag hat xlink:href Attribut
+			if (licenseId == null) {
+				NodeList nodeLstLicense = content.getElementsByTagName("license");
+				for (int i = 0; i < nodeLstLicense.getLength(); i++) {
+					node = nodeLstLicense.item(i);
+					Node xLink = node.getAttributes().getNamedItem("xlink:href");
+					if (xLink != null) {
+						licenseId = xLink.getNodeValue();
+						break;
+					}
+				}
+			}
+
+			// Fall 3: license-p-tag Text in Klammern auslesen
+			if (licenseId == null) {
+				NodeList nodeLstLicenseP = content.getElementsByTagName("license-p");
+				for (int i = 0; i < nodeLstLicenseP.getLength(); i++) {
+					node = nodeLstLicenseP.item(i);
+					Node parent = node.getParentNode();
+					if (parent.getAttributes().getNamedItem("xlink:href") == null) {
+						String text = node.getTextContent();
+						play.Logger.info("textContent: " + text);
+						licenseId =
+								text.substring(text.indexOf("(") + 1, text.indexOf(")"));
+						break;
+					}
+				}
+			}
+
+			play.Logger.debug("Found LicenseId: " + licenseId);
+			Map<String, Object> license = new TreeMap<>();
+			license.put("@id", licenseId);
+			license.put("prefLabel", licenseId);
+			licenses.add(license);
+
 			rdf.put("license", licenses);
 
 			/* Abstract */
@@ -844,6 +873,10 @@ public class XmlUtils {
 			rdf.put("subject", keywords);
 			rdf.put("contentType", "article");
 
+			/* Deepgreen-Id */
+			rdf.put("additionalNotes",
+					Arrays.asList("DeepGreen-ID: " + deepgreen_id));
+
 			/* RDF-Type */
 			Map<String, Object> rdftype = new TreeMap<>();
 			rdftype.put("@id", "http://purl.org/ontology/bibo/Article");
@@ -864,8 +897,31 @@ public class XmlUtils {
 
 			/* Sprache */
 			Map<String, Object> language = new TreeMap<>();
-			language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/eng");
-			language.put("prefLabel", "Englisch");
+			NodeList articleList = content.getElementsByTagName("article");
+			Node xmlLangValue =
+					articleList.item(0).getAttributes().getNamedItem("xml:lang");
+			switch (xmlLangValue.getNodeValue()) {
+			case "fr":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/fra");
+				language.put("prefLabel", "Französisch");
+				break;
+			case "it":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ita");
+				language.put("prefLabel", "Italienisch");
+				break;
+			case "sp":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/spa");
+				language.put("prefLabel", "Spanisch");
+				break;
+			case "de":
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ger");
+				language.put("prefLabel", "Deutsch");
+				break;
+			default:
+				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/eng");
+				language.put("prefLabel", "Englisch");
+			}
+
 			rdf.put("language", Arrays.asList(language));
 
 			/* DDC */
