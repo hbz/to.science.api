@@ -59,6 +59,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
+import archive.fedora.Vocabulary.*;
 import archive.fedora.XmlUtils;
 import controllers.MyController;
 import helper.DataciteClient;
@@ -214,11 +215,11 @@ public class Modify extends RegalAction {
 
 	/**
 	 * This method creates an LRMI datastream (unmapped) and appends it to a
-	 * ressource.
+	 * resource.
 	 * 
 	 * @param pid The pid of the ressource that must be updated
 	 * @param content The metadata in the format lrmi
-	 * @return a short message
+	 * @return The updated and enriched LRMI metadata as String
 	 */
 	public String updateAndEnrichLrmiData(String pid, JsonNode content) {
 		try {
@@ -299,12 +300,12 @@ public class Modify extends RegalAction {
 	}
 
 	/**
-	 * The method maps LRMI metadata to the Lobid2 format and creates a data
-	 * stream "metadata2" of the resource
+	 * The method maps LRMI metadata to the Lobid2 format and creates two data
+	 * streams of the resource: "metadata2" and "toscience"
 	 * 
 	 * @param node The node of the resource that must be updated
-	 * @param format RDF-Format, z.B. NTRIPLES
-	 * @param content The metadata as LRMI string
+	 * @param format RDF-Format for the metadata2 data stream (should be NTRIPLES)
+	 * @param content The new metadata as LRMI string
 	 * @return a short message
 	 */
 	public String updateLobidify2AndEnrichLrmiData(Node node, RDFFormat format,
@@ -319,15 +320,109 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
+		// Map LRMI (or amb) metadata to the lobid2 metadata format
+		HashMap<String, Object> ld2 =
+				(new JsonMapper()).getLd2Lobidify2Lrmi(node, content);
+
+		// 1. Update or create the metadata2 data stream
 		Map<String, Object> rdf =
-				new JsonMapper().getLd2Lobidify2Lrmi(node, content);
-		play.Logger.debug("Mapped LRMI data to lobid2!");
+				(Map<String, Object>) ld2.get(archive.fedora.Vocabulary.metadata2);
 		updateMetadata2(node, rdfToString(rdf, format));
 		play.Logger.debug("Updated Metadata2 datastream!");
 
+		// 2. Update or create the toscience data stream
+		/**
+		 * @Andres: this needs to be coded. The class MetadataJson needs to be
+		 *          defined in to.science.core
+		 */
+		/*
+		 * MetadataJson metadataJson = (MetadataJson)
+		 * ld2.get(archive.fedora.Vocabulary.metadataJson);
+		 */
+
+		// updateMetadataJson(node, metadataJson.getJson());
+		// In the absence of a mapping, we will continue with an example datastream:
+		updateMetadataJson(node, "{\n" + "        \"license\": {\n"
+				+ "                \"prefLabel\": \"CC BY 4.0\",\n"
+				+ "                \"@id\": \"https://creativecommons.org/licenses/by/4.0/\"\n"
+				+ "        },\n" + "        \"creator\": [\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Ruhr-Universität Bochum\",\n"
+				+ "                                \"@id\": \"https://ror.org/04tsk2644\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Andres Quast\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Dr.\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/QW5kcmVzIFF1YXN0\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Bergische Universität Wuppertal\",\n"
+				+ "                                \"@id\": \"https://ror.org/00613ak93\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Ingölf Küss\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Dr.\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/SW5nw7ZsZiBLw7xzcw==\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Universität zu Köln\",\n"
+				+ "                                \"@id\": \"https://ror.org/00rcxh774\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Peter Reimer\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Keine Angabe\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://orcid.org/0000-0002-3187-2536\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"FernUniversität in Hagen\",\n"
+				+ "                                \"@id\": \"https://ror.org/04tkkr536\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Markus Deimann\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Dr.\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://orcid.org/0000-0002-1652-5181\"\n"
+				+ "                },\n" + "                {\n"
+				+ "                        \"affiliation\": {\n"
+				+ "                                \"prefLabel\": \"Hochschule für Musik Detmold\",\n"
+				+ "                                \"@id\": \"https://ror.org/03y02pg02\",\n"
+				+ "                                \"type\": \"Organization\"\n"
+				+ "                        },\n"
+				+ "                        \"prefLabel\": \"Nina Hagen\",\n"
+				+ "                        \"academicDegree\": {\n"
+				+ "                                \"prefLabel\": \"Keine Angabe\",\n"
+				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
+				+ "                        },\n"
+				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/TmluYSBIYWdlbg==\"\n"
+				+ "                }\n" + "        ],\n" + "        \"medium\": [\n"
+				+ "                {\n"
+				+ "                        \"@id\": \"https://w3id.org/orca.nrw/medientypen/diagram\"\n"
+				+ "                }\n" + "        ],\n" + "        \"department\": [\n"
+				+ "                {\n"
+				+ "                        \"prefLabel\": \"Kommunikations- und Informationstechnik\",\n"
+				+ "                        \"@id\": \"https://w3id.org/kim/hochschulfaechersystematik/n222\"\n"
+				+ "                }\n" + "        ]\n" + "}");
+		play.Logger.debug("Updated toscience datastream!");
+
 		String enrichMessage = Enrich.enrichMetadata2(node);
+		/**
+		 * @Andres: hier könnte noch ein Enrichment des neuen toscience-Datenstroms
+		 *          stattfinden. enrichMessage.append(" " +
+		 *          Enrich().enrichMetadataJson(node));
+		 */
 		return pid
-				+ " LRMI-metadata successfully updated, lobidified and enriched! "
+				+ " LRMI-metadata successfully lobidified, updated and enriched! "
 				+ enrichMessage;
 	}
 
@@ -359,9 +454,8 @@ public class Modify extends RegalAction {
 		updateLrmiData(node, lrmiContent);
 		play.Logger.debug("Updated LRMI datastream!");
 
-		String enrichMessage = new Enrich().enrichLrmiData(node);
-		return pid + " LRMI-metadata successfully updated and enriched! "
-				+ enrichMessage;
+		lrmiContent = new Enrich().enrichLrmiData(node);
+		return pid + " LRMI-metadata successfully updated and enriched! ";
 	}
 
 	/**
@@ -394,7 +488,7 @@ public class Modify extends RegalAction {
 	 * 
 	 * @param node The node of the resource that must be updated
 	 * @param content The metadata as LRMI string
-	 * @return a short message
+	 * @return The enriched LRMI data as string
 	 */
 	public String updateAndEnrichLrmiData(Node node, String content) {
 		play.Logger.debug("Start Update and enrich LRMI data.");
@@ -412,13 +506,13 @@ public class Modify extends RegalAction {
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
 		updateLrmiData(node, content_toscience);
-		// msg = pid + " LRMI-metadata of " + node.getPid() + " successfully
-		// updated! ";
-		String enrichMessage = new Enrich().enrichLrmiData(node);
+		content_toscience = new Enrich().enrichLrmiData(node);
+		play.Logger
+				.debug("Enriched LRMI data. Content is now: " + content_toscience);
 		msg = pid + " LRMI-metadata of " + node.getPid()
-				+ " successfully updated and enriched! " + enrichMessage;
+				+ " successfully updated and enriched! ";
 		play.Logger.debug(msg);
-		return msg;
+		return content_toscience;
 	}
 
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,
@@ -482,7 +576,7 @@ public class Modify extends RegalAction {
 			content = rewriteContent(content, pid);
 			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
-			node.setMetadataFile(file.getAbsolutePath());
+			node.setMetadataFile("metadata", file.getAbsolutePath());
 			if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
 				List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
 						archive.fedora.Vocabulary.REL_LOBID_DOI, content,
@@ -491,7 +585,7 @@ public class Modify extends RegalAction {
 					node.setDoi(dois.get(0));
 				}
 			}
-			node.setMetadata1(content);
+			node.setMetadata("metadata", content);
 			OaiDispatcher.makeOAISet(node);
 			reindexNodeAndParent(node);
 			return pid + " metadata successfully updated!";
@@ -848,12 +942,13 @@ public class Modify extends RegalAction {
 	 * @return a short message
 	 */
 	public String lobidify2(Node node) {
-		return updateLobidify2AndEnrichMetadata(node, node.getMetadata2());
+		return updateLobidify2AndEnrichMetadata(node,
+				node.getMetadata(archive.fedora.Vocabulary.metadata2));
 	}
 
 	public String lobidify2(Node node, LocalDate date) {
 		return updateLobidify2AndEnrichMetadataIfRecentlyUpdated(node,
-				node.getMetadata2(), date);
+				node.getMetadata(archive.fedora.Vocabulary.metadata2), date);
 	}
 
 	/**
@@ -913,8 +1008,9 @@ public class Modify extends RegalAction {
 				+ parent.getPid() + " . Looking for field " + field);
 		String pred = getUriFromJsonName(field);
 		List<String> value = RdfUtils.findRdfObjects(subject, pred,
-				parent.getMetadata2(), RDFFormat.NTRIPLES);
-		String metadata = node.getMetadata2();
+				parent.getMetadata(archive.fedora.Vocabulary.metadata2),
+				RDFFormat.NTRIPLES);
+		String metadata = node.getMetadata(archive.fedora.Vocabulary.metadata2);
 		if (metadata == null)
 			metadata = "";
 		if (value != null && !value.isEmpty()) {
@@ -948,7 +1044,7 @@ public class Modify extends RegalAction {
 	}
 
 	@SuppressWarnings({ "serial" })
-	class MetadataNotFoundException extends RuntimeException {
+	public class MetadataNotFoundException extends RuntimeException {
 		MetadataNotFoundException(Throwable e) {
 			super(e);
 		}
@@ -1140,7 +1236,7 @@ public class Modify extends RegalAction {
 	 * @return a user message as string
 	 */
 	public String addMetadataField(Node node, String pred, String obj) {
-		String metadata = node.getMetadata2();
+		String metadata = node.getMetadata(archive.fedora.Vocabulary.metadata2);
 		metadata = RdfUtils.addTriple(node.getPid(), pred, obj, true, metadata,
 				RDFFormat.NTRIPLES);
 		updateLobidify2AndEnrichMetadata(node, metadata);
@@ -1191,10 +1287,23 @@ public class Modify extends RegalAction {
 		return enrichMessage;
 	}
 
-	String updateMetadata2(Node node, String content) {
+	/**
+	 * Eine verallgemeinernde Klasse für alle Metadatentypen zum Update von
+	 * Metadaten
+	 * 
+	 * @author kuss
+	 * @date 2022-09-30
+	 * @param metadataType der Typ der Metadaten: metadata2, lrmiData,
+	 *          toscience.json
+	 * @param node Der Knoten (Node), an dem die Metadaten hängen
+	 * @param content der Inhalt der Metadaten als Zeichenkette (String)
+	 * @return eine Statusmeldung (Erfolg / Misserfolg) als String
+	 */
+	public String updateMetadata(String metadataType, Node node, String content) {
 		try {
 			String pid = node.getPid();
-			play.Logger.debug("Updating Metadata2 of PID " + pid);
+			play.Logger.debug(
+					"Updating metadata of type " + metadataType + " on PID " + pid);
 			play.Logger.debug("content: " + content);
 			if (content == null) {
 				throw new HttpArchiveException(406,
@@ -1202,18 +1311,15 @@ public class Modify extends RegalAction {
 								+ " This action is not supported."
 								+ " Use HTTP DELETE instead.\n");
 			}
-			// RdfUtils.validate(content);
-			// Extreme Workaround to fix subject uris
-			content = rewriteContent(content, pid);
-			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
 			play.Logger
 					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
-			node.setMetadata2File(file.getAbsolutePath());
-			node.setMetadata2(content);
+			node.setMetadataFile(metadataType, file.getAbsolutePath());
+			node.setMetadata(metadataType, content);
 			OaiDispatcher.makeOAISet(node);
 			reindexNodeAndParent(node);
-			return pid + " metadata2 successfully updated!";
+			return pid + " metadata of type " + metadataType
+					+ " successfully updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);
 		} catch (IOException e) {
@@ -1221,33 +1327,46 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	String updateLrmiData(Node node, String content) {
+	String updateMetadata2(Node node, String content) {
 		try {
 			String pid = node.getPid();
-			if (content == null) {
-				throw new HttpArchiveException(406,
-						pid + " You've tried to upload an empty string."
-								+ " This action is not supported."
-								+ " Use HTTP DELETE instead.\n");
+			String contentRewrite = content;
+			if (content != null && !content.isEmpty()) {
+				// RdfUtils.validate(content);
+				// Extreme Workaround to fix subject uris
+				contentRewrite = rewriteContent(content, pid);
+				// Workaround end
 			}
-			File file = CopyUtils.copyStringToFile(content);
-			node.setLrmiDataFile(file.getAbsolutePath());
-			play.Logger.debug("file.getAbsolutePath(): " + file.getAbsolutePath());
-			node.setLrmiData(content);
-			OaiDispatcher.makeOAISet(node);
-			play.Logger.debug("Re-Indexing node and parent");
-			reindexNodeAndParent(node);
-			msg = "LRMI data successfully updated!";
-			play.Logger.debug(msg);
-			return pid + " " + msg;
-		} catch (IOException e) {
-			throw new UpdateNodeException(e);
+			return updateMetadata(archive.fedora.Vocabulary.metadata2, node,
+					contentRewrite);
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+
+	String updateLrmiData(Node node, String content) {
+		try {
+			return updateMetadata(archive.fedora.Vocabulary.lrmiData, node, content);
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+
+	String updateMetadataJson(Node node, String content) {
+		try {
+			return updateMetadata(archive.fedora.Vocabulary.metadataJson, node,
+					content);
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
 	private static String getAuthorOrdering(Node node) {
-		try (InputStream in =
-				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
+		try (InputStream in = new ByteArrayInputStream(
+				node.getMetadata(archive.fedora.Vocabulary.metadata2).getBytes())) {
 			Collection<Statement> myGraph =
 					RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");
 			Iterator<Statement> statements = myGraph.iterator();
@@ -1266,8 +1385,8 @@ public class Modify extends RegalAction {
 	}
 
 	private static List<String> getType(Node node) {
-		try (InputStream in =
-				new ByteArrayInputStream(node.getMetadata2().getBytes())) {
+		try (InputStream in = new ByteArrayInputStream(
+				node.getMetadata(archive.fedora.Vocabulary.metadata2).getBytes())) {
 			List<String> result = new ArrayList<>();
 			Collection<Statement> myGraph =
 					RdfUtils.readRdfToGraph(in, RDFFormat.NTRIPLES, "");

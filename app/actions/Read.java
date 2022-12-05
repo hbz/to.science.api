@@ -491,7 +491,7 @@ public class Read extends RegalAction {
 	 */
 	public String readMetadata1(Node node, String field) {
 		try {
-			String metadata = node.getMetadata1();
+			String metadata = node.getMetadata("metadata");
 			if (metadata == null)
 				return null;
 			if (field == null || field.isEmpty()) {
@@ -528,7 +528,7 @@ public class Read extends RegalAction {
 	 */
 	public String readMetadata2(Node node, String field) {
 		try {
-			String metadata = node.getMetadata2();
+			String metadata = node.getMetadata(archive.fedora.Vocabulary.metadata2);
 			if (metadata == null)
 				return null;
 			if (field == null || field.isEmpty()) {
@@ -553,7 +553,7 @@ public class Read extends RegalAction {
 	 */
 	public String readLrmiData(Node node) {
 		try {
-			String lrmiData = node.getLrmiData();
+			String lrmiData = node.getMetadata(archive.fedora.Vocabulary.lrmiData);
 			return lrmiData;
 
 		} catch (Exception e) {
@@ -617,7 +617,7 @@ public class Read extends RegalAction {
 	public String readMetadata1FromCache(String pid, String field) {
 		try {
 			Node node = readNode(pid);
-			String metadata = node.getMetadata1();
+			String metadata = node.getMetadata("metadata");
 			if (metadata == null || metadata.isEmpty())
 				throw new HttpArchiveException(404,
 						"No Metadata on " + pid + " available!");
@@ -687,7 +687,7 @@ public class Read extends RegalAction {
 	 */
 	public List<String> getNodeLdProperty1(Node node, String predicate) {
 		List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
-				predicate, node.getMetadata1(), RDFFormat.NTRIPLES);
+				predicate, node.getMetadata("metadata"), RDFFormat.NTRIPLES);
 		return linkedObjects;
 	}
 

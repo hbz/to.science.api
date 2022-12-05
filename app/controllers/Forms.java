@@ -40,7 +40,7 @@ public class Forms extends MyController {
 				previewNode.setPid("preview:1");
 				String metadata =
 						new Modify().getLobid2DataAsNtripleString(previewNode, alephId);
-				previewNode.setMetadata2(metadata);
+				previewNode.setMetadata(archive.fedora.Vocabulary.metadata2, metadata);
 				flash("message",
 						"Preview! Press 'Create' on the page bottom to create new object.");
 				return ok(
@@ -102,7 +102,7 @@ public class Forms extends MyController {
 		return Promise.promise(() -> {
 			try {
 				if (models.Globals.users.isLoggedIn(ctx())) {
-					return redirect(routes.Forms.getLogoutForm());
+					return redirect(Forms.getLogoutForm().toString());
 				}
 				Form<User> userForm = Form.form(User.class);
 				return ok(views.html.login.render(userForm));
@@ -128,7 +128,7 @@ public class Forms extends MyController {
 			flash("message", "Goodbye " + session().get("username")
 					+ ". You were successfully logged out");
 			session().clear();
-			return redirect(routes.Application.index());
+			return redirect(Application.index().toString());
 		});
 	}
 

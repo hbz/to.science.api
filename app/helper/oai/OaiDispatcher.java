@@ -130,7 +130,7 @@ public class OaiDispatcher {
 
 	private static void createDDCSets(Node node) throws RepositoryException {
 		OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
-		String metadata2 = node.getMetadata2();
+		String metadata2 = node.getMetadata(archive.fedora.Vocabulary.metadata2);
 		if (metadata2 == null)
 			return;
 		RepositoryResult<Statement> statements =
