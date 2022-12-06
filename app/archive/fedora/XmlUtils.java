@@ -732,41 +732,25 @@ public class XmlUtils {
 			DocumentElementList volumesElemList =
 					new DocumentElementList(content, "volume");
 			NodeList volumes = volumesElemList.getNodeList();
-			if (volumesElemList.getLength() > 0) {
-				String volume = "";
-				for (int i = 0; i < volumesElemList.getLength(); i++) {
-					node = volumes.item(i);
-					volume = node.getTextContent();
-					break;
-				}
+			if (volumesElemList.getLength() > 0
+					&& !volumes.item(0).getTextContent().equals("-1")) {
+				String volume = volumes.item(0).getTextContent();
+
 				DocumentElementList issuesElemList =
 						new DocumentElementList(content, "issue");
 				NodeList issues = issuesElemList.getNodeList();
-				String issue = "";
-				for (int i = 0; i < issuesElemList.getLength(); i++) {
-					node = issues.item(i);
-					issue = node.getTextContent();
-					break;
-				}
+				String issue = issues.item(0).getTextContent();
+
 				DocumentElementList fpageElemList =
 						new DocumentElementList(content, "fpage");
 				NodeList fpages = fpageElemList.getNodeList();
-				String fpage = "";
-				for (int i = 0; i < fpageElemList.getLength(); i++) {
-					node = fpages.item(i);
-					fpage = node.getTextContent();
-					break;
-				}
+				String fpage = fpages.item(0).getTextContent();
+
 				DocumentElementList lpageElemList =
 						new DocumentElementList(content, "lpage");
 				NodeList lpages = lpageElemList.getNodeList();
-				String lpage = "";
-				for (int i = 0; i < lpageElemList.getLength(); i++) {
-					node = lpages.item(i);
-					lpage = node.getTextContent();
-					break;
-				}
-        
+				String lpage = lpages.item(0).getTextContent();
+
 				String bibliographicCitation =
 						new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
 				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
@@ -784,13 +768,15 @@ public class XmlUtils {
 				break;
 			}
 
-
-			/* Open-Access Lizenz */
-			elemList = new DocumentElementList(content, "ext-link");
-			nodeList = elemList.getNodeList();
+			/* Lizenz Neu */
 			List<Map<String, Object>> licenses = new ArrayList<>();
+			String licenseId = null;
+
+			// Fall 1: ext-link-tag hat xlink:href Attribut
+			elemList = new DocumentElementList(content, "ext-link");
+			NodeList nodeLstExtLink = elemList.getNodeList();
 			for (int i = 0; i < elemList.getLength(); i++) {
-				node = nodeList.item(i);
+				node = nodeLstExtLink.item(i);
 				String parentNodeName = node.getParentNode().getNodeName();
 				if (parentNodeName.equalsIgnoreCase("license")
 						|| parentNodeName.equalsIgnoreCase("license-p")) {
@@ -802,8 +788,9 @@ public class XmlUtils {
 
 			// Fall 2: license-tag hat xlink:href Attribut
 			if (licenseId == null) {
-				NodeList nodeLstLicense = content.getElementsByTagName("license");
-				for (int i = 0; i < nodeLstLicense.getLength(); i++) {
+				elemList = new DocumentElementList(content, "license");
+				NodeList nodeLstLicense = elemList.getNodeList();
+				for (int i = 0; i < elemList.getLength(); i++) {
 					node = nodeLstLicense.item(i);
 					Node xLink = node.getAttributes().getNamedItem("xlink:href");
 					if (xLink != null) {
@@ -815,7 +802,8 @@ public class XmlUtils {
 
 			// Fall 3: license-p-tag Text in Klammern auslesen
 			if (licenseId == null) {
-				NodeList nodeLstLicenseP = content.getElementsByTagName("license-p");
+				elemList = new DocumentElementList(content, "license-p");
+				NodeList nodeLstLicenseP = elemList.getNodeList();
 				for (int i = 0; i < nodeLstLicenseP.getLength(); i++) {
 					node = nodeLstLicenseP.item(i);
 					Node parent = node.getParentNode();
@@ -852,8 +840,9 @@ public class XmlUtils {
 						.replaceAll("[\\r\\n\\t\\u00a0]+", " ").replaceAll("\\s+", " "));
 			}
 
-			nodeList = content.getElementsByTagName("trans-abstract");
-			if (nodeList != null && nodeList.getLength() > 0) {
+			elemList = new DocumentElementList(content, "trans-abstract");
+			nodeList = elemList.getNodeList();
+			if (elemList.getLength() > 0) {
 				childNodes = nodeList.item(0).getChildNodes();
 				int length = childNodes != null ? childNodes.getLength() : 0;
 				for (int i = 0; i < length; i++) {
@@ -920,31 +909,33 @@ public class XmlUtils {
 
 			/* Sprache */
 			Map<String, Object> language = new TreeMap<>();
-			NodeList articleList = content.getElementsByTagName("article");
-			Node xmlLangValue =
-					articleList.item(0).getAttributes().getNamedItem("xml:lang");
-			switch (xmlLangValue.getNodeValue()) {
-			case "fr":
-				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/fra");
-				language.put("prefLabel", "Französisch");
-				break;
-			case "it":
-				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ita");
-				language.put("prefLabel", "Italienisch");
-				break;
-			case "sp":
-				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/spa");
-				language.put("prefLabel", "Spanisch");
-				break;
-			case "de":
-				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ger");
-				language.put("prefLabel", "Deutsch");
-				break;
-			default:
-				language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/eng");
-				language.put("prefLabel", "Englisch");
+			elemList = new DocumentElementList(content, "article");
+			NodeList articleList = elemList.getNodeList();
+			if (elemList.getLength() > 0) {
+				Node xmlLangValue =
+						articleList.item(0).getAttributes().getNamedItem("xml:lang");
+				switch (xmlLangValue.getNodeValue()) {
+				case "fr":
+					language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/fra");
+					language.put("prefLabel", "Französisch");
+					break;
+				case "it":
+					language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ita");
+					language.put("prefLabel", "Italienisch");
+					break;
+				case "sp":
+					language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/spa");
+					language.put("prefLabel", "Spanisch");
+					break;
+				case "de":
+					language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/ger");
+					language.put("prefLabel", "Deutsch");
+					break;
+				default:
+					language.put("@id", "http://id.loc.gov/vocabulary/iso639-2/eng");
+					language.put("prefLabel", "Englisch");
+				}
 			}
-
 			rdf.put("language", Arrays.asList(language));
 
 			/* DDC */
