@@ -58,6 +58,7 @@ import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.NodeHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
@@ -562,6 +563,7 @@ public class Resource extends MyController {
 			@QueryParam("md5") String md5) {
 		return new ModifyAction().call(pid, node -> {
 			try {
+				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart d = body.getFile("data");
 				if (d == null) {
@@ -569,8 +571,21 @@ public class Resource extends MyController {
 				}
 				String mimeType = d.getContentType();
 				String name = d.getFilename();
+				play.Logger.debug("mimeType: " + mimeType);
+				play.Logger.debug("d.getFilename(): " + d.getFilename());
+
 				try (FileInputStream content = new FileInputStream(d.getFile())) {
 					modify.updateData(pid, content, mimeType, name, md5);
+
+					// OSU-172: Nachdem Erfolgreichen Austausch der Dateien (ChildNods)
+					// soll der ParentNode seine MetaData2 (Lrmi & Json) updatet werden,
+					// es handelt sich hier nur um eine Art Neuladung der Daten des
+					// ParentNodes.
+					if (readNode.getParentPid() != null) {
+						Node parentNode = new Read().readNode(pid);
+						new NodeHelper().refreshDataStreamsOfNode(parentNode);
+					}
+
 					return JsonMessage(new Message(
 							"File uploaded! Type: " + mimeType + ", Name: " + name));
 				}
