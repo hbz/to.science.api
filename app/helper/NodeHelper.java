@@ -227,7 +227,7 @@ public class NodeHelper {
 				node.getMetadata(archive.fedora.Vocabulary.metadata2));
 
 		new Modify().updateLrmifyAndEnrichMetadata(node.getPid(), format,
-				node.getMetadata(archive.fedora.Vocabulary.lrmiData));
+				node.getMetadata(archive.fedora.Vocabulary.metadata2));
 
 	}
 
