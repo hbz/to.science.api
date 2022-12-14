@@ -577,12 +577,12 @@ public class Resource extends MyController {
 				try (FileInputStream content = new FileInputStream(d.getFile())) {
 					modify.updateData(pid, content, mimeType, name, md5);
 
-					// OSU-172: Nachdem Erfolgreichen Austausch der Dateien (ChildNods)
-					// soll der ParentNode seine MetaData2 (Lrmi & Json) updatet werden,
-					// es handelt sich hier nur um eine Art Neuladung der Daten des
+					// OSU-172: Nach dem erfolgreichen Austausch der Dateien (ChildNodes)
+					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert werden.
+					// Es handelt sich hier nur um eine Art Neuladen der Daten des
 					// ParentNodes.
 					if (readNode.getParentPid() != null) {
-						Node parentNode = new Read().readNode(pid);
+						Node parentNode = new Read().readNode(readNode.getParentPid());
 						new NodeHelper().refreshDataStreamsOfNode(parentNode);
 					}
 
