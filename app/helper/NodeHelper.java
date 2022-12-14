@@ -31,10 +31,10 @@ public class NodeHelper {
 	 * This method calculates the number of ocurrences of the specific word
 	 * "encodingFormat" in a String
 	 * 
-	 * @param lrmiData of a ParenNode
+	 * @param lrmiData of a ParentNode
 	 * @return Number of searched word(encodingFormat) in String
 	 */
-	public int calculNumberOfEncodingObjectsInLRMIConent(String lrmiData) {
+	public int calculNumberOfEncodingObjectsInLRMIContent(String lrmiData) {
 		if (lrmiData != null) {
 			String[] count = lrmiData.split("encodingFormat");
 			return count.length - 1;
