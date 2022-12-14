@@ -28,8 +28,8 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 public class NodeHelper {
 
 	/**
-	 * This method calculates the number of a specific word(encodingFormat) in a
-	 * String
+	 * This method calculates the number of ocurrences 
+	 * of the specific word "encodingFormat" in a String
 	 * 
 	 * @param lrmiData of a ParenNode
 	 * @return Number of searched word(encodingFormat) in String
@@ -47,7 +47,7 @@ public class NodeHelper {
 	/**
 	 * Method removes an EncodingObject from AmbContent of ParentNode
 	 * 
-	 * @param childNode: what must be deleted (Encoding-Object)
+	 * @param childNode: The node whose reference (Encoding-Object) must be deleted
 	 * @param ambContentOfParentNode in String: the AmbContent of the Parent Node
 	 * @return String value: the new AmbContent of ParentNode without the encoding
 	 *         object (deleted) or the old ambContentOfParentNode at fail
@@ -63,41 +63,43 @@ public class NodeHelper {
 		JSONObject jsonEncodingObject = null;
 		String check;
 
-		if (childNode.getParentPid() != null && ambContentOfParentNode != null
-				&& !ambContentOfParentNode.isEmpty()) {
-
-			if (ambContentOfParentNode.contains("encoding")
-					// e.g. --> String contains exact /orca:xxxxx/
-					&& ambContentOfParentNode.contains("/" + childNode + "/")) {
-
-				// convert the ambContent from string to json
-				jsonAmbContent = new JSONObject(ambContentOfParentNode);
-
-				// get all encoding objects in json
-				jsonEncodingObjects = jsonAmbContent.getJSONArray("encoding");
-
-				for (int i = 0; i < jsonEncodingObjects.length(); i++) {
-					jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
-					check = jsonEncodingObject.toString();
-					if (check != null && check.contains("/" + childNode + "/")) {
-						jsonEncodingObjects.remove(i);
-					}
-				}
-				jsonAmbContent.put("encoding", jsonEncodingObjects);
-				// the new AmbContent without the deleted Encoding-Object --> case
-				// successful
-				return jsonAmbContent.toString();
-			}
-
+		if (childNode.getParentPid() == null || ambContentOfParentNode == null
+				|| ambContentOfParentNode.isEmpty()) {
+			// case fail. Return the old AmbContent of the parent node ()
+			return ambContentOfParentNode;
 		}
-		// the old AmbContent of the parent node () --> case fail
-		return ambContentOfParentNode;
+
+		if (!ambContentOfParentNode.contains("encoding")		
+			|| !ambContentOfParentNode.contains("/" + childNode + "/")) {
+			// case fail. Return the old AmbContent of the parent node ()
+			return ambContentOfParentNode;
+		}
+
+		// String contains exact e.g. /orca:xxxxx/
+		// Convert the ambContent from string to json
+		jsonAmbContent = new JSONObject(ambContentOfParentNode);
+
+		// Get all encoding objects in json
+		jsonEncodingObjects = jsonAmbContent.getJSONArray("encoding");
+
+		for (int i = 0; i < jsonEncodingObjects.length(); i++) {
+			jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
+			check = jsonEncodingObject.toString();
+			if (check != null && check.contains("/" + childNode + "/")) {
+				jsonEncodingObjects.remove(i);
+			}
+		}
+		jsonAmbContent.put("encoding", jsonEncodingObjects);
+		// case successful
+		// Return the new AmbContent without the deleted Encoding-Object
+		return jsonAmbContent.toString();
+		
 	}
 
 	/**
-	 * Method removes a hasPart-Object(child) from to.science of ParentNode
+	 * Method removes a hasPart-Object(child) from to.science content of ParentNode
 	 * 
-	 * @param childNode what must be deleted (hasPartObject)
+	 * @param childNode node whose reference must be deleted (hasPartObject)
 	 * @param toScienceContent
 	 * @return String of a new to.science content of parentNode or the old
 	 *         toScienceContent at fail
@@ -112,42 +114,44 @@ public class NodeHelper {
 		JSONObject jsonHasPartObject = null;
 		String check;
 
-		if (childNode.getParentPid() != null && toScienceContent != null
-				&& !toScienceContent.isEmpty()) {
-
-			if (toScienceContent.contains("hasPart")
-					// e.g. --> String contains exact "orca:xxxxx"
-					&& toScienceContent.contains("\"" + childNode + "\"")) {
-
-				// convert the ambContent from string to json
-				jsonToScienceContent = new JSONObject(toScienceContent);
-
-				// get all hasPart objects in json
-				jsonHasPartObjects = jsonToScienceContent.getJSONArray("hasPart");
-
-				for (int i = 0; i < jsonHasPartObjects.length(); i++) {
-					jsonHasPartObject = jsonHasPartObjects.getJSONObject(i);
-					check = jsonHasPartObject.toString();
-					if (check != null && check.contains("\"" + childNode + "\"")) {
-						jsonHasPartObjects.remove(i);
-					}
-				}
-				jsonToScienceContent.put("hasPart", jsonHasPartObjects);
-				// the new to.science content without the deleted hasPart object -->
-				// case successful
-				return jsonToScienceContent.toString();
-			}
-
+		if (childNode.getParentPid() == null || toScienceContent == null
+			|| toScienceContent.isEmpty()) {
+			// fail case. Return the old to.science content of the parent node ()
+			return toScienceContent;
 		}
-		// the old to.science content of the parent node () --> case fail
-		return toScienceContent;
+
+		if (!toScienceContent.contains("hasPart")	
+			|| !toScienceContent.contains("\"" + childNode + "\"")) {
+			// fail case. Return the old to.science content of the parent node ()
+			return toScienceContent;
+		}
+
+		// String contains exact e.g. "orca:xxxxx"
+		// convert the ambContent from string to json
+		jsonToScienceContent = new JSONObject(toScienceContent);
+
+		// get all hasPart objects in json
+		jsonHasPartObjects = jsonToScienceContent.getJSONArray("hasPart");
+
+		for (int i = 0; i < jsonHasPartObjects.length(); i++) {
+			jsonHasPartObject = jsonHasPartObjects.getJSONObject(i);
+			check = jsonHasPartObject.toString();
+			if (check != null && check.contains("\"" + childNode + "\"")) {
+				jsonHasPartObjects.remove(i);
+			}
+		}
+		jsonToScienceContent.put("hasPart", jsonHasPartObjects);
+		
+		// case successful
+		// Return the new to.science content without the deleted hasPart object		
+		return jsonToScienceContent.toString();
 	}
 
 	/**
 	 * Method edits the exchanged encoding object
+	 * The pid of the old encoding object and the new one is the same.
 	 * 
-	 * @param neuChildNode , the pid of the old encoding and the new one is the
-	 *          same
+	 * @param neuChildNode Node of the child (alt = neu)
 	 * @param ambContentOfParentNode
 	 * @return a LrmiContent of the ParentNode with the added new Encoding-Object
 	 */
@@ -159,48 +163,46 @@ public class NodeHelper {
 		JSONObject jsonEncodingObject = null;
 		String check;
 
-		if (neuChildNode.getParentPid() != null && ambContentOfParentNode != null
-				&& !ambContentOfParentNode.isEmpty()) {
-
-			if (ambContentOfParentNode.contains("encoding")
-					// e.g. --> String contains exact /orca:xxxxx/
-					&& ambContentOfParentNode.contains("/" + neuChildNode + "/")) {
-
-				// convert the ambContent from string to json
-				jsonAmbContent = new JSONObject(ambContentOfParentNode);
-
-				// get all encoding objects in json
-				jsonEncodingObjects = jsonAmbContent.getJSONArray("encoding");
-
-				for (int i = 0; i < jsonEncodingObjects.length(); i++) {
-					jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
-					check = jsonEncodingObject.toString();
-					if (check != null && check.contains("/" + neuChildNode + "/")) {
-						// size will just be edited, contentUrl and type remain in
-						// Encoding-Object
-						jsonEncodingObject.put("size", neuChildNode.getFileSizeAsString());
-						// encodingFormat will just be edited, contentUrl and type remain
-						jsonEncodingObject.put("encodingFormat",
-								neuChildNode.getMimeType());
-					}
-				}
-				jsonAmbContent.put("encoding", jsonEncodingObjects);
-				// the new AmbContent without the deleted Encoding-Object --> case
-				// successful
-				return jsonAmbContent.toString();
-			}
-
+		if (neuChildNode.getParentPid() == null || ambContentOfParentNode == null
+			|| ambContentOfParentNode.isEmpty()) {
+			// case fail. Return the old AmbContent of the parent node ()
+			return ambContentOfParentNode;
 		}
-		// the old AmbContent of the parent node () --> case fail
-		return ambContentOfParentNode;
 
+		if (!ambContentOfParentNode.contains("encoding")
+			|| !ambContentOfParentNode.contains("/" + neuChildNode + "/")) {
+			// case fail. Return the old AmbContent of the parent node ()
+			return ambContentOfParentNode;
+		}
+
+		// String contains exact e.g. /orca:xxxxx/
+		// convert the ambContent from string to json
+		jsonAmbContent = new JSONObject(ambContentOfParentNode);
+
+		// get all encoding objects in json
+		jsonEncodingObjects = jsonAmbContent.getJSONArray("encoding");
+
+		for (int i = 0; i < jsonEncodingObjects.length(); i++) {
+			jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
+			check = jsonEncodingObject.toString();
+			if (check != null && check.contains("/" + neuChildNode + "/")) {
+				// size will just be edited, contentUrl and type remain in Encoding-Object
+				jsonEncodingObject.put("size", neuChildNode.getFileSizeAsString());
+				// encodingFormat will just be edited, contentUrl and type remain
+				jsonEncodingObject.put("encodingFormat", neuChildNode.getMimeType());
+			}
+		}
+		jsonAmbContent.put("encoding", jsonEncodingObjects);
+		// case successful
+		// Return the new AmbContent without the deleted Encoding-Object
+		return jsonAmbContent.toString();
 	}
 
 	/**
 	 * Method gets the value between "" in a string
 	 * 
 	 * @param clientRequest = request().body().asText()
-	 * @return the value between "" = new title of ChildNode
+	 * @return the value between "" = the new title of ChildNode
 	 */
 	public String getTitleFromClientRequest(String s) {
 
