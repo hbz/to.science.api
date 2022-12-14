@@ -39,7 +39,9 @@ public class NodeHelper {
 	 */
 	public String deleteEncodingObjectFromAmbContentOfParenNode(Node childNode,
 			String ambContentOfParentNode) {
-
+		play.Logger.debug(
+				"deleteEncodingObjectFromAmbContentOfParenNode wird geloggt fuer pid ="
+						+ childNode.getPid());
 		JSONObject jsonAmbContent = null;
 		JSONArray jsonEncodingObjects = null;
 		JSONObject jsonEncodingObject = null;
@@ -86,7 +88,9 @@ public class NodeHelper {
 	 */
 	public String deleteHasPrtObjectFromToScienceContent(Node childNode,
 			String toScienceContent) {
-
+		play.Logger
+				.debug("deleteHasPrtObjectFromToScienceContent wird geloggt fuer pid ="
+						+ childNode.getPid());
 		JSONObject jsonToScienceContent = null;
 		JSONArray jsonHasPartObjects = null;
 		JSONObject jsonHasPartObject = null;
@@ -196,6 +200,8 @@ public class NodeHelper {
 	public void refreshDataStreamsOfNode(Node node) {
 		RDFFormat format = RDFFormat.NTRIPLES;
 		// node.setMetadata2(content);
+		play.Logger.debug(
+				"refreshDataStreamsOfNode wird geloggt fuer pid =" + node.getPid());
 		new Modify().updateLobidify2AndEnrichMetadata(node.getPid(),
 				node.getMetadata(archive.fedora.Vocabulary.metadata2));
 
