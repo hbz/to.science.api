@@ -28,8 +28,8 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 public class NodeHelper {
 
 	/**
-	 * This method calculates the number of ocurrences 
-	 * of the specific word "encodingFormat" in a String
+	 * This method calculates the number of ocurrences of the specific word
+	 * "encodingFormat" in a String
 	 * 
 	 * @param lrmiData of a ParenNode
 	 * @return Number of searched word(encodingFormat) in String
@@ -47,7 +47,8 @@ public class NodeHelper {
 	/**
 	 * Method removes an EncodingObject from AmbContent of ParentNode
 	 * 
-	 * @param childNode: The node whose reference (Encoding-Object) must be deleted
+	 * @param childNode: The node whose reference (Encoding-Object) must be
+	 *          deleted
 	 * @param ambContentOfParentNode in String: the AmbContent of the Parent Node
 	 * @return String value: the new AmbContent of ParentNode without the encoding
 	 *         object (deleted) or the old ambContentOfParentNode at fail
@@ -69,8 +70,8 @@ public class NodeHelper {
 			return ambContentOfParentNode;
 		}
 
-		if (!ambContentOfParentNode.contains("encoding")		
-			|| !ambContentOfParentNode.contains("/" + childNode + "/")) {
+		if (!ambContentOfParentNode.contains("encoding")
+				|| !ambContentOfParentNode.contains("/" + childNode + "/")) {
 			// case fail. Return the old AmbContent of the parent node ()
 			return ambContentOfParentNode;
 		}
@@ -93,11 +94,12 @@ public class NodeHelper {
 		// case successful
 		// Return the new AmbContent without the deleted Encoding-Object
 		return jsonAmbContent.toString();
-		
+
 	}
 
 	/**
-	 * Method removes a hasPart-Object(child) from to.science content of ParentNode
+	 * Method removes a hasPart-Object(child) from to.science content of
+	 * ParentNode
 	 * 
 	 * @param childNode node whose reference must be deleted (hasPartObject)
 	 * @param toScienceContent
@@ -115,13 +117,13 @@ public class NodeHelper {
 		String check;
 
 		if (childNode.getParentPid() == null || toScienceContent == null
-			|| toScienceContent.isEmpty()) {
+				|| toScienceContent.isEmpty()) {
 			// fail case. Return the old to.science content of the parent node ()
 			return toScienceContent;
 		}
 
-		if (!toScienceContent.contains("hasPart")	
-			|| !toScienceContent.contains("\"" + childNode + "\"")) {
+		if (!toScienceContent.contains("hasPart")
+				|| !toScienceContent.contains("\"" + childNode + "\"")) {
 			// fail case. Return the old to.science content of the parent node ()
 			return toScienceContent;
 		}
@@ -141,15 +143,15 @@ public class NodeHelper {
 			}
 		}
 		jsonToScienceContent.put("hasPart", jsonHasPartObjects);
-		
+
 		// case successful
-		// Return the new to.science content without the deleted hasPart object		
+		// Return the new to.science content without the deleted hasPart object
 		return jsonToScienceContent.toString();
 	}
 
 	/**
-	 * Method edits the exchanged encoding object
-	 * The pid of the old encoding object and the new one is the same.
+	 * Method edits the exchanged encoding object The pid of the old encoding
+	 * object and the new one is the same.
 	 * 
 	 * @param neuChildNode Node of the child (alt = neu)
 	 * @param ambContentOfParentNode
@@ -164,13 +166,13 @@ public class NodeHelper {
 		String check;
 
 		if (neuChildNode.getParentPid() == null || ambContentOfParentNode == null
-			|| ambContentOfParentNode.isEmpty()) {
+				|| ambContentOfParentNode.isEmpty()) {
 			// case fail. Return the old AmbContent of the parent node ()
 			return ambContentOfParentNode;
 		}
 
 		if (!ambContentOfParentNode.contains("encoding")
-			|| !ambContentOfParentNode.contains("/" + neuChildNode + "/")) {
+				|| !ambContentOfParentNode.contains("/" + neuChildNode + "/")) {
 			// case fail. Return the old AmbContent of the parent node ()
 			return ambContentOfParentNode;
 		}
@@ -186,7 +188,8 @@ public class NodeHelper {
 			jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
 			check = jsonEncodingObject.toString();
 			if (check != null && check.contains("/" + neuChildNode + "/")) {
-				// size will just be edited, contentUrl and type remain in Encoding-Object
+				// size will just be edited, contentUrl and type remain in
+				// Encoding-Object
 				jsonEncodingObject.put("size", neuChildNode.getFileSizeAsString());
 				// encodingFormat will just be edited, contentUrl and type remain
 				jsonEncodingObject.put("encodingFormat", neuChildNode.getMimeType());
@@ -223,8 +226,8 @@ public class NodeHelper {
 		new Modify().updateLobidify2AndEnrichMetadata(node.getPid(),
 				node.getMetadata(archive.fedora.Vocabulary.metadata2));
 
-		// new Modify().updateLrmifyAndEnrichMetadata(node.getPid(), format,
-		// node.getMetadata(archive.fedora.Vocabulary.lrmiData));
+		new Modify().updateLrmifyAndEnrichMetadata(node.getPid(), format,
+				node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 
 	}
 
