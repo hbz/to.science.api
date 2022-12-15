@@ -84,7 +84,9 @@ public class Delete extends RegalAction {
 
 			play.Logger.debug("oldLriContetn = " + lrmiContentOfParentNode);
 			String newLrmiContentOfParentNode =
-					new NodeHelper().deleteEncodingObjectFromAmbContentOfParenNode(n,
+					// new NodeHelper().deleteEncodingObjectFromAmbContentOfParenNode(n,
+					// lrmiContentOfParentNode);
+					new NodeHelper().deleteEncodingObjectFromAmbContentOfParentNode(n,
 							lrmiContentOfParentNode);
 			play.Logger.debug("NewLriContetn = " + lrmiContentOfParentNode);
 
