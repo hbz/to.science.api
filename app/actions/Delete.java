@@ -73,7 +73,7 @@ public class Delete extends RegalAction {
 		StringBuffer message = new StringBuffer();
 		message.append(new Index().remove(n));
 		removeNodeFromCache(n.getPid());
-		new NodeHelper().checkNodeBeforeDelete(n);
+		new NodeHelper().checkNodeBeforeDelete(n); // deleteEncoding&HasPart
 		Globals.fedora.deleteNode(n.getPid());
 		return message.toString() + "\n" + n.getPid() + " deleted!";
 	}
