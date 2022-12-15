@@ -22,7 +22,11 @@ import org.json.JSONObject;
 import actions.Modify;
 import actions.Read;
 import models.Globals;
+import models.Link;
 import models.Node;
+
+import java.util.List;
+
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 public class NodeHelper {
@@ -250,8 +254,8 @@ public class NodeHelper {
 			parentNode.setMetadata(archive.fedora.Vocabulary.lrmiData,
 					newLrmiContentOfParentNode);
 
-			// update json2 of ParentNode
-			Globals.fedora.unlinkParent(n);
+			// Update of Json2 of the ParentNode is not required at the moment
+			// 15.12.2022
 
 		}
 	}
