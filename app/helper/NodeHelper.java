@@ -54,47 +54,43 @@ public class NodeHelper {
 	 *         object (deleted) or the old ambContentOfParentNode at fail
 	 * 
 	 */
-	public String deleteEncodingObjectFromAmbContentOfParenNode(Node childNode,
+	public String deleteEncodingObjectFromAmbContentOfParentNode(Node childNode,
 			String ambContentOfParentNode) {
-		play.Logger.debug(
-				"deleteEncodingObjectFromAmbContentOfParenNode wird geloggt fuer pid ="
-						+ childNode.getPid());
+
 		JSONObject jsonAmbContent = null;
 		JSONArray jsonEncodingObjects = null;
 		JSONObject jsonEncodingObject = null;
 		String check;
 
-		if (childNode.getParentPid() == null || ambContentOfParentNode == null
-				|| ambContentOfParentNode.isEmpty()) {
-			// case fail. Return the old AmbContent of the parent node ()
-			return ambContentOfParentNode;
-		}
+		if (childNode.getParentPid() != null && ambContentOfParentNode != null
+				&& !ambContentOfParentNode.isEmpty()) {
 
-		if (!ambContentOfParentNode.contains("encoding")
-				|| !ambContentOfParentNode.contains("/" + childNode + "/")) {
-			// case fail. Return the old AmbContent of the parent node ()
-			return ambContentOfParentNode;
-		}
+			if (ambContentOfParentNode.contains("encoding")
+					// e.g. --> String contains exact /orca:xxxxx/
+					&& ambContentOfParentNode.contains("/" + childNode + "/")) {
 
-		// String contains exact e.g. /orca:xxxxx/
-		// Convert the ambContent from string to json
-		jsonAmbContent = new JSONObject(ambContentOfParentNode);
+				// convert the ambContent from string to json
+				jsonAmbContent = new JSONObject(ambContentOfParentNode);
 
-		// Get all encoding objects in json
-		jsonEncodingObjects = jsonAmbContent.getJSONArray("encoding");
+				// get all encoding objects in json
+				jsonEncodingObjects = jsonAmbContent.getJSONArray("encoding");
 
-		for (int i = 0; i < jsonEncodingObjects.length(); i++) {
-			jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
-			check = jsonEncodingObject.toString();
-			if (check != null && check.contains("/" + childNode + "/")) {
-				jsonEncodingObjects.remove(i);
+				for (int i = 0; i < jsonEncodingObjects.length(); i++) {
+					jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
+					check = jsonEncodingObject.toString();
+					if (check != null && check.contains("/" + childNode + "/")) {
+						jsonEncodingObjects.remove(i);
+					}
+				}
+				jsonAmbContent.put("encoding", jsonEncodingObjects);
+				// the new AmbContent without the deleted Encoding-Object --> case
+				// successful
+				return jsonAmbContent.toString();
 			}
-		}
-		jsonAmbContent.put("encoding", jsonEncodingObjects);
-		// case successful
-		// Return the new AmbContent without the deleted Encoding-Object
-		return jsonAmbContent.toString();
 
+		}
+		// the old AmbContent of the parent node () --> case fail
+		return ambContentOfParentNode;
 	}
 
 	/**
@@ -108,45 +104,41 @@ public class NodeHelper {
 	 */
 	public String deleteHasPrtObjectFromToScienceContent(Node childNode,
 			String toScienceContent) {
-		play.Logger
-				.debug("deleteHasPrtObjectFromToScienceContent wird geloggt fuer pid ="
-						+ childNode.getPid());
+
 		JSONObject jsonToScienceContent = null;
 		JSONArray jsonHasPartObjects = null;
 		JSONObject jsonHasPartObject = null;
 		String check;
 
-		if (childNode.getParentPid() == null || toScienceContent == null
-				|| toScienceContent.isEmpty()) {
-			// fail case. Return the old to.science content of the parent node ()
-			return toScienceContent;
-		}
+		if (childNode.getParentPid() != null && toScienceContent != null
+				&& !toScienceContent.isEmpty()) {
 
-		if (!toScienceContent.contains("hasPart")
-				|| !toScienceContent.contains("\"" + childNode + "\"")) {
-			// fail case. Return the old to.science content of the parent node ()
-			return toScienceContent;
-		}
+			if (toScienceContent.contains("hasPart")
+					// e.g. --> String contains exact "orca:xxxxx"
+					&& toScienceContent.contains("\"" + childNode + "\"")) {
 
-		// String contains exact e.g. "orca:xxxxx"
-		// convert the ambContent from string to json
-		jsonToScienceContent = new JSONObject(toScienceContent);
+				// convert the ambContent from string to json
+				jsonToScienceContent = new JSONObject(toScienceContent);
 
-		// get all hasPart objects in json
-		jsonHasPartObjects = jsonToScienceContent.getJSONArray("hasPart");
+				// get all hasPart objects in json
+				jsonHasPartObjects = jsonToScienceContent.getJSONArray("hasPart");
 
-		for (int i = 0; i < jsonHasPartObjects.length(); i++) {
-			jsonHasPartObject = jsonHasPartObjects.getJSONObject(i);
-			check = jsonHasPartObject.toString();
-			if (check != null && check.contains("\"" + childNode + "\"")) {
-				jsonHasPartObjects.remove(i);
+				for (int i = 0; i < jsonHasPartObjects.length(); i++) {
+					jsonHasPartObject = jsonHasPartObjects.getJSONObject(i);
+					check = jsonHasPartObject.toString();
+					if (check != null && check.contains("\"" + childNode + "\"")) {
+						jsonHasPartObjects.remove(i);
+					}
+				}
+				jsonToScienceContent.put("hasPart", jsonHasPartObjects);
+				// the new to.science content without the deleted hasPart object -->
+				// case successful
+				return jsonToScienceContent.toString();
 			}
-		}
-		jsonToScienceContent.put("hasPart", jsonHasPartObjects);
 
-		// case successful
-		// Return the new to.science content without the deleted hasPart object
-		return jsonToScienceContent.toString();
+		}
+		// the old to.science content of the parent node () --> case fail
+		return toScienceContent;
 	}
 
 	/**
