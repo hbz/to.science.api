@@ -67,7 +67,7 @@ public class NodeHelper {
 
 			if (ambContentOfParentNode.contains("encoding")
 					// e.g. --> String contains exact /orca:xxxxx/
-					&& ambContentOfParentNode.contains("/" + childNode + "/")) {
+					&& ambContentOfParentNode.contains("/" + childNode.getPid() + "/")) {
 
 				// convert the ambContent from string to json
 				jsonAmbContent = new JSONObject(ambContentOfParentNode);
@@ -78,7 +78,7 @@ public class NodeHelper {
 				for (int i = 0; i < jsonEncodingObjects.length(); i++) {
 					jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
 					check = jsonEncodingObject.toString();
-					if (check != null && check.contains("/" + childNode + "/")) {
+					if (check != null && check.contains("/" + childNode.getPid() + "/")) {
 						jsonEncodingObjects.remove(i);
 					}
 				}
@@ -115,7 +115,7 @@ public class NodeHelper {
 
 			if (toScienceContent.contains("hasPart")
 					// e.g. --> String contains exact "orca:xxxxx"
-					&& toScienceContent.contains("\"" + childNode + "\"")) {
+					&& toScienceContent.contains("\"" + childNode.getPid() + "\"")) {
 
 				// convert the ambContent from string to json
 				jsonToScienceContent = new JSONObject(toScienceContent);
@@ -126,7 +126,8 @@ public class NodeHelper {
 				for (int i = 0; i < jsonHasPartObjects.length(); i++) {
 					jsonHasPartObject = jsonHasPartObjects.getJSONObject(i);
 					check = jsonHasPartObject.toString();
-					if (check != null && check.contains("\"" + childNode + "\"")) {
+					if (check != null
+							&& check.contains("\"" + childNode.getPid() + "\"")) {
 						jsonHasPartObjects.remove(i);
 					}
 				}
@@ -163,8 +164,8 @@ public class NodeHelper {
 			return ambContentOfParentNode;
 		}
 
-		if (!ambContentOfParentNode.contains("encoding")
-				|| !ambContentOfParentNode.contains("/" + neuChildNode + "/")) {
+		if (!ambContentOfParentNode.contains("encoding") || !ambContentOfParentNode
+				.contains("/" + neuChildNode.getPid() + "/")) {
 			// case fail. Return the old AmbContent of the parent node ()
 			return ambContentOfParentNode;
 		}
@@ -179,7 +180,7 @@ public class NodeHelper {
 		for (int i = 0; i < jsonEncodingObjects.length(); i++) {
 			jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
 			check = jsonEncodingObject.toString();
-			if (check != null && check.contains("/" + neuChildNode + "/")) {
+			if (check != null && check.contains("/" + neuChildNode.getPid() + "/")) {
 				// size will just be edited, contentUrl and type remain in
 				// Encoding-Object
 				jsonEncodingObject.put("size", neuChildNode.getFileSizeAsString());
