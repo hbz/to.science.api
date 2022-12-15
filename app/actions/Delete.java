@@ -73,42 +73,7 @@ public class Delete extends RegalAction {
 		StringBuffer message = new StringBuffer();
 		message.append(new Index().remove(n));
 		removeNodeFromCache(n.getPid());
-		Node parentNode = null;
-
-		if (n.getParentPid() != null) {
-			parentNode = new Read().readNode(n.getParentPid());
-
-			// update LriContent of ParentNode
-			String lrmiContentOfParentNode =
-					parentNode.getMetadata(archive.fedora.Vocabulary.lrmiData);
-
-			play.Logger.debug("oldLriContetn = " + lrmiContentOfParentNode);
-			String newLrmiContentOfParentNode =
-					// new NodeHelper().deleteEncodingObjectFromAmbContentOfParenNode(n,
-					// lrmiContentOfParentNode);
-					new NodeHelper().deleteEncodingObjectFromAmbContentOfParentNode(n,
-							lrmiContentOfParentNode);
-			play.Logger.debug("NewLriContetn = " + lrmiContentOfParentNode);
-
-			parentNode.setMetadata(archive.fedora.Vocabulary.lrmiData,
-					newLrmiContentOfParentNode);
-
-			// update json2 content of parentNode
-			String jso2ContentOfParentNode =
-					parentNode.getMetadata(archive.fedora.Vocabulary.metadata2);
-
-			play.Logger.debug(
-					"old Json2 Content of ParentNode = " + jso2ContentOfParentNode);
-
-			String newJso2ContentOfParentNode = new NodeHelper()
-					.deleteHasPrtObjectFromToScienceContent(n, jso2ContentOfParentNode);
-
-			play.Logger.debug(
-					"New Json2 Content of ParentNode = " + newJso2ContentOfParentNode);
-			parentNode.setMetadata(archive.fedora.Vocabulary.metadata2,
-					newJso2ContentOfParentNode);
-		}
-
+		new NodeHelper().checkNodeBeforeDelete(n);
 		Globals.fedora.deleteNode(n.getPid());
 		return message.toString() + "\n" + n.getPid() + " deleted!";
 	}

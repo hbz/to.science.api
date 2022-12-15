@@ -224,4 +224,47 @@ public class NodeHelper {
 
 	}
 
+	/**
+	 * method checks if parent node is present before deleting a node, if yes the
+	 * data streams LRMI & json2 of the parent node object will be updated
+	 * 
+	 * @param n: Node that should be deleted
+	 */
+	public void checkNodeBeforeDelete(Node n) {
+		Node parentNode = null;
+		if (n.getParentPid() != null) {
+			parentNode = new Read().readNode(n.getParentPid());
+
+			// update LriContent of ParentNode
+			String lrmiContentOfParentNode =
+					parentNode.getMetadata(archive.fedora.Vocabulary.lrmiData);
+
+			play.Logger.debug("oldLriContetn = " + lrmiContentOfParentNode);
+			String newLrmiContentOfParentNode =
+					// new NodeHelper().deleteEncodingObjectFromAmbContentOfParenNode(n,
+					// lrmiContentOfParentNode);
+					new NodeHelper().deleteEncodingObjectFromAmbContentOfParentNode(n,
+							lrmiContentOfParentNode);
+			play.Logger.debug("NewLriContetn = " + lrmiContentOfParentNode);
+
+			parentNode.setMetadata(archive.fedora.Vocabulary.lrmiData,
+					newLrmiContentOfParentNode);
+
+			// update json2 content of parentNode
+			String jso2ContentOfParentNode =
+					parentNode.getMetadata(archive.fedora.Vocabulary.metadataJson);
+
+			play.Logger.debug(
+					"old Json2 Content of ParentNode = " + jso2ContentOfParentNode);
+
+			String newJso2ContentOfParentNode = new NodeHelper()
+					.deleteHasPrtObjectFromToScienceContent(n, jso2ContentOfParentNode);
+
+			play.Logger.debug(
+					"New Json2 Content of ParentNode = " + newJso2ContentOfParentNode);
+			parentNode.setMetadata(archive.fedora.Vocabulary.metadataJson,
+					newJso2ContentOfParentNode);
+		}
+	}
+
 }
