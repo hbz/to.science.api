@@ -27,3 +27,4 @@ scripts/variables.conf
 *.HIST
 *~
 *.class
+/target-eclipse/

@@ -470,7 +470,7 @@ public class LRMIMapper {
 					}
 					if (i < affiliation.size()) {
 						JSONObject affObj = new JSONObject();
-						affObj.put("@id",
+						affObj.put("id",
 								affiliation.get(i).replace(
 										"http://hbz-nrw.de/regal#" + agentType + "Affiliation",
 										"https://ror.org"));
@@ -495,7 +495,7 @@ public class LRMIMapper {
 						 * verwendet.
 						 */
 						JSONObject affObj = new JSONObject();
-						affObj.put("@id", "https://ror.org/");
+						affObj.put("id", "https://ror.org/");
 						affObj.put("type", "Organization");
 						affObj.put("name", "keine Angabe");
 						obj.put("affiliation", affObj);
