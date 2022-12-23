@@ -505,6 +505,8 @@ public class Modify extends RegalAction {
 				new JsonMapper().getTosciencefyLrmi(node, content);
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
+		play.Logger.debug("node.getLrmiData vor updaten ="
+				+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 		updateLrmiData(node, content_toscience);
 		content_toscience = new Enrich().enrichLrmiData(node);
 		play.Logger
@@ -1316,6 +1318,8 @@ public class Modify extends RegalAction {
 					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
 			node.setMetadataFile(metadataType, file.getAbsolutePath());
 			node.setMetadata(metadataType, content);
+			play.Logger.debug("node.getMetadata : "
+					+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 			OaiDispatcher.makeOAISet(node);
 			reindexNodeAndParent(node);
 			return pid + " metadata of type " + metadataType

@@ -485,6 +485,10 @@ public class Resource extends MyController {
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
 	public static Promise<Result> updateMetadata2(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("updateMetadata2() request().body().asJson()="
+					+ request().body().asJson());
+			play.Logger.debug("updateMetadata2() request().body().asText()="
+					+ request().body().asText());
 			play.Logger.debug("BEGIN controllers.Resource.updateMetadata2(pid)");
 			try {
 				play.Logger.debug("Start method updateMetadata2(pid)");
@@ -496,7 +500,7 @@ public class Resource extends MyController {
 
 				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
-				play.Logger.debug(result1);
+				play.Logger.debug("Resource.updateMetadata2() result1 =" + result1);
 
 				/**
 				 * 2. nach LRMI gemappte lobid2-Metadaten als Datenstrom "Lrmidata"
@@ -506,9 +510,14 @@ public class Resource extends MyController {
 				response().setContentType("text/plain");
 				// play.Logger.debug("request body=" + request().body().asText());
 				Node nodeNode = new Read().readNode(pid);
+
+				play.Logger
+						.debug("Resource.updateMetadata2() nodeNode.getMetaData2(json2) ="
+								+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
 						nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
-				play.Logger.debug(result2);
+				play.Logger
+						.debug("Resource.updateMetadata2() result2 Nach =" + result2);
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
@@ -578,7 +587,8 @@ public class Resource extends MyController {
 					modify.updateData(pid, content, mimeType, name, md5);
 
 					// OSU-172: Nach dem erfolgreichen Austausch der Dateien (ChildNodes)
-					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert werden.
+					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert
+					// werden.
 					// Es handelt sich hier nur um eine Art Neuladen der Daten des
 					// ParentNodes.
 					if (readNode.getParentPid() != null) {

@@ -118,8 +118,11 @@ public class Enrich {
 				play.Logger.info("No LRMI data to enrich " + node.getPid());
 				return lrmiData;
 			}
+			play.Logger.debug("lrmiData = ", lrmiData);
 			lrmiData = enrichLrmiData(lrmiData);
 			new Modify().updateLrmiData(node, lrmiData);
+			play.Logger.debug("node.getrmiData Nach Update = ",
+					node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 		} catch (Exception e) {
 			play.Logger.debug("", e.getMessage());
 			play.Logger

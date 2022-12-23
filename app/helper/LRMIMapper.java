@@ -439,6 +439,7 @@ public class LRMIMapper {
 			ArrayList<String> acadDegree, ArrayList<String> affiliation,
 			JSONObject lrmiJsonContent, String agentType) throws RuntimeException {
 		try {
+			play.Logger.debug("rdf = " + rdf.toString());
 			if (rdf.containsKey(agentType)) {
 				play.Logger.debug("add " + agentType + "\'s attributes to lrmi");
 				JSONArray arr = new JSONArray();

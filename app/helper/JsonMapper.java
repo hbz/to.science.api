@@ -1543,7 +1543,7 @@ public class JsonMapper {
 	 */
 	public void mapLrmiAgentsToLobid(Map<String, Object> rdf,
 			JSONObject lrmiJSONObject, String agentType) {
-
+		play.Logger.debug("mapLrmiAgentsToLobid() rdf= " + rdf.toString());
 		String academicDegreeId = null;
 		String affiliationId = null;
 		if (lrmiJSONObject.has(agentType)) {
@@ -1564,6 +1564,7 @@ public class JsonMapper {
 					HashMap<String, Object> lrmiAgentToLobid = mapLrmiAgentToLobid(obj);
 					Map<String, Object> agentMap =
 							(Map<String, Object>) lrmiAgentToLobid.get(metadata2);
+					play.Logger.debug("agentMap = " + agentType.toString());
 
 					agents.add(agentMap);
 
