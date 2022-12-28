@@ -536,16 +536,24 @@ public class Resource extends MyController {
 					.debug("The LRMI data that has been sent: request().body().asJson()="
 							+ request().body().asJson());
 			try {
+				Node nodeNode = new Read().readNode(pid);
 				/**
 				 * Wir legen 2 Datenströme an:
 				 * 
 				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
 				 * Datenstrom "Lrmidata"
 				 */
+				play.Logger.debug(
+						"nodeNode.getLrmiData() VOR modify.updateAndEnrichLrmiData() ="
+								+ nodeNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
 				String content =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
 				play.Logger.debug("The updated and enriched LRMI data: " + content);
 				String result1 = "LRMI metadata successfully updated and enriched.";
+
+				play.Logger.debug(
+						"nodeNode.getLrmiData() NACH modify.updateAndEnrichLrmiData() ="
+								+ nodeNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
 
 				/**
 				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom und als
@@ -553,10 +561,14 @@ public class Resource extends MyController {
 				 */
 				/* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein: */
 				RDFFormat format = RDFFormat.NTRIPLES;
-				Node nodeNode = new Read().readNode(pid);
+				// Node nodeNode = new Read().readNode(pid);
 				String result2 =
 						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content);
-				play.Logger.debug(result2);
+				play.Logger.debug("result2 = " + result2);
+
+				play.Logger.debug(
+						"nodeNode.getLrmiData() NACH modify.updateLobidify2AndEnrichLrmiData() ="
+								+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
@@ -592,8 +604,20 @@ public class Resource extends MyController {
 					// Es handelt sich hier nur um eine Art Neuladen der Daten des
 					// ParentNodes.
 					if (readNode.getParentPid() != null) {
+
 						Node parentNode = new Read().readNode(readNode.getParentPid());
+						play.Logger.debug("parentNode.getLrmi() vor Refresh = "
+								+ parentNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
+
+						play.Logger.debug("parentNode.metadata2() vor Refresh = "
+								+ parentNode.getMetadata(archive.fedora.Vocabulary.metadata2));
+
 						new NodeHelper().refreshDataStreamsOfNode(parentNode);
+						play.Logger.debug("parentNode.getLrmi() Nach Refresh =  "
+								+ parentNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
+
+						play.Logger.debug("parentNode.metadata2() Nach Refresh = "
+								+ parentNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 					}
 
 					return JsonMessage(new Message(

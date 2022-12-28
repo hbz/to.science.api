@@ -1209,12 +1209,17 @@ public class JsonMapper {
 		/* Mapping von LRMI.json nach lobid2.json = json2 */
 		this.node = n;
 		try {
+			play.Logger.debug("n.getLrmiData() VOR getLd2Lobidify2Lrmi()"
+					+ n.getMetadata(archive.fedora.Vocabulary.lrmiData));
+
 			HashMap<String, Object> retHash = new HashMap<>();
 			/*
 			 * Neues JSON-Objekt anlegen für rdf-Daten. Achtung: Die Map erhält die
 			 * Sortierung der Felder nicht !
 			 */
 			Map<String, Object> rdf = node.getLd2();
+			play.Logger.debug("node.getLd2() = " + node.getLd2());
+
 			/*
 			 * Neues JSON-Objekt anlegen für Metadaten im Format toscience
 			 */
@@ -1387,6 +1392,8 @@ public class JsonMapper {
 			}
 
 			// postprocessing(rdf);
+			play.Logger.debug("n.getLrmiData() NACH getLd2Lobidify2Lrmi()"
+					+ n.getMetadata(archive.fedora.Vocabulary.lrmiData));
 
 			play.Logger.debug("Done mapping LRMI data to lobid2.");
 			retHash.put(metadata2, rdf);

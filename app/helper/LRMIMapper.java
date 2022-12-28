@@ -83,7 +83,11 @@ public class LRMIMapper {
 			// get the current lrmiData as String
 			String currentLrmiContent = read.readLrmiData(node);
 			// String currentTosContent = read.
-
+			play.Logger
+					.debug("LRMIMapper.getLrmiAndLrmifyMetadata() content = " + content);
+			play.Logger
+					.debug("LRMIMapper.getLrmiAndLrmifyMetadata() n.getLrmiData vor edit"
+							+ n.getMetadata(archive.fedora.Vocabulary.lrmiData));
 			/**
 			 * - wandele ihn nach JsonObject (s. JsonMapper.getTosciencefyLrmi)
 			 */
@@ -440,6 +444,10 @@ public class LRMIMapper {
 			JSONObject lrmiJsonContent, String agentType) throws RuntimeException {
 		try {
 			play.Logger.debug("rdf = " + rdf.toString());
+			play.Logger.debug(
+					"Laenge von acadDegree  = " + String.valueOf(acadDegree.size()));
+			play.Logger.debug(
+					"Laenge von affiliation  = " + String.valueOf(affiliation.size()));
 			if (rdf.containsKey(agentType)) {
 				play.Logger.debug("add " + agentType + "\'s attributes to lrmi");
 				JSONArray arr = new JSONArray();

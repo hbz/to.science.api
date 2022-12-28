@@ -1318,7 +1318,7 @@ public class Modify extends RegalAction {
 					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
 			node.setMetadataFile(metadataType, file.getAbsolutePath());
 			node.setMetadata(metadataType, content);
-			play.Logger.debug("node.getMetadata : "
+			play.Logger.debug("updateMetadata() node.getMetadata : "
 					+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 			OaiDispatcher.makeOAISet(node);
 			reindexNodeAndParent(node);
@@ -1351,6 +1351,8 @@ public class Modify extends RegalAction {
 
 	String updateLrmiData(Node node, String content) {
 		try {
+			play.Logger.debug("Übergebene content bei updateLrmiData für Node= "
+					+ node.getPid() + "ist = " + content);
 			return updateMetadata(archive.fedora.Vocabulary.lrmiData, node, content);
 		} catch (Exception e) {
 			play.Logger.error(e.getMessage());
