@@ -1561,7 +1561,7 @@ public class JsonMapper {
 
 			ArrayList<Map<String, Object>> agents = new ArrayList<>(); // creators
 			ArrayList<String> agentAcademicDegree = new ArrayList<>(); // honoricPrefix
-			ArrayList<String> agentAffiliation = new ArrayList<>(); // affiliation
+			ArrayList<String> agentAffiliation = new ArrayList<>(); // creatorAffiliation
 			ArrayList<String> oerAgent = new ArrayList<>();
 
 			try {
@@ -1575,8 +1575,11 @@ public class JsonMapper {
 
 					// do the mapping to lobid2 agent
 					HashMap<String, Object> lrmiAgentToLobid = mapLrmiAgentToLobid(obj);
+					play.Logger
+							.debug("lrmiAgentToLobid = " + lrmiAgentToLobid.toString());
 					Map<String, Object> agentMap =
-							(Map<String, Object>) lrmiAgentToLobid.get(metadata2);
+							(Map<String, Object>) lrmiAgentToLobid.get(metadata2); //
+					play.Logger.debug("agentMap = " + agentMap.toString());
 					play.Logger.debug("agentMap = " + agentType.toString());
 
 					agents.add(agentMap);
@@ -1606,13 +1609,19 @@ public class JsonMapper {
 						agentStr.append(" " + cAffil.get(affiliationId));
 					}
 					oerAgent.add(agentStr.toString());
+					play.Logger.debug("agentStr =" + agentStr);
 				} // next agent
 
+				play.Logger.debug("agents.toString() =" + agents.toString());
 				rdf.put(agentType, agents);
+				play.Logger
+						.debug("agentAcademicDegree =" + agentAcademicDegree.toString());
 				rdf.put(agentType + "AcademicDegree", agentAcademicDegree);
+				play.Logger.debug("agentAffiliation =" + agentAffiliation.toString());
 				rdf.put(agentType + "Affiliation", agentAffiliation);
-
+				play.Logger.debug("oerAgent =" + oerAgent.toString());
 				rdf.put("oerAgent", oerAgent);
+				play.Logger.debug("rdf =" + rdf.toString());
 			} catch (Exception e) {
 				play.Logger.error(e.getMessage());
 				throw new RuntimeException(e);
