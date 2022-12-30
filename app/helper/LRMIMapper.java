@@ -82,6 +82,7 @@ public class LRMIMapper {
 			 */
 			// get the current lrmiData as String
 			String currentLrmiContent = read.readLrmiData(node);
+			play.Logger.debug("currentLrmiContent = " + currentLrmiContent);
 			// String currentTosContent = read.
 			play.Logger
 					.debug("LRMIMapper.getLrmiAndLrmifyMetadata() content = " + content);
@@ -111,6 +112,7 @@ public class LRMIMapper {
 					new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					format, profile.getContext().get("@context"));
+			play.Logger.debug("getLrmiAndLrmifyMetadata() rdf =" + rdf.toString());
 			/**
 			 * - gehe die lobid-Daten durch (Mapping lobid => LRMI !) und überschreibe
 			 * die entsprechenden Felder in den LRMI-Daten oder füge sie neu ein.
@@ -212,6 +214,11 @@ public class LRMIMapper {
 				}
 				play.Logger.debug("Amount of creator academic degrees in flat List: "
 						+ creatorAcadDegree.size());
+
+				for (int i = 0; i < creatorAcadDegree.size(); i++) {
+					play.Logger.debug("creatorAcadDegree degreeId = "
+							+ creatorAcadDegree.get(i) + "was added");
+				}
 			}
 
 			ArrayList<String> contributorAcadDegree = new ArrayList<>();
@@ -224,6 +231,11 @@ public class LRMIMapper {
 				play.Logger
 						.debug("Amount of contributor academic degrees in flat List: "
 								+ contributorAcadDegree.size());
+
+				for (int i = 0; i < contributorAcadDegree.size(); i++) {
+					play.Logger.debug("contributorAcadDegree degreeId = "
+							+ contributorAcadDegree.get(i) + "was added");
+				}
 			}
 
 			ArrayList<String> creatorAffiliation = new ArrayList<>();
@@ -235,6 +247,10 @@ public class LRMIMapper {
 				}
 				play.Logger.debug("Amount of creator affiliations in flat List: "
 						+ creatorAffiliation.size());
+				for (int i = 0; i < creatorAffiliation.size(); i++) {
+					play.Logger.debug("creatorAffiliation degreeId = "
+							+ creatorAffiliation.get(i) + "was added");
+				}
 			}
 
 			ArrayList<String> contributorAffiliation = new ArrayList<>();
@@ -248,10 +264,14 @@ public class LRMIMapper {
 						+ contributorAffiliation.size());
 			}
 			int attribCounter = 0;
+			play.Logger.debug("lrmiJsonContent vor mapAgent =" + lrmiJsonContent);
+
 			lrmiJsonContent = mapAgent(rdf, creatorAcadDegree, creatorAffiliation,
 					lrmiJsonContent, "creator");
 			lrmiJsonContent = mapAgent(rdf, contributorAcadDegree,
 					contributorAffiliation, lrmiJsonContent, "contributor");
+
+			play.Logger.debug("lrmiJsonContent nach mapAgent =" + lrmiJsonContent);
 
 			if (rdf.containsKey("subject")) {
 				arr = new JSONArray();

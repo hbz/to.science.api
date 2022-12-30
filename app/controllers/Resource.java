@@ -563,12 +563,16 @@ public class Resource extends MyController {
 				RDFFormat format = RDFFormat.NTRIPLES;
 				// Node nodeNode = new Read().readNode(pid);
 				String result2 =
-						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content);
+						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content); // lrmiContent
 				play.Logger.debug("result2 = " + result2);
 
 				play.Logger.debug(
 						"nodeNode.getLrmiData() NACH modify.updateLobidify2AndEnrichLrmiData() ="
-								+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
+								+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadataJson));
+
+				play.Logger.debug(
+						"nodeNode.getLrmiData() NACH modify.updateLobidify2AndEnrichLrmiData() ="
+								+ nodeNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
@@ -611,13 +615,13 @@ public class Resource extends MyController {
 
 						play.Logger.debug("parentNode.metadata2() vor Refresh = "
 								+ parentNode.getMetadata(archive.fedora.Vocabulary.metadata2));
-
-						new NodeHelper().refreshDataStreamsOfNode(parentNode);
-						play.Logger.debug("parentNode.getLrmi() Nach Refresh =  "
-								+ parentNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
-
-						play.Logger.debug("parentNode.metadata2() Nach Refresh = "
-								+ parentNode.getMetadata(archive.fedora.Vocabulary.metadata2));
+						//
+						// new NodeHelper().refreshDataStreamsOfNode(parentNode);
+						// play.Logger.debug("parentNode.getLrmi() Nach Refresh = "
+						// + parentNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
+						//
+						// play.Logger.debug("parentNode.metadata2() Nach Refresh = "
+						// + parentNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 					}
 
 					return JsonMessage(new Message(

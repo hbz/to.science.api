@@ -73,6 +73,8 @@ import models.DublinCoreData;
 import models.Globals;
 import models.Node;
 import models.ToScienceObject;
+import to.science.core.modelx.amb.AmbMapper;
+import to.science.core.modelx.mapper.AmbMapperImpl;
 
 /**
  * @author Jan Schnasse
@@ -326,7 +328,7 @@ public class Modify extends RegalAction {
 
 		// 1. Update or create the metadata2 data stream
 		Map<String, Object> rdf =
-				(Map<String, Object>) ld2.get(archive.fedora.Vocabulary.metadata2);
+				(Map<String, Object>) ld2.get(archive.fedora.Vocabulary.metadata2); // N-Triple
 		updateMetadata2(node, rdfToString(rdf, format));
 		play.Logger.debug("Updated Metadata2 datastream!");
 
@@ -342,77 +344,85 @@ public class Modify extends RegalAction {
 
 		// updateMetadataJson(node, metadataJson.getJson());
 		// In the absence of a mapping, we will continue with an example datastream:
-		updateMetadataJson(node, "{\n" + "        \"license\": {\n"
-				+ "                \"prefLabel\": \"CC BY 4.0\",\n"
-				+ "                \"@id\": \"https://creativecommons.org/licenses/by/4.0/\"\n"
-				+ "        },\n" + "        \"creator\": [\n" + "                {\n"
-				+ "                        \"affiliation\": {\n"
-				+ "                                \"prefLabel\": \"Ruhr-Universität Bochum\",\n"
-				+ "                                \"@id\": \"https://ror.org/04tsk2644\",\n"
-				+ "                                \"type\": \"Organization\"\n"
-				+ "                        },\n"
-				+ "                        \"prefLabel\": \"Andres Quast\",\n"
-				+ "                        \"academicDegree\": {\n"
-				+ "                                \"prefLabel\": \"Dr.\",\n"
-				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
-				+ "                        },\n"
-				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/QW5kcmVzIFF1YXN0\"\n"
-				+ "                },\n" + "                {\n"
-				+ "                        \"affiliation\": {\n"
-				+ "                                \"prefLabel\": \"Bergische Universität Wuppertal\",\n"
-				+ "                                \"@id\": \"https://ror.org/00613ak93\",\n"
-				+ "                                \"type\": \"Organization\"\n"
-				+ "                        },\n"
-				+ "                        \"prefLabel\": \"Ingölf Küss\",\n"
-				+ "                        \"academicDegree\": {\n"
-				+ "                                \"prefLabel\": \"Dr.\",\n"
-				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
-				+ "                        },\n"
-				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/SW5nw7ZsZiBLw7xzcw==\"\n"
-				+ "                },\n" + "                {\n"
-				+ "                        \"affiliation\": {\n"
-				+ "                                \"prefLabel\": \"Universität zu Köln\",\n"
-				+ "                                \"@id\": \"https://ror.org/00rcxh774\",\n"
-				+ "                                \"type\": \"Organization\"\n"
-				+ "                        },\n"
-				+ "                        \"prefLabel\": \"Peter Reimer\",\n"
-				+ "                        \"academicDegree\": {\n"
-				+ "                                \"prefLabel\": \"Keine Angabe\",\n"
-				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
-				+ "                        },\n"
-				+ "                        \"@id\": \"https://orcid.org/0000-0002-3187-2536\"\n"
-				+ "                },\n" + "                {\n"
-				+ "                        \"affiliation\": {\n"
-				+ "                                \"prefLabel\": \"FernUniversität in Hagen\",\n"
-				+ "                                \"@id\": \"https://ror.org/04tkkr536\",\n"
-				+ "                                \"type\": \"Organization\"\n"
-				+ "                        },\n"
-				+ "                        \"prefLabel\": \"Markus Deimann\",\n"
-				+ "                        \"academicDegree\": {\n"
-				+ "                                \"prefLabel\": \"Dr.\",\n"
-				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
-				+ "                        },\n"
-				+ "                        \"@id\": \"https://orcid.org/0000-0002-1652-5181\"\n"
-				+ "                },\n" + "                {\n"
-				+ "                        \"affiliation\": {\n"
-				+ "                                \"prefLabel\": \"Hochschule für Musik Detmold\",\n"
-				+ "                                \"@id\": \"https://ror.org/03y02pg02\",\n"
-				+ "                                \"type\": \"Organization\"\n"
-				+ "                        },\n"
-				+ "                        \"prefLabel\": \"Nina Hagen\",\n"
-				+ "                        \"academicDegree\": {\n"
-				+ "                                \"prefLabel\": \"Keine Angabe\",\n"
-				+ "                                \"@id\": \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
-				+ "                        },\n"
-				+ "                        \"@id\": \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/TmluYSBIYWdlbg==\"\n"
-				+ "                }\n" + "        ],\n" + "        \"medium\": [\n"
-				+ "                {\n"
-				+ "                        \"@id\": \"https://w3id.org/orca.nrw/medientypen/diagram\"\n"
-				+ "                }\n" + "        ],\n" + "        \"department\": [\n"
-				+ "                {\n"
-				+ "                        \"prefLabel\": \"Kommunikations- und Informationstechnik\",\n"
-				+ "                        \"@id\": \"https://w3id.org/kim/hochschulfaechersystematik/n222\"\n"
-				+ "                }\n" + "        ]\n" + "}");
+		// updateMetadataJson(node, "{\n" + " \"license\": {\n"
+		// + " \"prefLabel\": \"CC BY 4.0\",\n"
+		// + " \"@id\": \"https://creativecommons.org/licenses/by/4.0/\"\n"
+		// + " },\n" + " \"creator\": [\n" + " {\n"
+		// + " \"affiliation\": {\n"
+		// + " \"prefLabel\": \"Ruhr-Universität Bochum\",\n"
+		// + " \"@id\": \"https://ror.org/04tsk2644\",\n"
+		// + " \"type\": \"Organization\"\n"
+		// + " },\n"
+		// + " \"prefLabel\": \"Andres Quast\",\n"
+		// + " \"academicDegree\": {\n"
+		// + " \"prefLabel\": \"Dr.\",\n"
+		// + " \"@id\":
+		// \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+		// + " },\n"
+		// + " \"@id\":
+		// \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/QW5kcmVzIFF1YXN0\"\n"
+		// + " },\n" + " {\n"
+		// + " \"affiliation\": {\n"
+		// + " \"prefLabel\": \"Bergische Universität Wuppertal\",\n"
+		// + " \"@id\": \"https://ror.org/00613ak93\",\n"
+		// + " \"type\": \"Organization\"\n"
+		// + " },\n"
+		// + " \"prefLabel\": \"Ingölf Küss\",\n"
+		// + " \"academicDegree\": {\n"
+		// + " \"prefLabel\": \"Dr.\",\n"
+		// + " \"@id\":
+		// \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+		// + " },\n"
+		// + " \"@id\":
+		// \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/SW5nw7ZsZiBLw7xzcw==\"\n"
+		// + " },\n" + " {\n"
+		// + " \"affiliation\": {\n"
+		// + " \"prefLabel\": \"Universität zu Köln\",\n"
+		// + " \"@id\": \"https://ror.org/00rcxh774\",\n"
+		// + " \"type\": \"Organization\"\n"
+		// + " },\n"
+		// + " \"prefLabel\": \"Peter Reimer\",\n"
+		// + " \"academicDegree\": {\n"
+		// + " \"prefLabel\": \"Keine Angabe\",\n"
+		// + " \"@id\":
+		// \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
+		// + " },\n"
+		// + " \"@id\": \"https://orcid.org/0000-0002-3187-2536\"\n"
+		// + " },\n" + " {\n"
+		// + " \"affiliation\": {\n"
+		// + " \"prefLabel\": \"FernUniversität in Hagen\",\n"
+		// + " \"@id\": \"https://ror.org/04tkkr536\",\n"
+		// + " \"type\": \"Organization\"\n"
+		// + " },\n"
+		// + " \"prefLabel\": \"Markus Deimann\",\n"
+		// + " \"academicDegree\": {\n"
+		// + " \"prefLabel\": \"Dr.\",\n"
+		// + " \"@id\":
+		// \"https://d-nb.info/standards/elementset/gnd#academicDegree/Dr.\"\n"
+		// + " },\n"
+		// + " \"@id\": \"https://orcid.org/0000-0002-1652-5181\"\n"
+		// + " },\n" + " {\n"
+		// + " \"affiliation\": {\n"
+		// + " \"prefLabel\": \"Hochschule für Musik Detmold\",\n"
+		// + " \"@id\": \"https://ror.org/03y02pg02\",\n"
+		// + " \"type\": \"Organization\"\n"
+		// + " },\n"
+		// + " \"prefLabel\": \"Nina Hagen\",\n"
+		// + " \"academicDegree\": {\n"
+		// + " \"prefLabel\": \"Keine Angabe\",\n"
+		// + " \"@id\":
+		// \"https://d-nb.info/standards/elementset/gnd#academicDegree/unknown\"\n"
+		// + " },\n"
+		// + " \"@id\":
+		// \"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/TmluYSBIYWdlbg==\"\n"
+		// + " }\n" + " ],\n" + " \"medium\": [\n"
+		// + " {\n"
+		// + " \"@id\": \"https://w3id.org/orca.nrw/medientypen/diagram\"\n"
+		// + " }\n" + " ],\n" + " \"department\": [\n"
+		// + " {\n"
+		// + " \"prefLabel\": \"Kommunikations- und Informationstechnik\",\n"
+		// + " \"@id\": \"https://w3id.org/kim/hochschulfaechersystematik/n222\"\n"
+		// + " }\n" + " ]\n" + "}");
 		play.Logger.debug("Updated toscience datastream!");
 
 		String enrichMessage = Enrich.enrichMetadata2(node);
@@ -505,10 +515,10 @@ public class Modify extends RegalAction {
 				new JsonMapper().getTosciencefyLrmi(node, content);
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
-		play.Logger.debug("node.getLrmiData vor updaten ="
-				+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 		updateLrmiData(node, content_toscience);
 		content_toscience = new Enrich().enrichLrmiData(node);
+		play.Logger.debug("node.getLrmiData vor updaten ="
+				+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 		play.Logger
 				.debug("Enriched LRMI data. Content is now: " + content_toscience);
 		msg = pid + " LRMI-metadata of " + node.getPid()
@@ -1335,11 +1345,13 @@ public class Modify extends RegalAction {
 		try {
 			String pid = node.getPid();
 			String contentRewrite = content;
+			play.Logger.debug("content vor rewriteContent =" + content);
 			if (content != null && !content.isEmpty()) {
 				// RdfUtils.validate(content);
 				// Extreme Workaround to fix subject uris
 				contentRewrite = rewriteContent(content, pid);
 				// Workaround end
+				play.Logger.debug("content NACH rewriteContent =" + contentRewrite);
 			}
 			return updateMetadata(archive.fedora.Vocabulary.metadata2, node,
 					contentRewrite);
