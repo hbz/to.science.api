@@ -325,10 +325,13 @@ public class Modify extends RegalAction {
 		// Map LRMI (or amb) metadata to the lobid2 metadata format
 		HashMap<String, Object> ld2 =
 				(new JsonMapper()).getLd2Lobidify2Lrmi(node, content);
+		play.Logger.debug("ld2 = " + ld2.toString());
 
 		// 1. Update or create the metadata2 data stream
 		Map<String, Object> rdf =
 				(Map<String, Object>) ld2.get(archive.fedora.Vocabulary.metadata2); // N-Triple
+		play.Logger.debug("rdf = " + rdf.toString());
+
 		updateMetadata2(node, rdfToString(rdf, format));
 		play.Logger.debug("Updated Metadata2 datastream!");
 

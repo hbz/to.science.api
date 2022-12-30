@@ -1227,6 +1227,8 @@ public class JsonMapper {
 
 			// LRMIDaten nach JSONObject wandeln
 			JSONObject lrmiJSONObject = new JSONObject(content);
+			play.Logger
+					.debug("lrmiJSONObject.toString() =" + lrmiJSONObject.toString());
 			play.Logger.debug("Start mapping of lrmi to lobid2");
 			JSONArray arr = null;
 			JSONObject obj = null;
@@ -1551,17 +1553,21 @@ public class JsonMapper {
 	public void mapLrmiAgentsToLobid(Map<String, Object> rdf,
 			JSONObject lrmiJSONObject, String agentType) {
 		play.Logger.debug("mapLrmiAgentsToLobid() rdf= " + rdf.toString());
+		play.Logger.debug("lrmiJSONObject = " + lrmiJSONObject.toString());
 		String academicDegreeId = null;
 		String affiliationId = null;
+		// play.Logger.debug(affiliationId);
 		if (lrmiJSONObject.has(agentType)) {
 
-			ArrayList<Map<String, Object>> agents = new ArrayList<>();
-			ArrayList<String> agentAcademicDegree = new ArrayList<>();
-			ArrayList<String> agentAffiliation = new ArrayList<>();
+			ArrayList<Map<String, Object>> agents = new ArrayList<>(); // creators
+			ArrayList<String> agentAcademicDegree = new ArrayList<>(); // honoricPrefix
+			ArrayList<String> agentAffiliation = new ArrayList<>(); // affiliation
 			ArrayList<String> oerAgent = new ArrayList<>();
 
 			try {
-				JSONArray lrmiJSONArray = lrmiJSONObject.getJSONArray(agentType);
+				JSONArray lrmiJSONArray = lrmiJSONObject.getJSONArray(agentType); // creator
+				play.Logger.debug(
+						"lrmiJSONArray.toString() agentType =" + lrmiJSONArray.toString());
 				for (int i = 0; i < lrmiJSONArray.length(); i++) {
 					JSONObject obj = lrmiJSONArray.getJSONObject(i);
 					StringBuffer agentStr = new StringBuffer();

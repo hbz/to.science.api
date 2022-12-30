@@ -564,7 +564,6 @@ public class Resource extends MyController {
 				// Node nodeNode = new Read().readNode(pid);
 				String result2 =
 						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content); // lrmiContent
-				play.Logger.debug("result2 = " + result2);
 
 				play.Logger.debug(
 						"nodeNode.getLrmiData() NACH modify.updateLobidify2AndEnrichLrmiData() ="
