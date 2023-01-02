@@ -46,7 +46,7 @@ case _ =>{ }
 								<div class="dc:label">@views.Helper.getTitle(fileMap)</div>
 								<!--  span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span> -->
 								<!--  span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>-->
-								@if("public".equals(@fileMap.get("accessScheme"))){
+								@if("public".equals(fileMap.get("accessScheme"))){
 									<i class="fa fa-unlock" style="color:green;"></i>
  								}else {
 									<i class="fa fa-lock" style="color:red;"></i>
@@ -172,7 +172,7 @@ case _ =>{ }
 								</div>
 								<!--  span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>-->
 								<!--  span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>-->
-								@if("public".equals(@fileMap.get("accessScheme"))){
+								@if("public".equals(fileMap.get("accessScheme"))){
 									<i class="fa fa-unlock" style="color:green;"></i>
  								}else {
 									<i class="fa fa-lock" style="color:red;"></i>
@@ -222,7 +222,7 @@ case _ =>{ }
 								</div>
 								<!--  span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span> -->
 								<!--  span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>-->
-								@if("public".equals(@fileMap.get("accessScheme"))){
+								@if("public".equals(fileMap.get("accessScheme"))){
 									<i class="fa fa-unlock" style="color:green;"></i>
  								}else {
 									<i class="fa fa-lock" style="color:red;"></i>
