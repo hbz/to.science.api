@@ -47,9 +47,14 @@ case _ =>{ }
 								<!--  span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span> -->
 								<!--  span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>-->
 								@if("public".equals(fileMap.get("accessScheme"))){
-									<i class="fa fa-unlock" style="color:green;"></i>
+									<i class="fa fa-unlock" title="public data" style="color:green;"></i>
  								}else {
-									<i class="fa fa-lock" style="color:red;"></i>
+									<i class="fa fa-lock" title="private data" style="color:red;"></i>
+								}								
+								@if("public".equals(fileMap.get("publishScheme"))){
+									<i class="fa fa-unlock" title="public metadata" style="color:green;"></i>
+ 								}else {
+									<i class="fa fa-lock" title="private metadata" style="color:red;"></i>
 								}
 							</a>
 						  
@@ -113,10 +118,15 @@ case _ =>{ }
 							<a href="/resource/@fileMap.get("@id")">
 								<!--  span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span> -->
 								<!--  span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>-->
-								@if("public-access".equals(fileMap.get("accessScheme"))){
-									<i class="fa fa-unlock" style="color:green;"></i>
+								@if("public".equals(fileMap.get("accessScheme"))){
+									<i class="fa fa-unlock" title="public data" style="color:green;"></i>
  								}else {
-									<i class="fa fa-lock" style="color:red;"></i>
+									<i class="fa fa-lock" title="private data" style="color:red;"></i>
+								}								
+								@if("public".equals(fileMap.get("publishScheme"))){
+									<i class="fa fa-unlock" title="public metadata" style="color:green;"></i>
+ 								}else {
+									<i class="fa fa-lock" title="private metadata" style="color:red;"></i>
 								}
 							</a>
 						  
@@ -172,10 +182,15 @@ case _ =>{ }
 								</div>
 								<!--  span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>-->
 								<!--  span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>-->
-								@if("public".equals(fileMap.get("accessScheme"))){
-									<i class="fa fa-unlock" style="color:green;"></i>
+							   @if("public".equals(fileMap.get("accessScheme"))){
+									<i class="fa fa-unlock" title="public data" style="color:green;"></i>
  								}else {
-									<i class="fa fa-lock" style="color:red;"></i>
+									<i class="fa fa-lock" title="private data" style="color:red;"></i>
+								}								
+								@if("public".equals(fileMap.get("publishScheme"))){
+									<i class="fa fa-unlock" title="public metadata" style="color:green;"></i>
+ 								}else {
+									<i class="fa fa-lock" title="private metadata" style="color:red;"></i>
 								}
 						   </a>
 						  
@@ -223,9 +238,14 @@ case _ =>{ }
 								<!--  span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span> -->
 								<!--  span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>-->
 								@if("public".equals(fileMap.get("accessScheme"))){
-									<i class="fa fa-unlock" style="color:green;"></i>
+									<i class="fa fa-unlock" title="public data" style="color:green;"></i>
  								}else {
-									<i class="fa fa-lock" style="color:red;"></i>
+									<i class="fa fa-lock" title="private data" style="color:red;"></i>
+								}								
+								@if("public".equals(fileMap.get("publishScheme"))){
+									<i class="fa fa-unlock" title="public metadata" style="color:green;"></i>
+ 								}else {
+									<i class="fa fa-lock" title="private metadata" style="color:red;"></i>
 								}
 						   </a>
 						  
