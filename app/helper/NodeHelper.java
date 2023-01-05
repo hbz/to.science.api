@@ -87,7 +87,7 @@ public class NodeHelper {
 			jsonEncodingObject = jsonEncodingObjects.getJSONObject(i);
 			check = jsonEncodingObject.toString();
 			if (check != null && check.contains("/" + childNode + "/")) {
-				jsonEncodingObjects.remove(i);
+				// jsonEncodingObjects.remove(i);
 			}
 		}
 		jsonAmbContent.put("encoding", jsonEncodingObjects);
@@ -139,7 +139,7 @@ public class NodeHelper {
 			jsonHasPartObject = jsonHasPartObjects.getJSONObject(i);
 			check = jsonHasPartObject.toString();
 			if (check != null && check.contains("\"" + childNode + "\"")) {
-				jsonHasPartObjects.remove(i);
+				// jsonHasPartObjects.remove(i);
 			}
 		}
 		jsonToScienceContent.put("hasPart", jsonHasPartObjects);
