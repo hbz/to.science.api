@@ -52,6 +52,10 @@ public class OaiDispatcher {
 	 */
 	public static String makeOAISet(Node node) {
 		try {
+			play.Logger.debug("node.getMetaData2 = "
+					+ node.getMetadata(archive.fedora.Vocabulary.metadata2));
+			play.Logger.debug("node.getLrmiData = "
+					+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
 			play.Logger.info("Connect transformer to " + node.getPid());
 			updateTransformer(null, node);
 			play.Logger.info("Create OAI-Sets for " + node.getPid());
@@ -61,7 +65,7 @@ public class OaiDispatcher {
 			createAlephSet(node);
 			createContentTypeSet(node);
 			play.Logger.debug("Start update Index");
-			new Modify().updateIndex(node.getPid());
+			new Modify().updateIndex(node.getPid()); // hier geht Sortierung verloren
 			return node.getPid() + " successfully created oai sets!";
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -79,6 +83,8 @@ public class OaiDispatcher {
 		addWglTransformer(node);
 		addOpenAireTransformer(node);
 		addModsTransformer(node);
+		play.Logger.debug("node.getMetadata2 "
+				+ node.getMetadata(archive.fedora.Vocabulary.metadata2));
 
 	}
 
@@ -131,6 +137,7 @@ public class OaiDispatcher {
 	private static void createDDCSets(Node node) throws RepositoryException {
 		OaiSetBuilder oaiSetBuilder = new OaiSetBuilder();
 		String metadata2 = node.getMetadata(archive.fedora.Vocabulary.metadata2);
+		play.Logger.debug("node.getMetadata2 = " + metadata2);
 		if (metadata2 == null)
 			return;
 		RepositoryResult<Statement> statements =

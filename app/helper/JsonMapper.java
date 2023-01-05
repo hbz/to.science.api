@@ -1296,8 +1296,9 @@ public class JsonMapper {
 				}
 				rdf.put("language", inLangList);
 			}
-
+			play.Logger.debug("rdf vor mapLrmiAgentsToLobid =" + rdf.toString());
 			mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "creator");
+			play.Logger.debug("rdf nach mapLrmiAgentsToLobid =" + rdf.toString());
 			mapLrmiAgentsToLobid(rdf, lrmiJSONObject, "contributor");
 			mapLrmiObjectToLobid(rdf, lrmiJSONObject, "learningResourceType",
 					"medium");
@@ -1398,7 +1399,9 @@ public class JsonMapper {
 					+ n.getMetadata(archive.fedora.Vocabulary.lrmiData));
 
 			play.Logger.debug("Done mapping LRMI data to lobid2.");
+			play.Logger.debug("rdf =" + rdf.toString());
 			retHash.put(metadata2, rdf);
+
 			// retHash.put(metadataJson, ToscienceJsonImpl);
 			return retHash;
 		} catch (Exception e) {

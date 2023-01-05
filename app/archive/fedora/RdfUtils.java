@@ -132,6 +132,8 @@ public class RdfUtils {
 			RDFFormat outf, String baseUrl) {
 		Collection<Statement> myGraph = null;
 		myGraph = readRdfToGraph(in, inf, baseUrl);
+		play.Logger.debug("myGraph.toString(): " + myGraph.toString());
+
 		return graphToString(myGraph, outf);
 	}
 

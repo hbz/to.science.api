@@ -125,6 +125,7 @@ public class Index {
 		String pid = node.getPid();
 		String type = node.getContentType();
 		StringBuffer msg = new StringBuffer();
+
 		msg.append(indexToPrivateIndex(pid, type, namespace, node));
 		msg.append(handlePublicIndex(pid, type, namespace, node));
 		msg.append(handleFulltextIndex(pid, type, namespace, node));

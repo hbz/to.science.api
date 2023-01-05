@@ -69,6 +69,7 @@ import helper.LRMIMapper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
+import javafx.scene.control.ContentDisplay;
 import models.DublinCoreData;
 import models.Globals;
 import models.Node;
@@ -1333,7 +1334,7 @@ public class Modify extends RegalAction {
 			node.setMetadata(metadataType, content);
 			play.Logger.debug("updateMetadata() node.getMetadata : "
 					+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
-			OaiDispatcher.makeOAISet(node);
+			OaiDispatcher.makeOAISet(node); // hier geht die Sortierung verloren
 			reindexNodeAndParent(node);
 			return pid + " metadata of type " + metadataType
 					+ " successfully updated!";
@@ -1435,6 +1436,7 @@ public class Modify extends RegalAction {
 			String rdf = RdfUtils.readRdfToString(
 					new ByteArrayInputStream(json(result).getBytes("utf-8")),
 					RDFFormat.JSONLD, format, "");
+			play.Logger.debug("rdfToString rdf =" + rdf);
 			return rdf;
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);

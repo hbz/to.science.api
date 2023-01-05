@@ -566,8 +566,8 @@ public class Resource extends MyController {
 						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content); // lrmiContent
 
 				play.Logger.debug(
-						"nodeNode.getLrmiData() NACH modify.updateLobidify2AndEnrichLrmiData() ="
-								+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadataJson));
+						"nodeNode.getMetadata2 NACH modify.updateLobidify2AndEnrichLrmiData ="
+								+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 
 				play.Logger.debug(
 						"nodeNode.getLrmiData() NACH modify.updateLobidify2AndEnrichLrmiData() ="
@@ -614,6 +614,9 @@ public class Resource extends MyController {
 
 						play.Logger.debug("parentNode.metadata2() vor Refresh = "
 								+ parentNode.getMetadata(archive.fedora.Vocabulary.metadata2));
+						play.Logger
+								.debug("parentNode.metadata2() vor Refresh = " + parentNode
+										.getMetadata(archive.fedora.Vocabulary.metadataJson));
 						//
 						// new NodeHelper().refreshDataStreamsOfNode(parentNode);
 						// play.Logger.debug("parentNode.getLrmi() Nach Refresh = "
