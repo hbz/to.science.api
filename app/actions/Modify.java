@@ -284,6 +284,8 @@ public class Modify extends RegalAction {
 		}
 
 		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+			play.Logger
+					.debug("content.contains(archive.fedora.Vocabulary.REL_MAB_527)");
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
@@ -1317,6 +1319,8 @@ public class Modify extends RegalAction {
 	 */
 	public String updateMetadata(String metadataType, Node node, String content) {
 		try {
+			play.Logger.debug("updateMetadata() node.getMetadata : "
+					+ node.getMetadata(archive.fedora.Vocabulary.metadata2));
 			String pid = node.getPid();
 			play.Logger.debug(
 					"Updating metadata of type " + metadataType + " on PID " + pid);
@@ -1332,10 +1336,28 @@ public class Modify extends RegalAction {
 					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
 			node.setMetadataFile(metadataType, file.getAbsolutePath());
 			node.setMetadata(metadataType, content);
-			play.Logger.debug("updateMetadata() node.getMetadata : "
+
+			play.Logger.debug("updateMetadata() vor makeOAISet node.getMetadata : "
 					+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
+			play.Logger.debug("updateMetadata() vor makeOAISet node.getMetadata : "
+					+ node.getMetadata(archive.fedora.Vocabulary.metadata2));
+
 			OaiDispatcher.makeOAISet(node); // hier geht die Sortierung verloren
+			play.Logger.debug("updateMetadata() NACH makeOAISet node.getMetadata : "
+					+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
+			play.Logger.debug("updateMetadata() NACH makeOAISet node.getMetadata : "
+					+ node.getMetadata(archive.fedora.Vocabulary.metadata2));
+
 			reindexNodeAndParent(node);
+
+			play.Logger.debug(
+					"updateMetadata() NACH reindexNodeAndParent node.getMetadata : "
+							+ node.getMetadata(archive.fedora.Vocabulary.lrmiData));
+			play.Logger.debug(
+					"updateMetadata() NACH reindexNodeAndParent node.getMetadata : "
+							+ node.getMetadata(archive.fedora.Vocabulary.metadata2));
+
+			play.Logger.debug("metadataType = " + metadataType);
 			return pid + " metadata of type " + metadataType
 					+ " successfully updated!";
 		} catch (RdfException e) {

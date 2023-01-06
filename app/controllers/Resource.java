@@ -491,6 +491,7 @@ public class Resource extends MyController {
 					+ request().body().asText());
 			play.Logger.debug("BEGIN controllers.Resource.updateMetadata2(pid)");
 			try {
+				Node nodeNode = new Read().readNode(pid);
 				play.Logger.debug("Start method updateMetadata2(pid)");
 				/**
 				 * Wir aktualisieren 2 Datenströme, oder legen sie neu an:
@@ -501,6 +502,8 @@ public class Resource extends MyController {
 				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				play.Logger.debug("Resource.updateMetadata2() result1 =" + result1);
+				play.Logger.debug("updateMetadata2() node.getMetadata2()="
+						+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 
 				/**
 				 * 2. nach LRMI gemappte lobid2-Metadaten als Datenstrom "Lrmidata"
@@ -509,11 +512,7 @@ public class Resource extends MyController {
 				RDFFormat format = RDFFormat.NTRIPLES;
 				response().setContentType("text/plain");
 				// play.Logger.debug("request body=" + request().body().asText());
-				Node nodeNode = new Read().readNode(pid);
 
-				play.Logger
-						.debug("Resource.updateMetadata2() nodeNode.getMetaData2(json2) ="
-								+ nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 				String result2 = modify.updateLrmifyAndEnrichMetadata(pid, format,
 						nodeNode.getMetadata(archive.fedora.Vocabulary.metadata2));
 				play.Logger

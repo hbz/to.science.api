@@ -394,6 +394,8 @@ public class FedoraFacade {
 	 * @param node
 	 */
 	public void updateNode(Node node) {
+		play.Logger.debug("updateNode() node.getMetadata2: "
+				+ node.getMetadata(archive.fedora.Vocabulary.metadata2));
 		play.Logger.info("Update node in fedora, pid=" + node.getPid());
 		play.Logger.debug("node access scheme: " + node.getAccessScheme());
 		play.Logger.debug("node publish scheme: " + node.getPublishScheme());
