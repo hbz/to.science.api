@@ -160,10 +160,16 @@ public class LRMIMapper {
 
 			if (rdf.containsKey("contentType")) {
 				iterator = getLobid2Iterator(rdf.get("contentType"));
+				play.Logger.debug("rdf.get(contentType) =" + rdf.get("contentType"));
+				play.Logger.debug("iterator =" + iterator.toString());
 				arr = new JSONArray();
 				while (iterator.hasNext()) {
 					arr.put(iterator.next());
 				}
+				lrmiJsonContent.put("type", arr);
+			} else {
+				arr = new JSONArray();
+				arr.put("LearningResource");
 				lrmiJsonContent.put("type", arr);
 			}
 
