@@ -168,6 +168,8 @@ public class LRMIMapper {
 				}
 				lrmiJsonContent.put("type", arr);
 			} else {
+				// dieser Fall sollte nie vorkommen, da "contentType" ja immer gesetzt sein sollte.
+				// falls der Fall doch vorkommt, wird AMB-"type" jetzt gesetzt.
 				arr = new JSONArray();
 				arr.put("LearningResource");
 				lrmiJsonContent.put("type", arr);
