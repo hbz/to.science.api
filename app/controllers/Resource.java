@@ -548,7 +548,7 @@ public class Resource extends MyController {
 				JSONObject tosJSONObject =
 						ambMapperImpl.getTosJSONObject(new JSONObject(ambContent));
 				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
-				modify.updateMetadataJson(node, tosJSONObject.toString);
+				modify.updateMetadataJson(node, tosJSONObject.toString());
 
 				/**
 				 * 3.
