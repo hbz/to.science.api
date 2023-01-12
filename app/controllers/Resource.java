@@ -546,15 +546,15 @@ public class Resource extends MyController {
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
 				 */
 				AmbMapperImpl ambMapperImpl = new AmbMapperImpl();
+				play.Logger.debug("AmbMapperImpl Instance wurde angelegt");
 				JSONObject tosJSONObject =
 						ambMapperImpl.getTosJSONObject(new JSONObject(ambContent));
 				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
 				modify.updateMetadataJson(readNode, tosJSONObject.toString());
 
 				/**
-				 * 3.
+				 * 3.(TOSCIENCEJESON --> METADATA2)
 				 */
-
 				String result3 = modify.updateLobidify2AndEnrichMetadata(readNode,
 						tosJSONObject.toString()); // toscienceJsonContent
 
