@@ -530,6 +530,7 @@ public class Resource extends MyController {
 					.debug("The LRMI data that has been sent: request().body().asJson()="
 							+ request().body().asJson());
 			try {
+				Node readNode = new Read().readNode(pid);
 				/**
 				 * Wir legen 3 Datenströme an:
 				 * 
@@ -548,12 +549,12 @@ public class Resource extends MyController {
 				JSONObject tosJSONObject =
 						ambMapperImpl.getTosJSONObject(new JSONObject(ambContent));
 				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
-				modify.updateMetadataJson(node, tosJSONObject.toString());
+				modify.updateMetadataJson(readNode, tosJSONObject.toString());
 
 				/**
 				 * 3.
 				 */
-				Node readNode = new Read().readNode(pid);
+
 				String result3 = modify.updateLobidify2AndEnrichMetadata(readNode,
 						tosJSONObject.toString()); // toscienceJsonContent
 
