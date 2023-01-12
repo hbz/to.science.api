@@ -528,26 +528,39 @@ public class Resource extends MyController {
 							+ request().body().asJson());
 			try {
 				/**
-				 * Wir legen 2 Datenströme an:
+				 * Wir legen 3 Datenströme an:
 				 * 
 				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
 				 * Datenstrom "Lrmidata"
 				 */
-				String content =
+				String ambContent =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
-				play.Logger.debug("The updated and enriched LRMI data: " + content);
+				play.Logger.debug("The updated and enriched LRMI data: " + ambContent);
 				String result1 = "LRMI metadata successfully updated and enriched.";
 
 				/**
-				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom und als
-				 * toscience-Datenstrom
+				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
 				 */
-				/* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein: */
-				RDFFormat format = RDFFormat.NTRIPLES;
-				Node nodeNode = new Read().readNode(pid);
-				String result2 =
-						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content);
-				play.Logger.debug(result2);
+				AmbMapperImpl ambMapperImpl = new AmbMapperImpl();
+				JSONObject tosJSONObject =
+						ambMapperImpl.getTosJSONObject(new JSONObject(ambContent));
+				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
+				modify.updateMetadataJson(node, tosJSONObject.toString);
+
+				/**
+				 * 3.
+				 */
+				Node readNode = new Read().readNode(pid);
+				String result3 = modify.updateLobidify2AndEnrichMetadata(readNode,
+						tosJSONObject.toString()); // toscienceJsonContent
+
+				// /* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein:
+				// */
+				// RDFFormat format = RDFFormat.NTRIPLES;
+				// Node nodeNode = new Read().readNode(pid);
+				// String result2 = modify.updateLobidify2AndEnrichLrmiData(nodeNode,
+				// format, ambContent);
+				// play.Logger.debug(result2);
 
 				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
@@ -578,7 +591,8 @@ public class Resource extends MyController {
 					modify.updateData(pid, content, mimeType, name, md5);
 
 					// OSU-172: Nach dem erfolgreichen Austausch der Dateien (ChildNodes)
-					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert werden.
+					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert
+					// werden.
 					// Es handelt sich hier nur um eine Art Neuladen der Daten des
 					// ParentNodes.
 					if (readNode.getParentPid() != null) {
