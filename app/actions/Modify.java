@@ -1354,7 +1354,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	String updateMetadataJson(Node node, String content) {
+	public String updateMetadataJson(Node node, String content) {
 		try {
 			return updateMetadata(archive.fedora.Vocabulary.metadataJson, node,
 					content);
