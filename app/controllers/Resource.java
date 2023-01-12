@@ -41,7 +41,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -93,9 +92,6 @@ import views.html.oai.mets;
 import views.html.oai.oaidc;
 import views.html.oai.wgl;
 import views.html.tags.getTitle;
-
-import to.science.core.modelx.mapper.ambMapperImpl;
-import to.science.core.modelx.amb.getTosJSONObject;
 
 /**
  * In dieser Klasse werden API-Calls (Endpoint-Calls) auf Ressourcen (sub-path
@@ -566,7 +562,7 @@ public class Resource extends MyController {
 				// format, ambContent);
 				// play.Logger.debug(result2);
 
-				return JsonMessage(new Message(result1 + "\n" + result3));
+				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
