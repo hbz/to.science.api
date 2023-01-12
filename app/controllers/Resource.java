@@ -58,6 +58,7 @@ import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.JSONObject;
 import helper.NodeHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
@@ -537,7 +538,7 @@ public class Resource extends MyController {
 			try {
 				Node nodeNode = new Read().readNode(pid);
 				/**
-				 * Wir legen 2 Datenströme an:
+				 * Wir legen 3 Datenströme an:
 				 * 
 				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
 				 * Datenstrom "Lrmidata"
@@ -545,9 +546,9 @@ public class Resource extends MyController {
 				play.Logger.debug(
 						"nodeNode.getLrmiData() VOR modify.updateAndEnrichLrmiData() ="
 								+ nodeNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
-				String content =
+				String ambContent =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
-				play.Logger.debug("The updated and enriched LRMI data: " + content);
+				play.Logger.debug("The updated and enriched LRMI data: " + ambContent);
 				String result1 = "LRMI metadata successfully updated and enriched.";
 
 				play.Logger.debug(
@@ -555,14 +556,22 @@ public class Resource extends MyController {
 								+ nodeNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
 
 				/**
-				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom und als
-				 * toscience-Datenstrom
+				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
+				 */
+				AmbMapperImpl ambMapperImpl = new AmbMapperImpl();
+				JSONObject tosJSONObject =
+						ambMapperImpl.getTosJSONObject(new JSONObject(ambContent));
+				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
+				modify.updateMetadataJson(node, tosJSONObject.toString);
+
+				/**
+				 * 3. ld2 & Metadata2 (TOSCIENCEJSON--> METADATA2).
 				 */
 				/* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein: */
 				RDFFormat format = RDFFormat.NTRIPLES;
 				// Node nodeNode = new Read().readNode(pid);
-				String result2 =
-						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content); // lrmiContent
+				String result3 = modify.updateLobidify2AndEnrichLrmiData(nodeNode,
+						format, tosJSONObject.toString()); // toscienceJsonContent
 
 				play.Logger.debug(
 						"nodeNode.getMetadata2 NACH modify.updateLobidify2AndEnrichLrmiData ="
@@ -572,7 +581,7 @@ public class Resource extends MyController {
 						"nodeNode.getLrmiData() NACH modify.updateLobidify2AndEnrichLrmiData() ="
 								+ nodeNode.getMetadata(archive.fedora.Vocabulary.lrmiData));
 
-				return JsonMessage(new Message(result1 + "\n" + result2));
+				return JsonMessage(new Message(result1 + "\n" + result3));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
