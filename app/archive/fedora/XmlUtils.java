@@ -401,7 +401,7 @@ public class XmlUtils {
 				}
 
 				if (nodeWithoutAttrExists(nodeList)) {
-					if (attributes == null) {
+					if (attributes.getLength() == 0) {
 						lobidId = getLobidId(lobidId, node);
 						break;
 					}
@@ -498,7 +498,7 @@ public class XmlUtils {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
 				rdf.put("title", Arrays.asList(nodeList.item(0).getTextContent().trim()
-						.replaceAll("[\\r\\n\\u00a0]+", " ")));
+						.replaceAll("[\\r\\n\\u00a0]+", " ").replaceAll("\\s+", " ")));
 			} else if (elemList.getLength() > 0 && subTitleElemList.getLength() > 0) {
 				play.Logger
 						.debug("Found article title: " + nodeList.item(0).getTextContent());
@@ -506,9 +506,11 @@ public class XmlUtils {
 						"Found subtitle: " + subTitleNodeList.item(0).getTextContent());
 				rdf.put("title",
 						Arrays.asList(nodeList.item(0).getTextContent().trim()
-								.replaceAll("[\\r\\n\\u00a0]+", " ") + " : "
+								.replaceAll("[\\r\\n\\u00a0]+", " ").replaceAll("\\s+", " ")
+								+ " : "
 								+ subTitleNodeList.item(0).getTextContent().trim()
-										.replaceAll("[\\r\\n\\u00a0]+", " ")));
+										.replaceAll("[\\r\\n\\u00a0]+", " ")
+										.replaceAll("\\s+", " ")));
 			}
 
 			/* Alternative (Trans-title) */
@@ -518,8 +520,10 @@ public class XmlUtils {
 			if (elemList.getLength() > 0) {
 				play.Logger
 						.debug("Found trans title: " + nodeList.item(0).getTextContent());
-				rdf.put("alternative", Arrays.asList(nodeList.item(0).getTextContent()
-						.trim().replaceAll("[\\r\\n\\u00a0]+", " ")));
+				rdf.put("alternative",
+						Arrays.asList(nodeList.item(0).getTextContent().trim()
+								.replaceAll("[\\r\\n\\t\\u00a0]+", " ")
+								.replaceAll("\\s+", " ")));
 			}
 
 			/* Autor */
@@ -1018,7 +1022,8 @@ public class XmlUtils {
 			node = nodeList.item(i);
 
 			attributes = node.getAttributes();
-			if (attributes == null)
+
+			if (attributes.getLength() == 0)
 				return true;
 		}
 		return false;
