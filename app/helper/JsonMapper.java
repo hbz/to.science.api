@@ -547,10 +547,10 @@ public class JsonMapper {
 				rdf.remove("funding");
 			}
 			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
-      /*
-		  * in case of casting problems: List<String> fundingProgram = new
-		  * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
-		 */
+			/*
+			 * in case of casting problems: List<String> fundingProgram = new
+			 * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
+			 */
 			List<String> projectId = (List<String>) rdf.get("projectId");
 
 			List<Map<String, Object>> joinedFundings = new ArrayList<>();
@@ -1021,10 +1021,10 @@ public class JsonMapper {
 		if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
 		}
-		String publicationYear = hit.at("/publicationYear/0").asText();
-		if (publicationYear != null && !publicationYear.isEmpty()) {
-			return publicationYear.substring(0, 4);
-		}
+		// String publicationYear = hit.at("/publicationYear/0").asText();
+		// if (publicationYear != null && !publicationYear.isEmpty()) {
+		// return publicationYear.substring(0, 4);
+		// }
 		return null;
 	}
 
