@@ -545,6 +545,7 @@ public class Resource extends MyController {
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
 				 */
+				play.Logger.debug("toscienceJson wird gemappt");
 				AmbMapperImpl ambMapperImpl = new AmbMapperImpl();
 				play.Logger.debug("AmbMapperImpl Instance wurde angelegt");
 				JSONObject tosJSONObject =
