@@ -21897,4 +21897,145 @@
   "weight" : "",
   "type" : "STORE",
   "multilangLabel" : { }
-} ]
+},
+	{
+		"uri": "info:regal/zettel/ktblHeader",
+		"comment": "",
+		"label": "EmiMin-Data information",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info:regal/zettel/livestock",
+		"comment": "",
+		"label": "Animal breed",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info.ktbl.treatment@en",
+		"comment": "",
+		"label": "Livestock production",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info.ktbl.treatmentdetail@en",
+		"comment": "",
+		"label": "Additional specifications of housing systems",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info.ktbl.housing@en",
+		"comment": "",
+		"label": "Housing systems",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info.ktbl.ventilation@en",
+		"comment": "",
+		"label": "Ventilation system",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info.ktbl.emissionreduce@en",
+		"comment": "",
+		"label": "Emission reduction methods",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info.ktbl.emissionprobe@en",
+		"comment": "",
+		"label": "Emission measurement techniques",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+		{
+		"uri": "info.ktbl.emission@en",
+		"comment": "",
+		"label": "Emissions",
+		"icon": "",
+		"name": "",
+		"referenceType": "String",
+		"container": "",
+		"weight": "1",
+		"type": "CONTEXT",
+		"multilangLabel": {
+			
+		}
+	},
+	    {
+	    "uri": "info.ktbl.projecttitle@en",
+	    "comment": "",
+	    "label": "Project title",
+	    "icon": "",
+	    "name": "",
+	    "referenceType": "String",
+	    "container": "",
+	    "weight": "1",
+	    "type": "CONTEXT",
+	    "multilangLabel": {
+	      
+	    }
+	}
+ ]
