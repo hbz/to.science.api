@@ -401,7 +401,7 @@ public class XmlUtils {
 				}
 
 				if (nodeWithoutAttrExists(nodeList)) {
-					if (attributes == 0 || attributes.getLength() == 0) {
+					if (attributes == null || attributes.getLength() == 0) {
 						lobidId = getLobidId(lobidId, node);
 						break;
 					}
@@ -1023,7 +1023,7 @@ public class XmlUtils {
 
 			attributes = node.getAttributes();
 
-			if (attributes == 0 || attributes.getLength() == 0)
+			if (attributes == null || attributes.getLength() == 0)
 				return true;
 		}
 		return false;
