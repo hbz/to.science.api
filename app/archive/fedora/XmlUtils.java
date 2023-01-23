@@ -718,9 +718,13 @@ public class XmlUtils {
 			rdf.put("issued", pubYear);
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			if (epubDay == null) {
+			if (epubDay == null && epubMonth != null) {
 				publicationDateStr = epubYear + "-" + epubMonth;
 				formatter = new SimpleDateFormat("yyyy-MM");
+			}
+			if (epubDay == null && epubMonth == null) {
+				publicationDateStr = epubYear;
+				formatter = new SimpleDateFormat("yyyy");
 			}
 			rdf.put("publicationYear", Arrays.asList(publicationDateStr));
 
