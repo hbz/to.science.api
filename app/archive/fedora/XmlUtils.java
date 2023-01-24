@@ -383,6 +383,7 @@ public class XmlUtils {
 				attributes = node.getAttributes();
 				attrib = attributes.getNamedItem("pub-type");
 
+				// Priorität 1: pub-type=epub
 				if (issnAttrExists(nodeList, "epub")) {
 
 					if (attributes == null) {
@@ -400,6 +401,24 @@ public class XmlUtils {
 					continue;
 				}
 
+				// Priorität 2: pub-type=online
+				if (issnAttrExists(nodeList, "online")) {
+
+					if (attributes == null) {
+						continue;
+					}
+
+					if (attrib == null) {
+						continue;
+					}
+
+					if (attrib.getNodeValue().equalsIgnoreCase("online")) {
+						lobidId = getLobidId(lobidId, node);
+						break;
+					}
+				}
+
+				// Priorität 3: kein Attribut vorhanden
 				if (nodeWithoutAttrExists(nodeList)) {
 					if (attributes == null || attributes.getLength() == 0) {
 						lobidId = getLobidId(lobidId, node);
@@ -408,6 +427,7 @@ public class XmlUtils {
 					continue;
 				}
 
+				// Priorität 4: pub-type=ppub
 				if (issnAttrExists(nodeList, "ppub")) {
 
 					if (attributes == null) {
