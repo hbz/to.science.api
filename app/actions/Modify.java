@@ -62,6 +62,7 @@ import archive.fedora.RdfUtils;
 import archive.fedora.Vocabulary.*;
 import archive.fedora.XmlUtils;
 import controllers.MyController;
+import helper.AmbHelper;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
@@ -505,6 +506,18 @@ public class Modify extends RegalAction {
 				new JsonMapper().getTosciencefyLrmi(node, content);
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
+
+		// hier wird 'name' unter 'affiliation' gemappt.
+		content_toscience =
+				new AmbHelper().addNameToAffiliationByAmb(content_toscience);
+		play.Logger.debug("content_toscience nach addNameToAffiliationByAmb "
+				+ content_toscience);
+
+		// hier wird 'name' unter 'funder' gemappt.
+		content_toscience = new AmbHelper().addNameByFunderByAmb(content_toscience);
+		play.Logger.debug(
+				"content_toscience nach addNameByFunderByAmb() " + content_toscience);
+
 		updateLrmiData(node, content_toscience);
 		content_toscience = new Enrich().enrichLrmiData(node);
 		play.Logger

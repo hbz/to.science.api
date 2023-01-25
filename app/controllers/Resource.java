@@ -497,7 +497,10 @@ public class Resource extends MyController {
 				 * 
 				 * 1. lobid2-Metadaten als Datenstrom "Metadata2"
 				 */
-
+				play.Logger
+						.debug("request().body().asJson()=" + request().body().asJson());
+				play.Logger
+						.debug("request().body().asJson()=" + request().body().asJson());
 				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				play.Logger.debug(result1);
@@ -530,6 +533,8 @@ public class Resource extends MyController {
 			play.Logger
 					.debug("The LRMI data that has been sent: request().body().asJson()="
 							+ request().body().asJson());
+			play.Logger.debug("request().body().asJson().toString()="
+					+ request().body().asJson().toString());
 			try {
 				Node readNode = new Read().readNode(pid);
 				/**
@@ -540,8 +545,11 @@ public class Resource extends MyController {
 				 */
 				String ambContent =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
-				play.Logger.debug("The updated and enriched LRMI data: " + ambContent);
+
+				play.Logger.debug("ambContent = " + ambContent);
 				String result1 = "LRMI metadata successfully updated and enriched.";
+				String ambContent2 = new Read().readLrmiData(readNode);
+				play.Logger.debug("ambContent2 = " + ambContent2);
 
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
