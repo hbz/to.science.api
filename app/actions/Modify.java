@@ -1342,6 +1342,7 @@ public class Modify extends RegalAction {
 
 	String updateMetadata2(Node node, String content) {
 		try {
+			play.Logger.debug("Modify.updateMetadata2() content = " + content);
 			String pid = node.getPid();
 			String contentRewrite = content;
 			if (content != null && !content.isEmpty()) {

@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.Metadata2Helper;
 import helper.NodeHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
@@ -554,7 +556,7 @@ public class Resource extends MyController {
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
 				 */
-				play.Logger.debug("toscienceJson wird gemappt");
+				play.Logger.debug("toscienceJson will be mapped");
 				AmbMapperImpl ambMapperImpl = new AmbMapperImpl();
 				play.Logger.debug("AmbMapperImpl Instance wurde angelegt");
 				JSONObject tosJSONObject =
@@ -565,12 +567,23 @@ public class Resource extends MyController {
 				/**
 				 * 3.(TOSCIENCEJESON --> METADATA2)
 				 */
-				String result3 = modify.updateLobidify2AndEnrichMetadata(readNode,
-						tosJSONObject.toString()); // toscienceJsonContent
+				play.Logger.debug("Metadata2 will be mapped");
+				LinkedHashMap<String, Object> rdf = new Metadata2Helper()
+						.getMetadata2ByToScienceJson(tosJSONObject.toString());
+
+				RDFFormat format = RDFFormat.NTRIPLES;
+				modify.updateMetadata2(readNode, modify.rdfToString(rdf, format));
+				Enrich.enrichMetadata2(readNode);
+
+				play.Logger.debug("rdf = " + rdf.toString());
+				play.Logger.debug("Done Metadata2 Mapping");
+
+				// String result3 = modify.updateLobidify2AndEnrichMetadata(readNode,
+				// tosJSONObject.toString()); // toscienceJsonContent
 
 				// /* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein:
 				// */
-				// RDFFormat format = RDFFormat.NTRIPLES;
+				//
 				// Node nodeNode = new Read().readNode(pid);
 				// String result2 = modify.updateLobidify2AndEnrichLrmiData(nodeNode,
 				// format, ambContent);
