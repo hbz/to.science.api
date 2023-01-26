@@ -57,6 +57,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
 import actions.Enrich;
+import actions.Modify;
 import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
