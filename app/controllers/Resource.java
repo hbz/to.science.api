@@ -572,7 +572,7 @@ public class Resource extends MyController {
 						.getMetadata2ByToScienceJson(tosJSONObject.toString());
 
 				RDFFormat format = RDFFormat.NTRIPLES;
-				modify.updateMetadata2(readNode, modify.rdfToString(rdf, format));
+				modify.updateMetadata2(readNode, Modify.rdfToString(rdf, format));
 				Enrich.enrichMetadata2(readNode);
 
 				play.Logger.debug("rdf = " + rdf.toString());
@@ -589,7 +589,7 @@ public class Resource extends MyController {
 				// format, ambContent);
 				// play.Logger.debug(result2);
 
-				return JsonMessage(new Message(result1 + "\n" + result3));
+				return JsonMessage(new Message(result1));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

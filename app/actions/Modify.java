@@ -1422,8 +1422,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private static String rdfToString(Map<String, Object> result,
-			RDFFormat format) {
+	static String rdfToString(Map<String, Object> result, RDFFormat format) {
 		try {
 			String rdf = RdfUtils.readRdfToString(
 					new ByteArrayInputStream(json(result).getBytes("utf-8")),
