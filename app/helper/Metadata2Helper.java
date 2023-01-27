@@ -81,7 +81,7 @@ public class Metadata2Helper {
 			}
 
 			// There is always a ContentType
-			jObj = toscienceJsonObject.getJSONArray("contentType");
+			jObj = toscienceJsonObject.getJSONObject("contentType");
 			rdf.put("contentType", jObj.toString());
 
 			if (toscienceJsonObject.has("isPrimaryTopic")) {
@@ -102,21 +102,6 @@ public class Metadata2Helper {
 				jObj = toscienceJsonObject.getJSONObject("yearOfCopyright");
 				play.Logger.debug("Found yearOfCopyright : " + jObj.toString());
 				rdf.put("yearOfCopyright", jObj.toString());
-			}
-
-			// template for Mapping of Array
-			if (toscienceJsonObject.has("description")) {
-				List<String> descriptions = new ArrayList<>();
-				jObj = toscienceJsonObject.get("description");
-				if (jObj instanceof java.lang.String) {
-					descriptions.add(toscienceJsonObject.getString("description"));
-				} else if (jObj instanceof org.json.JSONArray) {
-					jArr = toscienceJsonObject.getJSONArray("description");
-					for (int i = 0; i < jArr.length(); i++) {
-						descriptions.add(jArr.getString(i));
-					}
-				}
-				rdf.put("description", descriptions);
 			}
 
 			if (toscienceJsonObject.has("license")) {
