@@ -438,7 +438,7 @@ public class Modify extends RegalAction {
 	 * @param tosJSONObject The new mapped data stream
 	 * @return
 	 */
-	String updateLobidify2AndEnrichAmb(Node node, RDFFormat format,
+	public String updateLobidify2AndEnrichAmb(Node node, RDFFormat format,
 			JSONObject tosJSONObject) {
 
 		play.Logger.debug("Update Metadata2 datastream!");
