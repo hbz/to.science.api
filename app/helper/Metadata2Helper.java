@@ -55,14 +55,15 @@ public class Metadata2Helper {
 					"getMetadata2ByToScienceJson() LinkedHashMap has been created");
 
 			if (toscienceJsonObject.has("@context")) {
-				jObj = toscienceJsonObject.getJSONObject("@context");
-				rdf.put("@context", jObj.toString());
+				String context = toscienceJsonObject.getString("@context");
+				play.Logger.debug("Found context: " + context);
+				rdf.put("@context", context);
 			}
 
 			if (toscienceJsonObject.has("title")) {
-				jObj = toscienceJsonObject.getJSONObject("title");
-				play.Logger.debug("Found title: " + jObj.toString());
-				rdf.put("title", jObj.toString());
+				jArr = toscienceJsonObject.getJSONArray("title");
+				play.Logger.debug("Found title: " + jArr.toString());
+				rdf.put("title", jArr.toString());
 			}
 
 			if (toscienceJsonObject.has("language")) {
@@ -80,28 +81,50 @@ public class Metadata2Helper {
 				rdf.put("funder", jObj.toString());
 			}
 
-			// There is always a ContentType
-			jObj = toscienceJsonObject.getJSONObject("contentType");
-			rdf.put("contentType", jObj.toString());
-
+			// There is always a ContentType?
+			if (toscienceJsonObject.has("contentType")) {
+				String contentType = toscienceJsonObject.getString("contentType");
+				play.Logger.debug("Found contentType : " + contentType);
+				rdf.put("contentType", contentType);
+			}
 			if (toscienceJsonObject.has("isPrimaryTopic")) {
-				jObj = toscienceJsonObject.getJSONObject("isPrimaryTopic");
-				play.Logger.debug("Found isPrimaryTopic : " + jObj.toString());
-				rdf.put("isPrimaryTopic", jObj.toString());
+				String isPrimaryTopic = toscienceJsonObject.getString("isPrimaryTopic");
+				play.Logger.debug("Found isPrimaryTopic : " + isPrimaryTopic);
+				rdf.put("isPrimaryTopic", isPrimaryTopic);
 			}
 
-			jsmapper.mapLrmiAgentsToLobid(rdf, toscienceJsonObject, "creator");
-			jsmapper.mapLrmiAgentsToLobid(rdf, toscienceJsonObject, "contributor");
-			jsmapper.mapLrmiObjectToLobid(rdf, toscienceJsonObject,
-					"learningResourceType", "medium");
-			jsmapper.mapLrmiObjectToLobid(rdf, toscienceJsonObject, "about",
-					"department");
+			play.Logger.debug("creator will be mapped");
+			if (toscienceJsonObject.has("creator")) {
+				jArr = toscienceJsonObject.getJSONArray("creator");
+				play.Logger.debug("Found creator : " + jArr.toString());
+				rdf.put("creator", jArr.toString());
+			}
 
+			play.Logger.debug("contributor will be mapped");
+			if (toscienceJsonObject.has("contributor")) {
+				jArr = toscienceJsonObject.getJSONArray("contributor");
+				play.Logger.debug("Found contributor : " + jArr.toString());
+				rdf.put("contributor", jArr.toString());
+			}
+
+			play.Logger.debug("medium will be mapped");
+			if (toscienceJsonObject.has("medium")) {
+				jArr = toscienceJsonObject.getJSONArray("medium");
+				play.Logger.debug("Found medium : " + jArr.toString());
+				rdf.put("medium", jArr.toString());
+			}
+
+			play.Logger.debug("department will be mapped");
+			if (toscienceJsonObject.has("department")) {
+				jArr = toscienceJsonObject.getJSONArray("department");
+				play.Logger.debug("Found department : " + jArr.toString());
+				rdf.put("department", jArr.toString());
+			}
 			// Should be mapped?
 			if (toscienceJsonObject.has("yearOfCopyright")) {
-				jObj = toscienceJsonObject.getJSONObject("yearOfCopyright");
-				play.Logger.debug("Found yearOfCopyright : " + jObj.toString());
-				rdf.put("yearOfCopyright", jObj.toString());
+				jArr = toscienceJsonObject.getJSONArray("yearOfCopyright");
+				play.Logger.debug("Found yearOfCopyright : " + jArr.toString());
+				rdf.put("yearOfCopyright", jArr.toString());
 			}
 
 			if (toscienceJsonObject.has("license")) {
@@ -112,6 +135,7 @@ public class Metadata2Helper {
 			}
 
 			// example for usage of AdHocUriProvider
+			play.Logger.debug("keywords will be mapped");
 			if (toscienceJsonObject.has("keywords")) {
 				String keyword = null;
 				List<Map<String, Object>> subject = new ArrayList<>();
