@@ -443,7 +443,7 @@ public class Modify extends RegalAction {
 
 		play.Logger.debug("Update Metadata2 datastream!");
 		LinkedHashMap<String, Object> ld2 = new Metadata2Helper()
-				.getMetadata2ByToScienceJson(tosJSONObject.toString());
+				.getMetadata2ByToScienceJson(node, tosJSONObject.toString());
 
 		play.Logger.debug("updateLobidify2AndEnrichAmb() ld2 = " + ld2.toString());
 
