@@ -562,6 +562,7 @@ public class Resource extends MyController {
 				play.Logger.debug("AmbMapperImpl Instance wurde angelegt");
 				JSONObject tosJSONObject =
 						ambMapperImpl.getTosJSONObject(new JSONObject(ambContent));
+
 				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
 				modify.updateMetadataJson(readNode, tosJSONObject.toString());
 
@@ -569,14 +570,15 @@ public class Resource extends MyController {
 				 * 3.(TOSCIENCEJESON --> METADATA2)
 				 */
 				play.Logger.debug("Metadata2 will be mapped");
-				LinkedHashMap<String, Object> rdf = new Metadata2Helper()
-						.getMetadata2ByToScienceJson(tosJSONObject.toString());
-
+				// LinkedHashMap<String, Object> rdf = new Metadata2Helper()
+				// .getMetadata2ByToScienceJson(tosJSONObject.toString());
+				//
 				RDFFormat format = RDFFormat.NTRIPLES;
-				modify.updateMetadata2(readNode, Modify.rdfToString(rdf, format));
-				Enrich.enrichMetadata2(readNode);
-
-				play.Logger.debug("rdf = " + rdf.toString());
+				// modify.updateMetadata2(readNode, Modify.rdfToString(rdf, format));
+				// // Enrich.enrichMetadata2(readNode);
+				//
+				// play.Logger.debug("rdf = " + rdf.toString());
+				modify.updateLobidify2AndEnrichAmb(readNode, format, tosJSONObject);
 				play.Logger.debug("Done Metadata2 Mapping");
 
 				// String result3 = modify.updateLobidify2AndEnrichMetadata(readNode,

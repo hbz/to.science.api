@@ -27,17 +27,19 @@ public class Metadata2Helper {
 	 * @param toscienceJsonContent: the content from the new data stream toscience
 	 * @return An RDF-LinkedHashMap as Metadata2
 	 */
-	public LinkedHashMap<String, Object> getMetadata2ByToScienceJson(
+	public LinkedHashMap<String, Object> getMetadata2ByToScienceJson(Node n,
 			String toscienceJsonContent) {
 		try {
+
 			JsonMapper jsmapper = new JsonMapper();
+			jsmapper.node = n;
 
 			play.Logger.debug("Start mapping of toscienceJson to metadata2");
 
 			JSONArray jArr = null;
 			JSONObject jObj = null;
-			Object myObj = null; /* Objekt von zunächst unbekanntem Typ/Klasse */
-			Map<String, Object> rdf = null;
+			Object myObj = null;
+			Map<String, Object> rdf = n.getLd2();
 
 			JSONObject toscienceJsonObject = new JSONObject(toscienceJsonContent);
 			LinkedHashMap<String, Object> metadata2Map = new LinkedHashMap();

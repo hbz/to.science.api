@@ -67,6 +67,7 @@ import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.LRMIMapper;
+import helper.Metadata2Helper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
@@ -425,6 +426,37 @@ public class Modify extends RegalAction {
 		return pid
 				+ " LRMI-metadata successfully lobidified, updated and enriched! "
 				+ enrichMessage;
+	}
+
+	/**
+	 * This method maps AMB (Lrmi data stream) to Ld2 and generates Metadata2
+	 * 
+	 * @param node
+	 * @param format
+	 * @param tosJSONObject The new mapped data stream
+	 * @return
+	 */
+	String updateLobidify2AndEnrichAmb(Node node, RDFFormat format,
+			JSONObject tosJSONObject) {
+
+		play.Logger.debug("Update Metadata2 datastream!");
+		LinkedHashMap<String, Object> ld2 = new Metadata2Helper()
+				.getMetadata2ByToScienceJson(tosJSONObject.toString());
+
+		play.Logger.debug("updateLobidify2AndEnrichAmb() ld2 = " + ld2.toString());
+
+		Map<String, Object> rdf =
+				(Map<String, Object>) ld2.get(archive.fedora.Vocabulary.metadata2);
+
+		play.Logger.debug("updateLobidify2AndEnrichAmb() rdf = " + rdf.toString());
+
+		updateMetadata2(node, rdfToString(rdf, format));
+
+		play.Logger.debug("Updated Metadata2 datastream!");
+
+		String enrichMessage = Enrich.enrichMetadata2(node);
+		return node.getPid() + enrichMessage;
+
 	}
 
 	/**
