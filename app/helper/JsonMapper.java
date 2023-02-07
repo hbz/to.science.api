@@ -1467,10 +1467,9 @@ public class JsonMapper {
 			JSONObject lrmiJSONObject, String lrmiObject, String lobidObject) {
 
 		if (lrmiJSONObject.has(lrmiObject)) {
+
 			try {
-
 				JSONArray arr = lrmiJSONObject.getJSONArray(lrmiObject);
-
 				// Provide resolving for prefLabels from id via GenericPropertiesLoader
 				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 				GenericPropertiesLoader genProp = new GenericPropertiesLoader();

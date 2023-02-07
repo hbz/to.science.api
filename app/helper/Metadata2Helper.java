@@ -27,7 +27,7 @@ public class Metadata2Helper {
 	 * @param toscienceJsonContent: the content from the new data stream toscience
 	 * @return An RDF-LinkedHashMap as Metadata2
 	 */
-	public LinkedHashMap<String, Object> getMetadata2ByToScienceJson(Node n,
+	public LinkedHashMap<String, Object> updateMetadata2ByToScienceJson(Node n,
 			String toscienceJsonContent) {
 		try {
 
@@ -92,13 +92,13 @@ public class Metadata2Helper {
 				play.Logger.debug("Found isPrimaryTopic : " + isPrimaryTopic);
 				rdf.put("isPrimaryTopic", isPrimaryTopic);
 			}
-
-			play.Logger.debug("creator will be mapped");
-			if (toscienceJsonObject.has("creator")) {
-				jArr = toscienceJsonObject.getJSONArray("creator");
-				play.Logger.debug("Found creator : " + jArr.toString());
-				rdf.put("creator", jArr.toString());
-			}
+			//
+			// play.Logger.debug("creator will be mapped");
+			// if (toscienceJsonObject.has("creator")) {
+			// jArr = toscienceJsonObject.getJSONArray("creator");
+			// play.Logger.debug("Found creator : " + jArr.toString());
+			// rdf.put("creator", jArr.toString());
+			// }
 
 			play.Logger.debug("contributor will be mapped");
 			if (toscienceJsonObject.has("contributor")) {
@@ -106,26 +106,27 @@ public class Metadata2Helper {
 				play.Logger.debug("Found contributor : " + jArr.toString());
 				rdf.put("contributor", jArr.toString());
 			}
-
+			// Art der Datei z.B. Diagramm
 			play.Logger.debug("medium will be mapped");
 			if (toscienceJsonObject.has("medium")) {
 				jArr = toscienceJsonObject.getJSONArray("medium");
 				play.Logger.debug("Found medium : " + jArr.toString());
 				rdf.put("medium", jArr.toString());
 			}
-
+			// z.B. Byzantinistik
 			play.Logger.debug("department will be mapped");
 			if (toscienceJsonObject.has("department")) {
 				jArr = toscienceJsonObject.getJSONArray("department");
 				play.Logger.debug("Found department : " + jArr.toString());
 				rdf.put("department", jArr.toString());
 			}
-			// Should be mapped?
-			if (toscienceJsonObject.has("yearOfCopyright")) {
-				jArr = toscienceJsonObject.getJSONArray("yearOfCopyright");
-				play.Logger.debug("Found yearOfCopyright : " + jArr.toString());
-				rdf.put("yearOfCopyright", jArr.toString());
-			}
+
+			// // Should be mapped?
+			// if (toscienceJsonObject.has("yearOfCopyright")) {
+			// jArr = toscienceJsonObject.getJSONArray("yearOfCopyright");
+			// play.Logger.debug("Found yearOfCopyright : " + jArr.toString());
+			// rdf.put("yearOfCopyright", jArr.toString());
+			// }
 
 			if (toscienceJsonObject.has("license")) {
 				jObj = toscienceJsonObject.getJSONObject("license");
@@ -133,6 +134,16 @@ public class Metadata2Helper {
 				rdf.put("license", jObj.toString());
 
 			}
+			play.Logger.debug("creator will be mapped");
+			ToscienceJsonHelper.mapToscienceAgentsToLobid(rdf, toscienceJsonObject,
+					"creator");
+			if (toscienceJsonObject.has("contributor")) {
+				play.Logger.debug("contributor will be mapped");
+				ToscienceJsonHelper.mapToscienceAgentsToLobid(rdf, toscienceJsonObject,
+						"contributor");
+			}
+			// jsmapper.mapLrmiObjectToLobid(rdf, toscienceJsonObject,
+			// "learningResourceType", "medium");
 
 			// example for usage of AdHocUriProvider
 			play.Logger.debug("keywords will be mapped");
@@ -150,6 +161,8 @@ public class Metadata2Helper {
 				}
 				rdf.put("subject", subject);
 			}
+			// soll spaeter gemappt werden und nicht hardcodiert sein.
+			rdf.put("language", "ger");
 
 			metadata2Map.put("metadata2", rdf);
 			play.Logger.debug("metadata2Map = " + metadata2Map.toString());
