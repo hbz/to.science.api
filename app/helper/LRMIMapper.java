@@ -663,7 +663,7 @@ public class LRMIMapper {
 
 		try {
 
-			iliasObject.put("contentUrl", rdf.get("ilias_Link"));
+			iliasObject.put("contentUrl", rdf.get("ilias_Link").toString());
 			iliasObject.put("encodingFormat", "text/html");
 			iliasObject.put("type", "MediaObject");
 
@@ -687,7 +687,7 @@ public class LRMIMapper {
 
 		try {
 
-			moodleObject.put("contentUrl", rdf.get("moodle_Link"));
+			moodleObject.put("contentUrl", rdf.get("moodle_Link").toString());
 			moodleObject.put("encodingFormat", "text/html");
 			moodleObject.put("type", "MediaObject");
 
