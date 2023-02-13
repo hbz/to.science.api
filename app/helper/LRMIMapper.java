@@ -167,12 +167,6 @@ public class LRMIMapper {
 					arr.put(iterator.next());
 				}
 				lrmiJsonContent.put("type", arr);
-			} else {
-				// dieser Fall sollte nie vorkommen, da "contentType" ja immer gesetzt sein sollte.
-				// falls der Fall doch vorkommt, wird AMB-"type" jetzt gesetzt.
-				arr = new JSONArray();
-				arr.put("LearningResource");
-				lrmiJsonContent.put("type", arr);
 			}
 
 			if (rdf.containsKey("title")) {
@@ -297,6 +291,11 @@ public class LRMIMapper {
 				play.Logger.debug("Child Node exists and is found");
 				iterator = getLobid2Iterator(rdf.get("hasPart"));
 				arr = new JSONArray();
+
+				if (rdf.containsKey("ilias_Link") || rdf.containsKey("moodle_Link")) {
+					arr = addIliasAndMoodleToEncoding(rdf, arr);
+				}
+
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
@@ -321,14 +320,25 @@ public class LRMIMapper {
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
+
+				if (rdf.containsKey("ilias_Link") || rdf.containsKey("moodle_Link")) {
+					arr = addIliasAndMoodleToEncoding(rdf, arr);
+				}
 				lrmiJsonContent.put("encoding", arr);
+
 			} else {
+
 				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
 				Map<String, Object> l1rdf = node.getLd1();
 				if (l1rdf.containsKey("hasPart")) {
 					play.Logger.debug("found Child in lobid");
 					iterator = getLobid2Iterator(l1rdf.get("hasPart"));
 					arr = new JSONArray();
+
+					if (rdf.containsKey("ilias_Link") || rdf.containsKey("moodle_Link")) {
+						arr = addIliasAndMoodleToEncoding(rdf, arr);
+					}
+
 					while (iterator.hasNext()) {
 						map = (Map<String, Object>) iterator.next();
 						obj = new JSONObject();
@@ -621,7 +631,6 @@ public class LRMIMapper {
 				funderObj.put("url", map.get("@id"));
 				funderObj.put("type", "FundingScheme");
 				funderObj.put("name", genPropMap.get(map.get("@id")));
-
 				lrmiObj.put("funder", funderObj);
 			}
 		} catch (JSONException e) {
@@ -629,6 +638,37 @@ public class LRMIMapper {
 		}
 
 		return lrmiObj;
+	}
+
+	/**
+	 * method adds a special Json object to existing encoding Json array.
+	 * 
+	 * @param rdf represents Metadata2
+	 * @param jArr represents the encoding json array to be extended
+	 */
+	public JSONArray addIliasAndMoodleToEncoding(Map<String, Object> rdf,
+			JSONArray jArr) {
+
+		JSONObject iliasMoodleObject = new JSONObject();
+
+		try {
+			if (rdf.containsKey("ilias_Link")) {
+				iliasMoodleObject.put("contentUrl", rdf.get("ilias_Link"));
+
+			} else if (rdf.containsKey("moodle_Link")) {
+				iliasMoodleObject.put("contentUrl", rdf.get("moodle_Link"));
+			}
+
+			iliasMoodleObject.put("encodingFormat", "text/html");
+			iliasMoodleObject.put("type", "MediaObject");
+
+			jArr.put("encoding", iliasMoodleObject);
+
+		} catch (Exception e) {
+			play.Logger
+					.error("Unable to apply to LMS-Site (ilias or moodle) to LRMI");
+		}
+		return arr;
 	}
 
 }
