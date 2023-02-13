@@ -668,7 +668,7 @@ public class LRMIMapper {
 			play.Logger
 					.error("Unable to apply to LMS-Site (ilias or moodle) to LRMI");
 		}
-		return arr;
+		return jArr;
 	}
 
 }
