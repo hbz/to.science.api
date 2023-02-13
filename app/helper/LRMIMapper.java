@@ -96,6 +96,7 @@ public class LRMIMapper {
 			JSONArray arr = null;
 			JSONObject obj = null;
 			JSONObject subObj = null;
+			JSONObject iliasOrMoodle = null;
 			/**
 			 * - wandle die gesendeten Metadata2-Daten nach JSON. Genauso wie hier:
 			 * JsonMapper.getDescriptiveMetadata2(), jedoch die Metadata2 nicht aus
@@ -293,7 +294,8 @@ public class LRMIMapper {
 				arr = new JSONArray();
 
 				if (rdf.containsKey("ilias_Link") || rdf.containsKey("moodle_Link")) {
-					arr = addIliasAndMoodleToEncoding(rdf, arr);
+					iliasOrMoodle = addIliasAndMoodleToEncoding(rdf);
+					arr.put(iliasOrMoodle);
 				}
 
 				while (iterator.hasNext()) {
@@ -320,10 +322,6 @@ public class LRMIMapper {
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
-
-				if (rdf.containsKey("ilias_Link") || rdf.containsKey("moodle_Link")) {
-					arr = addIliasAndMoodleToEncoding(rdf, arr);
-				}
 				lrmiJsonContent.put("encoding", arr);
 
 			} else {
@@ -336,7 +334,8 @@ public class LRMIMapper {
 					arr = new JSONArray();
 
 					if (rdf.containsKey("ilias_Link") || rdf.containsKey("moodle_Link")) {
-						arr = addIliasAndMoodleToEncoding(rdf, arr);
+						iliasOrMoodle = addIliasAndMoodleToEncoding(rdf);
+						arr.put(iliasOrMoodle);
 					}
 
 					while (iterator.hasNext()) {
@@ -641,13 +640,14 @@ public class LRMIMapper {
 	}
 
 	/**
-	 * method adds a special Json object to existing encoding Json array.
+	 * Method checks if LMS Sites exist, if so then the corresponding json object
+	 * will be generated and returned
 	 * 
-	 * @param rdf represents Metadata2
-	 * @param jArr represents the encoding json array to be extended
+	 * @param rdf Map representation of the lobid metadata
+	 * @return Json object with LMS-URLs
 	 */
-	public JSONArray addIliasAndMoodleToEncoding(Map<String, Object> rdf,
-			JSONArray jArr) {
+	public static JSONObject addIliasAndMoodleToEncoding(
+			Map<String, Object> rdf) {
 
 		JSONObject iliasMoodleObject = new JSONObject();
 
@@ -662,13 +662,11 @@ public class LRMIMapper {
 			iliasMoodleObject.put("encodingFormat", "text/html");
 			iliasMoodleObject.put("type", "MediaObject");
 
-			jArr.put("encoding", iliasMoodleObject);
-
 		} catch (Exception e) {
 			play.Logger
 					.error("Unable to apply to LMS-Site (ilias or moodle) to LRMI");
 		}
-		return jArr;
+		return iliasMoodleObject;
 	}
 
 }
