@@ -117,6 +117,7 @@ public class LRMIMapper {
 			 * löschen).
 			 */
 			/* Rückabbildung lobid2 => LRMI (vgl. JsonMapper.getLd2Lobidify2Lrmi */
+			play.Logger.debug("rdf =" + rdf.toString());
 			Iterator iterator = null;
 			Map<String, Object> map = null;
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
@@ -293,16 +294,6 @@ public class LRMIMapper {
 				iterator = getLobid2Iterator(rdf.get("hasPart"));
 				arr = new JSONArray();
 
-				if (rdf.containsKey("ilias_Link")) {
-					lmsIliasOrMoodle = addLmsIliasJsonObjectToEncoding(rdf);
-					arr.put(lmsIliasOrMoodle);
-				}
-
-				if (rdf.containsKey("moodle_Link")) {
-					lmsIliasOrMoodle = addLmsMoodleJsonObjectToEncoding(rdf);
-					arr.put(lmsIliasOrMoodle);
-				}
-
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
@@ -327,6 +318,17 @@ public class LRMIMapper {
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
+
+				if (rdf.containsKey("ilias_Link")) {
+					lmsIliasOrMoodle = addLmsIliasJsonObjectToEncoding(rdf);
+					arr.put(lmsIliasOrMoodle);
+				}
+
+				if (rdf.containsKey("moodle_Link")) {
+					lmsIliasOrMoodle = addLmsMoodleJsonObjectToEncoding(rdf);
+					arr.put(lmsIliasOrMoodle);
+				}
+
 				lrmiJsonContent.put("encoding", arr);
 
 			} else {
@@ -337,16 +339,6 @@ public class LRMIMapper {
 					play.Logger.debug("found Child in lobid");
 					iterator = getLobid2Iterator(l1rdf.get("hasPart"));
 					arr = new JSONArray();
-
-					if (rdf.containsKey("ilias_Link")) {
-						lmsIliasOrMoodle = addLmsIliasJsonObjectToEncoding(rdf);
-						arr.put(lmsIliasOrMoodle);
-					}
-
-					if (rdf.containsKey("moodle_Link")) {
-						lmsIliasOrMoodle = addLmsMoodleJsonObjectToEncoding(rdf);
-						arr.put(lmsIliasOrMoodle);
-					}
 
 					while (iterator.hasNext()) {
 						map = (Map<String, Object>) iterator.next();
@@ -372,6 +364,16 @@ public class LRMIMapper {
 						}
 						arr.put(obj);
 						play.Logger.debug("Added new encoding-field");
+					}
+
+					if (rdf.containsKey("ilias_Link")) {
+						lmsIliasOrMoodle = addLmsIliasJsonObjectToEncoding(rdf);
+						arr.put(lmsIliasOrMoodle);
+					}
+
+					if (rdf.containsKey("moodle_Link")) {
+						lmsIliasOrMoodle = addLmsMoodleJsonObjectToEncoding(rdf);
+						arr.put(lmsIliasOrMoodle);
 					}
 
 				}
@@ -406,7 +408,7 @@ public class LRMIMapper {
 	 * @param iObj a JSONObject of unknown internal structure
 	 * @return an Iterator representing the JSONObject
 	 */
-	public Iterator getLobid2Iterator(Object iObj) {
+	public static Iterator getLobid2Iterator(Object iObj) {
 		Iterator lIterator = null;
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =
@@ -659,11 +661,12 @@ public class LRMIMapper {
 	public static JSONObject addLmsIliasJsonObjectToEncoding(
 			Map<String, Object> rdf) {
 
+		Iterator iterator = null;
 		JSONObject iliasObject = new JSONObject();
 
 		try {
-
-			iliasObject.put("contentUrl", rdf.get("ilias_Link").toString());
+			iterator = getLobid2Iterator(rdf.get("ilias_Link"));
+			iliasObject.put("contentUrl", iterator.next());
 			iliasObject.put("encodingFormat", "text/html");
 			iliasObject.put("type", "MediaObject");
 
@@ -683,11 +686,12 @@ public class LRMIMapper {
 	public static JSONObject addLmsMoodleJsonObjectToEncoding(
 			Map<String, Object> rdf) {
 
+		Iterator iterator = null;
 		JSONObject moodleObject = new JSONObject();
 
 		try {
-
-			moodleObject.put("contentUrl", rdf.get("moodle_Link").toString());
+			iterator = getLobid2Iterator(rdf.get("moodle_Link"));
+			moodleObject.put("contentUrl", iterator.next());
 			moodleObject.put("encodingFormat", "text/html");
 			moodleObject.put("type", "MediaObject");
 
