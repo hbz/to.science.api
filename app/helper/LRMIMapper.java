@@ -168,7 +168,8 @@ public class LRMIMapper {
 				}
 				lrmiJsonContent.put("type", arr);
 			} else {
-				// dieser Fall sollte nie vorkommen, da "contentType" ja immer gesetzt sein sollte.
+				// dieser Fall sollte nie vorkommen, da "contentType" ja immer gesetzt
+				// sein sollte.
 				// falls der Fall doch vorkommt, wird AMB-"type" jetzt gesetzt.
 				arr = new JSONArray();
 				arr.put("LearningResource");
@@ -464,7 +465,7 @@ public class LRMIMapper {
 					}
 
 					if (i < acadDegree.size()) {
-						obj.put("honoricPrefix",
+						obj.put("honorificPrefix",
 								acadDegree.get(i).replace(
 										"http://hbz-nrw.de/regal#" + agentType + "AcademicDegree/",
 										""));
@@ -474,7 +475,7 @@ public class LRMIMapper {
 						 * Liste in RDF vorhanden. Daher wird für diesen Autor ein
 						 * Default-Wert verwendet.
 						 */
-						obj.put("honoricPrefix", "Keine Angabe");
+						obj.put("honorificPrefix", "Keine Angabe");
 					}
 					if (i < affiliation.size()) {
 						JSONObject affObj = new JSONObject();
