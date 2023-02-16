@@ -96,6 +96,7 @@ public class LRMIMapper {
 			JSONArray arr = null;
 			JSONObject obj = null;
 			JSONObject subObj = null;
+			JSONObject lmsIliasOrMoodle = null;
 			/**
 			 * - wandle die gesendeten Metadata2-Daten nach JSON. Genauso wie hier:
 			 * JsonMapper.getDescriptiveMetadata2(), jedoch die Metadata2 nicht aus
@@ -116,6 +117,7 @@ public class LRMIMapper {
 			 * löschen).
 			 */
 			/* Rückabbildung lobid2 => LRMI (vgl. JsonMapper.getLd2Lobidify2Lrmi */
+			play.Logger.debug("rdf =" + rdf.toString());
 			Iterator iterator = null;
 			Map<String, Object> map = null;
 			Object myObj = null; /* ein Objekt zunächst unbekannten Typs/Klasse */
@@ -166,12 +168,6 @@ public class LRMIMapper {
 				while (iterator.hasNext()) {
 					arr.put(iterator.next());
 				}
-				lrmiJsonContent.put("type", arr);
-			} else {
-				// dieser Fall sollte nie vorkommen, da "contentType" ja immer gesetzt sein sollte.
-				// falls der Fall doch vorkommt, wird AMB-"type" jetzt gesetzt.
-				arr = new JSONArray();
-				arr.put("LearningResource");
 				lrmiJsonContent.put("type", arr);
 			}
 
@@ -297,6 +293,7 @@ public class LRMIMapper {
 				play.Logger.debug("Child Node exists and is found");
 				iterator = getLobid2Iterator(rdf.get("hasPart"));
 				arr = new JSONArray();
+
 				while (iterator.hasNext()) {
 					map = (Map<String, Object>) iterator.next();
 					obj = new JSONObject();
@@ -321,14 +318,28 @@ public class LRMIMapper {
 					arr.put(obj);
 					play.Logger.debug("Added new encoding-field");
 				}
+
+				if (rdf.containsKey("ilias_Link")) {
+					lmsIliasOrMoodle = addLmsIliasJsonObjectToEncoding(rdf);
+					arr.put(lmsIliasOrMoodle);
+				}
+
+				if (rdf.containsKey("moodle_Link")) {
+					lmsIliasOrMoodle = addLmsMoodleJsonObjectToEncoding(rdf);
+					arr.put(lmsIliasOrMoodle);
+				}
+
 				lrmiJsonContent.put("encoding", arr);
+
 			} else {
+
 				play.Logger.debug("no Child found in lobid2, try to get it from lobid");
 				Map<String, Object> l1rdf = node.getLd1();
 				if (l1rdf.containsKey("hasPart")) {
 					play.Logger.debug("found Child in lobid");
 					iterator = getLobid2Iterator(l1rdf.get("hasPart"));
 					arr = new JSONArray();
+
 					while (iterator.hasNext()) {
 						map = (Map<String, Object>) iterator.next();
 						obj = new JSONObject();
@@ -353,6 +364,16 @@ public class LRMIMapper {
 						}
 						arr.put(obj);
 						play.Logger.debug("Added new encoding-field");
+					}
+
+					if (rdf.containsKey("ilias_Link")) {
+						lmsIliasOrMoodle = addLmsIliasJsonObjectToEncoding(rdf);
+						arr.put(lmsIliasOrMoodle);
+					}
+
+					if (rdf.containsKey("moodle_Link")) {
+						lmsIliasOrMoodle = addLmsMoodleJsonObjectToEncoding(rdf);
+						arr.put(lmsIliasOrMoodle);
 					}
 
 				}
@@ -387,7 +408,7 @@ public class LRMIMapper {
 	 * @param iObj a JSONObject of unknown internal structure
 	 * @return an Iterator representing the JSONObject
 	 */
-	public Iterator getLobid2Iterator(Object iObj) {
+	public static Iterator getLobid2Iterator(Object iObj) {
 		Iterator lIterator = null;
 		if (iObj instanceof java.util.ArrayList) {
 			ArrayList<Map<String, Object>> jList =
@@ -621,7 +642,6 @@ public class LRMIMapper {
 				funderObj.put("url", map.get("@id"));
 				funderObj.put("type", "FundingScheme");
 				funderObj.put("name", genPropMap.get(map.get("@id")));
-
 				lrmiObj.put("funder", funderObj);
 			}
 		} catch (JSONException e) {
@@ -629,6 +649,56 @@ public class LRMIMapper {
 		}
 
 		return lrmiObj;
+	}
+
+	/**
+	 * Method checks if LMS site from ILIAS exists, if yes, the corresponding json
+	 * object will be generated and returned
+	 * 
+	 * @param rdf Map representation of the lobid metadata
+	 * @return Json object with LMS-URLs
+	 */
+	public static JSONObject addLmsIliasJsonObjectToEncoding(
+			Map<String, Object> rdf) {
+
+		Iterator iterator = null;
+		JSONObject iliasObject = new JSONObject();
+
+		try {
+			iterator = getLobid2Iterator(rdf.get("ilias_Link"));
+			iliasObject.put("contentUrl", iterator.next());
+			iliasObject.put("encodingFormat", "text/html");
+			iliasObject.put("type", "MediaObject");
+
+		} catch (Exception e) {
+			play.Logger.error("Unable to add LMS-URL (ILIAS) to LRMI");
+		}
+		return iliasObject;
+	}
+
+	/**
+	 * Method checks if LMS site from MOODLE exists, if yes, the corresponding
+	 * json object will be generated and returned.
+	 * 
+	 * @param rdf Map representation of the lobid metadata
+	 * @return Json object with LMS-URLs
+	 */
+	public static JSONObject addLmsMoodleJsonObjectToEncoding(
+			Map<String, Object> rdf) {
+
+		Iterator iterator = null;
+		JSONObject moodleObject = new JSONObject();
+
+		try {
+			iterator = getLobid2Iterator(rdf.get("moodle_Link"));
+			moodleObject.put("contentUrl", iterator.next());
+			moodleObject.put("encodingFormat", "text/html");
+			moodleObject.put("type", "MediaObject");
+
+		} catch (Exception e) {
+			play.Logger.error("Unable to add LMS-URL (MOODLE) to LRMI");
+		}
+		return moodleObject;
 	}
 
 }

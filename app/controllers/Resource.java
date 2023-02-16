@@ -488,6 +488,9 @@ public class Resource extends MyController {
 			play.Logger.debug("BEGIN controllers.Resource.updateMetadata2(pid)");
 			try {
 				play.Logger.debug("Start method updateMetadata2(pid)");
+				play.Logger.debug("request body=" + request().body().asText());
+				play.Logger
+						.debug("request().body().asJson() =" + request().body().asJson());
 				/**
 				 * Wir aktualisieren 2 Datenströme, oder legen sie neu an:
 				 * 
@@ -578,7 +581,8 @@ public class Resource extends MyController {
 					modify.updateData(pid, content, mimeType, name, md5);
 
 					// OSU-172: Nach dem erfolgreichen Austausch der Dateien (ChildNodes)
-					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert werden.
+					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert
+					// werden.
 					// Es handelt sich hier nur um eine Art Neuladen der Daten des
 					// ParentNodes.
 					if (readNode.getParentPid() != null) {
