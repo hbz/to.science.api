@@ -573,7 +573,7 @@ public class Resource extends MyController {
 				String name = d.getFilename();
 				play.Logger.debug("mimeType: " + mimeType);
 				play.Logger.debug("d.getFilename(): " + d.getFilename());
-				play.Logger.debug("d.getFileSize(): " + d.getFileSize());
+				// play.Logger.debug("d.getFileSize(): " + d.getFileSize());
 
 				try (FileInputStream content = new FileInputStream(d.getFile())) {
 					modify.updateData(pid, content, mimeType, name, md5);
