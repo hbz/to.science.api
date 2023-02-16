@@ -573,12 +573,14 @@ public class Resource extends MyController {
 				String name = d.getFilename();
 				play.Logger.debug("mimeType: " + mimeType);
 				play.Logger.debug("d.getFilename(): " + d.getFilename());
+				play.Logger.debug("d.getFileSize(): " + d.getFileSize());
 
 				try (FileInputStream content = new FileInputStream(d.getFile())) {
 					modify.updateData(pid, content, mimeType, name, md5);
 
 					// OSU-172: Nach dem erfolgreichen Austausch der Dateien (ChildNodes)
-					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert werden.
+					// sollen die Metadaten des ParentNode (Lrmi & Json) aktualisiert
+					// werden.
 					// Es handelt sich hier nur um eine Art Neuladen der Daten des
 					// ParentNodes.
 					if (readNode.getParentPid() != null) {

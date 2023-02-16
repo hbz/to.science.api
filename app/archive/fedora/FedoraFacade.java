@@ -398,15 +398,21 @@ public class FedoraFacade {
 		play.Logger.debug("node access scheme: " + node.getAccessScheme());
 		play.Logger.debug("node publish scheme: " + node.getPublishScheme());
 		DublinCoreHandler.updateDc(node);
+		play.Logger.info("DublinCoreHandler.updateDc()");
 		List<Transformer> models = node.getTransformer();
+		play.Logger.info("getTransformer()");
 		// utils.updateContentModels(models);
 		node.removeRelations(REL_HAS_MODEL);
+		play.Logger.info("removeRelations");
 		if (node.getUploadFile() != null) {
 			if (node.isManaged()) {
 				utils.updateManagedStream(node);
+				play.Logger.info("updateManagedStream");
 				getChecksumFromFedora(node);
+				play.Logger.info("getChecksumFromFedora");
 			} else {
 				utils.updateUnManagedStream(node);
+				play.Logger.info("updateUnManagedStream()");
 			}
 			play.Logger.debug("Updated stream");
 		}

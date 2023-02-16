@@ -593,6 +593,8 @@ public class Create extends RegalAction {
 			webpageVersion.setLocalData(localpath);
 			webpageVersion.setMimeType("application/xml");
 			webpageVersion.setFileSize(zipSize);
+			play.Logger.debug("webpageVersion.getFileSizeAsString()= "
+					+ webpageVersion.getFileSizeAsString());
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
 			webpageVersion.setPublishScheme(n.getPublishScheme());
@@ -694,7 +696,7 @@ public class Create extends RegalAction {
 			 * hier werden erst mal standardmäßig im ersten Aufschlag alle
 			 * Forschungsdatenressourcen auf fiktive 100 KB Größe gesetzt
 			 */
-			BigInteger sizeInByte = new BigInteger("100000");
+			BigInteger sizeInByte = new BigInteger("1000000000");
 			researchDataResource.setFileSize(sizeInByte);
 			ApplicationLogger.info("localData = " + resource.getUrlString());
 			researchDataResource = updateResource(researchDataResource);
