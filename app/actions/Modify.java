@@ -97,9 +97,14 @@ public class Modify extends RegalAction {
 					pid + " you've tried to upload an empty stream."
 							+ " This action is not supported. Use HTTP DELETE instead.");
 		}
+
 		File tmp = File.createTempFile(name, "tmp");
+		play.Logger.debug("updateData(), tmp =" + tmp.length());
 		tmp.deleteOnExit();
+		play.Logger.debug("updateData(), deleteOnExit ");
+		play.Logger.debug("name: " + name);
 		CopyUtils.copy(content, tmp);
+		play.Logger.debug("updateData(), CopyUtils");
 		Node node = new Read().readNode(pid);
 		if (node != null) {
 			node.setUploadFile(tmp.getAbsolutePath());

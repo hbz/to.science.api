@@ -21,6 +21,7 @@ import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -566,6 +567,7 @@ public class Resource extends MyController {
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart d = body.getFile("data");
+				play.Logger.debug("Read-File, d.getFileSize() " + d.getFileSize());
 				if (d == null) {
 					return JsonMessage(new Message("Missing File.", 400));
 				}
@@ -573,9 +575,10 @@ public class Resource extends MyController {
 				String name = d.getFilename();
 				play.Logger.debug("mimeType: " + mimeType);
 				play.Logger.debug("d.getFilename(): " + d.getFilename());
-				// play.Logger.debug("d.getFileSize(): " + d.getFileSize());
 
 				try (FileInputStream content = new FileInputStream(d.getFile())) {
+					long sizeOfFile = fis.getChannel().size();
+					play.Logger.debug("sizeOfFile = : " + sizeOfFile + "bytes");
 					modify.updateData(pid, content, mimeType, name, md5);
 
 					// OSU-172: Nach dem erfolgreichen Austausch der Dateien (ChildNodes)
