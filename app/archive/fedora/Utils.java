@@ -403,7 +403,9 @@ public class Utils {
 
 		try {
 			File file = new File(node.getUploadFile());
+			play.Logger.debug("Utils, file.length() =  " + file.length() + "bytes");
 			if (dataStreamExists(node.getPid(), "data")) {
+				play.Logger.debug("dataStreamExists");
 				new ModifyDatastream(node.getPid(), "data").versionable(true)
 						.dsState("A").dsLabel(node.getFileLabel())
 						.mimeType(node.getMimeType()).controlGroup("M").content(file)

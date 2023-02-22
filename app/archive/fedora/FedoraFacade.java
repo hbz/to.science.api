@@ -262,6 +262,7 @@ public class FedoraFacade {
 	 * @return
 	 */
 	public Node readNode(String pid) {
+		play.Logger.debug("readNode(), pid = " + pid);
 		if (!nodeExists(pid))
 			throw new NodeNotFoundException(404, pid);
 		Node node = new Node();
@@ -397,6 +398,8 @@ public class FedoraFacade {
 		play.Logger.info("Update node in fedora, pid=" + node.getPid());
 		play.Logger.debug("node access scheme: " + node.getAccessScheme());
 		play.Logger.debug("node publish scheme: " + node.getPublishScheme());
+		play.Logger
+				.debug("node.getFileSizeAsString() =  " + node.getFileSizeAsString());
 		DublinCoreHandler.updateDc(node);
 		play.Logger.info("DublinCoreHandler.updateDc()");
 		List<Transformer> models = node.getTransformer();
@@ -405,6 +408,7 @@ public class FedoraFacade {
 		node.removeRelations(REL_HAS_MODEL);
 		play.Logger.info("removeRelations");
 		if (node.getUploadFile() != null) {
+			play.Logger.info("node.getUploadFile()!=null");
 			if (node.isManaged()) {
 				utils.updateManagedStream(node);
 				play.Logger.info("updateManagedStream");
