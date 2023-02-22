@@ -567,7 +567,6 @@ public class Resource extends MyController {
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart d = body.getFile("data");
-				play.Logger.debug("Read-File, d.getFileSize() " + d.getFileSize());
 				if (d == null) {
 					return JsonMessage(new Message("Missing File.", 400));
 				}
@@ -577,7 +576,7 @@ public class Resource extends MyController {
 				play.Logger.debug("d.getFilename(): " + d.getFilename());
 
 				try (FileInputStream content = new FileInputStream(d.getFile())) {
-					long sizeOfFile = fis.getChannel().size();
+					long sizeOfFile = content.getChannel().size();
 					play.Logger.debug("sizeOfFile = : " + sizeOfFile + "bytes");
 					modify.updateData(pid, content, mimeType, name, md5);
 
