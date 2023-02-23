@@ -1022,7 +1022,7 @@ public class JsonMapper {
 			return issued;
 		} else if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
-		} else if ((publicationYear != null && !publicationYear.isEmpty()) && (issuedCheck = true)) {
+		} else if ((publicationYear != null && !publicationYear.isEmpty()) && (issuedCheck != true)) {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
