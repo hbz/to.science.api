@@ -1013,7 +1013,7 @@ public class JsonMapper {
 	}
 
 	public static String getPublicationMap(JsonNode hit) {
-		boolean issuedCheck;
+		boolean issuedCheck = false;
 		String issued = hit.at("/issued").asText();
 		String startDate = hit.at("/publication/0/startDate").asText();
 		String publicationYear = hit.at("/publicationYear/0").asText();
@@ -1022,7 +1022,7 @@ public class JsonMapper {
 			return issued;
 		} else if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
-		} else if ((publicationYear != null && !publicationYear.isEmpty()) && (issuedCheck != true)) {
+		} else if ((publicationYear != null && !publicationYear.isEmpty()) && (issuedCheck == false)) {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
