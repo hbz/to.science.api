@@ -1020,9 +1020,12 @@ public class JsonMapper {
 		if (issued != null && !issued.isEmpty()) {
 			issuedCheck = true;
 			return issued;
-		} else if (startDate != null && !startDate.isEmpty()) {
+		}
+		if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
-		} else if ((publicationYear != null && !publicationYear.isEmpty()) && (issuedCheck == false)) {
+		}
+		if ((publicationYear != null && !publicationYear.isEmpty())
+				&& (!issuedCheck)) {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
