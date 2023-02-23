@@ -1013,6 +1013,10 @@ public class JsonMapper {
 	}
 
 	public static String getPublicationMap(JsonNode hit) {
+		String publicationYear = hit.at("/publicationYear/0").asText();
+		if (publicationYear != null && !publicationYear.isEmpty()) {
+			return publicationYear.substring(0, 4);
+		}
 		String issued = hit.at("/issued").asText();
 		if (issued != null && !issued.isEmpty()) {
 			return issued;
@@ -1021,10 +1025,6 @@ public class JsonMapper {
 		if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
 		}
-		// String publicationYear = hit.at("/publicationYear/0").asText();
-		// if (publicationYear != null && !publicationYear.isEmpty()) {
-		// return publicationYear.substring(0, 4);
-		// }
 		return null;
 	}
 
