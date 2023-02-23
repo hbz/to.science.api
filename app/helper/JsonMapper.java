@@ -1015,15 +1015,13 @@ public class JsonMapper {
 	public static String getPublicationMap(JsonNode hit) {
 
 		String issued = hit.at("/issued").asText();
+		String startDate = hit.at("/publication/0/startDate").asText();
+		String publicationYear = hit.at("/publicationYear/0").asText();
 		if (issued != null && !issued.isEmpty()) {
 			return issued;
-		}
-		String startDate = hit.at("/publication/0/startDate").asText();
-		if (startDate != null && !startDate.isEmpty()) {
+		} else if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
-		}
-		String publicationYear = hit.at("/publicationYear/0").asText();
-		if ((publicationYear != null && !publicationYear.isEmpty()) && (issued == null || issued.isEmpty())) {
+		} else if ((publicationYear != null && !publicationYear.isEmpty()) && (issued == null || issued.isEmpty())) {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
