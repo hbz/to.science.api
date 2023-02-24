@@ -1013,21 +1013,20 @@ public class JsonMapper {
 	}
 
 	public static String getPublicationMap(JsonNode hit) {
-		String issued = hit.at("/issued").asText();
-		String startDate = hit.at("/publication/0/startDate").asText();
-		String publicationYear = hit.at("/publicationYear/0").asText();
-		play.Logger.info("Issued: " + issued);
-		play.Logger.info("StartDate: " + startDate);
-		play.Logger.info("PublicationYear: " + publicationYear);
 
+		String issued = hit.at("/issued/0").asText();
+		play.Logger.info("Issued: " + issued);
 		if (issued != null && !issued.isEmpty()) {
 			return issued;
 		}
+		String startDate = hit.at("/publication/0/startDate").asText();
+		play.Logger.info("StartDate: " + startDate);
 		if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
 		}
-		if (publicationYear != null && !publicationYear.isEmpty())
-		{
+		String publicationYear = hit.at("/publicationYear/0").asText();
+		play.Logger.info("PublicationYear: " + publicationYear);
+		if (publicationYear != null && !publicationYear.isEmpty()) {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
