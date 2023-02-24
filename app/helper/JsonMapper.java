@@ -1027,7 +1027,7 @@ public class JsonMapper {
 			return startDate;
 		}
 		if ((publicationYear != null && !publicationYear.isEmpty())
-				&& (issued = null || issued.isEmpty())) {
+				&& (issued == null || issued.isEmpty())) {
 			return publicationYear.substring(0, 4);
 		}
 		return null;
