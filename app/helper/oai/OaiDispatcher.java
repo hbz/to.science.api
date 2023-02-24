@@ -198,7 +198,7 @@ public class OaiDispatcher {
 		if (node.hasLinkToCatalogId()) {
 			play.Logger.info(node.getPid() + " add alma set!");
 			addSet(node, "alma");
-			addSet(node, Globals.almaSetName);
+			addSet(node, Globals.alephSetName);
 		}
 	}
 
@@ -229,7 +229,7 @@ public class OaiDispatcher {
 
 	private static void createOAISet(String name, String spec, String pid) {
 		String setSpecPred = "http://www.openarchives.org/OAI/2.0/setSpec";
-		String setNamePred = "http://www.openarchives.org/OAI/2.0/setName";
+		String Pred = "http://www.openarchives.org/OAI/2.0/setName";
 		Link setSpecLink = new Link();
 		setSpecLink.setPredicate(setSpecPred);
 		Link setNameLink = new Link();
