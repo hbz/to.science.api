@@ -1,0 +1,23 @@
+@(data:MabRecord)<marc:collection xmlns:marc="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+<marc:record>
+  <marc:leader>01234ami  2200217uc 4500</marc:leader>
+  <marc:controlfield tag="001">@data.id</marc:controlfield>
+  @if(data.urn!=null){<marc:datafield tag="024" ind1="7" ind2=" ">
+    <marc:subfield code="a">@data.urn</marc:subfield>
+    <marc:subfield code="2">urn</marc:subfield>
+  </marc:datafield>}
+  @if(data.doi!=null){<marc:datafield tag="024" ind1="7" ind2=" ">
+    <marc:subfield code="a">@data.doi</marc:subfield>
+    <marc:subfield code="2">doi</marc:subfield>
+  </marc:datafield>}
+  <marc:datafield tag="856" ind1="4" ind2="0">
+    <marc:subfield code="m">V:DE-605</marc:subfield>
+    <marc:subfield code="p">443</marc:subfield>
+    <marc:subfield code="q">text/html</marc:subfield>
+    <marc:subfield code="u">@data.httpAdresse</marc:subfield>
+    <marc:subfield code="x">Resolving-System</marc:subfield>
+    <marc:subfield code="z">@models.Globals.mab655x</marc:subfield>
+    <marc:subfield code="3">Volltext</marc:subfield>
+  </marc:datafield>
+</marc:record>
+</marc:collection>
