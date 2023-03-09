@@ -122,8 +122,9 @@ public class MyController extends Controller {
 		play.Logger.debug(
 				"\nResponse: " + msg.toString() + "\nSession " + ctx().session());
 		if (request().accepts("text/html")) {
-			flash("message", "You must be logged in to perform this action!");
-			return redirect(routes.Forms.getLoginForm());
+			flash("message", "Zugriff verboten !");
+			// return redirect(routes.Forms.getLoginForm());
+			return JsonMessage(msg);
 		} else {
 			return JsonMessage(msg);
 		}
