@@ -1015,17 +1015,14 @@ public class JsonMapper {
 	public static String getPublicationMap(JsonNode hit) {
 
 		String issued = hit.at("/issued/0").asText();
-		play.Logger.info("Issued: " + issued);
 		if (issued != null && !issued.isEmpty()) {
 			return issued;
 		}
 		String startDate = hit.at("/publication/0/startDate").asText();
-		play.Logger.info("StartDate: " + startDate);
 		if (startDate != null && !startDate.isEmpty()) {
 			return startDate;
 		}
 		String publicationYear = hit.at("/publicationYear/0").asText();
-		play.Logger.info("PublicationYear: " + publicationYear);
 		if (publicationYear != null && !publicationYear.isEmpty()) {
 			return publicationYear.substring(0, 4);
 		}
