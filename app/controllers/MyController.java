@@ -124,7 +124,7 @@ public class MyController extends Controller {
 		if (request().accepts("text/html")) {
 			flash("message", "Zugriff verboten !");
 			// return redirect(routes.Forms.getLoginForm());
-			return JsonMessage(msg);
+			return forbidden("Sie haben keine Zugriffsberechtigung für diese Seite.");
 		} else {
 			return JsonMessage(msg);
 		}
