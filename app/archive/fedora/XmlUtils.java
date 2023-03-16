@@ -838,8 +838,12 @@ public class XmlUtils {
 					if (parent.getAttributes().getNamedItem("xlink:href") == null) {
 						String text = node.getTextContent();
 						play.Logger.info("textContent: " + text);
-						licenseId =
-								text.substring(text.indexOf("(") + 1, text.indexOf(")"));
+						int indexOpen = text.indexOf("(");
+						int indexClose = text.indexOf(")");
+						if (indexOpen == -1)
+							licenseId = "https://doi.org/10.1027/a000001";
+						if (indexOpen >= 0)
+							licenseId = text.substring(indexOpen + 1, indexClose);
 						break;
 					}
 				}
