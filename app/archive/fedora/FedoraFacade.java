@@ -20,7 +20,6 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
-import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 
 import java.io.IOException;
@@ -331,7 +330,7 @@ public class FedoraFacade {
 		try {
 			FedoraResponse response =
 					new GetDatastreamDissemination(node.getPid(), "metadata").execute();
-			node.setMetadata("metadata",
+			node.setMetadata1(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -341,8 +340,8 @@ public class FedoraFacade {
 	private void getMetadata2FromFedora(Node node) {
 		try {
 			FedoraResponse response =
-					new GetDatastreamDissemination(node.getPid(), metadata2).execute();
-			node.setMetadata(metadata2,
+					new GetDatastreamDissemination(node.getPid(), "metadata2").execute();
+			node.setMetadata2(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -352,8 +351,8 @@ public class FedoraFacade {
 	private void getLrmiDataFromFedora(Node node) {
 		try {
 			FedoraResponse response =
-					new GetDatastreamDissemination(node.getPid(), lrmiData).execute();
-			node.setMetadata(lrmiData,
+					new GetDatastreamDissemination(node.getPid(), "Lrmidata").execute();
+			node.setLrmiData(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name lrmiData is optional
@@ -404,23 +403,22 @@ public class FedoraFacade {
 		if (node.getUploadFile() != null) {
 			if (node.isManaged()) {
 				utils.updateManagedStream(node);
+				play.Logger.info("loaded File as managed stream to fedora");
 				getChecksumFromFedora(node);
 			} else {
 				utils.updateUnManagedStream(node);
+				play.Logger.info("loaded File as unmanaged stream to fedora");
 			}
 			play.Logger.debug("Updated stream");
 		}
-		if (node.getMetadataFile("metadata") != null) {
+		if (node.getMetadataFile() != null) {
 			utils.updateMetadataStream(node);
 		}
-		if (node.getMetadataFile(metadata2) != null) {
+		if (node.getMetadata2File() != null) {
 			utils.updateMetadata2Stream(node);
 		}
-		if (node.getMetadataFile(lrmiData) != null) {
+		if (node.getLrmiDataFile() != null) {
 			utils.updateLrmiDataStream(node);
-		}
-		if (node.getMetadataFile(metadataJson) != null) {
-			utils.updateMetadataJsonStream(node);
 		}
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);

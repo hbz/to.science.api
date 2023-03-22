@@ -403,12 +403,15 @@ public class Utils {
 
 		try {
 			File file = new File(node.getUploadFile());
+			play.Logger.info("Update managed datastream of " + node.getPid());
 			if (dataStreamExists(node.getPid(), "data")) {
+				play.Logger.info("replace existing datastream of " + node.getPid());
 				new ModifyDatastream(node.getPid(), "data").versionable(true)
 						.dsState("A").dsLabel(node.getFileLabel())
 						.mimeType(node.getMimeType()).controlGroup("M").content(file)
 						.execute();
 			} else {
+				play.Logger.info("add new datastream of " + node.getPid());
 				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
 						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
 						.content(file).controlGroup("M").execute();
@@ -506,53 +509,55 @@ public class Utils {
 		}
 	}
 
-	/**
-	 * This method updates a metadata stream of a node
-	 * 
-	 * @author kuss
-	 * @date 2022-09-30
-	 * @param metadataType The type of the metadata: metadata, metadata2,
-	 *          lrmiData, toscience.json
-	 * @param mimeType The mime type of the metadata
-	 * @param label The label of the metadata stream
-	 * @param node The Node on which the metadata sits
-	 */
-	public void updateMetadataStream(String metadataType, String mimeType,
-			String label, Node node) {
+	void updateMetadataStream(Node node) {
 		try {
-			File file = new File(node.getMetadataFile(metadataType));
-			if (dataStreamExists(node.getPid(), metadataType)) {
-				new ModifyDatastream(node.getPid(), metadataType).versionable(true)
-						.dsLabel(label).dsState("A").controlGroup("M").mimeType(mimeType)
-						.content(file).execute();
+			File file = new File(node.getMetadataFile());
+			if (dataStreamExists(node.getPid(), "metadata")) {
+				new ModifyDatastream(node.getPid(), "metadata").versionable(true)
+						.dsLabel("n-triple rdf metadata").dsState("A").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
 			} else {
-				new AddDatastream(node.getPid(), metadataType).versionable(true)
-						.dsState("A").dsLabel(label).controlGroup("M").mimeType(mimeType)
-						.content(file).execute();
+				new AddDatastream(node.getPid(), "metadata").versionable(true)
+						.dsState("A").dsLabel("n-triple rdf metadata").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
 		}
 	}
 
-	void updateMetadataStream(Node node) {
-		updateMetadataStream("metadata", "text/plain", "n-triple rdf metadata",
-				node);
-	}
-
 	void updateMetadata2Stream(Node node) {
-		updateMetadataStream(archive.fedora.Vocabulary.metadata2, "text/plain",
-				"n-triple rdf metadata", node);
+		try {
+			File file = new File(node.getMetadata2File());
+			if (dataStreamExists(node.getPid(), "metadata2")) {
+				new ModifyDatastream(node.getPid(), "metadata2").versionable(true)
+						.dsLabel("n-triple rdf metadata2").dsState("A").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "metadata2").versionable(true)
+						.dsState("A").dsLabel("n-triple rdf metadata2").controlGroup("M")
+						.mimeType("text/plain").content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
 	}
 
 	void updateLrmiDataStream(Node node) {
-		updateMetadataStream(archive.fedora.Vocabulary.lrmiData, "application/json",
-				"LRMI data JSON", node);
-	}
-
-	void updateMetadataJsonStream(Node node) {
-		updateMetadataStream(archive.fedora.Vocabulary.metadataJson,
-				"application/json", "Metadata in Format lobid2 JSON", node);
+		try {
+			File file = new File(node.getLrmiDataFile());
+			if (dataStreamExists(node.getPid(), "Lrmidata")) {
+				new ModifyDatastream(node.getPid(), "Lrmidata").versionable(true)
+						.dsLabel("LRMI data JSON").dsState("A").controlGroup("M")
+						.mimeType("application/json").content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), "Lrmidata").versionable(true)
+						.dsState("A").dsLabel("LRMI data JSON").controlGroup("M")
+						.mimeType("application/json").content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
 	}
 
 	void readRelsExt(Node node) throws FedoraClientException {
