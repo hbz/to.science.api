@@ -404,9 +404,11 @@ public class FedoraFacade {
 		if (node.getUploadFile() != null) {
 			if (node.isManaged()) {
 				utils.updateManagedStream(node);
+				play.Logger.info("Updated managed file fedora, pid=" + node.getPid());
 				getChecksumFromFedora(node);
 			} else {
 				utils.updateUnManagedStream(node);
+				play.Logger.info("Updated unmanaged file fedora, pid=" + node.getPid());
 			}
 			play.Logger.debug("Updated stream");
 		}

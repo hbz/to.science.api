@@ -404,11 +404,15 @@ public class Utils {
 		try {
 			File file = new File(node.getUploadFile());
 			if (dataStreamExists(node.getPid(), "data")) {
+				play.Logger.info(
+						"Start replacing managed file in fedora, pid=" + node.getPid());
 				new ModifyDatastream(node.getPid(), "data").versionable(true)
 						.dsState("A").dsLabel(node.getFileLabel())
 						.mimeType(node.getMimeType()).controlGroup("M").content(file)
 						.execute();
 			} else {
+				play.Logger
+						.info("Start adding managed file in fedora, pid=" + node.getPid());
 				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
 						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
 						.content(file).controlGroup("M").execute();
