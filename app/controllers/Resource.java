@@ -19,6 +19,7 @@ package controllers;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -574,8 +575,12 @@ public class Resource extends MyController {
 				}
 				String mimeType = d.getContentType();
 				String name = d.getFilename();
+				File file = (File) d.getFile();
+				long fileSize = file.length();
+
 				play.Logger.debug("mimeType: " + mimeType);
 				play.Logger.debug("d.getFilename(): " + d.getFilename());
+				play.Logger.debug("Content-Length: " + fileSize);
 
 				try (FileInputStream content = new FileInputStream(d.getFile())) {
 					modify.updateData(pid, content, mimeType, name, md5);
