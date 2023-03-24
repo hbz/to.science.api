@@ -411,15 +411,15 @@ public class Utils {
 						"Start replacing managed file in fedora, pid=" + node.getPid());
 				new ModifyDatastream(node.getPid(), "data").versionable(true)
 						.dsState("A").dsLabel(node.getFileLabel())
-						.mimeType(node.getMimeType()).controlGroup("M")
-						.addHeader("Content-Length", cLength).content(file).execute();
+						.mimeType(node.getMimeType()).controlGroup("M").content(file)
+						.execute();
 			} else {
 				play.Logger
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
 				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
 						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
-						.content(file).controlGroup("M")
-						.addHeader("Content-Length", cLength).execute();
+						.content(file).controlGroup("M").addContentLengthHeader(cLength)
+						.execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);

@@ -45,8 +45,9 @@ public class AddDatastream
 		return this;
 	}
 
-	public void addContentLengthHeader(String cLength) {
-		this.addHeader("Content-Length", cLength);
+	public AddDatastream addContentLengthHeader(String cLength) {
+		addHeader("Content-Length", cLength);
+		return this;
 	}
 
 }
