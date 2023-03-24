@@ -416,10 +416,10 @@ public class Utils {
 			} else {
 				play.Logger
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
-				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
-						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
-						.content(file).controlGroup("M").addContentLengthHeader(cLength)
-						.execute();
+				((AddDatastream) new AddDatastream(node.getPid(), "data")
+						.versionable(true).dsState("A").mimeType(node.getMimeType())
+						.dsLabel(node.getFileLabel()).content(file).controlGroup("M"))
+								.addContentLengthHeader(cLength).execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
