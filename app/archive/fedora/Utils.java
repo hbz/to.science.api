@@ -418,7 +418,7 @@ public class Utils {
 				((AddDatastream) new AddDatastream(node.getPid(), "data")
 						.versionable(true).dsState("A").mimeType(node.getMimeType())
 						.dsLabel(node.getFileLabel()).content(file).controlGroup("M"))
-								.addHeaderContentLengthHeader(cLength).execute();
+								.addHeader("Content-Length", cLength).execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
