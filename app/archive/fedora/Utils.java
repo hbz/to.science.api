@@ -416,9 +416,8 @@ public class Utils {
 				play.Logger
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
 				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
-						.mimeType(node.getMimeType())
-						.dsLabel(node.getFileLabel().content(file).controlGroup("M"))
-						.execute();
+						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
+						.content(file).controlGroup("M").execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
