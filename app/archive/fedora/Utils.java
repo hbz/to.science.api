@@ -350,8 +350,7 @@ public class Utils {
 			Upload request = new Upload(new File(node.getUrlHistFile()));
 			UploadResponse response = request.execute();
 			String location = response.getUploadLocation();
-			response.new AddDatastream(node.getPid(), "urlHist").versionable(true)
-					.dsState("A")
+			new AddDatastream(node.getPid(), "urlHist").versionable(true).dsState("A")
 					.dsLabel("json file to keep track of a webpage's URL changes")
 					.controlGroup("M").mimeType("application/json").dsLocation(location)
 					.execute();
@@ -418,8 +417,9 @@ public class Utils {
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
 				((AddDatastream) new AddDatastream(node.getPid(), "data")
 						.versionable(true).dsState("A").mimeType(node.getMimeType())
-						.dsLabel(node.getFileLabel()).content(file).controlGroup("M"))
-								.addContentLengthHeader(cLength).execute();
+						.dsLabel(node.getFileLabel().addHeader("Content-Length", cLength))
+						.content(file).controlGroup("M"))
+								.addHeaderContentLengthHeader(cLength).execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
