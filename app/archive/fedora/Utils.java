@@ -350,7 +350,8 @@ public class Utils {
 			Upload request = new Upload(new File(node.getUrlHistFile()));
 			UploadResponse response = request.execute();
 			String location = response.getUploadLocation();
-			new AddDatastream(node.getPid(), "urlHist").versionable(true).dsState("A")
+			response.new AddDatastream(node.getPid(), "urlHist").versionable(true)
+					.dsState("A")
 					.dsLabel("json file to keep track of a webpage's URL changes")
 					.controlGroup("M").mimeType("application/json").dsLocation(location)
 					.execute();
@@ -403,19 +404,22 @@ public class Utils {
 
 		try {
 			File file = new File(node.getUploadFile());
+			Long fileSize = file.length();
+			String cLength = fileSize.toString();
 			if (dataStreamExists(node.getPid(), "data")) {
 				play.Logger.info(
 						"Start replacing managed file in fedora, pid=" + node.getPid());
 				new ModifyDatastream(node.getPid(), "data").versionable(true)
 						.dsState("A").dsLabel(node.getFileLabel())
-						.mimeType(node.getMimeType()).controlGroup("M").content(file)
-						.execute();
+						.mimeType(node.getMimeType()).controlGroup("M")
+						.addHeader("Content-Length", cLength).content(file).execute();
 			} else {
 				play.Logger
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
 				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
 						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
-						.content(file).controlGroup("M").execute();
+						.content(file).controlGroup("M")
+						.addHeader("Content-Length", cLength).execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
