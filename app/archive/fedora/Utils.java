@@ -417,8 +417,7 @@ public class Utils {
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
 				((AddDatastream) new AddDatastream(node.getPid(), "data")
 						.versionable(true).dsState("A").mimeType(node.getMimeType())
-						.dsLabel(node.getFileLabel().addHeader("Content-Length", cLength))
-						.content(file).controlGroup("M"))
+						.dsLabel(node.getFileLabel()).content(file).controlGroup("M"))
 								.addHeaderContentLengthHeader(cLength).execute();
 			}
 		} catch (FedoraClientException e) {
