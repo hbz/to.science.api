@@ -403,8 +403,6 @@ public class Utils {
 
 		try {
 			File file = new File(node.getUploadFile());
-			Long fileSize = file.length();
-			String cLength = fileSize.toString();
 			if (dataStreamExists(node.getPid(), "data")) {
 				play.Logger.info(
 						"Start replacing managed file in fedora, pid=" + node.getPid());
