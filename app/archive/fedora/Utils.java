@@ -403,19 +403,21 @@ public class Utils {
 
 		try {
 			File file = new File(node.getUploadFile());
+			String cGroup = "M";
 			Long fileSize = file.length();
 			String cLength = fileSize.toString();
 			play.Logger.debug("fileSize: " + fileSize + ", cLength: " + cLength);
 
 			if (fileSize > Integer.MAX_VALUE) {
 				play.Logger.info("file size exceeds 2 GB");
+				cGroup = "E";
 			}
 			if (dataStreamExists(node.getPid(), "data")) {
 				play.Logger.info(
 						"Start replacing managed file in fedora, pid=" + node.getPid());
 				new ModifyDatastream(node.getPid(), "data").versionable(true)
 						.dsState("A").dsLabel(node.getFileLabel())
-						.mimeType(node.getMimeType()).controlGroup("M").content(file)
+						.mimeType(node.getMimeType()).controlGroup(cGroup).content(file)
 						.execute();
 			} else {
 				play.Logger
