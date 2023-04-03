@@ -405,6 +405,7 @@ public class Utils {
 			File file = new File(node.getUploadFile());
 			Long fileSize = file.length();
 			String cLength = fileSize.toString();
+			play.Logger.debug("fileSize: " + fileSize + ", cLength: " + cLength);
 			if (dataStreamExists(node.getPid(), "data")) {
 				play.Logger.info(
 						"Start replacing managed file in fedora, pid=" + node.getPid());
@@ -415,9 +416,11 @@ public class Utils {
 			} else {
 				play.Logger
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
-				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
-						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
-						.content(file).controlGroup("M").execute();
+				AddDatastream aDS = new AddDatastream(node.getPid(), "data");
+				aDS.addContentLengthHeader(cLength);
+				aDS.versionable(true).dsState("A").mimeType(node.getMimeType())
+						.dsLabel(node.getFileLabel()).content(file).controlGroup("M")
+						.execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
