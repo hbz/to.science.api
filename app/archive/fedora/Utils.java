@@ -406,6 +406,10 @@ public class Utils {
 			Long fileSize = file.length();
 			String cLength = fileSize.toString();
 			play.Logger.debug("fileSize: " + fileSize + ", cLength: " + cLength);
+
+			if (fileSize > Integer.MAX_VALUE) {
+				play.Logger.info("file size exceeds 2 GB");
+			}
 			if (dataStreamExists(node.getPid(), "data")) {
 				play.Logger.info(
 						"Start replacing managed file in fedora, pid=" + node.getPid());
@@ -421,6 +425,7 @@ public class Utils {
 				aDS.versionable(true).dsState("A").mimeType(node.getMimeType())
 						.dsLabel(node.getFileLabel()).content(file).controlGroup("M")
 						.execute();
+				play.Logger.info("Headers: " + aDS.getHeaders());
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);

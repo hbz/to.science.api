@@ -53,4 +53,7 @@ public class AddDatastream
 		addHeader("Content-Length", cLength);
 	}
 
+	public String getHeaders() {
+		return getHeaders().toString();
+	}
 }
