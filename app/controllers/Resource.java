@@ -422,8 +422,7 @@ public class Resource extends MyController {
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
-	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+	@ApiImplicitParams({ updateLobidify2AndEnrichToscienceJson })
 	public static Promise<Result> createResource(
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
@@ -541,23 +540,27 @@ public class Resource extends MyController {
 			try {
 				Node readNode = new Read().readNode(pid);
 				/**
-				 * Wir legen 3 Datenströme an:
+				 * Three Data Streams will be created:
 				 * 
-				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
-				 * Datenstrom "Lrmidata"
+				 * 1. LRMI (AMB) Data Stream
+				 * 
 				 */
+				play.Logger.debug("Amb will be mapped");
+
 				String ambContent =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
-
 				play.Logger.debug("ambContent = " + ambContent);
 				String result1 = "LRMI metadata successfully updated and enriched.";
 				String ambContent2 = new Read().readLrmiData(readNode);
 				play.Logger.debug("ambContent2 = " + ambContent2);
 
+				play.Logger.debug("Done Amb Mapping");
+
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
 				 */
 				play.Logger.debug("toscienceJson will be mapped");
+
 				AmbMapperImpl ambMapperImpl = new AmbMapperImpl();
 				play.Logger.debug("AmbMapperImpl Instance wurde angelegt");
 				JSONObject tosJSONObject =
@@ -566,31 +569,18 @@ public class Resource extends MyController {
 				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
 				modify.updateMetadataJson(readNode, tosJSONObject.toString());
 
+				play.Logger.debug("Done toscienceJson Mapping");
+
 				/**
 				 * 3.(TOSCIENCEJESON --> METADATA2)
 				 */
 				play.Logger.debug("Metadata2 will be mapped");
-				// LinkedHashMap<String, Object> rdf = new Metadata2Helper()
-				// .getMetadata2ByToScienceJson(tosJSONObject.toString());
-				//
+
 				RDFFormat format = RDFFormat.NTRIPLES;
-				// modify.updateMetadata2(readNode, Modify.rdfToString(rdf, format));
-				// // Enrich.enrichMetadata2(readNode);
-				//
-				// play.Logger.debug("rdf = " + rdf.toString());
-				modify.updateLobidify2AndEnrichAmb(readNode, format, tosJSONObject);
+				modify.updateLobidify2AndEnrichToscienceJson(readNode, format,
+						tosJSONObject);
+
 				play.Logger.debug("Done Metadata2 Mapping");
-
-				// String result3 = modify.updateLobidify2AndEnrichMetadata(readNode,
-				// tosJSONObject.toString()); // toscienceJsonContent
-
-				// /* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein:
-				// */
-				//
-				// Node nodeNode = new Read().readNode(pid);
-				// String result2 = modify.updateLobidify2AndEnrichLrmiData(nodeNode,
-				// format, ambContent);
-				// play.Logger.debug(result2);
 
 				return JsonMessage(new Message(result1));
 			} catch (Exception e) {

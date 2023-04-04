@@ -438,15 +438,20 @@ public class Modify extends RegalAction {
 	 * @param tosJSONObject The new mapped data stream
 	 * @return
 	 */
-	public String updateLobidify2AndEnrichAmb(Node node, RDFFormat format,
-			JSONObject tosJSONObject) {
+	public String updateLobidify2AndEnrichToscienceJson(Node node,
+			RDFFormat format, JSONObject tosJSONObject) {
 
-		play.Logger.debug("Update Metadata2 datastream!");
-		LinkedHashMap<String, Object> ld2 = new Metadata2Helper()
-				.getMetadata2ByToScienceJson(node, tosJSONObject.toString());
+		play.Logger.debug(" Start updateLobidify2AndEnrichToscienceJson");
+
+		if (tosJSONObject.toString() == null) {
+			throw new HttpArchiveException(406,
+					" The Argument ToscienceJson Data Stream is Empty.");
+		}
+		LinkedHashMap<String, Object> ld2 =
+				Metadata2Helper.getLd2Lobidify2ToscienceJson(node, tosJSONObject);
 
 		play.Logger.debug("updateLobidify2AndEnrichAmb() ld2 = " + ld2.toString());
-
+		// Update or create the metadata2 data stream
 		Map<String, Object> rdf =
 				(Map<String, Object>) ld2.get(archive.fedora.Vocabulary.metadata2);
 
