@@ -422,7 +422,8 @@ public class Resource extends MyController {
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
-	@ApiImplicitParams({ updateLobidify2AndEnrichToscienceJson })
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
 	public static Promise<Result> createResource(
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
