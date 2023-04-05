@@ -118,7 +118,8 @@ public class Metadata2Helper {
 					jObj = jsArr.getJSONObject(i);
 					play.Logger.debug("Found keyword: " + jObj.toString());
 					keywordMap.put("prefLabel", jObj.get("prefLabel").toString());
-					keywordMap.put("@id", ahu.getAdhocUri(jObj.toString()));
+					keywordMap.put("@id",
+							ahu.getAdhocUri(jObj.get("prefLabel").toString()));
 					keyWordList.add(keywordMap);
 				}
 				rdf.put("subject", keyWordList);
