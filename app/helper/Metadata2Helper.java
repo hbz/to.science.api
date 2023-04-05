@@ -69,9 +69,10 @@ public class Metadata2Helper {
 			}
 
 			if (toscienceJsonContent.has("title")) {
-				rdf.put("title", toscienceJsonContent.getJSONArray("title").toString());
-				play.Logger.debug("Found title: "
-						+ toscienceJsonContent.getJSONArray("title").toString());
+				jsArr = toscienceJsonContent.getJSONArray("title");
+				String title = getValueBetweenTwoQuotationMarks(jsArr.toString());
+				rdf.put("title", title);
+				play.Logger.debug("Found title: " + title);
 			}
 
 			rdf.put("accessScheme", "public");
@@ -103,19 +104,21 @@ public class Metadata2Helper {
 
 			if (toscienceJsonContent.has("description")) {
 				Object obj = toscienceJsonContent.get("description");
+				String description = getValueBetweenTwoQuotationMarks(obj.toString());
 				play.Logger.debug("Found description : " + obj.toString());
-				rdf.put("description", obj.toString());
+				rdf.put("description", description);
 			}
 
 			if (toscienceJsonContent.has("subject")) {
 				jsArr = toscienceJsonContent.getJSONArray("subject");
 				List<Map<String, Object>> keyWordList = new ArrayList<>();
 				for (int i = 0; i < jsArr.length(); i++) {
+					AdHocUriProvider ahu = new AdHocUriProvider();
 					Map<String, Object> keywordMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					play.Logger.debug("Found keyword: " + jObj.toString());
 					keywordMap.put("prefLabel", jObj.get("prefLabel").toString());
-					keywordMap.put("@id", jObj.get("@id").toString());
+					keywordMap.put("@id", ahu.getAdhocUri(jObj.toString()));
 					keyWordList.add(keywordMap);
 				}
 				rdf.put("subject", keyWordList);
@@ -137,16 +140,16 @@ public class Metadata2Helper {
 
 			if (toscienceJsonContent.has("department")) {
 				jsArr = toscienceJsonContent.getJSONArray("department");
-				List<Map<String, Object>> mediumList = new ArrayList<>();
+				List<Map<String, Object>> departmentList = new ArrayList<>();
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> departmentMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					play.Logger.debug("Found department : " + jObj.toString());
 					departmentMap.put("prefLabel", jObj.get("prefLabel").toString());
 					departmentMap.put("@id", jObj.get("@id").toString());
-					mediumList.add(departmentMap);
+					departmentList.add(departmentMap);
 				}
-				rdf.put("medium", mediumList);
+				rdf.put("department", departmentList);
 			}
 
 			if (toscienceJsonContent.has("creator")) {
@@ -200,8 +203,17 @@ public class Metadata2Helper {
 			try {
 				jsArr = toscienceJSONObject.getJSONArray(agentType);
 				for (int i = 0; i < jsArr.length(); i++) {
+
 					Map<String, Object> agentMap = new LinkedHashMap<>();
 					JSONObject jObj = jsArr.getJSONObject(i);
+
+					if (jObj.has("@id")) {
+						agentMap.put("@id", jObj.get("@id"));
+						agentMap.put("prefLabel", jObj.get("prefLabel"));
+					} else {
+						play.Logger.warn(" Attention " + agentType + " has no ID  !");
+					}
+
 					StringBuffer agentStr = new StringBuffer();
 
 					if (jObj.has("academicDegree")) {
@@ -218,7 +230,7 @@ public class Metadata2Helper {
 						Map<String, Object> affiliationMap = new LinkedHashMap<>();
 						JSONObject affi = jObj.getJSONObject("affiliation");
 
-						prefLabelOrganisation = affi.getString("prefLabel");
+						// prefLabelOrganisation = affi.getString("prefLabel");
 						affiliationId = affi.getString("@id");
 						affiliationType = affi.getString("type");
 
@@ -226,7 +238,7 @@ public class Metadata2Helper {
 
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
-						affiliationMap.put("prefLabel", prefLabelOrganisation);
+						// affiliationMap.put("prefLabel", prefLabelOrganisation);
 						agentMap.put("affiliation", affiliationMap);
 
 					}
@@ -239,14 +251,30 @@ public class Metadata2Helper {
 
 				rdf.put(agentType, agents);
 				rdf.put("oerAgent", oerAgent);
-				rdf.put("Affiliation", agentAffiliation);
-				rdf.put("AcademicDegree", agentAcademicDegree);
+				rdf.put(agentType + "Affiliation", agentAffiliation);
+				rdf.put(agentType + "AcademicDegree", agentAcademicDegree);
 
 			} catch (Exception e) {
 				play.Logger.error(e.getMessage());
 				throw new RuntimeException(e);
 			}
 		}
+
+	}
+
+	/**
+	 * This method gets the string value between double quotation marks("").
+	 * 
+	 * @param s: For example. s= ["FunderTestByNameUploadFormular"]
+	 * @return: For example FunderTestByNameUploadFormular
+	 */
+	public static String getValueBetweenTwoQuotationMarks(String s) {
+		String result = null;
+		if (s.contains("")) {
+			result = s.substring(s.toString().indexOf("\"") + 1,
+					s.toString().lastIndexOf("\""));
+		}
+		return result;
 
 	}
 
