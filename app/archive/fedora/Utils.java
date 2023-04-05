@@ -409,7 +409,8 @@ public class Utils {
 			play.Logger.debug("fileSize: " + fileSize + ", cLength: " + cLength);
 
 			if (fileSize > Integer.MAX_VALUE) {
-				play.Logger.info("file size exceeds 2 GB");
+				play.Logger.info(
+						"file size exceeds 2 GB, set file to externale managed content");
 				cGroup = "E";
 			}
 			if (dataStreamExists(node.getPid(), "data")) {
@@ -423,9 +424,11 @@ public class Utils {
 				play.Logger
 						.info("Start adding managed file in fedora, pid=" + node.getPid());
 				AddDatastream aDS = new AddDatastream(node.getPid(), "data");
+				play.Logger.info("Headers: " + aDS.getHeaders());
+
 				aDS.addContentLengthHeader(cLength);
 				aDS.versionable(true).dsState("A").mimeType(node.getMimeType())
-						.dsLabel(node.getFileLabel()).content(file).controlGroup("M")
+						.dsLabel(node.getFileLabel()).content(file).controlGroup(cGroup)
 						.execute();
 				play.Logger.info("Headers: " + aDS.getHeaders());
 			}
