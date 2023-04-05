@@ -421,16 +421,26 @@ public class Utils {
 						.mimeType(node.getMimeType()).controlGroup(cGroup).content(file)
 						.execute();
 			} else {
-				play.Logger
-						.info("Start adding managed file in fedora, pid=" + node.getPid());
-				AddDatastream aDS = new AddDatastream(node.getPid(), "data");
-				play.Logger.info("Headers: " + aDS.getHeaders());
-
-				aDS.addContentLengthHeader(cLength);
-				aDS.versionable(true).dsState("A").mimeType(node.getMimeType())
-						.dsLabel(node.getFileLabel()).content(file).controlGroup(cGroup)
-						.execute();
-				play.Logger.info("Headers: " + aDS.getHeaders());
+				if(cGroup.equals("M")) {
+					play.Logger.info(
+							"Start adding managed file in fedora, pid=" + node.getPid());
+					AddDatastream aDS = new AddDatastream(node.getPid(), "data");
+					aDS.addContentLengthHeader(cLength);
+					play.Logger.info("Headers: " + aDS.getHeaders());
+					aDS.versionable(true).dsState("A").mimeType(node.getMimeType())
+							.dsLabel(node.getFileLabel()).content(file).controlGroup(cGroup)
+							.execute();
+				}else{
+					play.Logger.info(
+							"Start adding unmanaged file in fedora, pid=" + node.getPid());
+					String localpath =  node.getUploadFile(); 
+					AddDatastream aDS = new AddDatastream(node.getPid(), "data");
+					aDS.addContentLengthHeader(cLength);
+					play.Logger.info("Headers: " + aDS.getHeaders());
+					aDS.versionable(true).dsState("A").mimeType(node.getMimeType())
+							.dsLabel(node.getFileLabel())..dsLocation(localpath).controlGroup(cGroup)
+							.execute();
+				}
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
