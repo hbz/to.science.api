@@ -13,6 +13,11 @@ import org.json.JSONObject;
 import models.Node;
 import util.AdHocUriProvider;
 
+/**
+ * 
+ * @author adoud
+ *
+ */
 public class Metadata2Helper {
 
 	/**
@@ -231,7 +236,7 @@ public class Metadata2Helper {
 						Map<String, Object> affiliationMap = new LinkedHashMap<>();
 						JSONObject affi = jObj.getJSONObject("affiliation");
 
-						// prefLabelOrganisation = affi.getString("prefLabel");
+						prefLabelOrganisation = affi.getString("prefLabel");
 						affiliationId = affi.getString("@id");
 						affiliationType = affi.getString("type");
 
@@ -264,7 +269,7 @@ public class Metadata2Helper {
 	}
 
 	/**
-	 * This method gets the string value between double quotation marks("").
+	 * This method gets the string value between two quotation marks("").
 	 * 
 	 * @param s: For example. s= ["FunderTestByNameUploadFormular"]
 	 * @return: For example FunderTestByNameUploadFormular
