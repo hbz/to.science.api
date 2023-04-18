@@ -1,5 +1,4 @@
-
-[![to.science Logo](to.science.svg)](https://github.com/hbz/to.science.api)
+!to.science-small.png(Toolbox Open Science Logo)!
 
 h1. About
 
