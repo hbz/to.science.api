@@ -1,5 +1,5 @@
 
-[![to.science Logo](to.science-small.png)](https://github.com/hbz/to.science.api)
+[![to.science Logo](to.science.svg)](https://github.com/hbz/to.science.api)
 
 h1. About
 
