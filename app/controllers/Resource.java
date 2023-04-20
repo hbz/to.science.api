@@ -899,6 +899,15 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/xml", nickname = "asAlmaNz", value = "asAlmaNz", notes = "Returns an Alma Network Zone xml display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asAlmaNz(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			MabRecord result = transform.aleph(pid);
+			response().setContentType("application/xml");
+			return ok(marc.render(result));
+		});
+	}
+
 	@ApiOperation(produces = "application/xml", nickname = "asDatacite", value = "asDatacite", notes = "Returns a Datacite display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asDatacite(@PathParam("pid") String pid,
 			@QueryParam("validate") boolean validate) {
