@@ -80,7 +80,7 @@ regal-api.heritrix.crawlsPerNight=10
 #-------------wget --------------------------------
 #--- importierte Webschnitte aus Edoweb1.0, 2.0 ---
 #--------------------------------------------------
-regal-api.wget.dataDir="/opt/regal/wget-data"
+regal-api.wget.dataDir="/opt/toscience/wget-data"
 # URL, unter der das Datenverzeichnis /wget-data liegt, also so: dataUrl/wget-data/
 regal-api.wget.dataUrl="https://localhost/wget-data"
 regal-api.webharvests.dataDir="/data/webharvests"
@@ -90,14 +90,15 @@ regal-api.restrictedweb.dataUrl="http://localhost/restrictedweb"
 
 #-------------wpull (Crawler)-----------------------                            
 regal-api.wpull.crawler="/usr/local/bin/wpull3"
-regal-api.wpull.jobDir="/opt/regal/wpull-data-crawldir"
-regal-api.wpull.tempJobDir="/opt/regal/wpull-data-tempdir"
-regal-api.wpull.outDir="/opt/regal/wpull-data"
+regal-api.wpull.jobDir="/opt/toscience/wpull-data-crawldir"
+regal-api.wpull.tempJobDir="/opt/toscience/wpull-data-tempdir"
+regal-api.wpull.outDir="/opt/toscience/wpull-data"
 regal-api.wpull.dataUrl="http://localhost"
-regal-api.public.jobDir="/opt/regal/public-data"
+regal-api.wpull.staticOptions=" --recursive --link-extractors=javascript,html,css --escaped-fragment --strip-session-id --no-host-directories --page-requisites --no-parent --no-check-certificate --no-directories --delete-after"
+regal-api.public.jobDir="/opt/toscience/public-data"
 
 #-------------CDN Gatherer--------------------------                            
-regal-api.cdntools.cdn="/opt/edoweb/bin/cdn"
+regal-api.cdntools.cdn="/opt/toscience/bin/cdn"
 
 #-------------Openwayback---------------------------
 regal-api.wayback.lesesaalLink="http://localhost:9080/wayback/"

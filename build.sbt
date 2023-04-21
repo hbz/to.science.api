@@ -1,7 +1,7 @@
 
-name := "regal-api"
+name := "toscience-api"
 
-version := "0.8.0-SNAPSHOT"
+version := "1.0.0-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 

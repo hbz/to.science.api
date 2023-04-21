@@ -113,6 +113,7 @@ public class Search {
 			String indexConfig = CopyUtils.copyToString(
 					Play.application().resourceAsStream(Globals.elasticsearchSettings),
 					"utf-8");
+			play.Logger.debug("indexConfig: " + indexConfig);
 
 			client.admin().indices().prepareCreate(index).setSource(indexConfig)
 					.execute().actionGet();
