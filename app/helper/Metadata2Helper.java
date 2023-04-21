@@ -211,40 +211,30 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 
 					Map<String, Object> agentMap = new LinkedHashMap<>();
-					JSONObject jObj = jsArr.getJSONObject(i);
-
-					if (jObj.has("@id")) {
-						agentMap.put("@id", jObj.get("@id"));
-						agentMap.put("prefLabel", jObj.get("prefLabel"));
-					} else {
-						play.Logger.warn(" Attention " + agentType + " has no ID  !");
-					}
+					JSONObject agentObject = jsArr.getJSONObject(i);
 
 					StringBuffer agentStr = new StringBuffer();
 
-					if (jObj.has("academicDegree")) {
-						academicDegree = jObj.getString("academicDegree");
-						String acaDegree = new String(
-								"https://d-nb.info/standards/elementset/gnd#academicDegree/"
-										+ academicDegree);
-						agentMap.put("academicDegree", acaDegree);
+					if (agentObject.has("academicDegree")) {
+						academicDegree = agentObject.getString("academicDegree");
+						agentMap.put("academicDegree", academicDegree);
 						agentAcademicDegree.add(academicDegree);
 
 					}
 
-					if (jObj.has("affiliation")) {
+					if (agentObject.has("affiliation")) {
 						Map<String, Object> affiliationMap = new LinkedHashMap<>();
-						JSONObject affi = jObj.getJSONObject("affiliation");
+						JSONObject affi = agentObject.getJSONObject("affiliation");
 
 						prefLabelOrganisation = affi.getString("prefLabel");
 						affiliationId = affi.getString("@id");
 						affiliationType = affi.getString("type");
 
-						agentAffiliation.add(affiliationId);
+						agentAffiliation.add(prefLabelOrganisation);
 
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
-						// affiliationMap.put("prefLabel", prefLabelOrganisation);
+						affiliationMap.put("prefLabel", prefLabelOrganisation);
 						agentMap.put("affiliation", affiliationMap);
 
 					}
