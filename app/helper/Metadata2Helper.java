@@ -245,7 +245,7 @@ public class Metadata2Helper {
 						affiliationId = affi.getString("@id");
 						affiliationType = affi.getString("type");
 
-						agentAffiliation.add(prefLabelOrganisation);
+						agentAffiliation.add(affiliationId);
 
 						affiliationMap.put("@id", affiliationId);
 						affiliationMap.put("type", affiliationType);
