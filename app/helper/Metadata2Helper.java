@@ -195,6 +195,8 @@ public class Metadata2Helper {
 	public static void mapToscienceAgentsToLobid(Map<String, Object> rdf,
 			JSONObject toscienceJSONObject, String agentType) {
 		String academicDegree = null;
+		String agentID = null;
+		String agentPrefLabel = null;
 		JSONArray jsArr = null;
 		String prefLabelOrganisation = null;
 		String affiliationId = null;
@@ -215,10 +217,23 @@ public class Metadata2Helper {
 
 					StringBuffer agentStr = new StringBuffer();
 
+					if (agentObject.has("@id")) {
+						agentID = agentObject.getString("@id");
+						agentMap.put("@id", agentID);
+						play.Logger.debug(agentType + "id : " + agentID);
+					}
+
+					if (agentObject.has("prefLabel")) {
+						agentPrefLabel = agentObject.getString("prefLabel");
+						agentMap.put("prefLabel", agentPrefLabel);
+						play.Logger.debug(agentType + "prefLabel : " + agentPrefLabel);
+					}
+
 					if (agentObject.has("academicDegree")) {
 						academicDegree = agentObject.getString("academicDegree");
 						agentMap.put("academicDegree", academicDegree);
 						agentAcademicDegree.add(academicDegree);
+						play.Logger.debug(agentType + "academicDegree : " + academicDegree);
 
 					}
 
@@ -236,6 +251,7 @@ public class Metadata2Helper {
 						affiliationMap.put("type", affiliationType);
 						affiliationMap.put("prefLabel", prefLabelOrganisation);
 						agentMap.put("affiliation", affiliationMap);
+						play.Logger.debug(agentType + "affiliation : " + affi.toString());
 
 					}
 					agents.add(agentMap);
