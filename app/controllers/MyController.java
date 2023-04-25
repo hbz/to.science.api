@@ -124,7 +124,17 @@ public class MyController extends Controller {
 		if (request().accepts("text/html")) {
 			flash("message", "Zugriff verboten !");
 			// return redirect(routes.Forms.getLoginForm());
-			return forbidden("Sie haben keine Zugriffsberechtigung für diese Seite.");
+			/*
+			 * So könnte der statische Inhalt als Datei übergeben werden, aber wir
+			 * wollen eine statische URL übergeben:
+			 */
+			// return controllers.Static.at(path="/public/html", "file.html")
+			return ok(views.html.staticUrl.render(
+					"<a href='https://edoweb-test.hbz-nrw.de/node/9'>Zugriff nur im Lesesaal der LBZ</a>"));
+			/*
+			 * return
+			 * forbidden("Sie haben keine Zugriffsberechtigung für diese Seite.");
+			 */
 		} else {
 			return JsonMessage(msg);
 		}
