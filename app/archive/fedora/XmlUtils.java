@@ -916,35 +916,37 @@ public class XmlUtils {
 			List<String> abstracts = new ArrayList<>();
 			elemList = new DocumentElementList(content, "abstract");
 			nodeList = elemList.getNodeList();
-			if (nodeList.item(0).getAttributes().getNamedItem("id") == null) {
-				if (elemList.getLength() > 0) {
-					Node paragraphNode = getFirstElementNode(nodeList.item(0));
-					Node boldNode = getFirstElementNode(paragraphNode);
-					if (boldNode != null
-							&& boldNode.getNodeName().equalsIgnoreCase("bold")) {
-						paragraphNode.removeChild(boldNode);
+			if (elemList.getLength() > 0) {
+				if (nodeList.item(0).getAttributes().getNamedItem("id") == null) {
+					if (elemList.getLength() > 0) {
+						Node paragraphNode = getFirstElementNode(nodeList.item(0));
+						Node boldNode = getFirstElementNode(paragraphNode);
+						if (boldNode != null
+								&& boldNode.getNodeName().equalsIgnoreCase("bold")) {
+							paragraphNode.removeChild(boldNode);
+						}
+						abstracts.add(paragraphNode.getTextContent().trim()
+								.replaceAll("[\\r\\n\\t\\u00a0]+", " ")
+								.replaceAll("\\s+", " "));
 					}
-					abstracts.add(paragraphNode.getTextContent().trim()
-							.replaceAll("[\\r\\n\\t\\u00a0]+", " ").replaceAll("\\s+", " "));
+				}
+
+				if (nodeList.item(0).getAttributes().getNamedItem("id") != null) {
+					List<String> textList = new ArrayList<>();
+					elemList = new DocumentElementList(content, "sec");
+					nodeList = elemList.getNodeList();
+					for (int i = 0; i < elemList.getLength(); i++) {
+						node = nodeList.item(i);
+						Node titleNode = node.getChildNodes().item(0);
+						Node pNode = node.getChildNodes().item(1);
+						textList.add(
+								titleNode.getTextContent() + ": " + pNode.getTextContent());
+					}
+					String txtContent = String.join(" ", textList);
+					abstracts.add(txtContent.trim().replaceAll("[\\r\\n\\t\\u00a0]+", " ")
+							.replaceAll("\\s+", " "));
 				}
 			}
-
-			if (nodeList.item(0).getAttributes().getNamedItem("id") != null) {
-				List<String> textList = new ArrayList<>();
-				elemList = new DocumentElementList(content, "sec");
-				nodeList = elemList.getNodeList();
-				for (int i = 0; i < elemList.getLength(); i++) {
-					node = nodeList.item(i);
-					Node titleNode = node.getChildNodes().item(0);
-					Node pNode = node.getChildNodes().item(1);
-					textList
-							.add(titleNode.getTextContent() + ": " + pNode.getTextContent());
-				}
-				String txtContent = String.join(" ", textList);
-				abstracts.add(txtContent.trim().replaceAll("[\\r\\n\\t\\u00a0]+", " ")
-						.replaceAll("\\s+", " "));
-			}
-
 			elemList = new DocumentElementList(content, "trans-abstract");
 			nodeList = elemList.getNodeList();
 			if (elemList.getLength() > 0) {
