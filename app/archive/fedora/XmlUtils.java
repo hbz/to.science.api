@@ -808,35 +808,52 @@ public class XmlUtils {
 			}
 
 			/* Zitierangabe */
+			String bibliographicCitation = null;
+
 			DocumentElementList volumesElemList =
 					new DocumentElementList(content, "volume");
 			NodeList volumes = volumesElemList.getNodeList();
 			if (volumesElemList.getLength() > 0
 					&& !volumes.item(0).getTextContent().equals("-1")) {
 				String volume = volumes.item(0).getTextContent();
+				bibliographicCitation = volume;
 
 				DocumentElementList issuesElemList =
 						new DocumentElementList(content, "issue");
-				NodeList issues = issuesElemList.getNodeList();
-				String issue = issues.item(0).getTextContent();
+				if (issuesElemList.getLength() > 0) {
+					NodeList issues = issuesElemList.getNodeList();
+					String issue = issues.item(0).getTextContent();
+					bibliographicCitation += "(" + issue + "):";
+				}
 
 				DocumentElementList fpageElemList =
 						new DocumentElementList(content, "fpage");
-				NodeList fpages = fpageElemList.getNodeList();
-				String fpage = fpages.item(0).getTextContent();
+				if (fpageElemList.getLength() > 0) {
+					NodeList fpages = fpageElemList.getNodeList();
+					String fpage = fpages.item(0).getTextContent();
+					bibliographicCitation += fpage;
+				}
 
 				DocumentElementList lpageElemList =
 						new DocumentElementList(content, "lpage");
-				NodeList lpages = lpageElemList.getNodeList();
-				String lpage = lpages.item(0).getTextContent();
+				if (lpageElemList.getLength() > 0) {
+					NodeList lpages = lpageElemList.getNodeList();
+					String lpage = lpages.item(0).getTextContent();
+					bibliographicCitation += lpage;
+				}
 
-				String bibliographicCitation =
-						new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
-				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
+				DocumentElementList elocIdElemList =
+						new DocumentElementList(content, "elocation-id");
+				if (elocIdElemList.getLength() > 0) {
+					NodeList elocIds = elocIdElemList.getNodeList();
+					String elocId = elocIds.item(0).getTextContent();
+					bibliographicCitation += elocId;
+				}
+
 			} else {
-				String bibliographicCitation = new String("Ahead of print");
-				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
+				bibliographicCitation = "Ahead of print";
 			}
+			rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
 
 			/* Copyright-Jahr */
 			String copYear = null;
