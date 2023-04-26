@@ -231,8 +231,9 @@ public class Metadata2Helper {
 
 					if (agentObject.has("academicDegree")) {
 						academicDegree = agentObject.getString("academicDegree");
-						if (academicDegree.contains("unknown")) {
-							academicDegree = "unknown";
+						if (!academicDegree.contains("Dr.")
+								&& !academicDegree.contains("Prof.")) {
+							academicDegree = "Keine Angabe";
 						}
 						agentMap.put("academicDegree", academicDegree);
 						agentAcademicDegree.add(academicDegree);
