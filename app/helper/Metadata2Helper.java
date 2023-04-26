@@ -231,6 +231,9 @@ public class Metadata2Helper {
 
 					if (agentObject.has("academicDegree")) {
 						academicDegree = agentObject.getString("academicDegree");
+						if (academicDegree.contains("unknown")) {
+							academicDegree = "unknown";
+						}
 						agentMap.put("academicDegree", academicDegree);
 						agentAcademicDegree.add(academicDegree);
 						play.Logger.debug(agentType + "academicDegree : " + academicDegree);
