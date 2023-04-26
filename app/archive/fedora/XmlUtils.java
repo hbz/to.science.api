@@ -1074,7 +1074,7 @@ public class XmlUtils {
 		play.Logger.debug("ISSN ohne Bindestrich: " + issn);
 		WSResponse response = play.libs.ws.WS.url(
 				"https://lobid.org/resources/search?q=issn:" + issn + "&format=json")
-				.setFollowRedirects(true).get().get(2000);
+				.setFollowRedirects(true).get().get(20000);
 		InputStream input = response.getBodyAsStream();
 		String formsResponseBody =
 				CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
