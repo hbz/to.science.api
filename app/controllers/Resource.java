@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,6 +43,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -55,10 +58,12 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
 import actions.Enrich;
+import actions.Modify;
 import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.Metadata2Helper;
 import helper.NodeHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
@@ -93,6 +98,8 @@ import views.html.oai.mets;
 import views.html.oai.oaidc;
 import views.html.oai.wgl;
 import views.html.tags.getTitle;
+
+import to.science.core.modelx.mapper.AmbMapperImpl;
 
 /**
  * In dieser Klasse werden API-Calls (Endpoint-Calls) auf Ressourcen (sub-path
@@ -497,7 +504,10 @@ public class Resource extends MyController {
 				 * 
 				 * 1. lobid2-Metadaten als Datenstrom "Metadata2"
 				 */
-
+				play.Logger
+						.debug("request().body().asJson()=" + request().body().asJson());
+				play.Logger
+						.debug("request().body().asJson()=" + request().body().asJson());
 				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				play.Logger.debug(result1);
@@ -530,30 +540,54 @@ public class Resource extends MyController {
 			play.Logger
 					.debug("The LRMI data that has been sent: request().body().asJson()="
 							+ request().body().asJson());
+			play.Logger.debug("request().body().asJson().toString()="
+					+ request().body().asJson().toString());
 			try {
+				Node readNode = new Read().readNode(pid);
 				/**
-				 * Wir legen 2 Datenströme an:
+				 * Three Data Streams will be created:
 				 * 
-				 * 1. ungemappte, aber angereicherte, LRMI-Daten als neuartiger
-				 * Datenstrom "Lrmidata"
+				 * 1. LRMI (AMB) Data Stream
+				 * 
 				 */
-				String content =
+				play.Logger.debug("Amb will be mapped");
+
+				String ambContent =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
-				play.Logger.debug("The updated and enriched LRMI data: " + content);
+				play.Logger.debug("ambContent = " + ambContent);
 				String result1 = "LRMI metadata successfully updated and enriched.";
+				String ambContent2 = new Read().readLrmiData(readNode);
+				play.Logger.debug("ambContent2 = " + ambContent2);
+
+				play.Logger.debug("Done Amb Mapping");
 
 				/**
-				 * 2. gemappte LRMI-Daten als Metadata2-Datenstrom und als
-				 * toscience-Datenstrom
+				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
 				 */
-				/* RDF-Format nicht nach dem Header richten, es muss NTRIPLES sein: */
-				RDFFormat format = RDFFormat.NTRIPLES;
-				Node nodeNode = new Read().readNode(pid);
-				String result2 =
-						modify.updateLobidify2AndEnrichLrmiData(nodeNode, format, content);
-				play.Logger.debug(result2);
+				play.Logger.debug("toscienceJson will be mapped");
 
-				return JsonMessage(new Message(result1 + "\n" + result2));
+				AmbMapperImpl ambMapperImpl = new AmbMapperImpl();
+				play.Logger.debug("AmbMapperImpl Instance wurde angelegt");
+				JSONObject tosJSONObject =
+						ambMapperImpl.getTosJSONObject(new JSONObject(ambContent));
+
+				play.Logger.debug("tosJSONObject = " + tosJSONObject.toString());
+				modify.updateMetadataJson(readNode, tosJSONObject.toString());
+
+				play.Logger.debug("Done toscienceJson Mapping");
+
+				/**
+				 * 3.(TOSCIENCEJESON --> METADATA2)
+				 */
+				play.Logger.debug("Metadata2 will be mapped");
+
+				RDFFormat format = RDFFormat.NTRIPLES;
+				modify.updateLobidify2AndEnrichToscienceJson(readNode, format,
+						tosJSONObject);
+
+				play.Logger.debug("Done Metadata2 Mapping");
+
+				return JsonMessage(new Message(result1));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

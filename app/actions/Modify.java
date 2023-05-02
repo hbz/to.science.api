@@ -49,6 +49,8 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,10 +64,12 @@ import archive.fedora.RdfUtils;
 import archive.fedora.Vocabulary.*;
 import archive.fedora.XmlUtils;
 import controllers.MyController;
+import helper.AmbHelper;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.LRMIMapper;
+import helper.Metadata2Helper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
@@ -427,6 +431,42 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * This method maps AMB (Lrmi data stream) to Ld2 and generates Metadata2
+	 * 
+	 * @param node
+	 * @param format
+	 * @param tosJSONObject The new mapped data stream
+	 * @return
+	 */
+	public String updateLobidify2AndEnrichToscienceJson(Node node,
+			RDFFormat format, JSONObject tosJSONObject) {
+
+		play.Logger.debug(" Start updateLobidify2AndEnrichToscienceJson");
+
+		if (tosJSONObject.toString() == null) {
+			throw new HttpArchiveException(406,
+					" The Argument ToscienceJson Data Stream is Empty.");
+		}
+		LinkedHashMap<String, Object> ld2 =
+				Metadata2Helper.getLd2Lobidify2ToscienceJson(node, tosJSONObject);
+
+		play.Logger.debug("updateLobidify2AndEnrichAmb() ld2 = " + ld2.toString());
+		// Update or create the metadata2 data stream
+		Map<String, Object> rdf =
+				(Map<String, Object>) ld2.get(archive.fedora.Vocabulary.metadata2);
+
+		play.Logger.debug("updateLobidify2AndEnrichAmb() rdf = " + rdf.toString());
+
+		updateMetadata2(node, rdfToString(rdf, format));
+
+		play.Logger.debug("Updated Metadata2 datastream!");
+
+		String enrichMessage = Enrich.enrichMetadata2(node);
+		return node.getPid() + enrichMessage;
+
+	}
+
+	/**
 	 * The method maps lobid2 metadata to the LRMI data format and creates or
 	 * updates a data stream Lrmidata of the resource
 	 * 
@@ -505,6 +545,18 @@ public class Modify extends RegalAction {
 				new JsonMapper().getTosciencefyLrmi(node, content);
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
+
+		// hier wird 'name' unter 'affiliation' gemappt.
+		content_toscience =
+				new AmbHelper().addNameToAffiliationByAmb(content_toscience);
+		play.Logger.debug("content_toscience nach addNameToAffiliationByAmb "
+				+ content_toscience);
+
+		// hier wird 'name' unter 'funder' gemappt.
+		content_toscience = new AmbHelper().addNameByFunderByAmb(content_toscience);
+		play.Logger.debug(
+				"content_toscience nach addNameByFunderByAmb() " + content_toscience);
+
 		updateLrmiData(node, content_toscience);
 		content_toscience = new Enrich().enrichLrmiData(node);
 		play.Logger
@@ -1327,8 +1379,9 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	String updateMetadata2(Node node, String content) {
+	public String updateMetadata2(Node node, String content) {
 		try {
+			play.Logger.debug("Modify.updateMetadata2() content = " + content);
 			String pid = node.getPid();
 			String contentRewrite = content;
 			if (content != null && !content.isEmpty()) {
@@ -1354,7 +1407,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	String updateMetadataJson(Node node, String content) {
+	public String updateMetadataJson(Node node, String content) {
 		try {
 			return updateMetadata(archive.fedora.Vocabulary.metadataJson, node,
 					content);
@@ -1408,7 +1461,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private static String rdfToString(Map<String, Object> result,
+	public static String rdfToString(Map<String, Object> result,
 			RDFFormat format) {
 		try {
 			String rdf = RdfUtils.readRdfToString(

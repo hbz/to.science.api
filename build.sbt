@@ -46,7 +46,7 @@ libraryDependencies ++= Seq(
   "javax.mail" % "mail" % "1.4.2",
   "org.apache.lucene" % "lucene-core" % "4.7.2",  
   "mysql" % "mysql-connector-java" % "8.0.23",
-  "io.github.hbz" % "to.science.core" % "1.2.0"
+  "io.github.hbz" % "to.science.core" % "1.3.5"
 )
 
 val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
