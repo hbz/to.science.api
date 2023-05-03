@@ -1031,6 +1031,7 @@ public class JsonMapper {
 	 */
 	public String getTosciencefyLrmi(Node n, String content) {
 		this.node = n;
+		play.Logger.debug("getTosciencefyLrmi(), content = " + content);
 		play.Logger.debug("Start getTosciencefyLrmi");
 		try {
 			// LRMI-Daten nach JSONObject wandeln
@@ -1425,8 +1426,7 @@ public class JsonMapper {
 	 * @param properties
 	 * @return
 	 */
-	private static LinkedHashMap<String, String> getPrefLabelMap(
-			String properties) {
+	static LinkedHashMap<String, String> getPrefLabelMap(String properties) {
 		LinkedHashMap<String, String> map = new LinkedHashMap<>();
 		GenericPropertiesLoader GenProp = new GenericPropertiesLoader();
 		play.Logger.debug("loading properties file " + properties);
@@ -1467,10 +1467,9 @@ public class JsonMapper {
 			JSONObject lrmiJSONObject, String lrmiObject, String lobidObject) {
 
 		if (lrmiJSONObject.has(lrmiObject)) {
+
 			try {
-
 				JSONArray arr = lrmiJSONObject.getJSONArray(lrmiObject);
-
 				// Provide resolving for prefLabels from id via GenericPropertiesLoader
 				LinkedHashMap<String, String> genPropMap = new LinkedHashMap<>();
 				GenericPropertiesLoader genProp = new GenericPropertiesLoader();
