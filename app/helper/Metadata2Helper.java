@@ -66,6 +66,12 @@ public class Metadata2Helper {
 					Map<String, Object> languageMap = new LinkedHashMap<>();
 					JSONObject jo = jsArr.getJSONObject(i);
 					languageMap.put("prefLabel", jo.getString("prefLabel"));
+					if (jo.getString("@id").contains("/iso639-2/deu")) {
+						String editlanguage = "http://id.loc.gov/vocabulary/iso639-2/ger";
+						languageMap.put("@id", editlanguage);
+					} else {
+						languageMap.put("@id", jo.getString("@id"));
+					}
 					languageMap.put("@id", jo.getString("@id"));
 					langList.add(languageMap);
 
