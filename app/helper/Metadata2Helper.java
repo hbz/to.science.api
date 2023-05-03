@@ -72,7 +72,6 @@ public class Metadata2Helper {
 					} else {
 						languageMap.put("@id", jo.getString("@id"));
 					}
-					languageMap.put("@id", jo.getString("@id"));
 					langList.add(languageMap);
 
 				}
