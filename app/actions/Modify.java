@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.FileInputStream;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
@@ -94,7 +95,7 @@ public class Modify extends RegalAction {
 	 * @return A short message
 	 * @throws IOException if data can not be written to a tmp file
 	 */
-	public String updateData(String pid, InputStream content, String mimeType,
+	public String updateData(String pid, FileInputStream content, String mimeType,
 			String name, String md5Hash) throws IOException {
 		if (content == null) {
 			throw new HttpArchiveException(406,
