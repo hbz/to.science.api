@@ -132,7 +132,7 @@ public class Node implements java.io.Serializable {
 	private String lastModifyMessage = "";
 
 	private String embargoTime = null;
-	private boolean isManaged = true;
+	public boolean isManaged = true;
 
 	/**
 	 * Creates a new Node.

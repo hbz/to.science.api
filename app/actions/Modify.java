@@ -109,6 +109,12 @@ public class Modify extends RegalAction {
 			node.setUploadFile(tmp.getAbsolutePath());
 			node.setFileLabel(name);
 			node.setMimeType(mimeType);
+
+			long sizeOfFile = content.getChannel().size();
+			play.Logger.debug("sizeOfFile = : " + sizeOfFile + "bytes");
+			if (sizeOfFile > 2000000000) {
+				node.isManaged = false;
+			}
 			Globals.fedora.updateNode(node);
 		} else {
 			throw new HttpArchiveException(500, "Lost Node!");
