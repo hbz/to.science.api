@@ -95,7 +95,7 @@ public class Modify extends RegalAction {
 	 * @return A short message
 	 * @throws IOException if data can not be written to a tmp file
 	 */
-	public String updateData(String pid, FileInputStream content, String mimeType,
+	public String updateData(String pid, InputStream content, String mimeType,
 			String name, String md5Hash) throws IOException {
 		if (content == null) {
 			throw new HttpArchiveException(406,
@@ -110,12 +110,7 @@ public class Modify extends RegalAction {
 			node.setUploadFile(tmp.getAbsolutePath());
 			node.setFileLabel(name);
 			node.setMimeType(mimeType);
-
-			long sizeOfFile = content.getChannel().size();
-			play.Logger.debug("sizeOfFile = : " + sizeOfFile + "bytes");
-			if (sizeOfFile > 2000000000) {
-				node.isManaged = false;
-			}
+			play.Logger.debug(node.getPid() + ": isManaged = " + node.isManaged);
 			Globals.fedora.updateNode(node);
 		} else {
 			throw new HttpArchiveException(500, "Lost Node!");

@@ -25,6 +25,7 @@ import helper.HttpArchiveException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -397,10 +398,28 @@ public class FedoraFacade {
 		play.Logger.info("Update node in fedora, pid=" + node.getPid());
 		play.Logger.debug("node access scheme: " + node.getAccessScheme());
 		play.Logger.debug("node publish scheme: " + node.getPublishScheme());
+		play.Logger.debug(node.getPid() + ": isManaged = " + node.isManaged);
 		DublinCoreHandler.updateDc(node);
 		List<Transformer> models = node.getTransformer();
 		// utils.updateContentModels(models);
 		node.removeRelations(REL_HAS_MODEL);
+
+		try {
+
+			BigInteger filSizeOfNode = node.getFileSize();
+			BigInteger twoGibSize = new BigInteger("2000000000");
+			play.Logger.debug("FileSize of node" + node.getPid() + " = "
+					+ node.getFileSize().toString());
+			int compareResult = filSizeOfNode.compareTo(twoGibSize);
+			if (compareResult == 1) {
+				play.Logger.debug("FileSize of node" + node.getPid()
+						+ " is bigger than 2000000000 Bytes");
+				node.isManaged = false;
+			}
+		} catch (Exception e) {
+			play.Logger.warn("Unable to read the file size", e);
+		}
+
 		if (node.getUploadFile() != null) {
 			if (node.isManaged()) {
 				utils.updateManagedStream(node);
