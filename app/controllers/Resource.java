@@ -605,11 +605,6 @@ public class Resource extends MyController {
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart d = body.getFile("data");
 
-				if (d != null) {
-					long sizeOfFileByFilePart = d.getFileSize();
-					play.Logger.debug("FilePart size of File: " + sizeOfFileByFilePart);
-				}
-
 				if (d == null) {
 					return JsonMessage(new Message("Missing File.", 400));
 				}
