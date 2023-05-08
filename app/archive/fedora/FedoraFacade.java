@@ -385,7 +385,8 @@ public class FedoraFacade {
 			node.setMimeType(response.getDatastreamProfile().getDsMIME());
 			node.setFileLabel(response.getDatastreamProfile().getDsLabel());
 			node.setChecksum(response.getDatastreamProfile().getDsChecksum());
-			node.setFileSize(response.getDatastreamProfile().getDsSize());
+			node.setFileSize(
+					(response.getDatastreamProfile().getDsSize()).longValue());
 		} catch (FedoraClientException e) {
 			// datastream with name data is optional
 		}
