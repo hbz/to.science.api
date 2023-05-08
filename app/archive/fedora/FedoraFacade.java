@@ -405,20 +405,19 @@ public class FedoraFacade {
 		node.removeRelations(REL_HAS_MODEL);
 
 		try {
+			if (node.getFileSizeAsString() != null) {
+				Long fileSize = node.getFileSize();
+				if (fileSize > Integer.MAX_VALUE) {
+					node.isManaged = false;
+					play.Logger.debug("fileSize > 2 GiB");
+				}
 
-			BigInteger filSizeOfNode = node.getFileSize();
-			BigInteger twoGibSize = new BigInteger("2000000000");
-			play.Logger.debug("FileSize of node" + node.getPid() + " = "
-					+ node.getFileSize().toString());
-			int compareResult = filSizeOfNode.compareTo(twoGibSize);
-			if (compareResult == 1) {
-				play.Logger.debug("FileSize of node" + node.getPid()
-						+ " is bigger than 2000000000 Bytes");
-				node.isManaged = false;
 			}
+
 		} catch (Exception e) {
 			play.Logger.warn("Unable to read the file size", e);
 		}
+		play.Logger.debug(node.getPid() + ": isManaged = " + node.isManaged);
 
 		if (node.getUploadFile() != null) {
 			if (node.isManaged()) {

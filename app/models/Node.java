@@ -107,7 +107,7 @@ public class Node implements java.io.Serializable {
 
 	private String fileLabel = null;
 	private String fileMimeType = null;
-	private BigInteger fileSize = null;
+	private Long fileSize = null;
 	private String fileChecksum = null;
 
 	private String label = null;
@@ -525,14 +525,14 @@ public class Node implements java.io.Serializable {
 	/**
 	 * @return returns the fileSize
 	 */
-	public BigInteger getFileSize() {
+	public Long getFileSize() {
 		return fileSize;
 	}
 
 	/**
 	 * @param sizeInByte sets the filesize
 	 */
-	public void setFileSize(BigInteger sizeInByte) {
+	public void setFileSize(Long sizeInByte) {
 		fileSize = sizeInByte;
 	}
 

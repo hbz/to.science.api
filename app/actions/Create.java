@@ -565,7 +565,8 @@ public class Create extends RegalAction {
 			ApplicationLogger.debug("label: " + label);
 			String zipSizeStr =
 					jsn.findValue("zipSize").toString().replaceAll("^\"|\"$", "");
-			BigInteger zipSize = new BigInteger(zipSizeStr).multiply(bigInt1024);
+			Long zipSize = new Long(zipSizeStr);
+			play.Logger.debug("zipSize as Long= " + zipSize);
 			ApplicationLogger.debug("zipSize (bytes): " + zipSize.toString());
 			String relUri = n.getPid() + "/" + n.getNamespace() + ":" + versionPid;
 			File crawlDir = new File(Globals.webharvestsDataDir + "/" + relUri);
@@ -694,7 +695,7 @@ public class Create extends RegalAction {
 			 * hier werden erst mal standardmäßig im ersten Aufschlag alle
 			 * Forschungsdatenressourcen auf fiktive 100 KB Größe gesetzt
 			 */
-			BigInteger sizeInByte = new BigInteger("100000");
+			Long sizeInByte = new Long("100000");
 			researchDataResource.setFileSize(sizeInByte);
 			ApplicationLogger.info("localData = " + resource.getUrlString());
 			researchDataResource = updateResource(researchDataResource);
