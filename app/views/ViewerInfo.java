@@ -23,7 +23,7 @@ public class ViewerInfo {
 	public String thumbnail = "";
 	public ViewerType viewertype = null;
 	public String mimetype = null;
-	public BigInteger filesize = null;
+	public Long filesize = null;
 	public String viewerAdress = null;
 	public String contentType = null;
 	public String accessScheme = null;
@@ -50,7 +50,7 @@ public class ViewerInfo {
 
 		if (mt.is(MediaType.ANY_IMAGE_TYPE) || mt.is(MediaType.JPEG)) {
 			play.Logger.debug("Filesize is " + filesize);
-			if (filesize.compareTo(BigInteger.valueOf(50000l)) > 0) {
+			if (filesize > 50000l) {
 				return ViewerType.DEEPZOOM;
 			}
 			return ViewerType.IMAGE;
