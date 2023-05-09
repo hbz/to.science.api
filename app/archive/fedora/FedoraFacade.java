@@ -387,6 +387,13 @@ public class FedoraFacade {
 			node.setChecksum(response.getDatastreamProfile().getDsChecksum());
 			node.setFileSize(
 					(response.getDatastreamProfile().getDsSize()).longValue());
+
+			play.Logger.debug("fileSize: "
+					+ (response.getDatastreamProfile().getDsSize()).longValue());
+
+			Long fileSize = (response.getDatastreamProfile().getDsSize()).longValue();
+			play.Logger.debug("fileSize: " + fileSize);
+
 		} catch (FedoraClientException e) {
 			// datastream with name data is optional
 		}
@@ -404,15 +411,21 @@ public class FedoraFacade {
 		List<Transformer> models = node.getTransformer();
 		// utils.updateContentModels(models);
 		node.removeRelations(REL_HAS_MODEL);
-
+		play.Logger.debug("Begin of try catch block :");
 		try {
 			if (node.getFileSizeAsString() != null) {
 				Long fileSize = node.getFileSize();
-				if (fileSize > Integer.MAX_VALUE) {
+				play.Logger.debug("node.getFileSize(): " + node.getFileSize());
+				play.Logger.debug("fileSize: " + fileSize);
+				if (node.getFileSize() > Integer.MAX_VALUE) {
 					node.isManaged = false;
 					play.Logger.debug("fileSize > 2 GiB");
+				} else {
+					play.Logger.debug("fileSize < 2 GiB");
 				}
 
+			} else {
+				play.Logger.debug("node.getFileSizeAsString() == null:");
 			}
 
 		} catch (Exception e) {

@@ -565,6 +565,7 @@ public class Create extends RegalAction {
 			ApplicationLogger.debug("label: " + label);
 			String zipSizeStr =
 					jsn.findValue("zipSize").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("zipSizeStr = " + zipSizeStr);
 			Long zipSize = new Long(zipSizeStr);
 			play.Logger.debug("zipSize as Long= " + zipSize);
 			ApplicationLogger.debug("zipSize (bytes): " + zipSize.toString());
@@ -594,6 +595,8 @@ public class Create extends RegalAction {
 			webpageVersion.setLocalData(localpath);
 			webpageVersion.setMimeType("application/xml");
 			webpageVersion.setFileSize(zipSize);
+			play.Logger.debug("webpageVersion.getFileSizeAsString(): "
+					+ webpageVersion.getFileSizeAsString());
 			webpageVersion.setFileLabel(label);
 			webpageVersion.setAccessScheme(n.getAccessScheme());
 			webpageVersion.setPublishScheme(n.getPublishScheme());
@@ -697,6 +700,8 @@ public class Create extends RegalAction {
 			 */
 			Long sizeInByte = new Long("100000");
 			researchDataResource.setFileSize(sizeInByte);
+			play.Logger.debug("researchDataResource.getFileSize() : "
+					+ researchDataResource.getFileSize());
 			ApplicationLogger.info("localData = " + resource.getUrlString());
 			researchDataResource = updateResource(researchDataResource);
 

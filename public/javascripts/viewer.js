@@ -5394,7 +5394,7 @@ var PDFDocumentProperties = function () {
   }, {
     key: 'setFileSize',
     value: function setFileSize(fileSize) {
-      if (Number.isInteger(fileSize) && fileSize > 0) {
+      if (Number.isInteger(fileSize) || fileSize > 0) {
         this.maybeFileSize = fileSize;
       }
     }
