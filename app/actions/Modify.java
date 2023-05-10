@@ -653,14 +653,18 @@ public class Modify extends RegalAction {
 				new ByteArrayInputStream(content.getBytes()), RDFFormat.NTRIPLES, "");
 		Iterator<Statement> it = graph.iterator();
 		String subj = pid;
+		play.Logger.debug("start Iteration");
 		while (it.hasNext()) {
 			Statement str = it.next();
+			play.Logger.debug("str = " + str);
 			if ("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
 					.equals(str.getPredicate().stringValue())) {
 				subj = str.getSubject().stringValue();
+				play.Logger.debug("subj = " + subj);
 				break;
 			}
 		}
+		play.Logger.debug("End Iteration");
 		if (pid.equals(subj))
 			return content;
 		play.Logger.debug("Rewrite " + subj + " to " + pid);
@@ -1388,6 +1392,7 @@ public class Modify extends RegalAction {
 				// RdfUtils.validate(content);
 				// Extreme Workaround to fix subject uris
 				contentRewrite = rewriteContent(content, pid);
+				play.Logger.debug("contentRewrite = " + contentRewrite);
 				// Workaround end
 			}
 			return updateMetadata(archive.fedora.Vocabulary.metadata2, node,
@@ -1467,6 +1472,7 @@ public class Modify extends RegalAction {
 			String rdf = RdfUtils.readRdfToString(
 					new ByteArrayInputStream(json(result).getBytes("utf-8")),
 					RDFFormat.JSONLD, format, "");
+			play.Logger.debug("rdfToString(), rdf =" + rdf);
 			return rdf;
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
