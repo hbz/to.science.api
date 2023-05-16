@@ -222,11 +222,11 @@ public class Webgatherer implements Runnable {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			SimpleDateFormat sdf_hr = new SimpleDateFormat("yyyy-MM-dd");
 			Date latestDate = getLastLaunch(n);
-			WebgatherLogger
-					.debug("Datum des letzten Einsammelns: " + latestDate.toString());
 			if (latestDate == null) {
 				return true;
 			}
+			WebgatherLogger
+					.debug("Datum des letzten Einsammelns: " + latestDate.toString());
 			Calendar latestCalendar = Calendar.getInstance();
 			WebgatherLogger.debug("Fetched Calendar instance");
 			latestCalendar.setTime(latestDate);
