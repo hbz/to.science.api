@@ -29,6 +29,7 @@ fi
 ln -sf $targetDir/$newInstallDir $toscienceDir/$linkDir
 rm -r  $targetDir/$newInstallDir/conf
 ln -sf $confDir $targetDir/$newInstallDir/conf
+cd $appDeployDir
 
 echo ""
 echo "Neue Binärversion verfügbar unter $targetDir/$newInstallDir."
