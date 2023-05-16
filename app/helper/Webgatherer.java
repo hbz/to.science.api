@@ -228,7 +228,9 @@ public class Webgatherer implements Runnable {
 				return true;
 			}
 			Calendar latestCalendar = Calendar.getInstance();
+			WebgatherLogger.debug("Fetched Calendar instance");
 			latestCalendar.setTime(latestDate);
+			WebgatherLogger.debug("Set Date and time in calendar instance");
 			if (conf.getInterval().equals(models.Gatherconf.Interval.once)) {
 				WebgatherLogger.info(n.getPid()
 						+ " will be gathered only once. It has already been gathered on "
