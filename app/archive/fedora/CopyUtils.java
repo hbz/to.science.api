@@ -56,7 +56,8 @@ public class CopyUtils {
 	 * @param tmp the file to copy into
 	 * @throws IOException if something goes wrong
 	 */
-	public static void copy(InputStream content, File tmp) throws IOException {
+	public static void copy(FileInputStream content, File tmp)
+			throws IOException {
 		try (OutputStream out = new FileOutputStream(tmp);) {
 			int read = 0;
 			byte[] bytes = new byte[1024];

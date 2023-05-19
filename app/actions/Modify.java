@@ -95,7 +95,7 @@ public class Modify extends RegalAction {
 	 * @return A short message
 	 * @throws IOException if data can not be written to a tmp file
 	 */
-	public String updateData(String pid, InputStream content, String mimeType,
+	public String updateData(String pid, FileInputStream content, String mimeType,
 			String name, String md5Hash) throws IOException {
 		if (content == null) {
 			throw new HttpArchiveException(406,
@@ -103,8 +103,10 @@ public class Modify extends RegalAction {
 							+ " This action is not supported. Use HTTP DELETE instead.");
 		}
 		File tmp = File.createTempFile(name, "tmp");
-		Long fileSize = tmp.length();
-		play.Logger.debug("fileSize before deleteOnExit(): " + fileSize);
+		// Long fileSize = tmp.length();
+		// play.Logger.debug("fileSize before deleteOnExit(): " + fileSize);
+		Long fileSize = content.getChannel().size();
+		play.Logger.debug("fileSize: " + fileSize);
 		tmp.deleteOnExit();
 		CopyUtils.copy(content, tmp);
 		Node node = new Read().readNode(pid);
@@ -115,8 +117,8 @@ public class Modify extends RegalAction {
 			play.Logger.debug("Begin of try catch block :");
 			try {
 				if (node.getUploadFile() != null) {
-
-					play.Logger.debug("fileSize after deleteOnExit(): " + fileSize);
+					//
+					// play.Logger.debug("fileSize after deleteOnExit(): " + fileSize);
 					if (fileSize > Integer.MAX_VALUE) {
 						node.isManaged = false;
 						play.Logger.debug("fileSize > 2 GiB");
