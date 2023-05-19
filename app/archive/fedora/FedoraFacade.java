@@ -411,27 +411,6 @@ public class FedoraFacade {
 		List<Transformer> models = node.getTransformer();
 		// utils.updateContentModels(models);
 		node.removeRelations(REL_HAS_MODEL);
-		play.Logger.debug("Begin of try catch block :");
-		try {
-			if (node.getFileSizeAsString() != null) {
-				Long fileSize = node.getFileSize();
-				play.Logger.debug("node.getFileSize(): " + node.getFileSize());
-				play.Logger.debug("fileSize: " + fileSize);
-				if (node.getFileSize() > Integer.MAX_VALUE) {
-					node.isManaged = false;
-					play.Logger.debug("fileSize > 2 GiB");
-				} else {
-					play.Logger.debug("fileSize < 2 GiB");
-				}
-
-			} else {
-				play.Logger.debug("node.getFileSizeAsString() == null:");
-			}
-
-		} catch (Exception e) {
-			play.Logger.warn("Unable to read the file size", e);
-		}
-		play.Logger.debug(node.getPid() + ": isManaged = " + node.isManaged);
 
 		if (node.getUploadFile() != null) {
 			if (node.isManaged()) {

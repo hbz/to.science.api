@@ -103,6 +103,8 @@ public class Modify extends RegalAction {
 							+ " This action is not supported. Use HTTP DELETE instead.");
 		}
 		File tmp = File.createTempFile(name, "tmp");
+		Long fileSize = tmp.length();
+		play.Logger.debug("fileSize before deleteOnExit(): " + fileSize);
 		tmp.deleteOnExit();
 		CopyUtils.copy(content, tmp);
 		Node node = new Read().readNode(pid);
@@ -110,7 +112,29 @@ public class Modify extends RegalAction {
 			node.setUploadFile(tmp.getAbsolutePath());
 			node.setFileLabel(name);
 			node.setMimeType(mimeType);
+			play.Logger.debug("Begin of try catch block :");
+			try {
+				if (node.getUploadFile() != null) {
+
+					play.Logger.debug("fileSize after deleteOnExit(): " + fileSize);
+					if (fileSize > Integer.MAX_VALUE) {
+						node.isManaged = false;
+						play.Logger.debug("fileSize > 2 GiB");
+					} else {
+						play.Logger.debug("fileSize < 2 GiB");
+					}
+
+				} else {
+					play.Logger.debug("node.getUploadFile() == null:");
+				}
+
+			} catch (Exception e) {
+				play.Logger.warn("Unable to read the file size", e);
+			}
+
 			play.Logger.debug(node.getPid() + ": isManaged = " + node.isManaged);
+			play.Logger.debug("End of try catch block :");
+
 			Globals.fedora.updateNode(node);
 		} else {
 			throw new HttpArchiveException(500, "Lost Node!");
