@@ -121,6 +121,7 @@ public class Modify extends RegalAction {
 					// play.Logger.debug("fileSize after deleteOnExit(): " + fileSize);
 					if (fileSize > Integer.MAX_VALUE) {
 						node.isManaged = false;
+						node.setFileSize(fileSize);
 						play.Logger.debug("fileSize > 2 GiB");
 					} else {
 						play.Logger.debug("fileSize < 2 GiB");

@@ -418,6 +418,8 @@ public class FedoraFacade {
 				play.Logger.info("Updated managed file fedora, pid=" + node.getPid());
 				getChecksumFromFedora(node);
 			} else {
+				play.Logger
+						.info("node.getFileSizeAsString()=" + node.getFileSizeAsString());
 				utils.updateUnManagedStream(node);
 				play.Logger.info("Updated unmanaged file fedora, pid=" + node.getPid());
 			}
