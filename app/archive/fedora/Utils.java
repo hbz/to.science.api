@@ -437,6 +437,10 @@ public class Utils {
 						+ "/data with unmanaged content " + localpath);
 				play.Logger.debug("MimeType: " + node.getMimeType());
 				play.Logger.debug("FileLabel: " + node.getFileLabel());
+				play.Logger
+						.debug("node.getFileSizeAsString: " + node.getFileSizeAsString());
+				play.Logger.debug("localpath: " + localpath);
+
 				((AddDatastream) new AddDatastream(node.getPid(), "data")
 						.checksumType("DISABLED").versionable(true).dsState("A")
 						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
