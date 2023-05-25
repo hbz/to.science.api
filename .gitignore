@@ -19,7 +19,6 @@ data
 .settings
 .classpath
 .project
-bin
 conf/application.conf
 conf/mail.properties
 conf/site.conf
