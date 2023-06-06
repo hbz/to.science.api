@@ -950,16 +950,25 @@ public class XmlUtils {
 
 				if (nodeList.item(0).getAttributes().getNamedItem("id") != null) {
 					List<String> textList = new ArrayList<>();
-					elemList = new DocumentElementList(content, "sec");
-					nodeList = elemList.getNodeList();
-					for (int i = 0; i < elemList.getLength(); i++) {
-						node = nodeList.item(i);
-						Node titleNode = node.getChildNodes().item(0);
-						Node pNode = node.getChildNodes().item(1);
+					String txtContent = null;
+					DocumentElementList elemListSec =
+							new DocumentElementList(content, "sec");
+					NodeList nodeListSec = elemListSec.getNodeList();
+					if (elemListSec.getLength() > 0) {
+						for (int i = 0; i < elemListSec.getLength(); i++) {
+							Node titleNode = getFirstElementNode(nodeListSec.item(i));
+							Node pNode = getNextElementNode(titleNode);
+							textList.add(
+									titleNode.getTextContent() + ": " + pNode.getTextContent());
+						}
+						txtContent = String.join(" ", textList);
+					} else {
+						Node titleNode = getFirstElementNode(nodeList.item(0));
+						Node pNode = getNextElementNode(titleNode);
 						textList.add(
 								titleNode.getTextContent() + ": " + pNode.getTextContent());
+						txtContent = textList.get(0);
 					}
-					String txtContent = String.join(" ", textList);
 					abstracts.add(txtContent.trim().replaceAll("[\\r\\n\\t\\u00a0]+", " ")
 							.replaceAll("\\s+", " "));
 				}
@@ -1149,15 +1158,26 @@ public class XmlUtils {
 		return false;
 	}
 
-	private static Node getFirstElementNode(Node parentNode) {
-		Node node = parentNode.getFirstChild();
-		while (node != null && Node.ELEMENT_NODE != node.getNodeType()) {
-			node = node.getNextSibling();
+	private static Node getFirstElementNode(Node parent) {
+		Node n = parent.getFirstChild();
+		while (n != null && Node.ELEMENT_NODE != n.getNodeType()) {
+			n = n.getNextSibling();
 		}
-		if (node == null) {
+		if (n == null) {
 			return null;
 		}
-		return node;
+		return n;
+	}
+
+	private static Node getNextElementNode(Node el) {
+		Node nd = el.getNextSibling();
+		while (nd != null) {
+			if (nd.getNodeType() == Node.ELEMENT_NODE) {
+				return nd;
+			}
+			nd = nd.getNextSibling();
+		}
+		return null;
 	}
 
 }
