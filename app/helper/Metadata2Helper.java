@@ -264,16 +264,18 @@ public class Metadata2Helper {
 
 					}
 					agents.add(agentMap);
-					agentStr.append(agentType + " " + Integer.toString(i + 1) + ": ");
+					agentStr.append(agentType + " " + Integer.toString(i + 1) + ":  ");
 					agentStr.append(academicDegree);
+					agentStr.append(" " + agentPrefLabel + " ");
 					agentStr.append(prefLabelOrganisation);
+					// E.G. // contributor 1: Dr. Max Mueller TH-Koeln
 					oerAgent.add(agentStr.toString());
 				}
 
 				rdf.put(agentType, agents);
-				rdf.put("oerAgent", oerAgent);
 				rdf.put(agentType + "Affiliation", agentAffiliation);
 				rdf.put(agentType + "AcademicDegree", agentAcademicDegree);
+				rdf.put("oerAgent", oerAgent);
 
 			} catch (Exception e) {
 				play.Logger.error(e.getMessage());
