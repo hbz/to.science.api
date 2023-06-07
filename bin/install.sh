@@ -25,8 +25,8 @@ unzip $fileName
 mv $deployDir/$folderName $targetDir/$newInstallDir
 mkdir $targetDir/$newInstallDir/logs
 
-if [ -L $targetDir/$linkDir ]; then
-       	rm $targetDir/$linkDir
+if [ -L $toscienceDir/$linkDir ]; then
+       	rm $toscienceDir/$linkDir
 fi
 ln -sf $targetDir/$newInstallDir $toscienceDir/$linkDir
 rm -r  $targetDir/$newInstallDir/conf
