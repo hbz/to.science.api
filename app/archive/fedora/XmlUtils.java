@@ -68,6 +68,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 import com.google.common.xml.XmlEscapers;
+import com.sun.xml.internal.ws.util.StringUtils;
 
 import helper.JsonMapper;
 import models.Globals;
@@ -855,18 +856,23 @@ public class XmlUtils {
 			}
 			rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
 
-			/* Copyright-Jahr */
+			/* Copyright-Jahr (alternativ: Copyright-Statement) */
 			String copYear = null;
 			elemList = new DocumentElementList(content, "copyright-year");
 			nodeList = elemList.getNodeList();
-			for (int i = 0; i < elemList.getLength(); i++) {
-				node = nodeList.item(i);
-				copYear = node.getTextContent();
-				if (copYear.isEmpty() || copYear == null)
-					copYear = pubYear;
-				rdf.put("yearOfCopyright", Arrays.asList(copYear));
-				break;
-			}
+
+			DocumentElementList elemListCopStatement =
+					new DocumentElementList(content, "copyright-statement");
+			NodeList nodeListCopStatement = elemListCopStatement.getNodeList();
+
+			if (elemList.getLength() > 0)
+				copYear = nodeList.item(0).getTextContent();
+			else if (elemListCopStatement.getLength() > 0) {
+				String copYearText = nodeListCopStatement.item(0).getTextContent();
+				copYear = copYearText.substring(copYearText.lastIndexOf(" ") + 1);
+			} else
+				copYear = pubYear;
+			rdf.put("yearOfCopyright", Arrays.asList(copYear));
 
 			/* Lizenz Neu */
 			List<Map<String, Object>> licenses = new ArrayList<>();
@@ -1178,6 +1184,18 @@ public class XmlUtils {
 			nd = nd.getNextSibling();
 		}
 		return null;
+	}
+
+	private static List<Node> getChildElements(Node parent) {
+		NodeList children = parent.getChildNodes();
+		int childCount = children.getLength();
+		List<Node> nodes = new ArrayList<>(childCount);
+		for (int i = 0; i < childCount; i++) {
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.ELEMENT_NODE)
+				nodes.add(child);
+		}
+		return nodes;
 	}
 
 }
