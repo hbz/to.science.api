@@ -68,7 +68,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 import com.google.common.xml.XmlEscapers;
-import com.sun.xml.internal.ws.util.StringUtils;
 
 import helper.JsonMapper;
 import models.Globals;
