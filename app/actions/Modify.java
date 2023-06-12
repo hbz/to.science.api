@@ -26,6 +26,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -120,7 +121,13 @@ public class Modify extends RegalAction {
 					//
 					// play.Logger.debug("fileSize after deleteOnExit(): " + fileSize);
 					if (fileSize > Integer.MAX_VALUE) {
-						node.isManaged = false;
+						// Datei wird als ungemanagter Content gespeichert
+						String timestamp = new SimpleDateFormat("yyyyMMdd.HHmmss")
+								.format(new java.util.Date());
+						File persist =
+								new File(Globals.unmanagedHome, name + "_" + timestamp);
+						CopyUtils.copy(content, persist);
+						node.setLocalData(persist.getAbsolutePath());
 						node.setFileSize(fileSize);
 						play.Logger.debug("fileSize > 2 GiB");
 					} else {

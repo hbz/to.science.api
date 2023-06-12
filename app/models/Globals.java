@@ -195,6 +195,12 @@ public class Globals {
 	public static final String PUBLIC_FULLTEXT_INDEX_PREF = "publicfulltext_";
 
 	/**
+	 * Pfad für persistierten, ungemanagten Content (beim Datei-Upload)
+	 */
+	public static String unmanagedHome =
+			Play.application().configuration().getString("regal-api.unmanaged.home");
+
+	/**
 	 * Global heritrix instance
 	 */
 	public static Heritrix heritrix = new Heritrix();
