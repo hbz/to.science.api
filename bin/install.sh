@@ -5,7 +5,8 @@ if (( $EUID == 0 )); then
     exit
 fi
 
-appDeployDir=$(pwd)
+actDir=$(pwd)
+deployingApp="to.science.api"
 toscienceDir="/opt/toscience"
 deployDir="/opt/toscience/git"
 targetDir="/opt/toscience/apps"
@@ -17,7 +18,7 @@ confDir="/etc/toscience/api"
 resourcesDir="/etc/toscience/resources"
 PLAYPORT=9000
 
-cp $appDeployDir/target/universal/$fileName $deployDir
+cp $deployDir/$deployingApp/target/universal/$fileName $deployDir
 
 cd $deployDir
 unzip $fileName
@@ -32,7 +33,7 @@ ln -sf $targetDir/$newInstallDir $toscienceDir/$linkDir
 rm -r  $targetDir/$newInstallDir/conf
 ln -sf $confDir $targetDir/$newInstallDir/conf
 ln -sf $resourcesDir $targetDir/$newInstallDir/resources
-cd $appDeployDir
+cd $actDir
 
 echo ""
 echo "Neue Binärversion verfügbar unter $targetDir/$newInstallDir."
