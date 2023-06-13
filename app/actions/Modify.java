@@ -109,7 +109,6 @@ public class Modify extends RegalAction {
 		Long fileSize = content.getChannel().size();
 		play.Logger.debug("fileSize: " + fileSize);
 		tmp.deleteOnExit();
-		CopyUtils.copy(content, tmp);
 		Node node = new Read().readNode(pid);
 		if (node != null) {
 			node.setUploadFile(tmp.getAbsolutePath());
@@ -131,6 +130,7 @@ public class Modify extends RegalAction {
 						node.setFileSize(fileSize);
 						play.Logger.debug("fileSize > 2 GiB");
 					} else {
+						CopyUtils.copy(content, tmp);
 						play.Logger.debug("fileSize < 2 GiB");
 					}
 
