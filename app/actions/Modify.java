@@ -119,7 +119,8 @@ public class Modify extends RegalAction {
 				if (node.getUploadFile() != null) {
 					//
 					// play.Logger.debug("fileSize after deleteOnExit(): " + fileSize);
-					if (fileSize > Integer.MAX_VALUE) {
+					// if (fileSize > Integer.MAX_VALUE) {
+					if (fileSize > 40000000) { // 40 Megabyte zu Testzwecken
 						// Datei wird als ungemanagter Content gespeichert
 						String timestamp = new SimpleDateFormat("yyyyMMdd.HHmmss")
 								.format(new java.util.Date());
