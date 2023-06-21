@@ -971,9 +971,11 @@ public class XmlUtils {
 							} else {
 								Node pNode = getNextElementNode(titleNode);
 								Node firstNode = getFirstElementNode(pNode);
-								if (firstNode.getNodeName().equalsIgnoreCase("fig")
-										|| pNode.getNodeName().equalsIgnoreCase("fig"))
-									continue;
+								if (firstNode != null) {
+									if (firstNode.getNodeName().equalsIgnoreCase("fig")
+											|| pNode.getNodeName().equalsIgnoreCase("fig"))
+										continue;
+								}
 								textList.add(
 										titleNode.getTextContent() + ": " + pNode.getTextContent());
 							}
