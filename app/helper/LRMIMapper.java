@@ -513,7 +513,9 @@ public class LRMIMapper {
 						// Affiliation element should be omitted, if no specification is
 						// made.
 						String affilId = affiliation.get(i);
-						if (!affilId.equals("https://ror.org/unknown")) {
+						if (!affilId.equals("https://ror.org/unknown") && !affilId
+								.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
+							play.Logger.debug("LRMIMapper, affilId = " + affilId);
 							obj.put("affiliation", affObj);
 						}
 					} else {
