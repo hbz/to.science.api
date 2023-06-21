@@ -787,6 +787,10 @@ public class XmlUtils {
 			if (pubYear == null)
 				pubYear = epubYear;
 			rdf.put("issued", pubYear);
+			if (epubMonth.length() == 1)
+				epubMonth = "0" + epubMonth;
+			if (epubDay.length() == 1)
+				epubDay = "0" + epubDay;
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			if (epubDay == null && epubMonth != null) {
@@ -962,9 +966,16 @@ public class XmlUtils {
 					if (elemListSec.getLength() > 0) {
 						for (int i = 0; i < elemListSec.getLength(); i++) {
 							Node titleNode = getFirstElementNode(nodeListSec.item(i));
-							Node pNode = getNextElementNode(titleNode);
-							textList.add(
-									titleNode.getTextContent() + ": " + pNode.getTextContent());
+							if (titleNode.getNodeName().equalsIgnoreCase("p")) {
+								textList.add("Abstract: " + titleNode.getTextContent());
+							} else {
+								Node pNode = getNextElementNode(titleNode);
+								Node firstNode = getFirstElementNode(pNode);
+								if (firstNode.getNodeName().equalsIgnoreCase("fig"))
+									continue;
+								textList.add(
+										titleNode.getTextContent() + ": " + pNode.getTextContent());
+							}
 						}
 						txtContent = String.join(" ", textList);
 					} else {
