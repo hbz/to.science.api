@@ -967,7 +967,8 @@ public class XmlUtils {
 						for (int i = 0; i < elemListSec.getLength(); i++) {
 							Node titleNode = getFirstElementNode(nodeListSec.item(i));
 							if (titleNode.getNodeName().equalsIgnoreCase("table-wrap")
-									|| titleNode.getNodeName().equalsIgnoreCase("table"))
+									|| titleNode.getNodeName().equalsIgnoreCase("table")
+									|| titleNode.getNodeName().equalsIgnoreCase("fig"))
 								continue;
 							else if (titleNode.getNodeName().equalsIgnoreCase("p")) {
 								textList.add("Abstract: " + titleNode.getTextContent());
