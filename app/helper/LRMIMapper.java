@@ -376,8 +376,8 @@ public class LRMIMapper {
 						arr.put(lmsIliasOrMoodle);
 					}
 
+					lrmiJsonContent.put("encoding", arr);
 				}
-				lrmiJsonContent.put("encoding", arr);
 			}
 
 			lrmiJsonContent = lobidFunder2LrmiFunder(rdf, lrmiJsonContent);
