@@ -1627,4 +1627,123 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "text/plain", nickname = "editMetada2byPid", value = "editMetada2byPid", notes = "Metadata2 of an old Node will be updated at URIs ", response = play.mvc.Result.class, httpMethod = "PUT")
+	public static Promise<Result> editMetada2byPid(@PathParam("pid") String pid) {
+		return new ReadDataAction().call(pid, node -> {
+			try {
+				String result = "";
+
+				play.Logger.debug("Metadata2 of Node :" + pid + " will be edited");
+
+				String oldUriAffiliationUnknown =
+						"http://hbz-nrw.de/regal#affiliation/unknown";
+
+				String oldUriCreatorAffiliation =
+						"http://hbz-nrw.de/regal#creatorAffiliation";
+
+				String oldUriContributorAffiliation =
+						"http://hbz-nrw.de/regal#contributorAffiliation";
+
+				String oldUriCreatorAcademicDegreUnknown =
+						"http://hbz-nrw.de/regal#creatorAcademicDegree/unknown";
+
+				String oldUriCreatorAcademicDegreDr =
+						"http://hbz-nrw.de/regal#creatorAcademicDegree/Dr.";
+
+				String oldUriCreatorAcademicDegreProf =
+						"http://hbz-nrw.de/regal#creatorAcademicDegree/Prof.";
+
+				String oldUriContributerAffiliationUnknown =
+						"http://hbz-nrw.de/regal#contributorAcademicDegree/unknown";
+
+				String oldUriContributerAffiliationDr =
+						"http://hbz-nrw.de/regal#contributorAcademicDegree/Dr.";
+
+				String oldUriContributerAffiliationProf =
+						"http://hbz-nrw.de/regal#contributorAcademicDegree/Prof.";
+
+				String oldUriUnknowAcademicDegree =
+						"http://hbz-nrw.de/regal#academicDegree/unknown";
+
+				if (node.getMetadata("metadata2") != null && node != null) {
+
+					String metadata2 = node.getMetadata("metadata2");
+
+					play.Logger.debug("node.getPid(): " + node.getPid());
+
+					play.Logger
+							.debug("metadata2 vor Edit and updateNode(): " + metadata2);
+
+					if (metadata2.contains(oldUriAffiliationUnknown)) {
+						metadata2 =
+								metadata2.replace(oldUriAffiliationUnknown, "unbekannt");
+					}
+
+					if (metadata2.contains(oldUriCreatorAffiliation)) {
+						metadata2 =
+								metadata2.replace(oldUriCreatorAffiliation, "https://ror.org");
+					}
+
+					if (metadata2.contains(oldUriContributorAffiliation)) {
+						metadata2 = metadata2.replace(oldUriContributorAffiliation,
+								"https://ror.org");
+					}
+
+					if (metadata2.contains(oldUriCreatorAcademicDegreUnknown)) {
+						metadata2 = metadata2.replace(oldUriCreatorAcademicDegreUnknown,
+								"unbekannt");
+					}
+
+					if (metadata2.contains(oldUriCreatorAcademicDegreDr)) {
+						metadata2 = metadata2.replace(oldUriCreatorAcademicDegreDr, "Dr.");
+					}
+
+					if (metadata2.contains(oldUriCreatorAcademicDegreProf)) {
+						metadata2 =
+								metadata2.replace(oldUriCreatorAcademicDegreProf, "Prof.");
+					}
+
+					if (metadata2.contains(oldUriContributerAffiliationUnknown)) {
+						metadata2 = metadata2.replace(oldUriContributerAffiliationUnknown,
+								"unbekannt");
+					}
+
+					if (metadata2.contains(oldUriContributerAffiliationDr)) {
+						metadata2 =
+								metadata2.replace(oldUriContributerAffiliationDr, "Dr.");
+					}
+
+					if (metadata2.contains(oldUriContributerAffiliationProf)) {
+						metadata2 =
+								metadata2.replace(oldUriContributerAffiliationProf, "Prof.");
+					}
+
+					if (metadata2.contains(oldUriUnknowAcademicDegree)) {
+						metadata2 =
+								metadata2.replace(oldUriUnknowAcademicDegree, "unbekannt");
+					}
+
+					node.setMetadata("metadata2", metadata2);
+					Globals.fedora.updateNode(node);
+
+					play.Logger.debug("metadata2 after Edit and updateNode(): "
+							+ node.getMetadata("metadata2"));
+
+					result =
+							"URIs by Affiliation & AcademicDegre in Metadata2 successfully edited";
+
+				} else {
+					play.Logger.debug("Unable to edit metadata2 of resource = " + pid);
+					result = "Edit of metadata2 failed";
+				}
+				return ok(result);
+
+			} catch (Exception e) {
+				play.Logger.error("", e);
+				return ok("Exception, unable to edit metadata2");
+			}
+
+		});
+	}
+
 }

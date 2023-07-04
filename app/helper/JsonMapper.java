@@ -491,7 +491,8 @@ public class JsonMapper {
 
 					// Affiliation element should be omitted, if no specification is made.
 					String affilId = agentAffiliation.get(i);
-					if (!affilId.equals("http://hbz-nrw.de/regal#affiliation/unknown")) {
+					if (!affilId.equals("http://hbz-nrw.de/regal#affiliation/unknown")
+							&& !affilId.equals("unbekannt")) {
 						agent.put("affiliation", affilFields);
 					}
 				} else {
