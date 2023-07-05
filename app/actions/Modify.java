@@ -490,6 +490,11 @@ public class Modify extends RegalAction {
 		String lrmiContent =
 				new LRMIMapper().getLrmiAndLrmifyMetadata(node, format, content);
 		play.Logger.debug("lrmiContent=" + lrmiContent);
+		// If a university is deselected via the frontend, no affiliation should be
+		// mapped in Amb.
+		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "creator");
+		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "contributor");
+
 		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
 		updateLrmiData(node, lrmiContent);
 		play.Logger.debug("Updated LRMI datastream!");

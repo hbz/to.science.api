@@ -66,4 +66,36 @@ public class AmbHelper {
 		}
 		return ambJsonContent.toString();
 	}
+
+	/**
+	 * This method deletes invalid affiliation from an AmbContent
+	 * 
+	 * @param ambContent
+	 * @param agent (creator | contributor)
+	 * @return
+	 */
+	public String removeAffiliation(String ambContent, String agent) {
+
+		JSONObject agentObject = null;
+		JSONObject affi = null;
+		JSONObject ambJson = new JSONObject(ambContent);
+		if (ambJson.getJSONArray(agent) != null
+				&& !ambJson.getJSONArray(agent).isEmpty()) {
+			JSONArray creatorArray = ambJson.getJSONArray(agent);
+			for (int i = 0; i < creatorArray.length(); i++) {
+				agentObject = creatorArray.getJSONObject(i);
+				affi = agentObject.getJSONObject("affiliation");
+				if (affi.has("id")) {
+					String id = affi.getString("id");
+					if (id.equals("unbekannt")) {
+						agentObject.remove("affiliation");
+
+					}
+				}
+
+			}
+		}
+		return ambJson.toString();
+	}
+
 }
