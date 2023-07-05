@@ -493,13 +493,18 @@ public class Modify extends RegalAction {
 		// If a university is deselected via the frontend, no affiliation should be
 		// mapped in Amb.
 		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "creator");
+		play.Logger
+				.debug("lrmiContent after remove creatorAffiliation=" + lrmiContent);
 		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "contributor");
+		play.Logger.debug(
+				"lrmiContent after remove contributerAffiliation=" + lrmiContent);
 
 		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
 		updateLrmiData(node, lrmiContent);
 		play.Logger.debug("Updated LRMI datastream!");
 
 		lrmiContent = new Enrich().enrichLrmiData(node);
+
 		return pid + " LRMI-metadata successfully updated and enriched! ";
 	}
 
