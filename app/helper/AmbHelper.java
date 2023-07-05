@@ -84,13 +84,16 @@ public class AmbHelper {
 			JSONArray creatorArray = ambJson.getJSONArray(agent);
 			for (int i = 0; i < creatorArray.length(); i++) {
 				agentObject = creatorArray.getJSONObject(i);
-				affi = agentObject.getJSONObject("affiliation");
-				if (affi.has("id")) {
-					String id = affi.getString("id");
-					if (id.equals("unbekannt")) {
-						agentObject.remove("affiliation");
+				if (agentObject.has("affiliation")) {
+					affi = agentObject.getJSONObject("affiliation");
+					if (affi.has("id")) {
+						String id = affi.getString("id");
+						if (id.equals("unbekannt")) {
+							agentObject.remove("affiliation");
 
+						}
 					}
+
 				}
 
 			}
