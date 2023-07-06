@@ -85,8 +85,7 @@ public class AmbHelper {
 		JSONObject affi = null;
 		JSONObject ambJson = new JSONObject(ambContent);
 		if (ambJson.getJSONArray(agent) != null
-				&& !ambJson.getJSONArray(agent).isEmpty()
-				&& ambJson.getJSONArray(agent).length) {
+				&& !ambJson.getJSONArray(agent).isEmpty()) {
 			JSONArray creatorArray = ambJson.getJSONArray(agent);
 			for (int i = 0; i < creatorArray.length(); i++) {
 				agentObject = creatorArray.getJSONObject(i);
