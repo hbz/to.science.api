@@ -31,7 +31,12 @@ public class AmbHelper {
 
 					if (affilation.has("id")) {
 						String id = affilation.getString("id");
-						affilation.put("name", affilLabelMap.get(id));
+						if (!id.equals("unbekannt")) {
+							affilation.put("name", affilLabelMap.get(id));
+						}
+						if (id.equals("unbekannt")) {
+							affilation.put("name", "unbekannt");
+						}
 
 					}
 				}
@@ -80,7 +85,8 @@ public class AmbHelper {
 		JSONObject affi = null;
 		JSONObject ambJson = new JSONObject(ambContent);
 		if (ambJson.getJSONArray(agent) != null
-				&& !ambJson.getJSONArray(agent).isEmpty()) {
+				&& !ambJson.getJSONArray(agent).isEmpty()
+				&& ambJson.getJSONArray(agent).length) {
 			JSONArray creatorArray = ambJson.getJSONArray(agent);
 			for (int i = 0; i < creatorArray.length(); i++) {
 				agentObject = creatorArray.getJSONObject(i);
@@ -99,6 +105,38 @@ public class AmbHelper {
 			}
 		}
 		return ambJson.toString();
+	}
+
+	/**
+	 * This method adds the Affiliation element to Agent(creator | contributer)
+	 * which have no affiliation.
+	 * 
+	 * @param ambContent
+	 * @param agent (creator | contributer)
+	 * @return
+	 */
+	public String addAffiliationToAgent(String ambContent, String agent) {
+		JSONObject agentObject = null;
+		JSONObject affi = null;
+
+		JSONObject ambJson = new JSONObject(ambContent);
+		if (ambJson.getJSONArray(agent) != null
+				&& !ambJson.getJSONArray(agent).isEmpty()) {
+			JSONArray agentArray = ambJson.getJSONArray(agent);
+			for (int i = 0; i < agentArray.length(); i++) {
+				agentObject = agentArray.getJSONObject(i);
+				if (!agentObject.has("affiliation")) {
+					affi = new JSONObject();
+					affi.put("id", "unbekannt");
+					affi.put("type", "Organization");
+					agentObject.put("affiliation", affi);
+
+				}
+
+			}
+		}
+		return ambJson.toString();
+
 	}
 
 }

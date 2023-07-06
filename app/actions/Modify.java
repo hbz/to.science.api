@@ -493,11 +493,11 @@ public class Modify extends RegalAction {
 		// If a university is deselected via the frontend, no affiliation should be
 		// mapped in Amb.
 		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "creator");
-		play.Logger
-				.debug("lrmiContent after remove creatorAffiliation=" + lrmiContent);
+		play.Logger.debug(
+				"lrmiContent after remove empty creatorAffiliation=" + lrmiContent);
 		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "contributor");
 		play.Logger.debug(
-				"lrmiContent after remove contributerAffiliation=" + lrmiContent);
+				"lrmiContent after remove empty contributerAffiliation=" + lrmiContent);
 
 		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
 		updateLrmiData(node, lrmiContent);
@@ -556,6 +556,16 @@ public class Modify extends RegalAction {
 		play.Logger.debug(
 				"Substituted IDs in content. Content is now: " + content_toscience);
 
+		content_toscience =
+				new AmbHelper().addAffiliationToAgent(content_toscience, "creator");
+		play.Logger.debug(
+				"content_toscience after add creatorAffiliation " + content_toscience);
+
+		content_toscience =
+				new AmbHelper().addAffiliationToAgent(content_toscience, "contributor");
+		play.Logger.debug("content_toscience after add contributorAffiliation "
+				+ content_toscience);
+
 		// hier wird 'name' unter 'affiliation' gemappt.
 		content_toscience =
 				new AmbHelper().addNameToAffiliationByAmb(content_toscience);
@@ -566,6 +576,15 @@ public class Modify extends RegalAction {
 		content_toscience = new AmbHelper().addNameByFunderByAmb(content_toscience);
 		play.Logger.debug(
 				"content_toscience nach addNameByFunderByAmb() " + content_toscience);
+
+		content_toscience =
+				new AmbHelper().removeAffiliation(content_toscience, "creator");
+		play.Logger
+				.debug("After remove empty creatorAffiliation" + content_toscience);
+		content_toscience =
+				new AmbHelper().removeAffiliation(content_toscience, "contributor");
+		play.Logger
+				.debug("After remove empty contributorAffiliation" + content_toscience);
 
 		updateLrmiData(node, content_toscience);
 		content_toscience = new Enrich().enrichLrmiData(node);

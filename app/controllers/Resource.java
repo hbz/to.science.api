@@ -1627,7 +1627,7 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "text/plain", nickname = "editMetada2byPid", value = "editMetada2byPid", notes = "Metadata2 of an old Node will be updated at URIs ", response = play.mvc.Result.class, httpMethod = "PUT")
+	@ApiOperation(produces = "text/plain", nickname = "editMetada2byPid", value = "editMetada2byPid", notes = "Metadata2 of an old Node will be updated at URIs ", response = play.mvc.Result.class, httpMethod = "PATCH")
 	public static Promise<Result> editMetada2byPid(@PathParam("pid") String pid) {
 		return new ReadDataAction().call(pid, node -> {
 			try {
