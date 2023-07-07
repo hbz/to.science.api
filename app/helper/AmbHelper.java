@@ -15,29 +15,21 @@ public class AmbHelper {
 	 * @param ambContent: String
 	 * @return new AMBContent with attribute 'name' by the element affiliation
 	 */
-	public String addNameToAffiliationByAmb(String ambContent) {
+	public String addNameToAffiliationByAmb(String ambContent, String agent) {
 
 		LinkedHashMap<String, String> affilLabelMap =
 				JsonMapper.getPrefLabelMap("affiliation-de.properties");
-
 		JSONObject ambJsonContent = new JSONObject(ambContent);
-
-		if (ambJsonContent.has("creator")) {
-			JSONArray creatorArray = ambJsonContent.getJSONArray("creator");
-			for (int i = 0; i < creatorArray.length(); i++) {
-				JSONObject creator = creatorArray.getJSONObject(i);
-				if (creator.has("affiliation")) {
-					JSONObject affilation = creator.getJSONObject("affiliation");
-
+		if (ambJsonContent.getJSONArray(agent) != null
+				&& !ambJsonContent.getJSONArray(agent).isEmpty()) {
+			JSONArray agentArray = ambJsonContent.getJSONArray(agent);
+			for (int i = 0; i < agentArray.length(); i++) {
+				JSONObject agentObject = agentArray.getJSONObject(i);
+				if (agentObject.has("affiliation")) {
+					JSONObject affilation = agentObject.getJSONObject("affiliation");
 					if (affilation.has("id")) {
 						String id = affilation.getString("id");
-						if (!id.equals("unbekannt")) {
-							affilation.put("name", affilLabelMap.get(id));
-						}
-						if (id.equals("unbekannt")) {
-							affilation.put("name", "unbekannt");
-						}
-
+						affilation.put("name", affilLabelMap.get(id));
 					}
 				}
 			}

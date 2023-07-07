@@ -62,6 +62,7 @@ import actions.Modify;
 import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
+import helper.AmbHelper;
 import helper.HttpArchiveException;
 import helper.Metadata2Helper;
 import helper.NodeHelper;
@@ -560,6 +561,12 @@ public class Resource extends MyController {
 				play.Logger.debug("ambContent2 = " + ambContent2);
 
 				play.Logger.debug("Done Amb Mapping");
+				// Amb will be extended by fake affiliation for agents that do not have
+				// affiliation.
+				ambContent =
+						new AmbHelper().addAffiliationToAgent(ambContent, "creator");
+				ambContent =
+						new AmbHelper().addAffiliationToAgent(ambContent, "contributor");
 
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
