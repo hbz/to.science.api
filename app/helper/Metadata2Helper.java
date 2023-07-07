@@ -249,8 +249,12 @@ public class Metadata2Helper {
 					if (agentObject.has("affiliation")) {
 						Map<String, Object> affiliationMap = new LinkedHashMap<>();
 						JSONObject affi = agentObject.getJSONObject("affiliation");
+						if (affi.has("prefLabel")) {
+							prefLabelOrganisation = affi.getString("prefLabel");
+						} else {
+							prefLabelOrganisation = "unbekannt";
+						}
 
-						prefLabelOrganisation = affi.getString("prefLabel");
 						affiliationId = affi.getString("@id");
 						affiliationType = affi.getString("type");
 
