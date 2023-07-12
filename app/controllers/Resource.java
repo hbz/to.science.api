@@ -1644,12 +1644,14 @@ public class Resource extends MyController {
 
 				String oldUriAffiliationUnknown =
 						"http://hbz-nrw.de/regal#affiliation/unknown";
+				String oldUriAffiliationUnknown =
+						"http://hbz-nrw.de/regal#affiliation/unknown";
 
 				String oldUriCreatorAffiliation =
-						"http://hbz-nrw.de/regal#creatorAffiliation";
+						"http://hbz-nrw.de/regal#creatorAffiliation/";
 
 				String oldUriContributorAffiliation =
-						"http://hbz-nrw.de/regal#contributorAffiliation";
+						"http://hbz-nrw.de/regal#contributorAffiliation/";
 
 				String oldUriCreatorAcademicDegreUnknown =
 						"http://hbz-nrw.de/regal#creatorAcademicDegree/unknown";
@@ -1672,6 +1674,9 @@ public class Resource extends MyController {
 				String oldUriUnknowAcademicDegree =
 						"http://hbz-nrw.de/regal#academicDegree/unknown";
 
+				String oldUriUnkownAcademicDegree =
+						"http://hbz-nrw.de/regal#academicDegree/unkown";
+
 				if (node.getMetadata("metadata2") != null && node != null) {
 
 					String metadata2 = node.getMetadata("metadata2");
@@ -1688,12 +1693,12 @@ public class Resource extends MyController {
 
 					if (metadata2.contains(oldUriCreatorAffiliation)) {
 						metadata2 =
-								metadata2.replace(oldUriCreatorAffiliation, "https://ror.org");
+								metadata2.replace(oldUriCreatorAffiliation, "https://ror.org/");
 					}
 
 					if (metadata2.contains(oldUriContributorAffiliation)) {
 						metadata2 = metadata2.replace(oldUriContributorAffiliation,
-								"https://ror.org");
+								"https://ror.org/");
 					}
 
 					if (metadata2.contains(oldUriCreatorAcademicDegreUnknown)) {
@@ -1728,6 +1733,11 @@ public class Resource extends MyController {
 					if (metadata2.contains(oldUriUnknowAcademicDegree)) {
 						metadata2 =
 								metadata2.replace(oldUriUnknowAcademicDegree, "unbekannt");
+					}
+
+					if (metadata2.contains(oldUriUnkownAcademicDegree)) {
+						metadata2 =
+								metadata2.replace(oldUriUnkownAcademicDegree, "unbekannt");
 					}
 
 					node.setMetadata("metadata2", metadata2);
