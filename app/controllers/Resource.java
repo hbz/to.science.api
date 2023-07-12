@@ -1644,8 +1644,6 @@ public class Resource extends MyController {
 
 				String oldUriAffiliationUnknown =
 						"http://hbz-nrw.de/regal#affiliation/unknown";
-				String oldUriAffiliationUnknown =
-						"http://hbz-nrw.de/regal#affiliation/unknown";
 
 				String oldUriCreatorAffiliation =
 						"http://hbz-nrw.de/regal#creatorAffiliation/";
