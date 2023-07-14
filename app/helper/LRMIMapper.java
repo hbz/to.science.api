@@ -527,9 +527,9 @@ public class LRMIMapper {
 						 * verwendet.
 						 */
 						JSONObject affObj = new JSONObject();
-						affObj.put("id", "https://ror.org/");
+						affObj.put("id", "unbekannt");
 						affObj.put("type", "Organization");
-						affObj.put("name", "keine Angabe");
+						affObj.put("name", "unbekannt");
 						obj.put("affiliation", affObj);
 					}
 					// last step to do here: count 1 to i as the internal counter for the

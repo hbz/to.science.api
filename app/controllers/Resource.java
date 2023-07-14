@@ -511,7 +511,7 @@ public class Resource extends MyController {
 						.debug("request().body().asJson()=" + request().body().asJson());
 				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
-				play.Logger.debug(result1);
+				play.Logger.debug("result1 = " + result1);
 
 				/**
 				 * 2. nach LRMI gemappte lobid2-Metadaten als Datenstrom "Lrmidata"
@@ -543,6 +543,7 @@ public class Resource extends MyController {
 							+ request().body().asJson());
 			play.Logger.debug("request().body().asJson().toString()="
 					+ request().body().asJson().toString());
+			String ambContent = null;
 			try {
 				Node readNode = new Read().readNode(pid);
 				/**
@@ -553,20 +554,23 @@ public class Resource extends MyController {
 				 */
 				play.Logger.debug("Amb will be mapped");
 
-				String ambContent =
+				ambContent =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
 				play.Logger.debug("ambContent = " + ambContent);
 				String result1 = "LRMI metadata successfully updated and enriched.";
-				String ambContent2 = new Read().readLrmiData(readNode);
-				play.Logger.debug("ambContent2 = " + ambContent2);
-
 				play.Logger.debug("Done Amb Mapping");
+
 				// Amb will be extended by fake affiliation for agents that do not have
 				// affiliation.
 				ambContent =
 						new AmbHelper().addAffiliationToAgent(ambContent, "creator");
-				ambContent =
-						new AmbHelper().addAffiliationToAgent(ambContent, "contributor");
+				play.Logger.debug("ambContent = " + ambContent);
+
+				if (ambContent.contains("contributor")) {
+					ambContent =
+							new AmbHelper().addAffiliationToAgent(ambContent, "contributor");
+					play.Logger.debug("ambContent = " + ambContent);
+				}
 
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)

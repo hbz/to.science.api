@@ -486,8 +486,10 @@ public class Modify extends RegalAction {
 							+ " This action is not supported."
 							+ " Use HTTP DELETE instead.\n");
 		}
+		play.Logger.debug("content=" + content);
+		String lrmiContent = null;
 
-		String lrmiContent =
+		lrmiContent =
 				new LRMIMapper().getLrmiAndLrmifyMetadata(node, format, content);
 		play.Logger.debug("lrmiContent=" + lrmiContent);
 		// If a university is deselected via the frontend, no affiliation should be
@@ -495,9 +497,13 @@ public class Modify extends RegalAction {
 		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "creator");
 		play.Logger.debug(
 				"lrmiContent after remove empty creatorAffiliation=" + lrmiContent);
-		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "contributor");
-		play.Logger.debug(
-				"lrmiContent after remove empty contributerAffiliation=" + lrmiContent);
+
+		if (lrmiContent.contains("contributor")) {
+			lrmiContent =
+					new AmbHelper().removeAffiliation(lrmiContent, "contributor");
+			play.Logger.debug("lrmiContent after remove empty contributerAffiliation="
+					+ lrmiContent);
+		}
 
 		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
 		updateLrmiData(node, lrmiContent);
@@ -554,12 +560,18 @@ public class Modify extends RegalAction {
 		String content_toscience =
 				new JsonMapper().getTosciencefyLrmi(node, content);
 
+		play.Logger.debug("content_toscience: " + content_toscience);
+
 		// hier wird 'name' unter 'affiliation' gemappt.
 		content_toscience =
 				new AmbHelper().addNameToAffiliationByAmb(content_toscience, "creator");
 
+		play.Logger.debug("content_toscience: " + content_toscience);
+
 		content_toscience = new AmbHelper()
 				.addNameToAffiliationByAmb(content_toscience, "contributor");
+
+		play.Logger.debug("content_toscience: " + content_toscience);
 
 		// hier wird 'name' unter 'funder' gemappt.
 		content_toscience = new AmbHelper().addNameByFunderByAmb(content_toscience);
