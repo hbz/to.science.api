@@ -498,12 +498,9 @@ public class Modify extends RegalAction {
 		play.Logger.debug(
 				"lrmiContent after remove empty creatorAffiliation=" + lrmiContent);
 
-		if (lrmiContent.contains("contributor")) {
-			lrmiContent =
-					new AmbHelper().removeAffiliation(lrmiContent, "contributor");
-			play.Logger.debug("lrmiContent after remove empty contributerAffiliation="
-					+ lrmiContent);
-		}
+		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "contributor");
+		play.Logger.debug(
+				"lrmiContent after remove empty contributerAffiliation=" + lrmiContent);
 
 		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
 		updateLrmiData(node, lrmiContent);
@@ -565,12 +562,10 @@ public class Modify extends RegalAction {
 		// hier wird 'name' unter 'affiliation' gemappt.
 		content_toscience =
 				new AmbHelper().addNameToAffiliationByAmb(content_toscience, "creator");
-
 		play.Logger.debug("content_toscience: " + content_toscience);
 
 		content_toscience = new AmbHelper()
 				.addNameToAffiliationByAmb(content_toscience, "contributor");
-
 		play.Logger.debug("content_toscience: " + content_toscience);
 
 		// hier wird 'name' unter 'funder' gemappt.

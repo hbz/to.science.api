@@ -20,22 +20,23 @@ public class AmbHelper {
 		LinkedHashMap<String, String> affilLabelMap =
 				JsonMapper.getPrefLabelMap("affiliation-de.properties");
 		JSONObject ambJsonContent = new JSONObject(ambContent);
-		if (ambJsonContent.getJSONArray(agent) != null
-				&& !ambJsonContent.getJSONArray(agent).isEmpty()) {
-			JSONArray agentArray = ambJsonContent.getJSONArray(agent);
-			for (int i = 0; i < agentArray.length(); i++) {
-				JSONObject agentObject = agentArray.getJSONObject(i);
-				if (agentObject.has("affiliation")) {
-					JSONObject affilation = agentObject.getJSONObject("affiliation");
-					if (affilation.has("id")) {
-						String id = affilation.getString("id");
-						affilation.put("name", affilLabelMap.get(id));
+		if (ambContent.contains(agent)) {
+			if (ambJsonContent.getJSONArray(agent) != null
+					&& !ambJsonContent.getJSONArray(agent).isEmpty()) {
+				JSONArray agentArray = ambJsonContent.getJSONArray(agent);
+				for (int i = 0; i < agentArray.length(); i++) {
+					JSONObject agentObject = agentArray.getJSONObject(i);
+					if (agentObject.has("affiliation")) {
+						JSONObject affilation = agentObject.getJSONObject("affiliation");
+						if (affilation.has("id")) {
+							String id = affilation.getString("id");
+							affilation.put("name", affilLabelMap.get(id));
+						}
 					}
 				}
+
 			}
-
 		}
-
 		return ambJsonContent.toString();
 	}
 
@@ -76,23 +77,25 @@ public class AmbHelper {
 		JSONObject agentObject = null;
 		JSONObject affi = null;
 		JSONObject ambJson = new JSONObject(ambContent);
-		if (ambJson.getJSONArray(agent) != null
-				&& !ambJson.getJSONArray(agent).isEmpty()) {
-			JSONArray agentArray = ambJson.getJSONArray(agent);
-			for (int i = 0; i < agentArray.length(); i++) {
-				agentObject = agentArray.getJSONObject(i);
-				if (agentObject.has("affiliation")) {
-					affi = agentObject.getJSONObject("affiliation");
-					if (affi.has("id")) {
-						String id = affi.getString("id");
-						if (id.equals("unbekannt")) {
-							agentObject.remove("affiliation");
+		if (ambContent.contains(agent)) {
+			if (ambJson.getJSONArray(agent) != null
+					&& !ambJson.getJSONArray(agent).isEmpty()) {
+				JSONArray agentArray = ambJson.getJSONArray(agent);
+				for (int i = 0; i < agentArray.length(); i++) {
+					agentObject = agentArray.getJSONObject(i);
+					if (agentObject.has("affiliation")) {
+						affi = agentObject.getJSONObject("affiliation");
+						if (affi.has("id")) {
+							String id = affi.getString("id");
+							if (id.equals("unbekannt")) {
+								agentObject.remove("affiliation");
 
+							}
 						}
+
 					}
 
 				}
-
 			}
 		}
 		return ambJson.toString();
@@ -111,19 +114,21 @@ public class AmbHelper {
 		JSONObject affi = null;
 
 		JSONObject ambJson = new JSONObject(ambContent);
-		if (ambJson.getJSONArray(agent) != null
-				&& !ambJson.getJSONArray(agent).isEmpty()) {
-			JSONArray agentArray = ambJson.getJSONArray(agent);
-			for (int i = 0; i < agentArray.length(); i++) {
-				agentObject = agentArray.getJSONObject(i);
-				if (!agentObject.has("affiliation")) {
-					affi = new JSONObject();
-					affi.put("id", "unbekannt");
-					affi.put("type", "Organization");
-					agentObject.put("affiliation", affi);
+		if (ambContent.contains(agent)) {
+			if (ambJson.getJSONArray(agent) != null
+					&& !ambJson.getJSONArray(agent).isEmpty()) {
+				JSONArray agentArray = ambJson.getJSONArray(agent);
+				for (int i = 0; i < agentArray.length(); i++) {
+					agentObject = agentArray.getJSONObject(i);
+					if (!agentObject.has("affiliation")) {
+						affi = new JSONObject();
+						affi.put("id", "unbekannt");
+						affi.put("type", "Organization");
+						agentObject.put("affiliation", affi);
+
+					}
 
 				}
-
 			}
 		}
 		return ambJson.toString();

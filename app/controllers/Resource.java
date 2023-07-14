@@ -566,11 +566,9 @@ public class Resource extends MyController {
 						new AmbHelper().addAffiliationToAgent(ambContent, "creator");
 				play.Logger.debug("ambContent = " + ambContent);
 
-				if (ambContent.contains("contributor")) {
-					ambContent =
-							new AmbHelper().addAffiliationToAgent(ambContent, "contributor");
-					play.Logger.debug("ambContent = " + ambContent);
-				}
+				ambContent =
+						new AmbHelper().addAffiliationToAgent(ambContent, "contributor");
+				play.Logger.debug("ambContent = " + ambContent);
 
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
