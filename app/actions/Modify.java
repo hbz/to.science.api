@@ -486,15 +486,28 @@ public class Modify extends RegalAction {
 							+ " This action is not supported."
 							+ " Use HTTP DELETE instead.\n");
 		}
+		play.Logger.debug("content=" + content);
+		String lrmiContent = null;
 
-		String lrmiContent =
+		lrmiContent =
 				new LRMIMapper().getLrmiAndLrmifyMetadata(node, format, content);
 		play.Logger.debug("lrmiContent=" + lrmiContent);
+		// If a university is deselected via the frontend, no affiliation should be
+		// mapped in Amb.
+		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "creator");
+		play.Logger.debug(
+				"lrmiContent after remove empty creatorAffiliation=" + lrmiContent);
+
+		lrmiContent = new AmbHelper().removeAffiliation(lrmiContent, "contributor");
+		play.Logger.debug(
+				"lrmiContent after remove empty contributerAffiliation=" + lrmiContent);
+
 		play.Logger.debug("Mapped and merged lobid2 data into LRMI data format !");
 		updateLrmiData(node, lrmiContent);
 		play.Logger.debug("Updated LRMI datastream!");
 
 		lrmiContent = new Enrich().enrichLrmiData(node);
+
 		return pid + " LRMI-metadata successfully updated and enriched! ";
 	}
 
@@ -543,24 +556,25 @@ public class Modify extends RegalAction {
 
 		String content_toscience =
 				new JsonMapper().getTosciencefyLrmi(node, content);
-		play.Logger.debug(
-				"Substituted IDs in content. Content is now: " + content_toscience);
+
+		play.Logger.debug("content_toscience: " + content_toscience);
 
 		// hier wird 'name' unter 'affiliation' gemappt.
 		content_toscience =
-				new AmbHelper().addNameToAffiliationByAmb(content_toscience);
-		play.Logger.debug("content_toscience nach addNameToAffiliationByAmb "
-				+ content_toscience);
+				new AmbHelper().addNameToAffiliationByAmb(content_toscience, "creator");
+		play.Logger.debug("content_toscience: " + content_toscience);
+
+		content_toscience = new AmbHelper()
+				.addNameToAffiliationByAmb(content_toscience, "contributor");
+		play.Logger.debug("content_toscience: " + content_toscience);
 
 		// hier wird 'name' unter 'funder' gemappt.
 		content_toscience = new AmbHelper().addNameByFunderByAmb(content_toscience);
-		play.Logger.debug(
-				"content_toscience nach addNameByFunderByAmb() " + content_toscience);
 
 		updateLrmiData(node, content_toscience);
+
 		content_toscience = new Enrich().enrichLrmiData(node);
-		play.Logger
-				.debug("Enriched LRMI data. Content is now: " + content_toscience);
+
 		msg = pid + " LRMI-metadata of " + node.getPid()
 				+ " successfully updated and enriched! ";
 		play.Logger.debug(msg);

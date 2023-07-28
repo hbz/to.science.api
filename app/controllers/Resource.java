@@ -62,6 +62,7 @@ import actions.Modify;
 import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
+import helper.AmbHelper;
 import helper.HttpArchiveException;
 import helper.Metadata2Helper;
 import helper.NodeHelper;
@@ -510,7 +511,7 @@ public class Resource extends MyController {
 						.debug("request().body().asJson()=" + request().body().asJson());
 				String result1 = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
-				play.Logger.debug(result1);
+				play.Logger.debug("result1 = " + result1);
 
 				/**
 				 * 2. nach LRMI gemappte lobid2-Metadaten als Datenstrom "Lrmidata"
@@ -542,6 +543,7 @@ public class Resource extends MyController {
 							+ request().body().asJson());
 			play.Logger.debug("request().body().asJson().toString()="
 					+ request().body().asJson().toString());
+			String ambContent = null;
 			try {
 				Node readNode = new Read().readNode(pid);
 				/**
@@ -552,14 +554,21 @@ public class Resource extends MyController {
 				 */
 				play.Logger.debug("Amb will be mapped");
 
-				String ambContent =
+				ambContent =
 						modify.updateAndEnrichLrmiData(pid, request().body().asJson());
 				play.Logger.debug("ambContent = " + ambContent);
 				String result1 = "LRMI metadata successfully updated and enriched.";
-				String ambContent2 = new Read().readLrmiData(readNode);
-				play.Logger.debug("ambContent2 = " + ambContent2);
-
 				play.Logger.debug("Done Amb Mapping");
+
+				// Amb will be extended by fake affiliation for agents that do not have
+				// affiliation.
+				ambContent =
+						new AmbHelper().addAffiliationToAgent(ambContent, "creator");
+				play.Logger.debug("ambContent = " + ambContent);
+
+				ambContent =
+						new AmbHelper().addAffiliationToAgent(ambContent, "contributor");
+				play.Logger.debug("ambContent = " + ambContent);
 
 				/**
 				 * 2. toscienceJson (AMB -->TOSCIENCEJSON)
@@ -1624,6 +1633,133 @@ public class Resource extends MyController {
 				play.Logger.error(e.toString());
 				return JsonMessage(new Message(json(e)));
 			}
+		});
+	}
+
+	@ApiOperation(produces = "text/plain", nickname = "editMetada2byPid", value = "editMetada2byPid", notes = "Metadata2 of an old Node will be updated at URIs ", response = play.mvc.Result.class, httpMethod = "PATCH")
+	public static Promise<Result> editMetada2byPid(@PathParam("pid") String pid) {
+		return new ReadDataAction().call(pid, node -> {
+			try {
+				String result = "";
+
+				play.Logger.debug("Metadata2 of Node :" + pid + " will be edited");
+
+				String oldUriAffiliationUnknown =
+						"http://hbz-nrw.de/regal#affiliation/unknown";
+
+				String oldUriCreatorAffiliation =
+						"http://hbz-nrw.de/regal#creatorAffiliation/";
+
+				String oldUriContributorAffiliation =
+						"http://hbz-nrw.de/regal#contributorAffiliation/";
+
+				String oldUriCreatorAcademicDegreUnknown =
+						"http://hbz-nrw.de/regal#creatorAcademicDegree/unknown";
+
+				String oldUriCreatorAcademicDegreDr =
+						"http://hbz-nrw.de/regal#creatorAcademicDegree/Dr.";
+
+				String oldUriCreatorAcademicDegreProf =
+						"http://hbz-nrw.de/regal#creatorAcademicDegree/Prof.";
+
+				String oldUriContributerAffiliationUnknown =
+						"http://hbz-nrw.de/regal#contributorAcademicDegree/unknown";
+
+				String oldUriContributerAffiliationDr =
+						"http://hbz-nrw.de/regal#contributorAcademicDegree/Dr.";
+
+				String oldUriContributerAffiliationProf =
+						"http://hbz-nrw.de/regal#contributorAcademicDegree/Prof.";
+
+				String oldUriUnknowAcademicDegree =
+						"http://hbz-nrw.de/regal#academicDegree/unknown";
+
+				String oldUriUnkownAcademicDegree =
+						"http://hbz-nrw.de/regal#academicDegree/unkown";
+
+				if (node.getMetadata("metadata2") != null && node != null) {
+
+					String metadata2 = node.getMetadata("metadata2");
+
+					play.Logger.debug("node.getPid(): " + node.getPid());
+
+					play.Logger
+							.debug("metadata2 vor Edit and updateNode(): " + metadata2);
+
+					if (metadata2.contains(oldUriAffiliationUnknown)) {
+						metadata2 =
+								metadata2.replace(oldUriAffiliationUnknown, "unbekannt");
+					}
+
+					if (metadata2.contains(oldUriCreatorAffiliation)) {
+						metadata2 =
+								metadata2.replace(oldUriCreatorAffiliation, "https://ror.org/");
+					}
+
+					if (metadata2.contains(oldUriContributorAffiliation)) {
+						metadata2 = metadata2.replace(oldUriContributorAffiliation,
+								"https://ror.org/");
+					}
+
+					if (metadata2.contains(oldUriCreatorAcademicDegreUnknown)) {
+						metadata2 = metadata2.replace(oldUriCreatorAcademicDegreUnknown,
+								"unbekannt");
+					}
+
+					if (metadata2.contains(oldUriCreatorAcademicDegreDr)) {
+						metadata2 = metadata2.replace(oldUriCreatorAcademicDegreDr, "Dr.");
+					}
+
+					if (metadata2.contains(oldUriCreatorAcademicDegreProf)) {
+						metadata2 =
+								metadata2.replace(oldUriCreatorAcademicDegreProf, "Prof.");
+					}
+
+					if (metadata2.contains(oldUriContributerAffiliationUnknown)) {
+						metadata2 = metadata2.replace(oldUriContributerAffiliationUnknown,
+								"unbekannt");
+					}
+
+					if (metadata2.contains(oldUriContributerAffiliationDr)) {
+						metadata2 =
+								metadata2.replace(oldUriContributerAffiliationDr, "Dr.");
+					}
+
+					if (metadata2.contains(oldUriContributerAffiliationProf)) {
+						metadata2 =
+								metadata2.replace(oldUriContributerAffiliationProf, "Prof.");
+					}
+
+					if (metadata2.contains(oldUriUnknowAcademicDegree)) {
+						metadata2 =
+								metadata2.replace(oldUriUnknowAcademicDegree, "unbekannt");
+					}
+
+					if (metadata2.contains(oldUriUnkownAcademicDegree)) {
+						metadata2 =
+								metadata2.replace(oldUriUnkownAcademicDegree, "unbekannt");
+					}
+
+					node.setMetadata("metadata2", metadata2);
+					Globals.fedora.updateNode(node);
+
+					play.Logger.debug("metadata2 after Edit and updateNode(): "
+							+ node.getMetadata("metadata2"));
+
+					result =
+							"URIs by Affiliation & AcademicDegre in Metadata2 successfully edited";
+
+				} else {
+					play.Logger.debug("Unable to edit metadata2 of resource = " + pid);
+					result = "Edit of metadata2 failed";
+				}
+				return ok(result);
+
+			} catch (Exception e) {
+				play.Logger.error("", e);
+				return ok("Exception, unable to edit metadata2");
+			}
+
 		});
 	}
 
