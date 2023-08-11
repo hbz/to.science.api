@@ -1004,6 +1004,8 @@ public class JsonMapper {
 		ObjectMapper mapper = new ObjectMapper();
 
 		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
+		play.Logger.debug("getPublicationMap(), issued=" + issued);
+
 		if (issued != null) {
 			rdf.put("issued", issued);
 		}
@@ -1012,21 +1014,29 @@ public class JsonMapper {
 		return rdf;
 	}
 
-	public static String getPublicationMap(JsonNode hit) {
+	public static String getPublicationMap(JsonNode jsNode) {
 
-		String issued = hit.at("/issued/0").asText();
-		if (issued != null && !issued.isEmpty()) {
-			return issued;
-		}
-		String startDate = hit.at("/publication/0/startDate").asText();
-		if (startDate != null && !startDate.isEmpty()) {
-			return startDate;
-		}
-		String publicationYear = hit.at("/publicationYear/0").asText();
-		if (publicationYear != null && !publicationYear.isEmpty()) {
-			return publicationYear.substring(0, 4);
+		play.Logger.debug("content of JsonNode=" + jsNode.toString());
+
+		if (jsNode.has("issued") && !jsNode.get("issued").toString().isEmpty()) {
+			String issued = jsNode.get("issued").toString();
+			play.Logger.debug("issued =" + issued);
+			return issued.substring(issued.toString().indexOf("\"") + 1,
+					issued.toString().lastIndexOf("\""));
+
+		} else if (jsNode.has("publicationYear")
+				&& !jsNode.get("publicationYear").toString().isEmpty()) {
+			String publicationYear =
+					jsNode.get("publicationYear").toString().substring(2, 6);
+			play.Logger.debug("publicationYear =" + publicationYear);
+
+			if (new JsonMapperHelper().isDateValid(publicationYear)) {
+				return publicationYear;
+			}
+
 		}
 		return null;
+
 	}
 
 	private static Collection<Map<String, Object>> getType(final JsonNode rdf) {
