@@ -17,7 +17,7 @@ public class JsonMapperHelper {
 	 */
 	boolean isDateValid(String datum) {
 		boolean result = false;
-		if (datum.matches("\\d{4}-?([0-9][0-9])?-?([0-9][0-9])?")) {
+		if (datum.matches("^\\d{4}(-[0-9][0-9])?(-[0-9][0-9])?")) {
 			result = true;
 		}
 		return result;
