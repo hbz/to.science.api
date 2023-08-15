@@ -660,6 +660,7 @@ public class XmlUtils {
 			String epubDay = null;
 			String epubMonth = null;
 			String epubYear = null;
+			Node attribPubFormat = null;
 
 			elemList = new DocumentElementList(content, "pub-date");
 			nodeList = elemList.getNodeList();
@@ -677,44 +678,24 @@ public class XmlUtils {
 					continue;
 				}
 
-				attrib = attributes.getNamedItem("pub-type");
-				if (attrib == null) {
-					continue;
-				}
+				// Attribute Name: pub-type
+				if (attributes.getNamedItem("pub-type") != null) {
+					attrib = attributes.getNamedItem("pub-type");
 
-				if (attrib.getNodeValue().equalsIgnoreCase("subscription-year")) {
-					for (int j = 0; j < childNodes.getLength(); j++) {
-						child = childNodes.item(j);
-						String childName = child.getNodeName();
-						if (childName.equalsIgnoreCase("year")) {
-							pubYear = child.getTextContent();
-							play.Logger.debug("Found publication year: " + pubYear);
-							break;
+					if (attrib.getNodeValue().equalsIgnoreCase("subscription-year")) {
+						for (int j = 0; j < childNodes.getLength(); j++) {
+							child = childNodes.item(j);
+							String childName = child.getNodeName();
+							if (childName.equalsIgnoreCase("year")) {
+								pubYear = child.getTextContent();
+								play.Logger.debug("Found publication year: " + pubYear);
+								break;
+							}
 						}
+						continue;
 					}
-					continue;
-				}
 
-				if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
-					for (int k = 0; k < childNodes.getLength(); k++) {
-						child = childNodes.item(k);
-						String childName = child.getNodeName();
-						if (childName.equalsIgnoreCase("day")) {
-							epubDay = child.getTextContent();
-							play.Logger.debug("Found e-publication day: " + epubDay);
-						} else if (childName.equalsIgnoreCase("month")) {
-							epubMonth = child.getTextContent();
-							play.Logger.debug("Found e-publication month: " + epubMonth);
-						} else if (childName.equalsIgnoreCase("year")) {
-							epubYear = child.getTextContent();
-							play.Logger.debug("Found e-publication year: " + epubYear);
-						}
-					}
-					break;
-				}
-
-				if (epubYear == null && epubMonth == null) {
-					if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
+					if (attrib.getNodeValue().equalsIgnoreCase("epub")) {
 						for (int k = 0; k < childNodes.getLength(); k++) {
 							child = childNodes.item(k);
 							String childName = child.getNodeName();
@@ -729,13 +710,87 @@ public class XmlUtils {
 								play.Logger.debug("Found e-publication year: " + epubYear);
 							}
 						}
-						continue;
+						break;
+					}
+
+					if (epubYear == null && epubMonth == null) {
+						if (attrib.getNodeValue().equalsIgnoreCase("ppub")) {
+							for (int k = 0; k < childNodes.getLength(); k++) {
+								child = childNodes.item(k);
+								String childName = child.getNodeName();
+								if (childName.equalsIgnoreCase("day")) {
+									epubDay = child.getTextContent();
+									play.Logger.debug("Found e-publication day: " + epubDay);
+								} else if (childName.equalsIgnoreCase("month")) {
+									epubMonth = child.getTextContent();
+									play.Logger.debug("Found e-publication month: " + epubMonth);
+								} else if (childName.equalsIgnoreCase("year")) {
+									epubYear = child.getTextContent();
+									play.Logger.debug("Found e-publication year: " + epubYear);
+								}
+							}
+							continue;
+						}
 					}
 				}
+				// Attribute Name: pub-type END
+
+				// Attribute Name: date-type
+				if (attributes.getNamedItem("date-type") != null) {
+					attrib = attributes.getNamedItem("date-type");
+					attribPubFormat = attributes.getNamedItem("publication-format");
+
+					if (attrib.getNodeValue().equals("pub")
+							&& attribPubFormat.getNodeValue().equals("electronic")) {
+						for (int k = 0; k < childNodes.getLength(); k++) {
+							child = childNodes.item(k);
+							String childName = child.getNodeName();
+							if (childName.equalsIgnoreCase("day")) {
+								epubDay = child.getTextContent();
+								play.Logger.debug("Found e-publication day: " + epubDay);
+							} else if (childName.equalsIgnoreCase("month")) {
+								epubMonth = child.getTextContent();
+								play.Logger.debug("Found e-publication month: " + epubMonth);
+							} else if (childName.equalsIgnoreCase("year")) {
+								epubYear = child.getTextContent();
+								play.Logger.debug("Found e-publication year: " + epubYear);
+							}
+						}
+						break;
+					}
+
+					if (epubYear == null && epubMonth == null) {
+						if (attrib.getNodeValue().equals("pub")
+								&& attribPubFormat.getNodeValue().equals("print")) {
+							for (int k = 0; k < childNodes.getLength(); k++) {
+								child = childNodes.item(k);
+								String childName = child.getNodeName();
+								if (childName.equalsIgnoreCase("day")) {
+									epubDay = child.getTextContent();
+									play.Logger.debug("Found e-publication day: " + epubDay);
+								} else if (childName.equalsIgnoreCase("month")) {
+									epubMonth = child.getTextContent();
+									play.Logger.debug("Found e-publication month: " + epubMonth);
+								} else if (childName.equalsIgnoreCase("year")) {
+									epubYear = child.getTextContent();
+									play.Logger.debug("Found e-publication year: " + epubYear);
+								}
+							}
+							continue;
+						}
+					}
+				}
+				// Attribute Name: date-type END
 
 			}
 
+			if (pubYear == null)
+				pubYear = epubYear;
 			rdf.put("issued", pubYear);
+			if (epubMonth.length() == 1)
+				epubMonth = "0" + epubMonth;
+			if (epubDay.length() == 1)
+				epubDay = "0" + epubDay;
 			String publicationDateStr = epubYear + "-" + epubMonth + "-" + epubDay;
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			if (epubDay == null && epubMonth != null) {
@@ -757,44 +812,70 @@ public class XmlUtils {
 			}
 
 			/* Zitierangabe */
+			String bibliographicCitation = null;
+
 			DocumentElementList volumesElemList =
 					new DocumentElementList(content, "volume");
 			NodeList volumes = volumesElemList.getNodeList();
 			if (volumesElemList.getLength() > 0
 					&& !volumes.item(0).getTextContent().equals("-1")) {
 				String volume = volumes.item(0).getTextContent();
+				bibliographicCitation = volume;
 
 				DocumentElementList issuesElemList =
 						new DocumentElementList(content, "issue");
-				NodeList issues = issuesElemList.getNodeList();
-				String issue = issues.item(0).getTextContent();
+				if (issuesElemList.getLength() > 0) {
+					NodeList issues = issuesElemList.getNodeList();
+					String issue = issues.item(0).getTextContent();
+					bibliographicCitation += "(" + issue + "):";
+				}
 
 				DocumentElementList fpageElemList =
 						new DocumentElementList(content, "fpage");
-				NodeList fpages = fpageElemList.getNodeList();
-				String fpage = fpages.item(0).getTextContent();
+				if (fpageElemList.getLength() > 0) {
+					NodeList fpages = fpageElemList.getNodeList();
+					String fpage = fpages.item(0).getTextContent();
+					bibliographicCitation += fpage;
+				}
 
 				DocumentElementList lpageElemList =
 						new DocumentElementList(content, "lpage");
-				NodeList lpages = lpageElemList.getNodeList();
-				String lpage = lpages.item(0).getTextContent();
+				if (lpageElemList.getLength() > 0) {
+					NodeList lpages = lpageElemList.getNodeList();
+					String lpage = lpages.item(0).getTextContent();
+					bibliographicCitation += lpage;
+				}
 
-				String bibliographicCitation =
-						new String(volume + "(" + issue + "):" + fpage + "-" + lpage);
-				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
+				DocumentElementList elocIdElemList =
+						new DocumentElementList(content, "elocation-id");
+				if (elocIdElemList.getLength() > 0) {
+					NodeList elocIds = elocIdElemList.getNodeList();
+					String elocId = elocIds.item(0).getTextContent();
+					bibliographicCitation += elocId;
+				}
+
 			} else {
-				String bibliographicCitation = new String("Ahead of print");
-				rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
+				bibliographicCitation = "Ahead of print";
 			}
+			rdf.put("bibliographicCitation", Arrays.asList(bibliographicCitation));
 
-			/* Copyright-Jahr */
+			/* Copyright-Jahr (alternativ: Copyright-Statement) */
+			String copYear = null;
 			elemList = new DocumentElementList(content, "copyright-year");
 			nodeList = elemList.getNodeList();
-			for (int i = 0; i < elemList.getLength(); i++) {
-				node = nodeList.item(i);
-				rdf.put("yearOfCopyright", Arrays.asList(node.getTextContent()));
-				break;
-			}
+
+			DocumentElementList elemListCopStatement =
+					new DocumentElementList(content, "copyright-statement");
+			NodeList nodeListCopStatement = elemListCopStatement.getNodeList();
+
+			if (elemList.getLength() > 0)
+				copYear = nodeList.item(0).getTextContent();
+			else if (elemListCopStatement.getLength() > 0) {
+				String copYearText = nodeListCopStatement.item(0).getTextContent();
+				copYear = copYearText.substring(copYearText.lastIndexOf(" ") + 1);
+			} else
+				copYear = pubYear;
+			rdf.put("yearOfCopyright", Arrays.asList(copYear));
 
 			/* Lizenz Neu */
 			List<Map<String, Object>> licenses = new ArrayList<>();
@@ -862,16 +943,59 @@ public class XmlUtils {
 			elemList = new DocumentElementList(content, "abstract");
 			nodeList = elemList.getNodeList();
 			if (elemList.getLength() > 0) {
-				Node paragraphNode = getFirstElementNode(nodeList.item(0));
-				Node boldNode = getFirstElementNode(paragraphNode);
-				if (boldNode != null
-						&& boldNode.getNodeName().equalsIgnoreCase("bold")) {
-					paragraphNode.removeChild(boldNode);
+				if (nodeList.item(0).getAttributes().getNamedItem("id") == null) {
+					if (elemList.getLength() > 0) {
+						Node paragraphNode = getFirstElementNode(nodeList.item(0));
+						Node boldNode = getFirstElementNode(paragraphNode);
+						if (boldNode != null
+								&& boldNode.getNodeName().equalsIgnoreCase("bold")) {
+							paragraphNode.removeChild(boldNode);
+						}
+						abstracts.add(paragraphNode.getTextContent().trim()
+								.replaceAll("[\\r\\n\\t\\u00a0]+", " ")
+								.replaceAll("\\s+", " "));
+					}
 				}
-				abstracts.add(paragraphNode.getTextContent().trim()
-						.replaceAll("[\\r\\n\\t\\u00a0]+", " ").replaceAll("\\s+", " "));
-			}
 
+				if (nodeList.item(0).getAttributes().getNamedItem("id") != null) {
+					List<String> textList = new ArrayList<>();
+					String txtContent = null;
+					DocumentElementList elemListSec =
+							new DocumentElementList(content, "sec");
+					NodeList nodeListSec = elemListSec.getNodeList();
+					if (elemListSec.getLength() > 0) {
+						for (int i = 0; i < elemListSec.getLength(); i++) {
+							Node titleNode = getFirstElementNode(nodeListSec.item(i));
+							if (titleNode.getNodeName().equalsIgnoreCase("table-wrap")
+									|| titleNode.getNodeName().equalsIgnoreCase("table")
+									|| titleNode.getNodeName().equalsIgnoreCase("fig"))
+								continue;
+							else if (titleNode.getNodeName().equalsIgnoreCase("p")) {
+								textList.add("Abstract: " + titleNode.getTextContent());
+							} else {
+								Node pNode = getNextElementNode(titleNode);
+								Node firstNode = getFirstElementNode(pNode);
+								if (firstNode != null) {
+									if (firstNode.getNodeName().equalsIgnoreCase("fig")
+											|| pNode.getNodeName().equalsIgnoreCase("fig"))
+										continue;
+								}
+								textList.add(
+										titleNode.getTextContent() + ": " + pNode.getTextContent());
+							}
+						}
+						txtContent = String.join(" ", textList);
+					} else {
+						Node titleNode = getFirstElementNode(nodeList.item(0));
+						Node pNode = getNextElementNode(titleNode);
+						textList.add(
+								titleNode.getTextContent() + ": " + pNode.getTextContent());
+						txtContent = textList.get(0);
+					}
+					abstracts.add(txtContent.trim().replaceAll("[\\r\\n\\t\\u00a0]+", " ")
+							.replaceAll("\\s+", " "));
+				}
+			}
 			elemList = new DocumentElementList(content, "trans-abstract");
 			nodeList = elemList.getNodeList();
 			if (elemList.getLength() > 0) {
@@ -999,7 +1123,7 @@ public class XmlUtils {
 		play.Logger.debug("ISSN ohne Bindestrich: " + issn);
 		WSResponse response = play.libs.ws.WS.url(
 				"https://lobid.org/resources/search?q=issn:" + issn + "&format=json")
-				.setFollowRedirects(true).get().get(2000);
+				.setFollowRedirects(true).get().get(20000);
 		InputStream input = response.getBodyAsStream();
 		String formsResponseBody =
 				CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
@@ -1057,15 +1181,38 @@ public class XmlUtils {
 		return false;
 	}
 
-	private static Node getFirstElementNode(Node parentNode) {
-		Node node = parentNode.getFirstChild();
-		while (node != null && Node.ELEMENT_NODE != node.getNodeType()) {
-			node = node.getNextSibling();
+	private static Node getFirstElementNode(Node parent) {
+		Node n = parent.getFirstChild();
+		while (n != null && Node.ELEMENT_NODE != n.getNodeType()) {
+			n = n.getNextSibling();
 		}
-		if (node == null) {
+		if (n == null) {
 			return null;
 		}
-		return node;
+		return n;
+	}
+
+	private static Node getNextElementNode(Node el) {
+		Node nd = el.getNextSibling();
+		while (nd != null) {
+			if (nd.getNodeType() == Node.ELEMENT_NODE) {
+				return nd;
+			}
+			nd = nd.getNextSibling();
+		}
+		return null;
+	}
+
+	private static List<Node> getChildElements(Node parent) {
+		NodeList children = parent.getChildNodes();
+		int childCount = children.getLength();
+		List<Node> nodes = new ArrayList<>(childCount);
+		for (int i = 0; i < childCount; i++) {
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.ELEMENT_NODE)
+				nodes.add(child);
+		}
+		return nodes;
 	}
 
 }

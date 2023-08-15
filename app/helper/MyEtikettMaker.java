@@ -217,7 +217,7 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 			WSResponse response = play.libs.ws.WS
 					.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
 					.setAuth(Globals.etikettUser, Globals.etikettPwd, WSAuthScheme.BASIC)
-					.setFollowRedirects(true).get().get(2000);
+					.setFollowRedirects(true).get().get(20000);
 			InputStream input = response.getBodyAsStream();
 			String content =
 					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
