@@ -98,6 +98,8 @@ public class OaiDispatcher {
 				internalAccessRoute + "pdfbox"));
 		transformers.add(new Transformer(namespace + "aleph", "aleph",
 				internalAccessRoute + "aleph"));
+		transformers.add(new Transformer(namespace + "alma", "alma",
+				internalAccessRoute + "alma"));
 		transformers.add(new Transformer(namespace + "mets", "mets",
 				internalAccessRoute + "mets"));
 		transformers.add(new Transformer(namespace + "openaire", "openaire",
@@ -111,8 +113,9 @@ public class OaiDispatcher {
 		OaiDispatcher.contentModelsInit(transformers);
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace
-				+ "aleph, " + namespace + "mets, " + namespace + "rdf, " + namespace
-				+ "wgl," + namespace + "openaire" + namespace + "mods";
+				+ "aleph, " + namespace + "alma, " + namespace + "mets, " + namespace
+				+ "rdf, " + namespace + "wgl," + namespace + "openaire, " + namespace
+				+ "mods";
 		play.Logger.info(result);
 		return result;
 	}
