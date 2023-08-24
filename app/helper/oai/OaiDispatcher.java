@@ -59,6 +59,7 @@ public class OaiDispatcher {
 			createOpenAccessSet(node);
 			createUrnSets(node);
 			createAlephSet(node);
+			createAlmaSet(node);
 			createContentTypeSet(node);
 			play.Logger.debug("Start update Index");
 			new Modify().updateIndex(node.getPid());
@@ -74,6 +75,7 @@ public class OaiDispatcher {
 		addOaiDcTransformer(node);
 		addEpicurTransformer(node);
 		addAlephTransformer(node);
+		addAlmaTransformer(node);
 		addMetsTransformer(node);
 		addRdfTransformer(node);
 		addWglTransformer(node);
@@ -193,6 +195,13 @@ public class OaiDispatcher {
 		}
 	}
 
+	private static void createAlmaSet(Node node) {
+		if (node.hasLinkToCatalogId()) {
+			play.Logger.info(node.getPid() + " add alma set!");
+			addSet(node, "alma");
+		}
+	}
+
 	private static void addSet(Node node, String name) {
 		play.Logger.info("Add OAI-Set " + name + " to " + node.getPid());
 		String spec = name;
@@ -251,6 +260,8 @@ public class OaiDispatcher {
 					continue; // implicitly added - or not allowed to set
 				if ("aleph".equals(t))
 					continue; // implicitly added - or not allowed to set
+				if ("alma".equals(t))
+					continue; // implicitly added - or not allowed to set
 				if ("mets".equals(t))
 					continue; // implicitly added - or not allowed to set
 				if ("rdf".equals(t))
@@ -284,6 +295,17 @@ public class OaiDispatcher {
 					|| "webpage".equals(type))
 				if (node.hasLinkToCatalogId()) {
 					node.addTransformer(new Transformer("aleph"));
+				}
+		}
+	}
+
+	private static void addAlmaTransformer(Node node) {
+		String type = node.getContentType();
+		if (node.hasPersistentIdentifier()) {
+			if ("monograph".equals(type) || "journal".equals(type)
+					|| "webpage".equals(type))
+				if (node.hasLinkToCatalogId()) {
+					node.addTransformer(new Transformer("alma"));
 				}
 		}
 	}
