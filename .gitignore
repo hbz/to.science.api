@@ -1,6 +1,7 @@
 logs
 project/target
 target
+target-eclipse
 tmp
 .history
 dist
@@ -24,3 +25,4 @@ scripts/variables.conf
 *.HIST
 *~
 *.class
+/bin/
