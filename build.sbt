@@ -7,8 +7,10 @@ scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
   cache,ws,javaWs,javaJdbc,
+  "org.marc4j" % "marc4j" % "2.8.0", 
   "junit" % "junit" % "4.11", 
   "org.apache.pdfbox" % "pdfbox" % "1.8.0",
+  "org.apache.commons" % "commons-lang3" % "3.4",
   "org.bouncycastle" % "bcprov-jdk15" % "1.44",
   "org.bouncycastle" % "bcmail-jdk15" % "1.44", 
   "com.ibm.icu" % "icu4j" % "3.8",
@@ -44,7 +46,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.dataformat" %"jackson-dataformat-xml" %"2.6.3",
   "javax.mail" % "mail" % "1.4.2",
   "org.apache.lucene" % "lucene-core" % "4.7.2",  
-  "mysql" % "mysql-connector-java" % "5.1.18"
+  "mysql" % "mysql-connector-java" % "8.0.23"
 )
 
 val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
@@ -52,6 +54,7 @@ val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers := Seq(Resolver.mavenLocal,"Maven Central Server" at "https://repo1.maven.org/maven2","edoweb releases" at "https://edoweb.github.io/releases","hypnoticocelot" at "https://oss.sonatype.org/content/repositories/releases/", "aduna" at "https://maven.ontotext.com/content/repositories/aduna/" , "Typesafe repository" at "https://repo.typesafe.com/typesafe/ivy-releases/", "Duraspace releases" at "https://m2.duraspace.org/content/repositories/thirdparty" )
+"Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/","Play2war plugins release" at "https://repository-play-war.forge.cloudbees.com/release/","Duraspace releases" at "https://m2.duraspace.org/content/repositories/thirdparty"
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 

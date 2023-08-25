@@ -68,13 +68,18 @@
 					<h2 id="page-title-suffix" class="titlePost title-suffix">
 						@if(hit.contains("contribution")){
 							<ol class="author-title-list">
-								@for(c <-views.Helper.listAuthors(hit)){
+								@for(a <-views.Helper.listAuthors(hit)){
+									<li>@displayAuthors(a.get("id").toString(),a.get("label").toString(),a.get("roleId").toString(),a.get("roleName").toString())</li>
+								}
+							</ol>
+							<ol class="contributors-title-list">
+								@for(c <-views.Helper.listContributors(hit)){
 									<li>@displayAuthors(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())</li>
 								}
 							</ol>
 						
 						}else{
-							<ol class="author-title-list">
+							<ol class="creators-title-list">
 							@for(c <-views.Helper.listCreators(hit)){
 									<li>@displayCreators(c.get("id"),c.get("label").toString())</li>
 								}

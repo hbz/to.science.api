@@ -125,7 +125,7 @@ public class Forms extends MyController {
 	public static Promise<Result> postLogout() {
 		return new CreateAction().call((userId) -> {
 
-			flash("message", "Goodby " + session().get("username")
+			flash("message", "Goodbye " + session().get("username")
 					+ ". You were successfully logged out");
 			session().clear();
 			return redirect(routes.Application.index());

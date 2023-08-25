@@ -144,6 +144,7 @@ public class Resource extends MyController {
 			return jsonList(namespace, contentType, from, until);
 		} catch (HttpArchiveException e) {
 			return Promise.promise(new Function0<Result>() {
+				@Override
 				public Result apply() {
 					return JsonMessage(new Message(e, e.getCode()));
 				}
@@ -151,6 +152,7 @@ public class Resource extends MyController {
 		} catch (Exception e) {
 			return Promise.promise(new Function0<Result>() {
 
+				@Override
 				public Result apply() {
 					return JsonMessage(new Message(e, 500));
 				}
@@ -287,6 +289,7 @@ public class Resource extends MyController {
 		});
 	}
 
+	@SuppressWarnings("resource")
 	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listData(@PathParam("pid") String pid) {
 		return new ReadDataAction().call(pid, node -> {
@@ -320,7 +323,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "patchResource", value = "patchResource", notes = "Patches a Resource", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> patchResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			try {
@@ -342,7 +345,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "patchResources", value = "patchResources", notes = "Applies the PATCH object to the resource and to all child resources", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "RegalObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "ToScienceObject wich specifies a values that must be modified in the resource and it's childs", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> patchResources(@PathParam("pid") String pid) {
 		return new BulkActionAccessor().call((userId) -> {
 			ToScienceObject object = getRegalObject(request().body().asJson());
@@ -359,7 +362,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "updateResource", value = "updateResource", notes = "Updates or Creates a Resource with the path decoded pid", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> updateResource(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
 			play.Logger.debug("Updating Pid: " + pid);
@@ -383,7 +386,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "createNewResource", value = "createNewResource", notes = "Creates a Resource on a new position", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "New Object", required = true, dataType = "RegalObject", paramType = "body") })
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "ToScienceObject", paramType = "body") })
 	public static Promise<Result> createResource(
 			@PathParam("namespace") String namespace) {
 		return new CreateAction().call((userId) -> {
@@ -433,6 +436,7 @@ public class Resource extends MyController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
+
 		return new ModifyAction().call(pid, node -> {
 			try {
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
@@ -442,6 +446,7 @@ public class Resource extends MyController {
 				throw new HttpArchiveException(500, e);
 			}
 		});
+
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "updateMetadata2", value = "updateMetadata2", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
@@ -453,6 +458,44 @@ public class Resource extends MyController {
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				return JsonMessage(new Message(result));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "updateDeepGreen", value = "updateDeepGreen", notes = "Updates the metadata of the resource using DeepGreen data.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	public static Promise<Result> updateDeepGreen(@PathParam("pid") String pid,
+			@QueryParam("embargo_duration") int embargo_duration,
+			@QueryParam("deepgreen_id") String deepgreen_id) {
+		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("Starting updateDeepGreen data with pid=" + pid);
+			play.Logger.debug("request().body().asXml()=" + request().body().asXml());
+			try {
+				/**
+				 * Wir legen 2 Datenstroeme an:
+				 * 
+				 * 1. ungemappte LRMI-Daten als neuartiger Datenstrom "Lrmidata" ==>
+				 * fuer DeepGreen erstmal nicht machen
+				 */
+				/**
+				 * String result1 = modify.updateAndEnrichLrmiData(pid,
+				 * request().body().asJson()); play.Logger.debug(result1);
+				 */
+
+				/**
+				 * 2. gemappte DeepGreen-Daten als Metadata2-Datenstrom
+				 */
+				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
+				RDFFormat format = RDFFormat.NTRIPLES;
+				String result2 = modify.updateLobidify2AndEnrichDeepGreenData(pid,
+						embargo_duration, deepgreen_id, format, request().body().asXml());
+				play.Logger.debug(result2);
+
+				// return JsonMessage(new Message(result1 + "\n" + result2));
+				return JsonMessage(new Message(result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
@@ -630,7 +673,7 @@ public class Resource extends MyController {
 			@QueryParam("from") int from, @QueryParam("until") int until,
 			@QueryParam("format") String format) {
 		return new ReadMetadataAction().call(null, node -> {
-			List<Map<String, Object>> hitMap = new ArrayList<Map<String, Object>>();
+			List<Map<String, Object>> hitMap = new ArrayList<>();
 			try {
 				SearchResponse response = getSearchResult(queryString, from, until);
 				SearchHits hits = response.getHits();
@@ -844,6 +887,15 @@ public class Resource extends MyController {
 			MabRecord result = transform.aleph(pid);
 			response().setContentType("application/xml");
 			return ok(mab.render(result));
+		});
+	}
+	
+	@ApiOperation(produces = "application/xml", nickname = "asAlmaNz", value = "asAlmaNz", notes = "Returns an Alma Network Zone xml display of the resource", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asAlmaNz(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			MabRecord result = transform.aleph(pid);
+			response().setContentType("application/xml");
+			return ok(marc.render(result));
 		});
 	}
 
@@ -1098,10 +1150,9 @@ public class Resource extends MyController {
 					}
 					Globals.heritrix.createJobDir(conf);
 					return JsonMessage(new Message(result, 200));
-				} else {
-					throw new HttpArchiveException(409,
-							"Please provide JSON config in request body.");
 				}
+				throw new HttpArchiveException(409,
+						"Please provide JSON config in request body.");
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

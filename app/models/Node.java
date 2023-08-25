@@ -49,10 +49,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 /**
- * A Node of object graph. Nodes are used to model complex objects
+ * A Node of object graph. Nodes are used to model complex objects Diese Klasse
+ * modelliert ein Fedora Objekt in to.science.
  * 
  * 
  * @author Jan Schnasse, schnasse@hbz-nrw.de
+ * @author Ingolf Kuss, kuss@hbz-nrw.de
  * 
  */
 @XmlRootElement(name = "object")
@@ -129,7 +131,6 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * Creates a new node with a certain pid.
 	 * 
 	 * @param pid the ID of the node.
 	 */

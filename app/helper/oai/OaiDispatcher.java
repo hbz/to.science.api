@@ -44,6 +44,7 @@ import archive.fedora.RdfUtils;
  *
  */
 public class OaiDispatcher {
+	static String msg = "";
 
 	/**
 	 * @param node the node to be published on the oai interface
@@ -60,12 +61,12 @@ public class OaiDispatcher {
 			createAlephSet(node);
 			createAlmaSet(node);
 			createContentTypeSet(node);
+			play.Logger.debug("Start update Index");
 			new Modify().updateIndex(node.getPid());
 			return node.getPid() + " successfully created oai sets!";
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	public static void updateTransformer(List<String> transformers, Node node) {
@@ -115,7 +116,7 @@ public class OaiDispatcher {
 		String result = "Reinit contentModels " + namespace + "epicur, " + namespace
 				+ "oaidc, " + namespace + "pdfa, " + namespace + "pdfbox, " + namespace
 				+ "aleph, " + namespace + "alma, " + namespace + "mets, " + namespace
-				+ "rdf, " + namespace + "wgl," + namespace + "openaire" + namespace
+				+ "rdf, " + namespace + "wgl," + namespace + "openaire, " + namespace
 				+ "mods";
 		play.Logger.info(result);
 		return result;
