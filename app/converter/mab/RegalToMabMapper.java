@@ -99,8 +99,8 @@ public class RegalToMabMapper {
 
 	private void handleFreeFields(String subj, String pred, String obj) {
 
-		if (archive.fedora.Vocabulary.REL_MAB_527.equals(pred)) {
-			String id = obj.substring(obj.lastIndexOf('/') + 1, obj.length() - 2);
+		if (archive.fedora.Vocabulary.REL_HBZ_ID.equals(pred)) {
+			String id = obj;
 			if (!id.startsWith("urn")) {
 				record.id = id;
 			}

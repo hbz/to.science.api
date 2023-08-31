@@ -155,7 +155,8 @@ public class Helper {
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
 			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
-					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)
+					&& !"http://id.loc.gov/vocabulary/relators/aut".equals(roleUri)) {
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
 				contribution.put("label", name);
@@ -387,8 +388,29 @@ public class Helper {
 			String roleUri = c.at("/role/0/@id").asText();
 			String uri = c.at("/agent/0/@id").asText();
 
-			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
-					|| "http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+			if ("http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)
+					|| "http://id.loc.gov/vocabulary/relators/aut".equals(roleUri)) {
+				Map<String, Object> contribution = new HashMap<>();
+				contribution.put("id", uri);
+				contribution.put("label", name);
+				contribution.put("roleName", role);
+				contribution.put("roleId", roleUri);
+				result.add(contribution);
+			}
+		}
+		return result;
+	}
+	
+	public static List<Map<String, Object>> listContributors(Map<String, Object> h) {
+		List<Map<String, Object>> result = new ArrayList<>();
+		JsonNode hit = new ObjectMapper().valueToTree(h);
+		for (JsonNode c : hit.at("/contribution")) {
+			String name = c.at("/agent/0/label").asText();
+			String role = c.at("/role/0/label").asText();
+			String roleUri = c.at("/role/0/@id").asText();
+			String uri = c.at("/agent/0/@id").asText();
+
+			if ("http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)) {
 				Map<String, Object> contribution = new HashMap<>();
 				contribution.put("id", uri);
 				contribution.put("label", name);
@@ -433,7 +455,8 @@ public class Helper {
 		for (JsonNode c : hit.at("/contribution")) {
 			String roleUri = c.at("/role/0/@id").asText();
 			if (!"http://id.loc.gov/vocabulary/relators/ctb".equals(roleUri)
-					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)) {
+					&& !"http://id.loc.gov/vocabulary/relators/cre".equals(roleUri)
+					&& !"http://id.loc.gov/vocabulary/relators/aut".equals(roleUri)) {
 				return true;
 			}
 		}

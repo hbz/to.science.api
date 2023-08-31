@@ -1,6 +1,7 @@
 logs
 project/target
 target
+target-eclipse
 tmp
 .history
 dist
@@ -19,8 +20,8 @@ data
 .project
 conf/application.conf
 conf/mail.properties
+conf/site.conf
 scripts/variables.conf
 *.HIST
 *~
 *.class
-/bin/
