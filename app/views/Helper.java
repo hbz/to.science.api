@@ -173,15 +173,12 @@ public class Helper {
 		List<Map<String, Object>> result2 = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
 		for (JsonNode c : hit.at("/subject")) {
-			play.Logger.debug("JsonNode /subject: " + c.toString());
 			if (c.has("componentList")) {
 				result1.add(getComponentList(c));
 			} else {
 				String label = c.at("/label").asText();
 				if (label != null && !label.isEmpty()) {
-					play.Logger.debug("label=" + label);
 					String uri = c.at("/@id").asText();
-					play.Logger.debug("uri=" + uri);
 					if (uri.contains("rpb#nr")) {
 						/**
 						 * Schlagworte mit diesem prefix kommen nicht zur Anzeige
@@ -189,11 +186,9 @@ public class Helper {
 						continue;
 					}
 					String sourceId = c.at("/source/0/@id").asText();
-					play.Logger.debug("sourceId=" + sourceId);
 					String source = c.at("/source/0/label").asText();
-					play.Logger.debug("source=" + source);
+			
 					String notation = c.at("/notation").asText();
-					play.Logger.debug("notation=" + notation);
 
 					if (uri == null || uri.isEmpty()) {
 						/**
@@ -209,8 +204,6 @@ public class Helper {
 					subject.put("source", source);
 					subject.put("sourceId", sourceId);
 					subject.put("sourceName", getSubjectSource(sourceId, uri, notation));
-					play.Logger
-							.debug("sourceName=" + getSubjectSource(sourceId, uri, notation));
 					result2.add(subject);
 				}
 			}
