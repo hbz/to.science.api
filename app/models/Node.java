@@ -74,6 +74,7 @@ public class Node implements java.io.Serializable {
 	private String objectTimestampFile = null;
 	private List<Link> links = new Vector<Link>();
 	private List<Transformer> transformer = new Vector<Transformer>();
+	private HashMap<String, String> metadata = new HashMap();
 
 	private String metadata1 = null;
 	private String metadata2 = null;
@@ -763,6 +764,11 @@ public class Node implements java.io.Serializable {
 	 */
 	public Node setFileChecksum(String fileChecksum) {
 		this.fileChecksum = fileChecksum;
+		return this;
+	}
+
+	public Node setMetadata(String metadataType, String metadata) {
+		this.metadata.put(metadataType, metadata);
 		return this;
 	}
 
