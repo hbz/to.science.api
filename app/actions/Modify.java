@@ -1199,4 +1199,42 @@ public class Modify extends RegalAction {
 		}
 	}
 
+	public String updateMetadataJson(Node node, String content) {
+		try {
+			return updateMetadata(archive.fedora.Vocabulary.metadataJson, node,
+					content);
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+
+	public String updateMetadata(String metadataType, Node node, String content) {
+		try {
+			String pid = node.getPid();
+			play.Logger.debug(
+					"Updating metadata of type " + metadataType + " on PID " + pid);
+			play.Logger.debug("content: " + content);
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			File file = CopyUtils.copyStringToFile(content);
+			play.Logger
+					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
+			node.setMetadataFile(metadataType, file.getAbsolutePath());
+			node.setMetadata(metadataType, content);
+			OaiDispatcher.makeOAISet(node);
+			reindexNodeAndParent(node);
+			return pid + " metadata of type " + metadataType
+					+ " successfully updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
 }

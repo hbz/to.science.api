@@ -463,8 +463,9 @@ public class Resource extends MyController {
 					play.Logger.debug("rdf=" + rdf.toString());
 					// ******************************
 
-					modify.updateMetadataJson(readNode, toscienceDummy);
-					play.Logger.debug("Done toscienceJson Mapping");
+					modify.
+					// updateMetadataJson(readNode, toscienceDummy);
+							play.Logger.debug("Done toscienceJson Mapping");
 				}
 
 				/**

@@ -79,9 +79,7 @@ public class RdfHelper {
 		} catch (Exception e) {
 			play.Logger.error("Lobid(RDF) Content could not be convert to Map", e);
 		}
-
 		return rdf;
-
 	}
 
 }
