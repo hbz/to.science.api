@@ -388,7 +388,7 @@ public class Modify extends RegalAction {
 			content = rewriteContent(content, pid);
 			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
-			node.setMetadataFile(file.getAbsolutePath());
+			node.setMetadataFile("metadata", file.getAbsolutePath());
 			if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
 				List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
 						archive.fedora.Vocabulary.REL_LOBID_DOI, content,
