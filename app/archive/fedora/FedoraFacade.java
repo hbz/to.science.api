@@ -397,8 +397,12 @@ public class FedoraFacade {
 			}
 			play.Logger.debug("Updated stream");
 		}
-		if (node.getMetadataFile() != null) {
-			utils.updateMetadataStream(node);
+
+		if (node.getMetadataFile("metadata") != null) {
+			utils.updateMetadataStream(node, "metadata");
+		}
+		if (node.getMetadataFile("toscience") != null) {
+			utils.updateMetadataJsonStream(node);
 		}
 		if (node.getMetadata2File() != null) {
 			utils.updateMetadata2Stream(node);
