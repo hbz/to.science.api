@@ -439,6 +439,36 @@ public class Resource extends MyController {
 
 		return new ModifyAction().call(pid, node -> {
 			try {
+
+				/**
+				 * 1. toscienceJson
+				 */
+
+				Node readNode = readNodeOrNull(pid);
+				play.Logger
+						.debug("readNode.getContentType()= " + readNode.getContentType());
+				if (!readNode.getContentType().contains("file")
+						&& !readNode.getContentType().contains("part")
+						&& !readNode.getContentType().contains("monograph")) {
+					String toscienceDummy =
+							"{\"funder\":{\"prefLabel\":\"InDigO\",\"@id\":\"https://www.dh.nrw/kooperationen/InDigO-90\"},\"creator\":[{\"affiliation\":{\"prefLabel\":\"Technische Hochschule Köln\",\"@id\":\"https://ror.org/014nnvj65\",\"type\":\"Organization\"},\"academicDegree\":\"Dr.\",\"prefLabel\":\"Autor1\",\"@id\":\"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/QXV0b3Ix\",\"type\":\"Person\"}],\"subject\":[{\"prefLabel\":\"Schlagwort1\",\"@id\":\"https://api.toscience.hbz-nrw.de/adhoc/uri/U2NobGFnd29ydDE=\"}],\"description\":[\"Dies ist eine TestResource\"],\"language\":[{\"prefLabel\":\"German\",\"@id\":\"http://id.loc.gov/vocabulary/iso639-2/deu\"}],\"medium\":[{\"prefLabel\":\"Daten\",\"@id\":\"https://w3id.org/kim/hcrt/data\"}],\"title\":[\"UploadTest Hasan\"],\"@context\":\"https://api.hoerkaen.hbz-nrw.de/context.json\",\"isPrimaryTopic\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\",\"license\":{\"prefLabel\":\"CC BY 4.0\",\"@id\":\"https://creativecommons.org/licenses/by/4.0/\"},\"yearOfCopyright\":[\"2023\"],\"@id\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\",\"isDescribedBy\":{\"@id\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\",\"describes\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\"},\"department\":[{\"prefLabel\":\"Informatik\",\"@id\":\"https://w3id.org/kim/hochschulfaechersystematik/n079\"}],\"contentType\":\"researchData\"}";
+					play.Logger.debug("toscienceJson will be mapped");
+
+					// ******************************
+					RDFFormat format = RDFFormat.NTRIPLES;
+					Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode, format,
+							request().body().asText());
+
+					play.Logger.debug("rdf=" + rdf.toString());
+					// ******************************
+
+					modify.updateMetadataJson(readNode, toscienceDummy);
+					play.Logger.debug("Done toscienceJson Mapping");
+				}
+
+				/**
+				 * 2. METADATA2
+				 */
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				return JsonMessage(new Message(result));
@@ -889,7 +919,7 @@ public class Resource extends MyController {
 			return ok(mab.render(result));
 		});
 	}
-	
+
 	@ApiOperation(produces = "application/xml", nickname = "asAlmaNz", value = "asAlmaNz", notes = "Returns an Alma Network Zone xml display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asAlmaNz(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
