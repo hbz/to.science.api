@@ -435,7 +435,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "updateMetadata", value = "updateMetadata", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "Metadata", required = true, dataType = "ToScienceObject", paramType = "body") })
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "object", paramType = "body") })
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 
 		return new ModifyAction().call(pid, node -> {
