@@ -439,7 +439,15 @@ public class Resource extends MyController {
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 
 		return new ModifyAction().call(pid, node -> {
+
 			try {
+
+				//
+				play.Logger.debug("request().body().asJson().toString()="
+						+ request().body().asJson().toString());
+				play.Logger
+						.debug("request().body().asJson()=" + request().body().asJson());
+				//
 
 				/**
 				 * 1. toscienceJson
