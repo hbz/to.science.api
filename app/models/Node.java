@@ -610,6 +610,15 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * 
+	 * @param metadataType (toscience | metadata2)
+	 * @return returns the corresponding data stream
+	 */
+	public String getMetadata(String metadataType) {
+		return metadata.get(metadataType);
+	}
+
+	/**
 	 * @return n-triple metadata as string
 	 */
 	@JsonIgnore()

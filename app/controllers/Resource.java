@@ -462,12 +462,14 @@ public class Resource extends MyController {
 							request().body().asText());
 
 					play.Logger.debug("rdf=" + rdf.toString());
-					JSONObject jsObject = new JSONObject(rdf);
-					play.Logger.debug("rdfAsJson=" + jsObject.toString());
+					JSONObject lobidAsJson = new JSONObject(rdf);
+					play.Logger.debug("rdfAsJson=" + lobidAsJson.toString());
 
 					// ******************************
 
-					modify.updateMetadataJson(readNode, toscienceDummy);
+					modify.updateMetadataJson(readNode, lobidAsJson.toString());
+					play.Logger
+							.debug("tosciecne from Node" + readNode.getMetadata("toscience"));
 					play.Logger.debug("Done toscienceJson Mapping");
 				}
 

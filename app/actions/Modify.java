@@ -1201,8 +1201,7 @@ public class Modify extends RegalAction {
 
 	public String updateMetadataJson(Node node, String content) {
 		try {
-			return updateMetadata(archive.fedora.Vocabulary.metadataJson, node,
-					content);
+			return updateMetadata("toscience", node, content);
 		} catch (Exception e) {
 			play.Logger.error(e.getMessage());
 			throw new RuntimeException(e);
