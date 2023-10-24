@@ -66,7 +66,7 @@ public class RdfHelper {
 
 			InputStream stream = new ByteArrayInputStream(
 					rewriteContent.getBytes(StandardCharsets.UTF_8));
-			// profile.getContext().get("@context")); ?
+
 			rdf = jsonConverter.convert(n.getPid(), stream, format,
 					profile.getContext().get("@context"));
 

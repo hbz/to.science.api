@@ -41,6 +41,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -461,6 +462,9 @@ public class Resource extends MyController {
 							request().body().asText());
 
 					play.Logger.debug("rdf=" + rdf.toString());
+					JSONObject jsObject = new JSONObject(rdf);
+					play.Logger.debug("rdfAsJson=" + jsObject.toString());
+
 					// ******************************
 
 					modify.updateMetadataJson(readNode, toscienceDummy);
