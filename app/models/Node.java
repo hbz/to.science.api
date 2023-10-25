@@ -67,6 +67,7 @@ public class Node implements java.io.Serializable {
 
 	private String metadataFile = null;
 	private String metadata2File = null;
+	private String ktblDataFile = null;
 	private String seqFile = null;
 	private String confFile = null;
 	private String urlHistFile = null;
@@ -77,6 +78,7 @@ public class Node implements java.io.Serializable {
 
 	private String metadata1 = null;
 	private String metadata2 = null;
+	private String ktbldata = null;
 	private String seq = null;
 
 	private String conf = null;
@@ -324,6 +326,22 @@ public class Node implements java.io.Serializable {
 	 */
 	public void setMetadata2File(String metadataFile) {
 		this.metadata2File = metadataFile;
+	}
+
+	/**
+	 * The KTBL-Data file
+	 * 
+	 * @return the absolute path to file
+	 */
+	public String getKtblDataFile() {
+		return ktblDataFile;
+	}
+
+	/**
+	 * @param The absolutepath to the metadatafile
+	 */
+	public void setKtblDataFile(String metadataFile) {
+		this.ktblDataFile = metadataFile;
 	}
 
 	/**
@@ -639,6 +657,22 @@ public class Node implements java.io.Serializable {
 	 */
 	public Node setMetadata2(String metadata2) {
 		this.metadata2 = metadata2;
+		return this;
+	}
+
+	/**
+	 * @return KTBL metadata as string
+	 */
+	public String getKtblData() {
+		return ktbldata;
+	}
+
+	/**
+	 * @param KTBL metadata in json format
+	 * @return this
+	 */
+	public Node setKtblData(String ktbldata) {
+		this.ktbldata = ktbldata;
 		return this;
 	}
 

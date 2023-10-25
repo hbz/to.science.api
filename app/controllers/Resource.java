@@ -54,6 +54,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
 import actions.Enrich;
+import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
@@ -502,6 +503,55 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("Starting updateKtbl data with pid=" + pid);
+			play.Logger
+					.debug("request().body().asJson()=" + request().body().asJson());
+			String ktblContent = null;
+			try {
+				Node readNode = new Read().readNode(pid);
+				/**
+				 * Wir legen 3 Datenstroeme an:
+				 * 
+				 * 1. ungemappte KTBL-Daten als neuartiger Datenstrom "ktbl" nur das,
+				 * was unter "info" :[ "ktbl" : [ steht
+				 */
+				ktblContent =
+						modify.updateAndEnrichKtblData(pid, request().body().asJson());
+				play.Logger.debug("ktblContent = " + ktblContent);
+				String result1 = "KTBL metadata successfully updated and enriched.";
+				play.Logger.debug(result1);
+
+				/**
+				 * 2. gemappte KTBL-Daten als Metadata2-Datenstrom
+				 */
+				/* Format nicht nach dem Header richten, es muss NTRIPLES sein: */
+				RDFFormat format = RDFFormat.NTRIPLES;
+				String result2 = modify.updateLobidify2AndEnrichKtblData(readNode,
+						format, request().body().asJson().toString());
+				play.Logger.debug(result2);
+
+				/**
+				 * 3. toscienceJson (Metadata2 --> toscienceJson)
+				 */
+				/**
+				 * ToDo: JSONObject tosJSONObject = ... play.Logger.debug("tosJSONObject
+				 * = " + tosJSONObject.toString()); modify.updateMetadataJson(readNode,
+				 * tosJSONObject.toString()); play.Logger.debug("Done toscienceJson
+				 * Mapping");
+				 */
+
+				return JsonMessage(new Message(result1 + "\n" + result2));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "updateData", value = "updateData", notes = "Updates the data of a resource", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
@@ -889,7 +939,7 @@ public class Resource extends MyController {
 			return ok(mab.render(result));
 		});
 	}
-	
+
 	@ApiOperation(produces = "application/xml", nickname = "asAlmaNz", value = "asAlmaNz", notes = "Returns an Alma Network Zone xml display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asAlmaNz(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {

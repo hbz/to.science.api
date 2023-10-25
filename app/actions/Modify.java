@@ -65,6 +65,7 @@ import controllers.MyController;
 import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
+import helper.KtblMapper;
 import helper.MyEtikettMaker;
 import helper.URN;
 import helper.oai.OaiDispatcher;
@@ -215,6 +216,23 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * This method creates a KTBL datastream (unmapped) and appends it to a
+	 * ressource.
+	 * 
+	 * @param pid The pid of the ressource that must be updated
+	 * @param content The metadata in the format KTBL
+	 * @return a short message
+	 */
+	public String updateAndEnrichKtblData(String pid, JsonNode content) {
+		try {
+			Node node = new Read().readNode(pid);
+			return updateAndEnrichKtblData(node, content.toString());
+		} catch (Exception e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * @param node The node that must be updated
 	 * @param content The metadata as rdf string
 	 * @return a short message
@@ -325,6 +343,69 @@ public class Modify extends RegalAction {
 					e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * The method maps KTBL metadata to the Lobid2 format and creates a data
+	 * stream "metadata2" of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param format RDF-Format, z.B. NTRIPLES
+	 * @param content The metadata as KTBL string
+	 * @return a short message
+	 */
+	public String updateLobidify2AndEnrichKtblData(Node node, RDFFormat format,
+			String content) {
+
+		play.Logger.debug("Start updateLobidify2AndEnrichKtblData");
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		Map<String, Object> rdf =
+				new KtblMapper().getLd2LobidifyKtbl(node, content);
+		play.Logger.debug("Mapped KTBL data to lobid2!");
+		updateMetadata2(node, rdfToString(rdf, format));
+		play.Logger.debug("Updated Metadata2 datastream!");
+
+		String enrichMessage = Enrich.enrichMetadata2(node);
+		return pid
+				+ " KTBL-metadata successfully updated, lobidified and enriched! "
+				+ enrichMessage;
+	}
+
+	/**
+	 * This method creates a KTBL data stream (unmapped) of the resource
+	 * 
+	 * @param node The node of the resource that must be updated
+	 * @param content The metadata as KTBL string
+	 * @return a short message
+	 */
+	public String updateAndEnrichKtblData(Node node, String content) {
+		play.Logger.debug("Start Update and enrich KTBL data.");
+		play.Logger.debug("content: " + content);
+		String pid = node.getPid();
+		if (content == null) {
+			throw new HttpArchiveException(406,
+					pid + " You've tried to upload an empty string."
+							+ " This action is not supported."
+							+ " Use HTTP DELETE instead.\n");
+		}
+
+		String content_toscience = new KtblMapper().getLobidifyKtbl(node, content);
+		play.Logger.debug(
+				"Substituted IDs in content. Content is now: " + content_toscience);
+		updateKtblData(node, content_toscience);
+
+		String enrichMessage = new Enrich().enrichKtblData(node);
+		msg = pid + " KTBL-metadata of " + node.getPid()
+				+ " successfully updated and enriched! " + enrichMessage;
+		play.Logger.debug(msg);
+		return msg;
 	}
 
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(String pid,
@@ -1122,6 +1203,30 @@ public class Modify extends RegalAction {
 			return pid + " metadata2 successfully updated!";
 		} catch (RdfException e) {
 			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	String updateKtblData(Node node, String content) {
+		try {
+			String pid = node.getPid();
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			File file = CopyUtils.copyStringToFile(content);
+			node.setKtblDataFile(file.getAbsolutePath());
+			play.Logger.debug("file.getAbsolutePath(): " + file.getAbsolutePath());
+			node.setKtblData(content);
+			OaiDispatcher.makeOAISet(node);
+			play.Logger.debug("Re-Indexing node and parent");
+			reindexNodeAndParent(node);
+			msg = "LRMI data successfully updated!";
+			play.Logger.debug(msg);
+			return pid + " " + msg;
 		} catch (IOException e) {
 			throw new UpdateNodeException(e);
 		}

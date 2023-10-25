@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,18 +29,22 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
 
 import archive.fedora.RdfUtils;
 import archive.fedora.XmlUtils;
 import helper.MyEtikettMaker;
 import models.Globals;
 import models.Node;
+import play.libs.ws.WSResponse;
 
 /**
  * Add a label for each uri
@@ -47,6 +53,8 @@ import models.Node;
  *
  */
 public class Enrich {
+
+	private InputStream input;
 
 	private static final String PREF_LABEL =
 			"http://www.w3.org/2004/02/skos/core#prefLabel";
@@ -91,6 +99,30 @@ public class Enrich {
 					+ e.getMessage();
 		}
 		return "Enrichment of " + node.getPid() + " succeeded!";
+	}
+
+	/**
+	 * Diese Methode reichert KTBL-Daten an.
+	 * 
+	 * @param node Der Knoten der Ressource
+	 * @return Nachricht (Zeichenkette)
+	 */
+	public String enrichKtblData(Node node) {
+		try {
+			play.Logger.info("Enrich KBTL data of " + node.getPid());
+			String ktblData = node.getKtblData();
+			if (ktblData == null || ktblData.isEmpty()) {
+				play.Logger.info("No KTBL data to enrich " + node.getPid());
+				return "No KTBL data to enrich " + node.getPid();
+			}
+			ktblData = enrichKtblData(ktblData);
+			new Modify().updateKtblData(node, ktblData);
+		} catch (Exception e) {
+			play.Logger.debug("", e);
+			return "Enrichment of LRMI data of " + node.getPid() + " failed !\n"
+					+ e.getMessage();
+		}
+		return "Enrichment LRMI data of " + node.getPid() + " succeeded !";
 	}
 
 	private static void enrichAll(Node node, String metadata,
@@ -202,6 +234,72 @@ public class Enrich {
 			}
 		}
 		return new Vector<>(result.keySet());
+	}
+
+	/**
+	 * Diese Methode reichert KTBL-Daten an. Insbesondere wird überprüft, ob es
+	 * für Labels auch URIs gibt. Falls nicht, werden welche angelegt
+	 * (ad-Hoc-URIs).
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 * @param content Die KTBL-Daten im Format JSON
+	 * @date 2023-10-25
+	 * 
+	 * @return Die angereicherten KTBL-Daten im Format Zeichenkette (String)
+	 */
+	public String enrichKtblData(String content) {
+		try {
+			play.Logger.debug("Start enrichment of ktbl data");
+			// KTBL-Daten nach JSONObject wandeln
+			JSONObject jcontent = new JSONObject(content);
+			JSONArray arr = null;
+			JSONObject obj = null;
+
+			String creatorName = null;
+			if (jcontent.has("creator")) {
+				arr = jcontent.getJSONArray("creator");
+				for (int i = 0; i < arr.length(); i++) {
+					obj = arr.getJSONObject(i);
+					creatorName = new String(obj.getString("name"));
+					if (!obj.has("id")) {
+						// Autor ohne ID. Das bedeutet in LRMI-Sprache: ohne URI
+						// Mache API-Call an Zettel, um eine ad-hoc-URI zu erhalten
+						creatorName = URLEncoder
+								.encode(creatorName, StandardCharsets.UTF_8.toString())
+								.replaceAll("\\+", "%20").replaceAll("%21", "!")
+								.replaceAll("%27", "'").replaceAll("%28", "(")
+								.replaceAll("%29", ")").replaceAll("%7E", "~");
+						WSResponse response = play.libs.ws.WS.url(
+								Globals.zettelUrl + "/localAutocomplete" + "?q=" + creatorName)
+								.setFollowRedirects(true).get().get(2000);
+						input = response.getBodyAsStream();
+						String formsResponseBody = CharStreams
+								.toString(new InputStreamReader(input, Charsets.UTF_8));
+						Closeables.closeQuietly(input);
+						// fetch annoying errors from to.science.forms service
+						if (response.getStatus() != 200) {
+							play.Logger.error(
+									"to.science.forms service request localAutocomplete fails for "
+											+ creatorName + "\nUse URI for setting Label now!");
+						} else {
+							// Parse out uri value from JSON structure
+							JSONArray jFormsResponse = new JSONArray(formsResponseBody);
+							JSONObject jFormsObject = jFormsResponse.getJSONObject(0);
+							String adHocUri = new String(jFormsObject.getString("value"));
+							play.Logger.debug("Found adHoc-URI: " + adHocUri);
+							obj.put("id", adHocUri);
+						}
+					} // end of "creator has no id"
+				} // next creator
+			}
+
+			play.Logger.debug("Done enrichment of LRMI data.");
+			return jcontent.toString();
+		} catch (Exception e) {
+			play.Logger.error("Content could not be enriched!", e);
+			throw new RuntimeException("KTBL.json could not be enriched", e);
+		}
+
 	}
 
 }
