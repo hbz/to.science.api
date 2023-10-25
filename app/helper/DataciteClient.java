@@ -35,6 +35,7 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.impl.MultiPartWriter;
+import com.typesafe.config.ConfigFactory;
 
 /**
  * @author Jan Schnasse
@@ -103,14 +104,24 @@ public class DataciteClient {
 	 */
 	public String mintDoiAtDatacite(String doi, String objectUrl) {
 		try {
+
+			String regalApiDataciteUrl =
+					ConfigFactory.load().getString("regal-api.datacite");
+
+			play.Logger.debug("PostBody:\n" + regalApiDataciteUrl);
 			status = 200;
-			String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
-					: "https://mds.datacite.org/doi";
+			// String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
+			// : "https://mds.datacite.org/doi";
+			String url = testMode ? regalApiDataciteUrl + "/doi?testMode=true"
+					: regalApiDataciteUrl + "/doi";
+			play.Logger.debug("url" + url);
+
 			WebResource resource = webclient.resource(url);
 			String postBody = "doi=" + doi + "\nurl=" + objectUrl + "\n";
 			play.Logger.info("PostBody:\n" + postBody);
 			String response =
 					resource.type("application/xml").post(String.class, postBody);
+			play.Logger.debug("response" + response);
 			return response;
 		} catch (UniformInterfaceException e) {
 			setStatus(e.getResponse().getStatus());
