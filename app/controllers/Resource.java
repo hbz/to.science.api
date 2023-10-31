@@ -889,7 +889,7 @@ public class Resource extends MyController {
 			return ok(mab.render(result));
 		});
 	}
-	
+
 	@ApiOperation(produces = "application/xml", nickname = "asAlmaNz", value = "asAlmaNz", notes = "Returns an Alma Network Zone xml display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asAlmaNz(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
@@ -1322,8 +1322,10 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "addDoi", value = "addDoi", notes = "Adds a Doi and performes a registration at Datacite", response = String.class, httpMethod = "POST")
 	public static Promise<Result> addDoi(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Endpoint addDoi has been called");
 			Node node = readNodeOrNull(pid);
 			Map<String, Object> result = modify.addDoi(node);
+			play.Logger.debug("Resource.ddDoi()" + result.toString());
 			return JsonMessage(new Message(json(result)));
 		});
 	}
@@ -1331,8 +1333,10 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
 	public static Promise<Result> updateDoi(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Endpoint updateDoi has been called");
 			Node node = readNodeOrNull(pid);
 			Map<String, Object> result = modify.updateDoi(node);
+			play.Logger.debug("Resource.updateDoi()" + result.toString());
 			return JsonMessage(new Message(json(result)));
 		});
 	}
@@ -1340,8 +1344,10 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
 	public static Promise<Result> replaceDoi(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Endpoint replaceDoi has been called");
 			Node node = readNodeOrNull(pid);
 			Map<String, Object> result = modify.replaceDoi(node);
+			play.Logger.debug("Resource.replaceDoi()" + result.toString());
 			return JsonMessage(new Message(json(result)));
 		});
 	}

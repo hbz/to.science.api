@@ -104,21 +104,16 @@ public class DataciteClient {
 	 */
 	public String mintDoiAtDatacite(String doi, String objectUrl) {
 		try {
-
-			String regalApiDataciteUrl =
-					ConfigFactory.load().getString("regal-api.datacite");
-
-			play.Logger.debug("PostBody:\n" + regalApiDataciteUrl);
+			play.Logger.debug("mintDoiAtDatacite is called");
+			play.Logger.debug("objectUrl=" + objectUrl);
 			status = 200;
-			// String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
-			// : "https://mds.datacite.org/doi";
-			String url = testMode ? regalApiDataciteUrl + "/doi?testMode=true"
-					: regalApiDataciteUrl + "/doi";
-			play.Logger.debug("url" + url);
+			String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
+					: "https://mds.datacite.org/doi";
 
 			WebResource resource = webclient.resource(url);
+			play.Logger.debug("resource=" + resource.toString());
 			String postBody = "doi=" + doi + "\nurl=" + objectUrl + "\n";
-			play.Logger.info("PostBody:\n" + postBody);
+			play.Logger.debug("PostBody=" + postBody);
 			String response =
 					resource.type("application/xml").post(String.class, postBody);
 			play.Logger.debug("response" + response);
@@ -136,9 +131,18 @@ public class DataciteClient {
 	 */
 	public String registerMetadataAtDatacite(Node node, String xml) {
 		try {
+			play.Logger.debug("registerMetadataAtDatacite is called");
+
+			String dataciteURL = ConfigFactory.load().getString("regal-api.datacite");
+			play.Logger.debug("dataciteURL=" + dataciteURL);
 			status = 200;
-			String url = testMode ? "https://mds.datacite.org/metadata?testMode=true"
-					: "https://mds.datacite.org/metadata";
+			// String url = testMode ?
+			// "https://mds.datacite.org/metadata?testMode=true"
+			// : "https://mds.datacite.org/metadata";
+			String url = testMode ? dataciteURL + "/metadata?testMode=true"
+					: dataciteURL + "/metadata";
+
+			play.Logger.debug("url=" + url);
 			WebResource resource = webclient.resource(url);
 			String response = resource.type("application/xml;charset=UTF-8")
 					.post(String.class, xml);

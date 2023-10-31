@@ -890,13 +890,18 @@ public class Modify extends RegalAction {
 		}
 		Map<String, Object> result = new HashMap<>();
 		String doi = node.getDoi();
+		play.Logger.debug("doi=" + doi);
 
 		if (doi == null || doi.isEmpty()) {
 			doi = createDoiIdentifier(node);
+			play.Logger.debug("doi=" + doi);
 			result.put("Doi", doi);
 			// node.setDoi(doi);
 			String objectUrl = Globals.urnbase + node.getPid();
+			play.Logger.debug("objectUrl=" + objectUrl);
+
 			String xml = new Transform().datacite(node, doi);
+			play.Logger.debug("xml=" + xml);
 			MyController.validate(xml,
 					"public/schemas/datacite/kernel-4.1/metadata.xsd",
 					"https://schema.datacite.org/meta/kernel-4.1/",
@@ -976,7 +981,9 @@ public class Modify extends RegalAction {
 	private String createDoiIdentifier(Node node) {
 		String pid = node.getPid();
 		String id = pid.replace(node.getNamespace() + ":", "");
+		play.Logger.debug("id=" + id);
 		String doi = Globals.doiPrefix + "00" + id;
+		play.Logger.debug("doi=" + doi);
 		return doi;
 	}
 
