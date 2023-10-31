@@ -908,9 +908,13 @@ public class Modify extends RegalAction {
 					"public/schemas/datacite/kernel-4.1/");
 			try {
 				DataciteClient client = new DataciteClient();
+				play.Logger.debug("xml=" + xml);
 				result.put("Metadata", xml);
 				String registerMetadataResponse =
 						client.registerMetadataAtDatacite(node, xml);
+				play.Logger
+						.debug("registerMetadataResponse=" + registerMetadataResponse);
+
 				result.put("registerMetadataResponse", registerMetadataResponse);
 				if (client.getStatus() != 200)
 					throw new RuntimeException("Registering Doi failed!");
