@@ -46,14 +46,16 @@ public class DataciteClient {
 	Client webclient = null;
 	boolean testMode = false;
 	int status = 200;
+	String user = Globals.dataCiteUser;
+	String password = Globals.dataCitePasswd;
+	// URL of Datacite-Repository(Prod | Test)
+	String dataciteURL = Globals.datCiteUrl;
 
 	/**
 	 * The DataciteClient can mint and register dois via the datacite api
 	 */
 	public DataciteClient() {
 		status = 200;
-		String user = Globals.dataCiteUser;
-		String password = Globals.dataCitePasswd;
 		ClientConfig cc = new DefaultClientConfig();
 		cc.getClasses().add(MultiPartWriter.class);
 		cc.getClasses().add(FormDataMultiPart.class);
@@ -107,9 +109,11 @@ public class DataciteClient {
 			play.Logger.debug("mintDoiAtDatacite is called");
 			play.Logger.debug("objectUrl=" + objectUrl);
 			status = 200;
-			String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
-					: "https://mds.datacite.org/doi";
+			// String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
+			// : "https://mds.datacite.org/doi";
 
+			String url = testMode ? dataciteURL + "/metadata?testMode=true"
+					: dataciteURL + "/metadata";
 			WebResource resource = webclient.resource(url);
 			play.Logger.debug("resource=" + resource.toString());
 			String postBody = "doi=" + doi + "\nurl=" + objectUrl + "\n";
@@ -132,8 +136,6 @@ public class DataciteClient {
 	public String registerMetadataAtDatacite(Node node, String xml) {
 		try {
 			play.Logger.debug("registerMetadataAtDatacite is called");
-
-			String dataciteURL = ConfigFactory.load().getString("regal-api.datacite");
 			play.Logger.debug("dataciteURL=" + dataciteURL);
 			status = 200;
 			// String url = testMode ?
