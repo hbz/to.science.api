@@ -505,14 +505,19 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+			@ApiImplicitParam(value = "Metadata", dataType = "file", required = true, paramType = "body") })
 	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
-			play.Logger.debug("Starting updateKtbl data with pid=" + pid);
-			play.Logger
-					.debug("request().body().asJson()=" + request().body().asText());
-			String ktblContent = null;
 			try {
+				MultipartFormData body = request().body().asMultipartFormData();
+				FilePart data = body.getFile("data");
+				if (data == null) {
+					return (Result) JsonMessage(new Message("Missing File.", 400));
+				}
+				play.Logger.debug("Starting updateKtbl data with pid=" + pid);
+				play.Logger.debug("request().body().asJson()=" + data.toString());
+				String ktblContent = null;
+
 				Node readNode = new Read().readNode(pid);
 				/**
 				 * Wir legen 3 Datenstroeme an:
@@ -520,9 +525,8 @@ public class Resource extends MyController {
 				 * 1. ungemappte KTBL-Daten als neuartiger Datenstrom "ktbl" nur das,
 				 * was unter "info" :[ "ktbl" : [ steht
 				 */
-				ktblContent =
-						modify.updateAndEnrichKtblData(pid, request().body().asJson());
-				play.Logger.debug("ktblContent = " + ktblContent);
+				// ktblContent = modify.updateAndEnrichKtblData(pid, data.toString());
+				// play.Logger.debug("ktblContent = " + ktblContent);
 				String result1 = "KTBL metadata successfully updated and enriched.";
 				play.Logger.debug(result1);
 
