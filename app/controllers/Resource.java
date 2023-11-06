@@ -510,7 +510,7 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, node -> {
 			play.Logger.debug("Starting updateKtbl data with pid=" + pid);
 			play.Logger
-					.debug("request().body().asJson()=" + request().body().asJson());
+					.debug("request().body().asJson()=" + request().body().asText());
 			String ktblContent = null;
 			try {
 				Node readNode = new Read().readNode(pid);
