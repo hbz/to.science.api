@@ -109,11 +109,8 @@ public class DataciteClient {
 			play.Logger.debug("mintDoiAtDatacite is called");
 			play.Logger.debug("objectUrl=" + objectUrl);
 			status = 200;
-			// String url = testMode ? "https://mds.datacite.org/doi?testMode=true"
-			// : "https://mds.datacite.org/doi";
-
-			String url = testMode ? dataciteURL + "/metadata?testMode=true"
-					: dataciteURL + "/metadata";
+			String url =
+					testMode ? dataciteURL + "/doi?testMode=true" : dataciteURL + "/doi";
 			WebResource resource = webclient.resource(url);
 			play.Logger.debug("resource=" + resource.toString());
 			String postBody = "doi=" + doi + "\nurl=" + objectUrl + "\n";
@@ -138,9 +135,6 @@ public class DataciteClient {
 			play.Logger.debug("registerMetadataAtDatacite is called");
 			play.Logger.debug("dataciteURL=" + dataciteURL);
 			status = 200;
-			// String url = testMode ?
-			// "https://mds.datacite.org/metadata?testMode=true"
-			// : "https://mds.datacite.org/metadata";
 			String url = testMode ? dataciteURL + "/metadata?testMode=true"
 					: dataciteURL + "/metadata";
 

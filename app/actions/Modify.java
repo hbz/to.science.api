@@ -930,6 +930,7 @@ public class Modify extends RegalAction {
 			ToScienceObject o = new ToScienceObject();
 			o.getIsDescribedBy().setDoi(doi);
 			new Create().patchResource(node, o);
+			play.Logger.debug("result=" + result.toString());
 			return result;
 		} else {
 			throw new HttpArchiveException(409,
