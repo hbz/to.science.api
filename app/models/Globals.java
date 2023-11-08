@@ -227,6 +227,10 @@ public class Globals {
 	 */
 	public static String dataCitePasswd = Play.application().configuration()
 			.getString("regal-api.datacitePassword");
+
+	public static String datCiteUrl =
+			Play.application().configuration().getString("regal-api.datacite");
+
 	/**
 	 * Test Prefix 10.5072 Productive Prefix 10.4126
 	 */
