@@ -80,7 +80,7 @@ import play.libs.ws.WSResponse;
  * 
  */
 public class XmlUtils {
-	String doiReolver = Globals.doiResolver;
+	String doiResolver = Globals.doiResolver;
 
 	public static XmlSchemaValidator validator = new XmlSchemaValidator();
 
@@ -490,8 +490,8 @@ public class XmlUtils {
 					String doi = node.getTextContent();
 					play.Logger.debug("DOI: " + doi);
 					Map<String, Object> publisherVersionDoi = new TreeMap<>();
-					publisherVersionDoi.put("@id", doiReolver + "/" + doi);
-					publisherVersionDoi.put("prefLabel", doiReolver + "/" + doi);
+					publisherVersionDoi.put("@id", doiResolver + "/" + doi);
+					publisherVersionDoi.put("prefLabel", doiResolver + "/" + doi);
 					publisherVersions.add(publisherVersionDoi);
 				}
 				if (attrib.getNodeValue().equalsIgnoreCase("pmcid")) {
@@ -923,7 +923,7 @@ public class XmlUtils {
 						int indexOpen = text.indexOf("(");
 						int indexClose = text.indexOf(")");
 						if (indexOpen == -1)
-							licenseId = doiReolver + "/10.1027/a000001";
+							licenseId = doiResolver + "/10.1027/a000001";
 						if (indexOpen >= 0)
 							licenseId = text.substring(indexOpen + 1, indexClose);
 						break;
