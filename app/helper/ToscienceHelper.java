@@ -35,26 +35,34 @@ public class ToscienceHelper {
 		try {
 			while (keys.hasNext()) {
 				String key = keys.next();
+				play.Logger.debug("key=" + key);
 				Object value = allJsonObjects.get(key);
+				play.Logger.debug("value=" + value.toString());
 				if (value.toString().contains("prefLabel")) {
 					if (value instanceof JSONObject) {
+						play.Logger.debug("alue instanceof JSONObject");
 						jsObject = allJsonObjects.getJSONObject(key);
+						play.Logger.debug("jsObject=" + jsObject.toString());
 						oldPrefLabel = jsObject.get("prefLabel");
 						if (oldPrefLabel.toString().contains("http")) {
+							play.Logger.debug("oldPrefLabel=" + oldPrefLabel.toString());
 							String newPrefLabel =
 									MyEtikettMaker.getLabelFromEtikettWs(oldPrefLabel.toString());
-							play.Logger.debug("neuPrefLabel=" + newPrefLabel);
+							play.Logger.debug("newPrefLabel=" + newPrefLabel);
 							jsObject.put("prefLabel", newPrefLabel);
 						}
 					} else if (value instanceof JSONArray) {
+						play.Logger.debug("value instanceof JSONArray");
 						JSONArray jsArray = allJsonObjects.getJSONArray(key);
+						play.Logger.debug("jsArray=" + jsArray.toString());
 						for (int j = 0; j < jsArray.length(); j++) {
 							jsObject = jsArray.getJSONObject(j);
 							oldPrefLabel = jsObject.get("prefLabel");
 							if (oldPrefLabel.toString().contains("http")) {
+								play.Logger.debug("oldPrefLabel=" + oldPrefLabel.toString());
 								String newPrefLabel = MyEtikettMaker
 										.getLabelFromEtikettWs(oldPrefLabel.toString());
-								play.Logger.debug("neuPrefLabel=" + newPrefLabel);
+								play.Logger.debug("newPrefLabel=" + newPrefLabel);
 								jsObject.put("prefLabel", newPrefLabel);
 							}
 						}
