@@ -59,6 +59,7 @@ import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.RdfHelper;
+import helper.ToscienceHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
@@ -451,8 +452,7 @@ public class Resource extends MyController {
 						.debug("readNode.getContentType()= " + readNode.getContentType());
 				if (!readNode.getContentType().contains("file")
 						&& !readNode.getContentType().contains("part")) {
-					String toscienceDummy =
-							"{\"funder\":{\"prefLabel\":\"InDigO\",\"@id\":\"https://www.dh.nrw/kooperationen/InDigO-90\"},\"creator\":[{\"affiliation\":{\"prefLabel\":\"Technische Hochschule Köln\",\"@id\":\"https://ror.org/014nnvj65\",\"type\":\"Organization\"},\"academicDegree\":\"Dr.\",\"prefLabel\":\"Autor1\",\"@id\":\"https://api.hoerkaen.hbz-nrw.de/adhoc/uri/QXV0b3Ix\",\"type\":\"Person\"}],\"subject\":[{\"prefLabel\":\"Schlagwort1\",\"@id\":\"https://api.toscience.hbz-nrw.de/adhoc/uri/U2NobGFnd29ydDE=\"}],\"description\":[\"Dies ist eine TestResource\"],\"language\":[{\"prefLabel\":\"German\",\"@id\":\"http://id.loc.gov/vocabulary/iso639-2/deu\"}],\"medium\":[{\"prefLabel\":\"Daten\",\"@id\":\"https://w3id.org/kim/hcrt/data\"}],\"title\":[\"UploadTest Hasan\"],\"@context\":\"https://api.hoerkaen.hbz-nrw.de/context.json\",\"isPrimaryTopic\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\",\"license\":{\"prefLabel\":\"CC BY 4.0\",\"@id\":\"https://creativecommons.org/licenses/by/4.0/\"},\"yearOfCopyright\":[\"2023\"],\"@id\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\",\"isDescribedBy\":{\"@id\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\",\"describes\":\"orca:25995f46-40f1-4baa-8992-d3c4d255f5f8\"},\"department\":[{\"prefLabel\":\"Informatik\",\"@id\":\"https://w3id.org/kim/hochschulfaechersystematik/n079\"}],\"contentType\":\"researchData\"}";
+
 					play.Logger.debug("toscienceJson will be mapped");
 
 					// ******************************
@@ -461,12 +461,21 @@ public class Resource extends MyController {
 							request().body().asText());
 
 					play.Logger.debug("rdf=" + rdf.toString());
-					JSONObject lobidAsJson = new JSONObject(rdf);
-					play.Logger.debug("rdfAsJson=" + lobidAsJson.toString());
+					JSONObject toscienceUnresolvedPrefLabels = new JSONObject(rdf);
+
+					play.Logger.debug("tosciencenUnresolvedPrefLabels="
+							+ toscienceUnresolvedPrefLabels.toString());
+
+					JSONObject toscienceResolvedPrefLabels = ToscienceHelper
+							.getPrefLabelsResolved(toscienceUnresolvedPrefLabels);
+
+					play.Logger.debug("toscienceResolvedPrefLabels="
+							+ toscienceResolvedPrefLabels.toString());
 
 					// ******************************
 
-					modify.updateMetadataJson(readNode, lobidAsJson.toString());
+					modify.updateMetadataJson(readNode,
+							toscienceResolvedPrefLabels.toString());
 					play.Logger
 							.debug("tosciecne from Node" + readNode.getMetadata("toscience"));
 					play.Logger.debug("Done toscienceJson Mapping");
