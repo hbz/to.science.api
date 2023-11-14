@@ -1,6 +1,9 @@
 package helper;
 
 import org.json.JSONObject;
+
+import java.util.List;
+
 import org.json.JSONArray;
 import helper.MyEtikettMaker;
 import play.Play;
@@ -25,8 +28,8 @@ public class ToscienceHelper {
 		Object oldPrefLabel = null;
 		JSONObject jsObject = null;
 
-		for (Object key : allJsonObjects.names()) {
-
+		List<Object> keys = allJsonObjects.names().toList();
+		for (Object key : keys) {
 			Object value = allJsonObjects.get(key.toString());
 			if (value.toString().contains("prefLabel")) {
 				if (value instanceof JSONObject) {
