@@ -7,6 +7,7 @@ import java.util.List;
 import org.json.JSONArray;
 import helper.MyEtikettMaker;
 import java.util.List;
+import java.util.stream.Collectors;
 import play.Play;
 
 /**
@@ -29,7 +30,9 @@ public class ToscienceHelper {
 		Object oldPrefLabel = null;
 		JSONObject jsObject = null;
 
-		List<Object> keys = allJsonObjects.names().toList();
+		// List<Object> keys = allJsonObjects.names().toList();
+		List<Object> keys =
+				allJsonObjects.keySet().stream().collect(Collectors.toList());
 		for (Object key : keys) {
 			Object value = allJsonObjects.get(key.toString());
 			if (value.toString().contains("prefLabel")) {
