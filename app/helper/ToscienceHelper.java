@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import helper.MyEtikettMaker;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.json.JSONException;
 import play.Play;
 
 /**
@@ -30,23 +31,14 @@ public class ToscienceHelper {
 		JSONObject jsObject = null;
 
 		Iterator<String> keys = allJsonObjects.keys();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = allJsonObjects.get(key);
-			if (value.toString().contains("prefLabel")) {
-				if (value instanceof JSONObject) {
-					jsObject = allJsonObjects.getJSONObject(key);
-					oldPrefLabel = jsObject.get("prefLabel");
-					if (oldPrefLabel.toString().contains("http")) {
-						String newPrefLabel =
-								MyEtikettMaker.getLabelFromEtikettWs(oldPrefLabel.toString());
-						play.Logger.debug("neuPrefLabel=" + newPrefLabel);
-						jsObject.put("prefLabel", newPrefLabel);
-					}
-				} else if (value instanceof JSONArray) {
-					JSONArray jsArray = allJsonObjects.getJSONArray(key);
-					for (int j = 0; j < jsArray.length(); j++) {
-						jsObject = jsArray.getJSONObject(j);
+
+		try {
+			while (keys.hasNext()) {
+				String key = keys.next();
+				Object value = allJsonObjects.get(key);
+				if (value.toString().contains("prefLabel")) {
+					if (value instanceof JSONObject) {
+						jsObject = allJsonObjects.getJSONObject(key);
 						oldPrefLabel = jsObject.get("prefLabel");
 						if (oldPrefLabel.toString().contains("http")) {
 							String newPrefLabel =
@@ -54,12 +46,29 @@ public class ToscienceHelper {
 							play.Logger.debug("neuPrefLabel=" + newPrefLabel);
 							jsObject.put("prefLabel", newPrefLabel);
 						}
+					} else if (value instanceof JSONArray) {
+						JSONArray jsArray = allJsonObjects.getJSONArray(key);
+						for (int j = 0; j < jsArray.length(); j++) {
+							jsObject = jsArray.getJSONObject(j);
+							oldPrefLabel = jsObject.get("prefLabel");
+							if (oldPrefLabel.toString().contains("http")) {
+								String newPrefLabel = MyEtikettMaker
+										.getLabelFromEtikettWs(oldPrefLabel.toString());
+								play.Logger.debug("neuPrefLabel=" + newPrefLabel);
+								jsObject.put("prefLabel", newPrefLabel);
+							}
+						}
 					}
+
 				}
 
 			}
 
+		} catch (JSONException e) {
+			// Behandlung der JSONException
+			e.printStackTrace();
 		}
+
 		return allJsonObjects;
 
 	}
