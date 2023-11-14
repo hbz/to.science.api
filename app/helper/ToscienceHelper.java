@@ -24,11 +24,13 @@ public class ToscienceHelper {
 
 		Object oldPrefLabel = null;
 		JSONObject jsObject = null;
-		for (String key : allJsonObjects.keySet()) {
-			Object value = allJsonObjects.get(key);
+
+		for (Object key : allJsonObjects.names()) {
+
+			Object value = allJsonObjects.get(key.toString());
 			if (value.toString().contains("prefLabel")) {
 				if (value instanceof JSONObject) {
-					jsObject = allJsonObjects.getJSONObject(key);
+					jsObject = allJsonObjects.getJSONObject(key.toString());
 					oldPrefLabel = jsObject.get("prefLabel");
 					if (oldPrefLabel.toString().contains("http")) {
 						String newPrefLabel =
@@ -37,7 +39,7 @@ public class ToscienceHelper {
 						jsObject.put("prefLabel", newPrefLabel);
 					}
 				} else if (value instanceof JSONArray) {
-					JSONArray jsArray = allJsonObjects.getJSONArray(key);
+					JSONArray jsArray = allJsonObjects.getJSONArray(key.toString());
 					for (int j = 0; j < jsArray.length(); j++) {
 						jsObject = jsArray.getJSONObject(j);
 						oldPrefLabel = jsObject.get("prefLabel");
