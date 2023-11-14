@@ -448,6 +448,7 @@ public class Resource extends MyController {
 				 */
 
 				Node readNode = readNodeOrNull(pid);
+				JSONObject toscienceJson = null;
 				play.Logger
 						.debug("readNode.getContentType()= " + readNode.getContentType());
 				if (!readNode.getContentType().contains("file")
@@ -461,21 +462,17 @@ public class Resource extends MyController {
 							request().body().asText());
 
 					play.Logger.debug("rdf=" + rdf.toString());
-					JSONObject toscienceUnresolvedPrefLabels = new JSONObject(rdf);
+					toscienceJson = new JSONObject(rdf);
 
-					play.Logger.debug("tosciencenUnresolvedPrefLabels="
-							+ toscienceUnresolvedPrefLabels.toString());
+					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
 
-					JSONObject toscienceResolvedPrefLabels = ToscienceHelper
-							.getPrefLabelsResolved(toscienceUnresolvedPrefLabels);
+					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
 
-					play.Logger.debug("toscienceResolvedPrefLabels="
-							+ toscienceResolvedPrefLabels.toString());
+					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
 
 					// ******************************
 
-					modify.updateMetadataJson(readNode,
-							toscienceResolvedPrefLabels.toString());
+					modify.updateMetadataJson(readNode, toscienceJson.toString());
 					play.Logger
 							.debug("tosciecne from Node" + readNode.getMetadata("toscience"));
 					play.Logger.debug("Done toscienceJson Mapping");
