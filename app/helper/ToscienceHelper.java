@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Iterator;
 import org.json.JSONArray;
 import helper.MyEtikettMaker;
-import java.util.List;
 import java.util.stream.Collectors;
 import org.json.JSONException;
 import play.Play;
@@ -35,11 +34,9 @@ public class ToscienceHelper {
 		try {
 			while (keys.hasNext()) {
 				String key = keys.next();
-				play.Logger.debug("key=" + key);
 				Object value = allJsonObjects.get(key);
-				play.Logger.debug("value=" + value.toString());
-				play.Logger
-						.debug("value.getClass().getName()=" + value.getClass().getName());
+				play.Logger.debug(" key=" + key + " ,value=" + value.toString()
+						+ " ,artOfObject=" + value.getClass().getName());
 				if (value.toString().contains("prefLabel")) {
 					play.Logger.debug("value contains prefLabel");
 					if (value instanceof JSONObject) {
