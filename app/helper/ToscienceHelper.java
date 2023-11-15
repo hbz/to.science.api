@@ -38,6 +38,8 @@ public class ToscienceHelper {
 				play.Logger.debug("key=" + key);
 				Object value = allJsonObjects.get(key);
 				play.Logger.debug("value=" + value.toString());
+				play.Logger
+						.debug("value.getClass().getName()=" + value.getClass().getName());
 				if (value.toString().contains("prefLabel")) {
 					play.Logger.debug("value contains prefLabel");
 					if (value instanceof JSONObject) {
