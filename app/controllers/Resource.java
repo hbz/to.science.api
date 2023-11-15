@@ -462,7 +462,7 @@ public class Resource extends MyController {
 							request().body().asText());
 
 					play.Logger.debug("rdf=" + rdf.toString());
-					toscienceJson = new JSONObject(rdf.toString());
+					toscienceJson = new JSONObject(new JSONObject(rdf).toString());
 
 					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
 
