@@ -280,7 +280,7 @@ public class Globals {
 			Play.application().configuration().getString("regal-api.etikett.url");
 
 	public static String etikettUrlSecure = Play.application().configuration()
-			.getString("regal-api.etikett.Secure.url");
+			.getString("regal-api.etikett.url.secure");
 
 	public static String etikettUser =
 			Play.application().configuration().getString("regal-api.etikett.user");
