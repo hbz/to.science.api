@@ -211,29 +211,14 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 
 	public static String getLabelFromEtikettWs(String uri) {
 		try {
-			InputStream input = null;
-			WSResponse response = null;
 			uri = uri.replaceAll("#", "%23");
 			play.Logger.debug("Etikett url: " + Globals.etikettUrl + "?url=" + uri
 					+ "&column=label");
-			if (uri.contains("www.openstreetmap.org")) {
-				response =
-						play.libs.ws.WS
-								.url(Globals.etikettUrlSecure + "?url=" + uri + "&column=label")
-								.setAuth(Globals.etikettUser, Globals.etikettPwd,
-										WSAuthScheme.BASIC)
-								.setFollowRedirects(true).get().get(20000);
-				input = response.getBodyAsStream();
-			} else {
-				response =
-						play.libs.ws.WS
-								.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
-								.setAuth(Globals.etikettUser, Globals.etikettPwd,
-										WSAuthScheme.BASIC)
-								.setFollowRedirects(true).get().get(20000);
-				input = response.getBodyAsStream();
-			}
-
+			WSResponse response = play.libs.ws.WS
+					.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
+					.setAuth(Globals.etikettUser, Globals.etikettPwd, WSAuthScheme.BASIC)
+					.setFollowRedirects(true).get().get(20000);
+			InputStream input = response.getBodyAsStream();
 			String content =
 					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
 			Closeables.closeQuietly(input);
