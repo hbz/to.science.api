@@ -44,7 +44,8 @@ public class ToscienceHelper {
 						jsObject = allJsonObjects.getJSONObject(key);
 						play.Logger.debug("jsObject=" + jsObject.toString());
 						oldPrefLabel = jsObject.get("prefLabel");
-						if (oldPrefLabel.toString().contains("http")) {
+						if (oldPrefLabel.toString().contains("http")
+								&& !oldPrefLabel.toString().contains("www.openstreetmap.org")) {
 							play.Logger.debug("oldPrefLabel=" + oldPrefLabel.toString());
 							String newPrefLabel =
 									MyEtikettMaker.getLabelFromEtikettWs(oldPrefLabel.toString());
@@ -58,7 +59,8 @@ public class ToscienceHelper {
 						for (int j = 0; j < jsArray.length(); j++) {
 							jsObject = jsArray.getJSONObject(j);
 							oldPrefLabel = jsObject.get("prefLabel");
-							if (oldPrefLabel.toString().contains("http")) {
+							if (oldPrefLabel.toString().contains("http") && !oldPrefLabel
+									.toString().contains("www.openstreetmap.org")) {
 								play.Logger.debug("oldPrefLabel=" + oldPrefLabel.toString());
 								String newPrefLabel = MyEtikettMaker
 										.getLabelFromEtikettWs(oldPrefLabel.toString());
