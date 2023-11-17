@@ -58,6 +58,7 @@ import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.KTBLMapperHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
@@ -527,6 +528,14 @@ public class Resource extends MyController {
 				 */
 				// ktblContent = modify.updateAndEnrichKtblData(pid, data.toString());
 				// play.Logger.debug("ktblContent = " + ktblContent);
+				String contentOfFile =
+						KTBLMapperHelper.getStringContentFromJsonFile(data);
+				play.Logger.debug("contentOfFile=" + contentOfFile);
+
+				String ktblMetadata =
+						KTBLMapperHelper.getWantedToPersistKtblMetadata(contentOfFile);
+				play.Logger.debug("ktblMetadata=" + ktblMetadata);
+
 				String result1 = "KTBL metadata successfully updated and enriched.";
 				play.Logger.debug(result1);
 
