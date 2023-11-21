@@ -992,7 +992,7 @@ public class Utils {
 
 	void updateMetadataJsonStream(Node node) {
 		updateMetadataStream(archive.fedora.Vocabulary.metadataJson,
-				"application/json", "Metadata in Format lobid2 JSON", node);
+				"application/json", "Metadata in Format JSON", node);
 	}
 
 	public void updateMetadataStream(String metadataType, String mimeType,
