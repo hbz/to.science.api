@@ -502,9 +502,9 @@ public class Utils {
 		}
 	}
 
-	void updateMetadataStream(Node node) {
+	void updateMetadataStream(Node node, String metadataType) {
 		try {
-			File file = new File(node.getMetadataFile());
+			File file = new File(node.getMetadataFile(metadataType));
 			if (dataStreamExists(node.getPid(), "metadata")) {
 				new ModifyDatastream(node.getPid(), "metadata").versionable(true)
 						.dsLabel("n-triple rdf metadata").dsState("A").controlGroup("M")
@@ -990,4 +990,26 @@ public class Utils {
 		return t;
 	}
 
+	void updateMetadataJsonStream(Node node) {
+		updateMetadataStream(archive.fedora.Vocabulary.metadataJson,
+				"application/json", "Metadata in Format JSON", node);
+	}
+
+	public void updateMetadataStream(String metadataType, String mimeType,
+			String label, Node node) {
+		try {
+			File file = new File(node.getMetadataFile(metadataType));
+			if (dataStreamExists(node.getPid(), metadataType)) {
+				new ModifyDatastream(node.getPid(), metadataType).versionable(true)
+						.dsLabel(label).dsState("A").controlGroup("M").mimeType(mimeType)
+						.content(file).execute();
+			} else {
+				new AddDatastream(node.getPid(), metadataType).versionable(true)
+						.dsState("A").dsLabel(label).controlGroup("M").mimeType(mimeType)
+						.content(file).execute();
+			}
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
 }

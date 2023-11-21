@@ -128,4 +128,9 @@ public abstract class Vocabulary {
 	 */
 	public final static String REL_LOBID_DOI =
 			"http://purl.org/ontology/bibo/doi";
+
+	public final static String metadata2 = "metadata2";
+	public final static String lrmiData = "lrmiData";
+	public final static String metadataJson = "toscience";
+
 }
