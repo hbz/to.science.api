@@ -41,6 +41,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -57,6 +58,8 @@ import actions.Enrich;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.RdfHelper;
+import helper.ToscienceHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
@@ -439,6 +442,45 @@ public class Resource extends MyController {
 
 		return new ModifyAction().call(pid, node -> {
 			try {
+
+				/**
+				 * 1. toscienceJson
+				 */
+
+				Node readNode = readNodeOrNull(pid);
+				JSONObject toscienceJson = null;
+				play.Logger
+						.debug("readNode.getContentType()= " + readNode.getContentType());
+				if (!readNode.getContentType().contains("file")
+						&& !readNode.getContentType().contains("part")) {
+
+					play.Logger.debug("toscienceJson will be mapped");
+
+					// ******************************
+					RDFFormat format = RDFFormat.NTRIPLES;
+					Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode, format,
+							request().body().asText());
+
+					play.Logger.debug("rdf=" + rdf.toString());
+					toscienceJson = new JSONObject(new JSONObject(rdf).toString());
+
+					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+
+					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
+
+					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+
+					// ******************************
+
+					modify.updateMetadataJson(readNode, toscienceJson.toString());
+					play.Logger
+							.debug("tosciecne from Node" + readNode.getMetadata("toscience"));
+					play.Logger.debug("Done toscienceJson Mapping");
+				}
+
+				/**
+				 * 2. METADATA2
+				 */
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				return JsonMessage(new Message(result));
@@ -889,7 +931,7 @@ public class Resource extends MyController {
 			return ok(mab.render(result));
 		});
 	}
-	
+
 	@ApiOperation(produces = "application/xml", nickname = "asAlmaNz", value = "asAlmaNz", notes = "Returns an Alma Network Zone xml display of the resource", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> asAlmaNz(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
@@ -1322,8 +1364,10 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "addDoi", value = "addDoi", notes = "Adds a Doi and performes a registration at Datacite", response = String.class, httpMethod = "POST")
 	public static Promise<Result> addDoi(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Endpoint addDoi has been called");
 			Node node = readNodeOrNull(pid);
 			Map<String, Object> result = modify.addDoi(node);
+			play.Logger.debug("Resource.ddDoi()" + result.toString());
 			return JsonMessage(new Message(json(result)));
 		});
 	}
@@ -1331,8 +1375,10 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
 	public static Promise<Result> updateDoi(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Endpoint updateDoi has been called");
 			Node node = readNodeOrNull(pid);
 			Map<String, Object> result = modify.updateDoi(node);
+			play.Logger.debug("Resource.updateDoi()" + result.toString());
 			return JsonMessage(new Message(json(result)));
 		});
 	}
@@ -1340,8 +1386,10 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateDoi", value = "updateDoi", notes = "Update the Doi's metadata at Datacite", response = String.class, httpMethod = "POST")
 	public static Promise<Result> replaceDoi(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Endpoint replaceDoi has been called");
 			Node node = readNodeOrNull(pid);
 			Map<String, Object> result = modify.replaceDoi(node);
+			play.Logger.debug("Resource.replaceDoi()" + result.toString());
 			return JsonMessage(new Message(json(result)));
 		});
 	}

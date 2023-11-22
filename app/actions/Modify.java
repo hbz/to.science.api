@@ -388,7 +388,7 @@ public class Modify extends RegalAction {
 			content = rewriteContent(content, pid);
 			// Workaround end
 			File file = CopyUtils.copyStringToFile(content);
-			node.setMetadataFile(file.getAbsolutePath());
+			node.setMetadataFile("metadata", file.getAbsolutePath());
 			if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
 				List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
 						archive.fedora.Vocabulary.REL_LOBID_DOI, content,
@@ -890,22 +890,31 @@ public class Modify extends RegalAction {
 		}
 		Map<String, Object> result = new HashMap<>();
 		String doi = node.getDoi();
+		play.Logger.debug("doi=" + doi);
 
 		if (doi == null || doi.isEmpty()) {
 			doi = createDoiIdentifier(node);
+			play.Logger.debug("doi=" + doi);
 			result.put("Doi", doi);
 			// node.setDoi(doi);
 			String objectUrl = Globals.urnbase + node.getPid();
+			play.Logger.debug("objectUrl=" + objectUrl);
+
 			String xml = new Transform().datacite(node, doi);
+			play.Logger.debug("xml=" + xml);
 			MyController.validate(xml,
 					"public/schemas/datacite/kernel-4.1/metadata.xsd",
 					"https://schema.datacite.org/meta/kernel-4.1/",
 					"public/schemas/datacite/kernel-4.1/");
 			try {
 				DataciteClient client = new DataciteClient();
+				play.Logger.debug("xml=" + xml);
 				result.put("Metadata", xml);
 				String registerMetadataResponse =
 						client.registerMetadataAtDatacite(node, xml);
+				play.Logger
+						.debug("registerMetadataResponse=" + registerMetadataResponse);
+
 				result.put("registerMetadataResponse", registerMetadataResponse);
 				if (client.getStatus() != 200)
 					throw new RuntimeException("Registering Doi failed!");
@@ -921,6 +930,7 @@ public class Modify extends RegalAction {
 			ToScienceObject o = new ToScienceObject();
 			o.getIsDescribedBy().setDoi(doi);
 			new Create().patchResource(node, o);
+			play.Logger.debug("result=" + result.toString());
 			return result;
 		} else {
 			throw new HttpArchiveException(409,
@@ -976,7 +986,9 @@ public class Modify extends RegalAction {
 	private String createDoiIdentifier(Node node) {
 		String pid = node.getPid();
 		String id = pid.replace(node.getNamespace() + ":", "");
+		play.Logger.debug("id=" + id);
 		String doi = Globals.doiPrefix + "00" + id;
+		play.Logger.debug("doi=" + doi);
 		return doi;
 	}
 
@@ -1196,6 +1208,43 @@ public class Modify extends RegalAction {
 			return result;
 		} catch (IOException e) {
 			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	public String updateMetadataJson(Node node, String content) {
+		try {
+			return updateMetadata("toscience", node, content);
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+
+	public String updateMetadata(String metadataType, Node node, String content) {
+		try {
+			String pid = node.getPid();
+			play.Logger.debug(
+					"Updating metadata of type " + metadataType + " on PID " + pid);
+			play.Logger.debug("content: " + content);
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			File file = CopyUtils.copyStringToFile(content);
+			play.Logger
+					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
+			node.setMetadataFile(metadataType, file.getAbsolutePath());
+			node.setMetadata(metadataType, content);
+			OaiDispatcher.makeOAISet(node);
+			reindexNodeAndParent(node);
+			return pid + " metadata of type " + metadataType
+					+ " successfully updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
 		}
 	}
 

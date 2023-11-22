@@ -65,7 +65,7 @@ public class Node implements java.io.Serializable {
 	 */
 	public DublinCoreData dublinCoreData = new DublinCoreData();
 
-	private String metadataFile = null;
+	private HashMap<String, String> metadataFile = new HashMap();
 	private String metadata2File = null;
 	private String seqFile = null;
 	private String confFile = null;
@@ -74,6 +74,7 @@ public class Node implements java.io.Serializable {
 	private String objectTimestampFile = null;
 	private List<Link> links = new Vector<Link>();
 	private List<Transformer> transformer = new Vector<Transformer>();
+	private HashMap<String, String> metadata = new HashMap();
 
 	private String metadata1 = null;
 	private String metadata2 = null;
@@ -299,15 +300,17 @@ public class Node implements java.io.Serializable {
 	 * 
 	 * @return the absolute path to file
 	 */
-	public String getMetadataFile() {
-		return metadataFile;
+	public String getMetadataFile(String metadataType) {
+		return metadataFile.get(metadataType);
 	}
 
 	/**
+	 * @param metadataType the type of the metadata: metadata2, lrmiData,
+	 *          toscience.json
 	 * @param metadataFile The absolutepath to the metadatafile
 	 */
-	public void setMetadataFile(String metadataFile) {
-		this.metadataFile = metadataFile;
+	public void setMetadataFile(String metadataType, String metadataFile) {
+		this.metadataFile.put(metadataType, metadataFile);
 	}
 
 	/**
@@ -607,6 +610,15 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * 
+	 * @param metadataType (toscience | metadata2)
+	 * @return returns the corresponding data stream
+	 */
+	public String getMetadata(String metadataType) {
+		return metadata.get(metadataType);
+	}
+
+	/**
 	 * @return n-triple metadata as string
 	 */
 	@JsonIgnore()
@@ -763,6 +775,11 @@ public class Node implements java.io.Serializable {
 	 */
 	public Node setFileChecksum(String fileChecksum) {
 		this.fileChecksum = fileChecksum;
+		return this;
+	}
+
+	public Node setMetadata(String metadataType, String metadata) {
+		this.metadata.put(metadataType, metadata);
 		return this;
 	}
 
