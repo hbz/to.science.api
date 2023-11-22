@@ -58,6 +58,7 @@ import actions.Enrich;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.KTBLMapperHelper;
 import helper.RdfHelper;
 import helper.ToscienceHelper;
 import helper.WebgatherUtils;
@@ -538,6 +539,63 @@ public class Resource extends MyController {
 
 				// return JsonMessage(new Message(result1 + "\n" + result2));
 				return JsonMessage(new Message(result2));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", dataType = "file", required = true, paramType = "body") })
+	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			try {
+				MultipartFormData body = request().body().asMultipartFormData();
+				FilePart data = body.getFile("data");
+				if (data == null) {
+					return (Result) JsonMessage(new Message("Missing File.", 400));
+				}
+				play.Logger.debug("Starting updateKtbl data with pid=" + pid);
+				play.Logger.debug("request().body().asJson()=" + data.toString());
+				String ktblContent = null;
+
+				Node readNode = new Read().readNode(pid);
+				/**
+				 * 1. ktbl(Json)
+				 */
+				String contentOfFile =
+						KTBLMapperHelper.getStringContentFromJsonFile(data);
+				play.Logger.debug("contentOfFile=" + contentOfFile);
+
+				String ktblMetadata =
+						KTBLMapperHelper.getToPersistKtblMetadata(contentOfFile);
+				play.Logger.debug("ktblMetadata=" + ktblMetadata);
+
+				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
+
+				play.Logger.debug("result1=" + result1);
+
+				/**
+				 * 2. toscience
+				 */
+
+				JSONObject toscienceJson = new JSONObject(ktblMetadata);
+				String result2 =
+						modify.updateMetadata("toscience", readNode, ktblMetadata);
+				play.Logger.debug("result2=" + result2);
+
+				/**
+				 * 3. metadata2
+				 */
+				/**
+				 * ToDo: JSONObject tosJSONObject = ... play.Logger.debug("tosJSONObject
+				 * = " + tosJSONObject.toString()); modify.updateMetadataJson(readNode,
+				 * tosJSONObject.toString()); play.Logger.debug("Done toscienceJson
+				 * Mapping");
+				 */
+
+				return JsonMessage(new Message(result1 + "\n" + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
