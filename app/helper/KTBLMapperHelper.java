@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import org.json.JSONObject;
 import play.mvc.Http.MultipartFormData.FilePart;
 import org.json.JSONException;
+import java.io.IOException;
 
 /**
  * 
@@ -27,23 +28,25 @@ public class KTBLMapperHelper {
 	 * @return the content of the file as a string
 	 */
 	static public String getStringContentFromJsonFile(FilePart fp) {
-
 		StringBuilder ktblMetadata = null;
+		BufferedReader br = null;
+
 		try {
 			ktblMetadata = new StringBuilder();
 			if (fp != null) {
-				play.Logger.debug("FilePart !=NULL");
 				File file = (File) fp.getFile();
-				try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-					String line;
-					while ((line = br.readLine()) != null) {
-						ktblMetadata.append(line);
-					}
+				br = new BufferedReader(new FileReader(file));
+				String line;
+				while ((line = br.readLine()) != null) {
+					ktblMetadata.append(line);
 				}
 			}
-
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				br.close();
+			}
 		}
 		play.Logger.debug("ktblMetadata.toString()=" + ktblMetadata.toString());
 		return ktblMetadata.toString();
