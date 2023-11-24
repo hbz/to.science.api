@@ -7,9 +7,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+import java.io.FileNotFoundException;
 import org.json.JSONObject;
 import play.mvc.Http.MultipartFormData.FilePart;
+import org.json.JSONException;
 
 /**
  * 
@@ -26,17 +27,23 @@ public class KTBLMapperHelper {
 	 * @return the content of the file as a string
 	 */
 	static public String getStringContentFromJsonFile(FilePart fp) {
-		StringBuilder ktblMetadata = new StringBuilder();
 
-		if (fp != null) {
-			play.Logger.debug("FilePart !=NULL");
-			File file = (File) fp.getFile();
-			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-				String line;
-				while ((line = br.readLine()) != null) {
-					ktblMetadata.append(line);
+		StringBuilder ktblMetadata = null;
+		try {
+			ktblMetadata = new StringBuilder();
+			if (fp != null) {
+				play.Logger.debug("FilePart !=NULL");
+				File file = (File) fp.getFile();
+				try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+					String line;
+					while ((line = br.readLine()) != null) {
+						ktblMetadata.append(line);
+					}
 				}
 			}
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
 		play.Logger.debug("ktblMetadata.toString()=" + ktblMetadata.toString());
 		return ktblMetadata.toString();
@@ -51,14 +58,21 @@ public class KTBLMapperHelper {
 	 */
 	static public String getToPersistKtblMetadata(String contentJsFile) {
 
-		JSONObject allKtblMetadata = new JSONObject(contentJsFile);
-		JSONObject wantedKtblMetadata = new JSONObject();
+		JSONObject wantedKtblMetadata = null;
+		JSONObject allKtblMetadata = null;
+		try {
+			allKtblMetadata = new JSONObject(contentJsFile);
+			wantedKtblMetadata = new JSONObject();
 
-		wantedKtblMetadata.put("recordingPeriod",
-				allKtblMetadata.getJSONArray("recordingPeriod"));
-		wantedKtblMetadata.put("relatedDatasets",
-				allKtblMetadata.getJSONArray("relatedDatasets"));
-		wantedKtblMetadata.put("info", allKtblMetadata.get("info"));
+			wantedKtblMetadata.put("recordingPeriod",
+					allKtblMetadata.getJSONArray("recordingPeriod"));
+			wantedKtblMetadata.put("relatedDatasets",
+					allKtblMetadata.getJSONArray("relatedDatasets"));
+			wantedKtblMetadata.put("info", allKtblMetadata.get("info"));
+
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException:getToPersistKtblMetadata()");
+		}
 
 		return wantedKtblMetadata.toString();
 	}
@@ -72,13 +86,18 @@ public class KTBLMapperHelper {
 
 	public static Map<String, Object> getMapFromJSONObject(
 			JSONObject jsonObject) {
-		Map<String, Object> map = new LinkedHashMap<>();
+		Map<String, Object> map = null;
+		try {
+			map = new LinkedHashMap<>();
+			Iterator<String> keys = jsonObject.keys();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				Object value = jsonObject.get(key);
+				map.put(key, value);
+			}
 
-		Iterator<String> keys = jsonObject.keys();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = jsonObject.get(key);
-			map.put(key, value);
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException:getMapFromJSONObject()");
 		}
 
 		return map;
