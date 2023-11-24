@@ -173,7 +173,7 @@ public class Delete extends RegalAction {
 				RDFFormat.NTRIPLES);
 		Collection<Statement> myGraph =
 				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
-		return new Modify().updateMetadata2(node,
+		return new Modify().updateMetadata("metadata2", node,
 				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
 	}
 }

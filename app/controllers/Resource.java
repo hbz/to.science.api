@@ -55,6 +55,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
 import actions.Enrich;
+import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
@@ -457,7 +458,6 @@ public class Resource extends MyController {
 
 					play.Logger.debug("toscienceJson will be mapped");
 
-					// ******************************
 					RDFFormat format = RDFFormat.NTRIPLES;
 					Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode, format,
 							request().body().asText());
@@ -470,8 +470,6 @@ public class Resource extends MyController {
 					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
 
 					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
-
-					// ******************************
 
 					modify.updateMetadataJson(readNode, toscienceJson.toString());
 					play.Logger
@@ -551,18 +549,21 @@ public class Resource extends MyController {
 	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
+
+				String ktblContent = null;
+				Node readNode = new Read().readNode(pid);
+
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
+
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
 				play.Logger.debug("Starting updateKtbl data with pid=" + pid);
 				play.Logger.debug("request().body().asJson()=" + data.toString());
-				String ktblContent = null;
 
-				Node readNode = new Read().readNode(pid);
 				/**
-				 * 1. ktbl(Json)
+				 * 1.KTBL(Json)***************************************
 				 */
 				String contentOfFile =
 						KTBLMapperHelper.getStringContentFromJsonFile(data);
@@ -574,28 +575,29 @@ public class Resource extends MyController {
 
 				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
 
-				play.Logger.debug("result1=" + result1);
-
 				/**
-				 * 2. toscience
+				 * 2. TOSCIENCE(Json)***************************************
 				 */
 
-				JSONObject toscienceJson = new JSONObject(ktblMetadata);
 				String result2 =
 						modify.updateMetadata("toscience", readNode, ktblMetadata);
-				play.Logger.debug("result2=" + result2);
 
 				/**
-				 * 3. metadata2
+				 * 3. METADATA2(rdf)***************************************
 				 */
-				/**
-				 * ToDo: JSONObject tosJSONObject = ... play.Logger.debug("tosJSONObject
-				 * = " + tosJSONObject.toString()); modify.updateMetadataJson(readNode,
-				 * tosJSONObject.toString()); play.Logger.debug("Done toscienceJson
-				 * Mapping");
-				 */
+				JSONObject ktblJson = new JSONObject(ktblMetadata);
+				Map<String, Object> rdf =
+						KTBLMapperHelper.getMapFromJSONObject(ktblJson);
 
-				return JsonMessage(new Message(result1 + "\n" + result2));
+				String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
+
+				String result3 =
+						modify.updateMetadata("metadata2", readNode, contentRewrite);
+
+				Globals.fedora.updateNode(readNode);
+
+				return JsonMessage(
+						new Message(result1 + "\n" + result2 + "\n" + result3));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
@@ -1490,7 +1492,6 @@ public class Resource extends MyController {
 		return new CreateAction().call(userId -> {
 			try {
 				DynamicForm form = Form.form().bindFromRequest();
-				String alephId = form.get("alephId");
 				String namespace = form.get("namespace");
 				String pid = form.get("pid");
 				ToScienceObject object = new ToScienceObject();

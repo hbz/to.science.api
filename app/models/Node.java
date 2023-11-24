@@ -325,9 +325,9 @@ public class Node implements java.io.Serializable {
 	/**
 	 * @param metadataFile The absolutepath to the metadatafile
 	 */
-	public void setMetadata2File(String metadataFile) {
-		this.metadata2File = metadataFile;
-	}
+	// public void setMetadata2File(String metadataFile) {
+	// this.metadata2File = metadataFile;
+	// }
 
 	/**
 	 * The metadata file

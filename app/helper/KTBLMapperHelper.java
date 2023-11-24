@@ -3,6 +3,11 @@ package helper;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.json.JSONObject;
 import play.mvc.Http.MultipartFormData.FilePart;
 
@@ -56,6 +61,27 @@ public class KTBLMapperHelper {
 		wantedKtblMetadata.put("info", allKtblMetadata.get("info"));
 
 		return wantedKtblMetadata.toString();
+	}
+
+	/**
+	 * This method converts a JSONObject into a Map<String, Object>
+	 * 
+	 * @param jsonObject
+	 * @return
+	 */
+
+	public static Map<String, Object> getMapFromJSONObject(
+			JSONObject jsonObject) {
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		Iterator<String> keys = jsonObject.keys();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = jsonObject.get(key);
+			map.put(key, value);
+		}
+
+		return map;
 	}
 
 }
