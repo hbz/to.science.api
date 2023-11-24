@@ -554,7 +554,7 @@ public class Resource extends MyController {
 				Node readNode = new Read().readNode(pid);
 
 				MultipartFormData body = request().body().asMultipartFormData();
-				FilePart data = body.getFile("data");
+				FilePart data = body.getFile("Metadata");
 
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
