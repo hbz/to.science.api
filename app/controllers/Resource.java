@@ -545,7 +545,7 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(value = "Metadata", dataType = "file", required = true, paramType = "body") })
+			@ApiImplicitParam(name = "data", dataType = "file", required = true, paramType = "body") })
 	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
@@ -554,7 +554,7 @@ public class Resource extends MyController {
 				Node readNode = new Read().readNode(pid);
 
 				MultipartFormData body = request().body().asMultipartFormData();
-				FilePart data = body.getFile("Metadata");
+				FilePart data = body.getFile("data");
 
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
