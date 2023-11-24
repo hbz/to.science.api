@@ -1492,6 +1492,7 @@ public class Resource extends MyController {
 		return new CreateAction().call(userId -> {
 			try {
 				DynamicForm form = Form.form().bindFromRequest();
+				String alephId = form.get("alephId");
 				String namespace = form.get("namespace");
 				String pid = form.get("pid");
 				ToScienceObject object = new ToScienceObject();
