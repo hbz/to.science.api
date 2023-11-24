@@ -43,6 +43,8 @@ public class KTBLMapperHelper {
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			if (br != null) {
 				br.close();
