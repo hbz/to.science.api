@@ -47,7 +47,10 @@ public class KTBLMapperHelper {
 			e.printStackTrace();
 		} finally {
 			if (br != null) {
-				br.close();
+				try {
+					br.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 		play.Logger.debug("ktblMetadata.toString()=" + ktblMetadata.toString());
