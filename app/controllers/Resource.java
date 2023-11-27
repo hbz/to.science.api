@@ -545,16 +545,19 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "data", dataType = "file", required = true, paramType = "body") })
+			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
 	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
-
+				play.Logger.debug("Starting updateKtbl");
 				String ktblContent = null;
 				Node readNode = new Read().readNode(pid);
 
 				MultipartFormData body = request().body().asMultipartFormData();
+
+				play.Logger.debug("getFile");
 				FilePart data = body.getFile("data");
+				play.Logger.debug("getFile done");
 
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
