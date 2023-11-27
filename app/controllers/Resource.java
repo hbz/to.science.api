@@ -549,21 +549,17 @@ public class Resource extends MyController {
 	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
-				play.Logger.debug("Starting updateKtbl");
-				String ktblContent = null;
+
+				play.Logger.debug("Starting KTBL Mapping");
+
 				Node readNode = new Read().readNode(pid);
 
 				MultipartFormData body = request().body().asMultipartFormData();
-
-				play.Logger.debug("getFile");
 				FilePart data = body.getFile("data");
-				play.Logger.debug("getFile done");
 
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
-				play.Logger.debug("Starting updateKtbl data with pid=" + pid);
-				play.Logger.debug("request().body().asJson()=" + data.toString());
 
 				/**
 				 * 1.KTBL(Json)***************************************
@@ -578,29 +574,30 @@ public class Resource extends MyController {
 
 				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
 
+				play.Logger.debug("Done KTBL Mapping");
+
 				/**
 				 * 2. TOSCIENCE(Json)***************************************
 				 */
 
-				String result2 =
-						modify.updateMetadata("toscience", readNode, ktblMetadata);
+				// String result2 =
+				// modify.updateMetadata("toscience", readNode, ktblMetadata);
 
 				/**
 				 * 3. METADATA2(rdf)***************************************
 				 */
-				JSONObject ktblJson = new JSONObject(ktblMetadata);
-				Map<String, Object> rdf =
-						KTBLMapperHelper.getMapFromJSONObject(ktblJson);
-
-				String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
-
-				String result3 =
-						modify.updateMetadata("metadata2", readNode, contentRewrite);
+				// JSONObject ktblJson = new JSONObject(ktblMetadata);
+				// Map<String, Object> rdf =
+				// KTBLMapperHelper.getMapFromJSONObject(ktblJson);
+				//
+				// String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
+				//
+				// String result3 =
+				// modify.updateMetadata("metadata2", readNode, contentRewrite);
 
 				Globals.fedora.updateNode(readNode);
 
-				return JsonMessage(
-						new Message(result1 + "\n" + result2 + "\n" + result3));
+				return JsonMessage(new Message(result1));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
