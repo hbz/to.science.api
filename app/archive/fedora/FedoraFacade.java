@@ -397,16 +397,26 @@ public class FedoraFacade {
 			}
 			play.Logger.debug("Updated stream");
 		}
+		//
+		// if (node.getMetadataFile("metadata") != null) {
+		// utils.updateMetadataStream(node, "metadata");
+		// }
 
-		if (node.getMetadataFile("metadata") != null) {
-			utils.updateMetadataStream(node, "metadata");
+		if (node.getMetadataFile("metadata2") != null) {
+			utils.updateMetadata2Stream(node);
 		}
+
 		if (node.getMetadataFile("toscience") != null) {
 			utils.updateMetadataJsonStream(node);
 		}
-		if (node.getMetadata2File() != null) {
-			utils.updateMetadata2Stream(node);
+
+		if (node.getMetadataFile("ktbl") != null) {
+			utils.updateMetadataKtblStream(node);
 		}
+
+		// if (node.getMetadata2File() != null) {
+		// utils.updateMetadata2Stream(node);
+		// }
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);
 		}
