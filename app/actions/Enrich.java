@@ -62,7 +62,7 @@ public class Enrich {
 			List<Statement> enrichStatements = new ArrayList<>();
 			enrichAll(node, metadata, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-			new Modify().updateMetadata2(node, metadata);
+			new Modify().updateMetadata("metadata2", node, metadata);
 		} catch (Exception e) {
 			play.Logger.debug("", e);
 			return "Enrichment of " + node.getPid() + " partially failed !\n"

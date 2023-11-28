@@ -520,20 +520,8 @@ public class Utils {
 	}
 
 	void updateMetadata2Stream(Node node) {
-		try {
-			File file = new File(node.getMetadata2File());
-			if (dataStreamExists(node.getPid(), "metadata2")) {
-				new ModifyDatastream(node.getPid(), "metadata2").versionable(true)
-						.dsLabel("n-triple rdf metadata2").dsState("A").controlGroup("M")
-						.mimeType("text/plain").content(file).execute();
-			} else {
-				new AddDatastream(node.getPid(), "metadata2").versionable(true)
-						.dsState("A").dsLabel("n-triple rdf metadata2").controlGroup("M")
-						.mimeType("text/plain").content(file).execute();
-			}
-		} catch (FedoraClientException e) {
-			throw new HttpArchiveException(e.getStatus(), e);
-		}
+		updateMetadataStream(archive.fedora.Vocabulary.metadata2, "text/plain",
+				"n-triple rdf metadata", node);
 	}
 
 	void readRelsExt(Node node) throws FedoraClientException {
@@ -991,8 +979,13 @@ public class Utils {
 	}
 
 	void updateMetadataJsonStream(Node node) {
-		updateMetadataStream(archive.fedora.Vocabulary.metadataJson,
-				"application/json", "Metadata in Format JSON", node);
+		updateMetadataStream(archive.fedora.Vocabulary.toscience,
+				"application/json", "Metadata TOSCIENCE in Format JSON", node);
+	}
+
+	void updateMetadataKtblStream(Node node) {
+		updateMetadataStream(archive.fedora.Vocabulary.ktbl, "application/json",
+				"Metadata KTBL in Format JSON", node);
 	}
 
 	public void updateMetadataStream(String metadataType, String mimeType,

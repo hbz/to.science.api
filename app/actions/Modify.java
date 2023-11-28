@@ -236,13 +236,13 @@ public class Modify extends RegalAction {
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata2(node, content);
+			updateMetadata("metadata2", node, content);
 
 			String enrichMessage2 = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage2;
 		} else {
-			updateMetadata2(node, content);
+			updateMetadata("metadata2", node, content);
 			String enrichMessage2 = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage2;
@@ -272,13 +272,13 @@ public class Modify extends RegalAction {
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			alephid = alephid.replaceAll("#.*", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata2(node, content);
+			updateMetadata("metadata2", node, content);
 
 			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
 					+ enrichMessage;
 		} else {
-			updateMetadata2(node, content);
+			updateMetadata("metadata2", node, content);
 			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, and enriched! "
 					+ enrichMessage;
@@ -312,7 +312,7 @@ public class Modify extends RegalAction {
 			Map<String, Object> rdf = new XmlUtils().getLd2Lobidify2DeepGreen(
 					node.getLd2(), embargoDuration, deepgreenId, content);
 			play.Logger.debug("Mapped DeepGrren data to lobid2!");
-			updateMetadata2(node, rdfToString(rdf, format));
+			updateMetadata("metadata2", node, rdfToString(rdf, format));
 			play.Logger.debug("Updated Metadata2 datastream!");
 
 			String enrichMessage = Enrich.enrichMetadata2(node);
@@ -359,7 +359,7 @@ public class Modify extends RegalAction {
 			try {
 				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
-				updateMetadata2(node, content);
+				updateMetadata("metadata2", node, content);
 				msg.append(Enrich.enrichMetadata2(node));
 			} catch (NotUpdatedException e) {
 				play.Logger.debug("", e);
@@ -1104,39 +1104,10 @@ public class Modify extends RegalAction {
 	}
 
 	public String lobidify2(Node node, String alephid) {
-		updateMetadata2(node, getLobid2DataAsNtripleString(node, alephid));
+		updateMetadata("metadata2", node,
+				getLobid2DataAsNtripleString(node, alephid));
 		String enrichMessage = Enrich.enrichMetadata2(node);
 		return enrichMessage;
-	}
-
-	String updateMetadata2(Node node, String content) {
-		try {
-			String pid = node.getPid();
-			play.Logger.debug("Updating Metadata2 of PID " + pid);
-			play.Logger.debug("content: " + content);
-			if (content == null) {
-				throw new HttpArchiveException(406,
-						pid + " You've tried to upload an empty string."
-								+ " This action is not supported."
-								+ " Use HTTP DELETE instead.\n");
-			}
-			// RdfUtils.validate(content);
-			// Extreme Workaround to fix subject uris
-			content = rewriteContent(content, pid);
-			// Workaround end
-			File file = CopyUtils.copyStringToFile(content);
-			play.Logger
-					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
-			node.setMetadata2File(file.getAbsolutePath());
-			node.setMetadata2(content);
-			OaiDispatcher.makeOAISet(node);
-			reindexNodeAndParent(node);
-			return pid + " metadata2 successfully updated!";
-		} catch (RdfException e) {
-			throw new HttpArchiveException(400, e);
-		} catch (IOException e) {
-			throw new UpdateNodeException(e);
-		}
 	}
 
 	private static String getAuthorOrdering(Node node) {
@@ -1232,6 +1203,11 @@ public class Modify extends RegalAction {
 								+ " This action is not supported."
 								+ " Use HTTP DELETE instead.\n");
 			}
+
+			if (metadataType.equals("metadata2")) {
+				content = rewriteContent(content, pid);
+			}
+
 			File file = CopyUtils.copyStringToFile(content);
 			play.Logger
 					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());

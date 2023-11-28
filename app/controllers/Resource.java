@@ -55,9 +55,11 @@ import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.BulkAction;
 import actions.Enrich;
+import actions.Read;
 import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
+import helper.KTBLMapperHelper;
 import helper.RdfHelper;
 import helper.ToscienceHelper;
 import helper.WebgatherUtils;
@@ -456,7 +458,6 @@ public class Resource extends MyController {
 
 					play.Logger.debug("toscienceJson will be mapped");
 
-					// ******************************
 					RDFFormat format = RDFFormat.NTRIPLES;
 					Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode, format,
 							request().body().asText());
@@ -469,8 +470,6 @@ public class Resource extends MyController {
 					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
 
 					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
-
-					// ******************************
 
 					modify.updateMetadataJson(readNode, toscienceJson.toString());
 					play.Logger
@@ -538,6 +537,67 @@ public class Resource extends MyController {
 
 				// return JsonMessage(new Message(result1 + "\n" + result2));
 				return JsonMessage(new Message(result2));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
+	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			try {
+
+				play.Logger.debug("Starting KTBL Mapping");
+
+				Node readNode = new Read().readNode(pid);
+
+				MultipartFormData body = request().body().asMultipartFormData();
+				FilePart data = body.getFile("data");
+
+				if (data == null) {
+					return (Result) JsonMessage(new Message("Missing File.", 400));
+				}
+
+				/**
+				 * 1.KTBL(Json)***************************************
+				 */
+				String contentOfFile =
+						KTBLMapperHelper.getStringContentFromJsonFile(data);
+				play.Logger.debug("contentOfFile=" + contentOfFile);
+
+				String ktblMetadata =
+						KTBLMapperHelper.getToPersistKtblMetadata(contentOfFile);
+				play.Logger.debug("ktblMetadata=" + ktblMetadata);
+
+				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
+
+				play.Logger.debug("Done KTBL Mapping");
+
+				/**
+				 * 2. TOSCIENCE(Json)***************************************
+				 */
+
+				// String result2 =
+				// modify.updateMetadata("toscience", readNode, ktblMetadata);
+
+				/**
+				 * 3. METADATA2(rdf)***************************************
+				 */
+				// JSONObject ktblJson = new JSONObject(ktblMetadata);
+				// Map<String, Object> rdf =
+				// KTBLMapperHelper.getMapFromJSONObject(ktblJson);
+				//
+				// String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
+				//
+				// String result3 =
+				// modify.updateMetadata("metadata2", readNode, contentRewrite);
+
+				Globals.fedora.updateNode(readNode);
+
+				return JsonMessage(new Message(result1));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
