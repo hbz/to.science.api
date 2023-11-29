@@ -154,6 +154,18 @@ public class Delete extends RegalAction {
 		return pid + ": data - datastream successfully deleted! ";
 	}
 
+	public String deleteMetadataField(String pid, String field) {
+		Node node = new Read().readNode(pid);
+		String pred = getUriFromJsonName(field);
+		RepositoryConnection rdfRepo = RdfUtils.readRdfInputStreamToRepository(
+				new ByteArrayInputStream(node.getMetadata(metadata1).getBytes()),
+				RDFFormat.NTRIPLES);
+		Collection<Statement> myGraph =
+				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
+		return new Modify().updateMetadata(metadata1, node,
+				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
+	}
+
 	public String deleteMetadata2Field(String pid, String field) {
 		Node node = new Read().readNode(pid);
 		String pred = getUriFromJsonName(field);
@@ -162,7 +174,7 @@ public class Delete extends RegalAction {
 				RDFFormat.NTRIPLES);
 		Collection<Statement> myGraph =
 				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
-		return new Modify().updateMetadata("metadata2", node,
+		return new Modify().updateMetadata(metadata2, node,
 				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
 	}
 }
