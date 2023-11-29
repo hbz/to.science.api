@@ -18,7 +18,7 @@ package helper;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import static archive.fedora.Vocabulary.REL_HBZ_ID;
+import static archive.fedora.Vocabulary.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -313,7 +313,7 @@ public class JsonMapper {
 	private Map<String, Object> getDescriptiveMetadata1() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata1().getBytes(StandardCharsets.UTF_8));
+					node.getMetadata(metadata1).getBytes(StandardCharsets.UTF_8));
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;

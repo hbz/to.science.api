@@ -17,7 +17,7 @@
 package models;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
-import static archive.fedora.Vocabulary.REL_MAB_527;
+import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 
@@ -66,20 +66,17 @@ public class Node implements java.io.Serializable {
 	public DublinCoreData dublinCoreData = new DublinCoreData();
 
 	private HashMap<String, String> metadataFile = new HashMap();
-	private String metadata2File = null;
 	private String seqFile = null;
 	private String confFile = null;
 	private String urlHistFile = null;
 	private String uploadFile = null;
 	private String objectTimestampFile = null;
+
 	private List<Link> links = new Vector<Link>();
 	private List<Transformer> transformer = new Vector<Transformer>();
+
 	private HashMap<String, String> metadata = new HashMap();
-
-	private String metadata1 = null;
-	private String metadata2 = null;
 	private String seq = null;
-
 	private String conf = null;
 	private String urlHist = null;
 
@@ -306,28 +303,12 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * @param metadataType the type of the metadata: metadata2, lrmiData,
-	 *          toscience.json
+	 *          toscience
 	 * @param metadataFile The absolutepath to the metadatafile
 	 */
 	public void setMetadataFile(String metadataType, String metadataFile) {
 		this.metadataFile.put(metadataType, metadataFile);
 	}
-
-	/**
-	 * The metadata file
-	 * 
-	 * @return the absolute path to file
-	 */
-	public String getMetadata2File() {
-		return metadata2File;
-	}
-
-	/**
-	 * @param metadataFile The absolutepath to the metadatafile
-	 */
-	// public void setMetadata2File(String metadataFile) {
-	// this.metadata2File = metadataFile;
-	// }
 
 	/**
 	 * The metadata file
@@ -619,38 +600,27 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @return n-triple metadata as string
-	 */
-	@JsonIgnore()
-	public String getMetadata1() {
-		return metadata1;
-	}
-
-	/**
-	 * @param metadata n-triple metadata as string
-	 * @return this
-	 */
-	public Node setMetadata1(String metadata) {
-		this.metadata1 = metadata;
-		return this;
-	}
-
-	/**
-	 * @return n-triple metadata as string
+	 * @return n-triple metadata as string. Returns metadata2 if present, or else
+	 *         metadata (deprecated)
 	 */
 	@JsonIgnore()
 	public String getMetadata2() {
-		if (metadata2 == null || metadata2.isEmpty())
-			return metadata1;
-		return metadata2;
+		String myMetadata = getMetadata(metadata2);
+		if (myMetadata == null || myMetadata.isEmpty()) {
+			myMetadata = getMetadata(metadata1);
+		}
+		return myMetadata;
 	}
 
 	/**
-	 * @param metadata n-triple metadata as string
-	 * @return this
+	 * set metadata of type metadataType
+	 * 
+	 * @param metadataType metadataType (metadata2, toscience)
+	 * @param metadata the metadata as String
+	 * @return the modified Node
 	 */
-	public Node setMetadata2(String metadata2) {
-		this.metadata2 = metadata2;
+	public Node setMetadata(String metadataType, String metadata) {
+		this.metadata.put(metadataType, metadata);
 		return this;
 	}
 
@@ -775,11 +745,6 @@ public class Node implements java.io.Serializable {
 	 */
 	public Node setFileChecksum(String fileChecksum) {
 		this.fileChecksum = fileChecksum;
-		return this;
-	}
-
-	public Node setMetadata(String metadataType, String metadata) {
-		this.metadata.put(metadataType, metadata);
 		return this;
 	}
 
@@ -925,8 +890,8 @@ public class Node implements java.io.Serializable {
 	 */
 	@JsonIgnore()
 	public List<Link> getLinks() {
-		try (InputStream stream =
-				new ByteArrayInputStream(metadata2.getBytes(StandardCharsets.UTF_8));) {
+		try (InputStream stream = new ByteArrayInputStream(
+				getMetadata2().getBytes(StandardCharsets.UTF_8));) {
 			RdfResource rdf =
 					RdfUtils.createRdfResource(stream, RDFFormat.NTRIPLES, pid);
 			rdf = rdf.resolve();
@@ -1070,11 +1035,13 @@ public class Node implements java.io.Serializable {
 	 * 
 	 */
 	public boolean hasPersistentIdentifier() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2)
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn",
+				getMetadata2())
 				|| RdfUtils.hasTriple(pid,
-						"http://geni-orca.renci.org/owl/topology.owl#hasURN", metadata2)
+						"http://geni-orca.renci.org/owl/topology.owl#hasURN",
+						getMetadata2())
 				|| RdfUtils.hasTriple(pid, "http://purl.org/ontology/bibo/doi",
-						metadata2)
+						getMetadata2())
 				|| hasDoi() || hasUrn();
 	}
 
@@ -1082,14 +1049,15 @@ public class Node implements java.io.Serializable {
 	 * @return true if the metadata contains urn
 	 */
 	public boolean hasUrnInMetadata() {
-		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn", metadata2);
+		return RdfUtils.hasTriple(pid, "http://purl.org/lobid/lv#urn",
+				getMetadata2());
 	}
 
 	/**
 	 * @return true if metadata contains catalog id
 	 */
 	public boolean hasLinkToCatalogId() {
-		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, metadata2);
+		boolean result = RdfUtils.hasTriple(pid, REL_MAB_527, getMetadata2());
 		return result;
 	}
 
@@ -1099,7 +1067,8 @@ public class Node implements java.io.Serializable {
 	public String getUrnFromMetadata() {
 		try {
 			String hasUrn = "http://purl.org/lobid/lv#urn";
-			return RdfUtils.findRdfObjects(pid, hasUrn, metadata2, RDFFormat.NTRIPLES)
+			return RdfUtils
+					.findRdfObjects(pid, hasUrn, getMetadata2(), RDFFormat.NTRIPLES)
 					.get(0);
 		} catch (Exception e) {
 			return null;

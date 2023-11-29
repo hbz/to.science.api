@@ -36,6 +36,7 @@ import com.google.common.io.CharStreams;
 
 import archive.fedora.RdfUtils;
 import archive.fedora.XmlUtils;
+import static archive.fedora.Vocabulary.*;
 import helper.MyEtikettMaker;
 import models.Globals;
 import models.Node;
@@ -62,30 +63,8 @@ public class Enrich {
 			List<Statement> enrichStatements = new ArrayList<>();
 			enrichAll(node, metadata, enrichStatements);
 			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-			new Modify().updateMetadata("metadata2", node, metadata);
+			new Modify().updateMetadata(metadata2, node, metadata);
 		} catch (Exception e) {
-			play.Logger.debug("", e);
-			return "Enrichment of " + node.getPid() + " partially failed !\n"
-					+ e.getMessage();
-		}
-		return "Enrichment of " + node.getPid() + " succeeded!";
-	}
-
-	public static String enrichMetadata1(Node node) {
-		try {
-			play.Logger.info("Enrich " + node.getPid());
-			String metadata = node.getMetadata1();
-			if (metadata == null || metadata.isEmpty()) {
-				play.Logger.info("Not metadata to enrich " + node.getPid());
-				return "Not metadata to enrich " + node.getPid();
-			}
-			List<Statement> enrichStatements = new ArrayList<>();
-			enrichAll(node, metadata, enrichStatements);
-			metadata = RdfUtils.replaceTriples(enrichStatements, metadata);
-			new Modify().updateMetadata1(node, metadata);
-
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
 			play.Logger.debug("", e);
 			return "Enrichment of " + node.getPid() + " partially failed !\n"
 					+ e.getMessage();
