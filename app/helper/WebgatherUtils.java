@@ -201,4 +201,17 @@ public class WebgatherUtils {
 
 	} // Ende startCrawl
 
+	/**
+	 * 
+	 * Diese Routine ermittelt die toscience-ID des im letzten Nachtlauf zuletzt
+	 * angestarteten Webpage-Crawls. Zum Wiederaufsetzen an dieser Stelle wichtig.
+	 * 
+	 * @author Ingolf Kuss
+	 * @return die ID der zuletzt gecrawlten Webpage
+	 */
+	public static String readLastlyCrawledWebpageId() {
+		// hier die letzte ID aus einer Datenhaltung auslesen
+		return Globals.defaultNamespace + ":0";
+	}
+
 }

@@ -32,19 +32,14 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import models.Gatherconf;
 import models.Globals;
 import models.Link;
 import models.Node;
-import actions.Create;
 import actions.Modify;
 import actions.Create.WebgathererTooBusyException;
 import helper.WpullCrawl.CrawlControllerState;
-import helper.WpullCrawl;
 import actions.Read;
 
 /**
@@ -57,9 +52,10 @@ public class Webgatherer implements Runnable {
 			Play.application().configuration().getString("regal-api.heritrix.jobDir");
 	final static String wpullJobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
-	private String msg = null;
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+	private int precount = 0; // die Anzahl bearbeiteter Webpages
+	private int count = 0; // die Anzahl tatsächlich gestarteter Crawls
 
 	@Override
 	public void run() {
@@ -72,81 +68,113 @@ public class Webgatherer implements Runnable {
 		List<Node> webpages =
 				new Read().listRepo("webpage", Globals.defaultNamespace, 0, 50000);
 		WebgatherLogger.info("Found " + webpages.size() + " webpages.");
-		int count = 0;
-		int precount = 0;
 		int limit = play.Play.application().configuration()
 				.getInt("regal-api.heritrix.crawlsPerNight");
-		Gatherconf conf = null;
-		Node node = null;
-		// get all configs
-		for (Node n : webpages) {
-			try {
-				precount++;
-				node = n;
-				conf = null;
-				WebgatherLogger.info("Precount: " + precount);
-				WebgatherLogger.info("PID: " + n.getPid());
-				if (n.getState().equals("D")) {
-					WebgatherLogger.info("Objekt " + n.getPid() + " wurde gelöscht.");
-					continue;
-				}
-				if (n.getConf() == null) {
-					WebgatherLogger.info("Webpage " + n.getPid()
-							+ " hat noch keine Crawler-Konfigration.");
-					continue;
-				}
-				WebgatherLogger.info(
-						"Config: " + n.getConf() + " is being created in Gatherconf.");
-				conf = Gatherconf.create(n.getConf());
-				if (!conf.isActive()) {
-					WebgatherLogger.info("Site " + n.getPid() + " ist deaktiviert.");
-					continue;
-				}
-				WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
-				// find open jobs
-				if (isOutstanding(n, conf)) {
-					WebgatherLogger.info(
-							"Die Website " + n.getPid() + " soll jetzt eingesammelt werden.");
-					if (conf.hasUrlMoved(n)) {
-						if (conf.getUrlNew() == null) {
-							WebgatherLogger
-									.info("De Sick " + n.getPid() + " is unbekannt vertrocke !");
-						} else {
-							WebgatherLogger.info("De Sick " + n.getPid()
-									+ " is umjetrocke noh " + conf.getUrlNew() + " .");
-						}
-						WebgatherUtils.sendInvalidUrlEmail(n, conf);
-					} else {
-						WebgatherLogger
-								.info("HTTP Response Code = " + conf.getHttpResponseCode());
-						WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
-						/* new Create().createWebpageVersion(n); */
-						new WebgatherUtils().startCrawl(n);
-						count++; // count erst hier, so dass fehlgeschlagene Launches nicht
-											// mitgezählt werden
-						WebgatherLogger.info("Count is now = " + count);
-					}
-				}
 
-			} catch (WebgathererTooBusyException e) {
-				WebgatherLogger.error("Webgathering for " + n.getPid()
-						+ " stopped! Heritrix is too busy.");
-			} catch (MalformedURLException | URISyntaxException e) {
-				setUnknownHost(node, conf);
-				WebgatherLogger.error("Fehlgeformte URL bei " + n.getPid() + " !");
-			} catch (UnknownHostException e) {
-				setUnknownHost(node, conf);
-				WebgatherLogger.error(
-						"Ungültige URL. Neue URL unbekannt für " + n.getPid() + " !");
-			} catch (Exception e) {
-				WebgatherLogger.error("Couldn't create webpage version for "
-						+ n.getPid() + ". Cause: " + e.getLocalizedMessage(), e);
+		Node webpagesArray[] = (Node[]) webpages.toArray();
+		String lastlyCrawledWebpageId =
+				helper.WebgatherUtils.readLastlyCrawledWebpageId();
+		/* fortlaufender Index für Webpages, beginnend bei Null; kann "rollieren" */
+		int i = 0;
+		while (i < webpagesArray.length) {
+			if ((webpagesArray[i].getPid().compareTo(lastlyCrawledWebpageId) <= 0)
+					&& (precount == 0)) {
+				i++;
+				if (i >= webpagesArray.length) {
+					i = 0;
+					precount = 1;
+				}
+				continue;
 			}
+			precount++;
+			bearbWebpage(webpagesArray[i]);
 			if (count >= limit)
 				break;
+			i++;
+			if (i >= webpagesArray.length)
+				i = 0; // es geht wieder von vorne los
+			if (precount >= webpagesArray.length)
+				break;
+		}
+		// er hat webpagesArray.length Webseiten bearbeitet, oder limit Crawls
+		// gestartet
+		// Ende des Nachtlaufes
+		WebgatherLogger
+				.info("Ich habe " + precount + " Webpages bearbeitet und dabei " + count
+						+ " neue Crawls gestartet.");
+		WebgatherLogger.info("ENDE des Webgather-Nachtlaufes.");
+	}
+
+	/**
+	 * Diese Methode bearbeitet eine einzelne Webpage - prüft, ob jetzt neu
+	 * eingesammelt werden muss - beginnt ggfs. einen neuen Sammelvorgang
+	 * ("Crawl")
+	 */
+	private void bearbWebpage(Node node) {
+		Gatherconf conf = null;
+		Node n = node;
+		try {
+
+			WebgatherLogger.info("Precount: " + precount);
+			WebgatherLogger.info("PID: " + n.getPid());
+			if (n.getState().equals("D")) {
+				WebgatherLogger.info("Objekt " + n.getPid() + " wurde gelöscht.");
+				return;
+			}
+			if (n.getConf() == null) {
+				WebgatherLogger.info(
+						"Webpage " + n.getPid() + " hat noch keine Crawler-Konfigration.");
+				return;
+			}
+			WebgatherLogger
+					.info("Config: " + n.getConf() + " is being created in Gatherconf.");
+			conf = Gatherconf.create(n.getConf());
+			if (!conf.isActive()) {
+				WebgatherLogger.info("Site " + n.getPid() + " ist deaktiviert.");
+				return;
+			}
+			WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
+			// find open jobs
+			if (isOutstanding(n, conf)) {
+				WebgatherLogger.info(
+						"Die Website " + n.getPid() + " soll jetzt eingesammelt werden.");
+				if (conf.hasUrlMoved(n)) {
+					if (conf.getUrlNew() == null) {
+						WebgatherLogger
+								.info("De Sick " + n.getPid() + " is unbekannt vertrocke !");
+					} else {
+						WebgatherLogger.info("De Sick " + n.getPid() + " is umjetrocke noh "
+								+ conf.getUrlNew() + " .");
+					}
+					WebgatherUtils.sendInvalidUrlEmail(n, conf);
+				} else {
+					WebgatherLogger
+							.info("HTTP Response Code = " + conf.getHttpResponseCode());
+					WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
+					/* new Create().createWebpageVersion(n); */
+					new WebgatherUtils().startCrawl(n);
+					count++; // count erst hier, so dass fehlgeschlagene Launches nicht
+										// mitgezählt werden
+					WebgatherLogger.info("Count is now = " + count);
+				}
+			}
+
+		} catch (WebgathererTooBusyException e) {
+			WebgatherLogger.error(
+					"Webgathering for " + n.getPid() + " stopped! Heritrix is too busy.");
+		} catch (MalformedURLException | URISyntaxException e) {
+			setUnknownHost(n, conf);
+			WebgatherLogger.error("Fehlgeformte URL bei " + n.getPid() + " !");
+		} catch (UnknownHostException e) {
+			setUnknownHost(n, conf);
+			WebgatherLogger
+					.error("Ungültige URL. Neue URL unbekannt für " + n.getPid() + " !");
+		} catch (Exception e) {
+			WebgatherLogger.error("Couldn't create webpage version for " + n.getPid()
+					+ ". Cause: " + e.getLocalizedMessage(), e);
 		}
 
-	}
+	} // ENDE bearbWebpage()
 
 	private static void setUnknownHost(Node node, Gatherconf conf) {
 		if (conf != null && conf.getInvalidUrl() == false) {
