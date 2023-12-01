@@ -80,14 +80,16 @@ public class Webgatherer implements Runnable {
 		WebgatherLogger.info("Zuletzt gecralte Website: " + lastlyCrawledWebpageId);
 		/* fortlaufender Index für Webpages, beginnend bei Null; kann "rollieren" */
 		int i = 0;
+		int firstLoop = 1;
 		while (i < webpagesArray.length) {
 			if ((webpagesArray[i].getPid().compareTo(lastlyCrawledWebpageId) <= 0)
-					&& (precount == 0)) {
-				WebgatherLogger.debug(webpagesArray[i].getPid() + "wird übersprungen.");
+					&& (firstLoop == 1)) {
+				WebgatherLogger
+						.debug(webpagesArray[i].getPid() + " wird übersprungen.");
 				i++;
 				if (i >= webpagesArray.length) {
 					i = 0;
-					precount = 1;
+					firstLoop = 0;
 				}
 				continue;
 			}
@@ -96,8 +98,10 @@ public class Webgatherer implements Runnable {
 			if (count >= limit)
 				break;
 			i++;
-			if (i >= webpagesArray.length)
+			if (i >= webpagesArray.length) {
 				i = 0; // es geht wieder von vorne los
+				firstLoop = 0;
+			}
 			if (precount >= webpagesArray.length)
 				break;
 		}
