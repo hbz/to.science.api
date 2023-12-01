@@ -72,13 +72,16 @@ public class Webgatherer implements Runnable {
 				.getInt("regal-api.heritrix.crawlsPerNight");
 
 		Node webpagesArray[] = (Node[]) webpages.toArray();
+		WebgatherLogger.debug("Found: " + webpagesArray.length + " webpages.");
 		String lastlyCrawledWebpageId =
 				helper.WebgatherUtils.readLastlyCrawledWebpageId();
+		WebgatherLogger.info("Zuletzt gecralte Website: " + lastlyCrawledWebpageId);
 		/* fortlaufender Index für Webpages, beginnend bei Null; kann "rollieren" */
 		int i = 0;
 		while (i < webpagesArray.length) {
 			if ((webpagesArray[i].getPid().compareTo(lastlyCrawledWebpageId) <= 0)
 					&& (precount == 0)) {
+				WebgatherLogger.debug(webpagesArray[i].getPid() + "wird übersprungen.");
 				i++;
 				if (i >= webpagesArray.length) {
 					i = 0;
