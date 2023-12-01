@@ -20,8 +20,10 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import play.Logger;
 import play.Play;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileWriter;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.net.URISyntaxException;
@@ -71,7 +73,7 @@ public class Webgatherer implements Runnable {
 		int limit = play.Play.application().configuration()
 				.getInt("regal-api.heritrix.crawlsPerNight");
 
-		Node webpagesArray[] = (Node[]) webpages.toArray();
+		Node webpagesArray[] = webpages.toArray(new Node[0]);
 		WebgatherLogger.debug("Found: " + webpagesArray.length + " webpages.");
 		String lastlyCrawledWebpageId =
 				helper.WebgatherUtils.readLastlyCrawledWebpageId();
@@ -117,6 +119,14 @@ public class Webgatherer implements Runnable {
 		Gatherconf conf = null;
 		Node n = node;
 		try {
+			// Merke toscience-ID der Webpage in einer Datei
+			String fileName =
+					helper.WebgatherUtils.getFileNameLastlyCrawledWebpageId();
+			FileWriter fw = new FileWriter(fileName);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(n.getPid());
+			// bw.newLine();
+			bw.close();
 
 			WebgatherLogger.info("Precount: " + precount);
 			WebgatherLogger.info("PID: " + n.getPid());

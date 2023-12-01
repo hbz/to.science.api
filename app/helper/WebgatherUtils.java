@@ -16,7 +16,10 @@
  */
 package helper;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -210,8 +213,38 @@ public class WebgatherUtils {
 	 * @return die ID der zuletzt gecrawlten Webpage
 	 */
 	public static String readLastlyCrawledWebpageId() {
-		// hier die letzte ID aus einer Datenhaltung auslesen
-		return Globals.defaultNamespace + ":0";
+		// hier die letzte ID aus einer Datei auslesen
+		String fileName = getFileNameLastlyCrawledWebpageId();
+		String lastId = Globals.defaultNamespace + ":0";
+		try {
+			FileReader fr = new FileReader(fileName);
+			BufferedReader br = new BufferedReader(fr);
+			lastId = br.readLine();
+			WebgatherLogger.debug("Found lastly crawled webpage id: " + lastId);
+			br.close();
+		} catch (IOException e) {
+			WebgatherLogger
+					.debug("WARN: lastly crawled webpage id could not be read from file ("
+							+ fileName + ")!");
+			lastId = Globals.defaultNamespace + ":0";
+			WebgatherLogger.debug("Using default id: " + lastId);
+		}
+		return lastId;
+	}
+
+	/**
+	 * Diese Methode gibt den Namen der Datei zurück, in der sich der Webcrawler
+	 * die ID der in Nachtläufen zuletzt gecrawlten Webpage merkt.
+	 * 
+	 * @author I. Kuss
+	 * @return fileName
+	 */
+	public static String getFileNameLastlyCrawledWebpageId() {
+		String fileName = Globals.lastlyCrawledWebpageIdFile;
+		if (fileName == null || fileName.isEmpty()) {
+			fileName = "/tmp/lastlyCrawledWebpageId";
+		}
+		return fileName;
 	}
 
 }
