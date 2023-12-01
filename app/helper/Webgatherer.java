@@ -77,7 +77,7 @@ public class Webgatherer implements Runnable {
 		WebgatherLogger.debug("Found: " + webpagesArray.length + " webpages.");
 		String lastlyCrawledWebpageId =
 				helper.WebgatherUtils.readLastlyCrawledWebpageId();
-		WebgatherLogger.info("Zuletzt gecralte Website: " + lastlyCrawledWebpageId);
+		WebgatherLogger.info("Zuletzt gecrawlte Website: " + lastlyCrawledWebpageId);
 		/* fortlaufender Index für Webpages, beginnend bei Null; kann "rollieren" */
 		int i = 0;
 		int firstLoop = 1;
