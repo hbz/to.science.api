@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import actions.Modify;
+import static archive.fedora.Vocabulary.*;
 import authenticate.BasicAuth;
 import authenticate.User;
 import authenticate.UserDB;
@@ -40,7 +41,7 @@ public class Forms extends MyController {
 				previewNode.setPid("preview:1");
 				String metadata =
 						new Modify().getLobid2DataAsNtripleString(previewNode, alephId);
-				previewNode.setMetadata2(metadata);
+				previewNode.setMetadata(metadata2, metadata);
 				flash("message",
 						"Preview! Press 'Create' on the page bottom to create new object.");
 				return ok(

@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
+import static archive.fedora.Vocabulary.*;
 import models.Globals;
 import models.Node;
 
@@ -157,11 +158,11 @@ public class Delete extends RegalAction {
 		Node node = new Read().readNode(pid);
 		String pred = getUriFromJsonName(field);
 		RepositoryConnection rdfRepo = RdfUtils.readRdfInputStreamToRepository(
-				new ByteArrayInputStream(node.getMetadata1().getBytes()),
+				new ByteArrayInputStream(node.getMetadata(metadata1).getBytes()),
 				RDFFormat.NTRIPLES);
 		Collection<Statement> myGraph =
 				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
-		return new Modify().updateMetadata1(node,
+		return new Modify().updateMetadata(metadata1, node,
 				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
 	}
 
@@ -173,7 +174,7 @@ public class Delete extends RegalAction {
 				RDFFormat.NTRIPLES);
 		Collection<Statement> myGraph =
 				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
-		return new Modify().updateMetadata("metadata2", node,
+		return new Modify().updateMetadata(metadata2, node,
 				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
 	}
 }

@@ -503,44 +503,36 @@ public class Utils {
 	}
 
 	void updateMetadataStream(Node node, String metadataType) {
+		updateMetadataStream(metadataType, "text/plain", "n-triple rdf metadata",
+				node);
+	}
+
+	/**
+	 * Update a metadata stream
+	 * 
+	 * @param metadataType the metadatatype as defined in
+	 *          archive.fedora.Vocabulary
+	 * @param mimeType the mime tpye of the metadata
+	 * @param label the label of the metadata
+	 * @param node the node of class models.Node
+	 */
+	public void updateMetadataStream(String metadataType, String mimeType,
+			String label, Node node) {
 		try {
 			File file = new File(node.getMetadataFile(metadataType));
-			if (dataStreamExists(node.getPid(), "metadata")) {
-				new ModifyDatastream(node.getPid(), "metadata").versionable(true)
-						.dsLabel("n-triple rdf metadata").dsState("A").controlGroup("M")
-						.mimeType("text/plain").content(file).execute();
+			if (dataStreamExists(node.getPid(), metadataType)) {
+				new ModifyDatastream(node.getPid(), metadataType).versionable(true)
+						.dsLabel(label).dsState("A").controlGroup("M").mimeType(mimeType)
+						.content(file).execute();
 			} else {
-				new AddDatastream(node.getPid(), "metadata").versionable(true)
-						.dsState("A").dsLabel("n-triple rdf metadata").controlGroup("M")
-						.mimeType("text/plain").content(file).execute();
+				new AddDatastream(node.getPid(), metadataType).versionable(true)
+						.dsState("A").dsLabel(label).controlGroup("M").mimeType(mimeType)
+						.content(file).execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
 		}
 	}
-
-	void updateMetadata2Stream(Node node) {
-		updateMetadataStream(archive.fedora.Vocabulary.metadata2, "text/plain",
-				"n-triple rdf metadata", node);
-	}
-
-	//
-	// void updateMetadata2Stream(Node node) {
-	// try {
-	// File file = new File(node.getMetadata2File());
-	// if (dataStreamExists(node.getPid(), "metadata2")) {
-	// new ModifyDatastream(node.getPid(), "metadata2").versionable(true)
-	// .dsLabel("n-triple rdf metadata2").dsState("A").controlGroup("M")
-	// .mimeType("text/plain").content(file).execute();
-	// } else {
-	// new AddDatastream(node.getPid(), "metadata2").versionable(true)
-	// .dsState("A").dsLabel("n-triple rdf metadata2").controlGroup("M")
-	// .mimeType("text/plain").content(file).execute();
-	// }
-	// } catch (FedoraClientException e) {
-	// throw new HttpArchiveException(e.getStatus(), e);
-	// }
-	// }
 
 	void readRelsExt(Node node) throws FedoraClientException {
 		FedoraResponse response =
@@ -1006,21 +998,4 @@ public class Utils {
 				"Metadata KTBL in Format JSON", node);
 	}
 
-	public void updateMetadataStream(String metadataType, String mimeType,
-			String label, Node node) {
-		try {
-			File file = new File(node.getMetadataFile(metadataType));
-			if (dataStreamExists(node.getPid(), metadataType)) {
-				new ModifyDatastream(node.getPid(), metadataType).versionable(true)
-						.dsLabel(label).dsState("A").controlGroup("M").mimeType(mimeType)
-						.content(file).execute();
-			} else {
-				new AddDatastream(node.getPid(), metadataType).versionable(true)
-						.dsState("A").dsLabel(label).controlGroup("M").mimeType(mimeType)
-						.content(file).execute();
-			}
-		} catch (FedoraClientException e) {
-			throw new HttpArchiveException(e.getStatus(), e);
-		}
-	}
 }

@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.FedoraVocabulary.REL_HAS_MODEL;
 import static archive.fedora.FedoraVocabulary.SIMPLE;
+import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 
 import java.io.IOException;
@@ -271,8 +272,9 @@ public class FedoraFacade {
 		getRelsExtFromFedora(node);
 		getDatesFromFedora(node);
 		getChecksumFromFedora(node);
-		getMetadataFromFedora(node);
-		getMetadata2FromFedora(node);
+		getMetadataFromFedora(metadata1, node);
+		getMetadataFromFedora(metadata2, node);
+		getMetadataFromFedora(toscience, node);
 		getDataFromFedora(pid, node);
 		getConfFromFedora(pid, node);
 		getUrlHistFromFedora(pid, node);
@@ -325,22 +327,11 @@ public class FedoraFacade {
 		}
 	}
 
-	private void getMetadataFromFedora(Node node) {
+	private void getMetadataFromFedora(String metadataType, Node node) {
 		try {
 			FedoraResponse response =
-					new GetDatastreamDissemination(node.getPid(), "metadata").execute();
-			node.setMetadata1(
-					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
-		} catch (Exception e) {
-			// datastream with name metadata is optional
-		}
-	}
-
-	private void getMetadata2FromFedora(Node node) {
-		try {
-			FedoraResponse response =
-					new GetDatastreamDissemination(node.getPid(), "metadata2").execute();
-			node.setMetadata2(
+					new GetDatastreamDissemination(node.getPid(), metadataType).execute();
+			node.setMetadata(metadataType,
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
@@ -397,26 +388,23 @@ public class FedoraFacade {
 			}
 			play.Logger.debug("Updated stream");
 		}
-		//
-		// if (node.getMetadataFile("metadata") != null) {
-		// utils.updateMetadataStream(node, "metadata");
-		// }
 
-		if (node.getMetadataFile("metadata2") != null) {
-			utils.updateMetadata2Stream(node);
+		if (node.getMetadataFile(metadata1) != null) {
+			utils.updateMetadataStream(node, metadata1);
 		}
 
-		if (node.getMetadataFile("toscience") != null) {
+		if (node.getMetadataFile(metadata2) != null) {
+			utils.updateMetadataStream(node, metadata2);
+		}
+
+		if (node.getMetadataFile(toscience) != null) {
 			utils.updateMetadataJsonStream(node);
 		}
 
-		if (node.getMetadataFile("ktbl") != null) {
+		if (node.getMetadataFile(ktbl) != null) {
 			utils.updateMetadataKtblStream(node);
 		}
 
-		// if (node.getMetadata2File() != null) {
-		// utils.updateMetadata2Stream(node);
-		// }
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);
 		}
