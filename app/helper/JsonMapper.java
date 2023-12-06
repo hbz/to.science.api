@@ -18,7 +18,7 @@ package helper;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import static archive.fedora.Vocabulary.REL_HBZ_ID;
+import static archive.fedora.Vocabulary.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -313,7 +313,7 @@ public class JsonMapper {
 	private Map<String, Object> getDescriptiveMetadata1() {
 		try {
 			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata1().getBytes(StandardCharsets.UTF_8));
+					node.getMetadata(metadata1).getBytes(StandardCharsets.UTF_8));
 			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
@@ -819,15 +819,17 @@ public class JsonMapper {
 		return new HashMap<>();
 	}
 
+
+
 	private static Map<String, Object> findContributor(Map<String, Object> m,
 			String authorsId) {
-		if (m.get("contributor") instanceof ArrayList) {
-			ArrayList<Map<String, Object>> creators =
-					(ArrayList<Map<String, Object>>) m.get("contributor");
+		if (m.get("contributor") instanceof List) {
+			play.Logger.debug("Casting m.get(\"contributor\") to Collection<String>");
+			Collection<String> creators = (Collection<String>) m.get("contributor");
 			play.Logger.trace("" + creators.getClass());
-			for (Map<String, Object> creator : creators) {
-				String currentId = (String) creator.get(ID2);
-				play.Logger.trace(currentId + " " + authorsId);
+			for (String creator : creators) {
+				String currentId = creator;
+				play.Logger.trace(creator + " " + currentId + " " + authorsId);
 				if (authorsId.compareTo(currentId) == 0) {
 					Map<String, Object> result = new HashMap<>();
 					result.put(ID2, currentId);

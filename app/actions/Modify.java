@@ -60,6 +60,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 import archive.fedora.CopyUtils;
 import archive.fedora.RdfException;
 import archive.fedora.RdfUtils;
+import static archive.fedora.Vocabulary.*;
 import archive.fedora.XmlUtils;
 import controllers.MyController;
 import helper.DataciteClient;
@@ -236,7 +237,7 @@ public class Modify extends RegalAction {
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata("metadata2", node, content);
+			updateMetadata(metadata2, node, content);
 
 			String enrichMessage2 = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
@@ -312,7 +313,7 @@ public class Modify extends RegalAction {
 			Map<String, Object> rdf = new XmlUtils().getLd2Lobidify2DeepGreen(
 					node.getLd2(), embargoDuration, deepgreenId, content);
 			play.Logger.debug("Mapped DeepGrren data to lobid2!");
-			updateMetadata("metadata2", node, rdfToString(rdf, format));
+			updateMetadata(metadata2, node, rdfToString(rdf, format));
 			play.Logger.debug("Updated Metadata2 datastream!");
 
 			String enrichMessage = Enrich.enrichMetadata2(node);
@@ -359,7 +360,7 @@ public class Modify extends RegalAction {
 			try {
 				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
 						alephid, date);
-				updateMetadata("metadata2", node, content);
+				updateMetadata(metadata2, node, content);
 				msg.append(Enrich.enrichMetadata2(node));
 			} catch (NotUpdatedException e) {
 				play.Logger.debug("", e);
@@ -372,40 +373,6 @@ public class Modify extends RegalAction {
 			return pid + " no updates available. Resource has no AlephId.";
 		}
 
-	}
-
-	String updateMetadata1(Node node, String content) {
-		try {
-			String pid = node.getPid();
-			if (content == null) {
-				throw new HttpArchiveException(406,
-						pid + " You've tried to upload an empty string."
-								+ " This action is not supported."
-								+ " Use HTTP DELETE instead.\n");
-			}
-			// RdfUtils.validate(content);
-			// Extreme Workaround to fix subject uris
-			content = rewriteContent(content, pid);
-			// Workaround end
-			File file = CopyUtils.copyStringToFile(content);
-			node.setMetadataFile("metadata", file.getAbsolutePath());
-			if (content.contains(archive.fedora.Vocabulary.REL_LOBID_DOI)) {
-				List<String> dois = RdfUtils.findRdfObjects(node.getPid(),
-						archive.fedora.Vocabulary.REL_LOBID_DOI, content,
-						RDFFormat.NTRIPLES);
-				if (!dois.isEmpty()) {
-					node.setDoi(dois.get(0));
-				}
-			}
-			node.setMetadata1(content);
-			OaiDispatcher.makeOAISet(node);
-			reindexNodeAndParent(node);
-			return pid + " metadata successfully updated!";
-		} catch (RdfException e) {
-			throw new HttpArchiveException(400, e);
-		} catch (IOException e) {
-			throw new UpdateNodeException(e);
-		}
 	}
 
 	public String rewriteContent(String content, String pid) {
@@ -1097,14 +1064,8 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	public String lobidify1(Node node, String alephid) {
-		updateMetadata1(node, getLobidDataAsNtripleString(node, alephid));
-		String enrichMessage = Enrich.enrichMetadata1(node);
-		return enrichMessage;
-	}
-
 	public String lobidify2(Node node, String alephid) {
-		updateMetadata("metadata2", node,
+		updateMetadata(metadata2, node,
 				getLobid2DataAsNtripleString(node, alephid));
 		String enrichMessage = Enrich.enrichMetadata2(node);
 		return enrichMessage;
@@ -1204,7 +1165,7 @@ public class Modify extends RegalAction {
 								+ " Use HTTP DELETE instead.\n");
 			}
 
-			if (metadataType.equals("metadata2")) {
+			if (metadataType.equals(metadata2)) {
 				content = rewriteContent(content, pid);
 			}
 

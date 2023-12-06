@@ -18,9 +18,7 @@ package actions;
 
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
-import static archive.fedora.Vocabulary.REL_CONTENT_TYPE;
-import static archive.fedora.Vocabulary.REL_IS_NODE_TYPE;
-import static archive.fedora.Vocabulary.TYPE_OBJECT;
+import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.Webgatherer;
@@ -473,25 +471,13 @@ public class Read extends RegalAction {
 	}
 
 	/**
-	 * @param pid the pid of the object
-	 * @param field if field is specified, only the value of a certain field will
-	 *          be returned
-	 * @return n-triple metadata
-	 */
-	public String readMetadata1(String pid, String field) {
-		Node node = internalReadNode(pid);
-		String result = readMetadata1(node, field);
-		return result == null ? "No " + field : result;
-	}
-
-	/**
 	 * @param node
 	 * @param field the shortname of metadata field
 	 * @return the ntriples or just one field
 	 */
 	public String readMetadata1(Node node, String field) {
 		try {
-			String metadata = node.getMetadata1();
+			String metadata = node.getMetadata(metadata1);
 			if (metadata == null)
 				return null;
 			if (field == null || field.isEmpty()) {
@@ -594,35 +580,6 @@ public class Read extends RegalAction {
 	}
 
 	/**
-	 * @param pid the pid of the object
-	 * @param field if field is specified, only a certain field of the node's
-	 *          metadata will be returned
-	 * @return n-triple metadata
-	 */
-	public String readMetadata1FromCache(String pid, String field) {
-		try {
-			Node node = readNode(pid);
-			String metadata = node.getMetadata1();
-			if (metadata == null || metadata.isEmpty())
-				throw new HttpArchiveException(404,
-						"No Metadata on " + pid + " available!");
-			if (field == null || field.isEmpty()) {
-				return metadata;
-			} else {
-				String pred = getUriFromJsonName(field);
-				List<String> value =
-						RdfUtils.findRdfObjects(pid, pred, metadata, RDFFormat.NTRIPLES);
-
-				return value.isEmpty() ? "No " + field : value.get(0);
-			}
-		} catch (UrlConnectionException e) {
-			throw new HttpArchiveException(404, e);
-		} catch (Exception e) {
-			throw new HttpArchiveException(500, e);
-		}
-	}
-
-	/**
 	 * @param node the pid of the object
 	 * @return ordered json array of parts
 	 */
@@ -663,17 +620,6 @@ public class Read extends RegalAction {
 		Urn result = new Urn(urn);
 		result.init(Globals.urnbase + pid);
 		return result;
-	}
-
-	/**
-	 * @param node the node to fetch a certain property from
-	 * @param predicate the property in its long form
-	 * @return all objects that are referenced using the predicate
-	 */
-	public List<String> getNodeLdProperty1(Node node, String predicate) {
-		List<String> linkedObjects = RdfUtils.findRdfObjects(node.getPid(),
-				predicate, node.getMetadata1(), RDFFormat.NTRIPLES);
-		return linkedObjects;
 	}
 
 	/**
@@ -786,9 +732,8 @@ public class Read extends RegalAction {
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					entries.put("crawlControllerState",
 							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus",
-							WpullCrawl.getCrawlExitStatus(node) < 0 ? ""
-									: WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
+							? "" : WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
