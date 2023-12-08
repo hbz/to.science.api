@@ -83,4 +83,25 @@ public class ToscienceHelper {
 
 	}
 
+	/**
+	 * This method deletes the KTBL metadata and keeps only the Toscience metadata
+	 * and returns it
+	 * 
+	 * @param contentJsFile contains Tos and Ktbl metadata
+	 * @return a string with Toscience metadata
+	 */
+	static public String getToPersistTosMetadata(String contentJsFile) {
+		JSONObject ktblAndTos = null;
+		try {
+			ktblAndTos = new JSONObject(contentJsFile);
+			ktblAndTos.remove("recordingPeriod");
+			ktblAndTos.remove("relatedDatasets");
+			ktblAndTos.remove("info");
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException:getToPersistTosMetadata()");
+		}
+
+		return ktblAndTos.toString();
+	}
+
 }

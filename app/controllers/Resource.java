@@ -546,7 +546,7 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
-	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
+	public static Promise<Result> updateKtblAndTos(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
 
@@ -566,11 +566,9 @@ public class Resource extends MyController {
 				 */
 				String contentOfFile =
 						KTBLMapperHelper.getStringContentFromJsonFile(data);
-				play.Logger.debug("contentOfFile=" + contentOfFile);
 
 				String ktblMetadata =
 						KTBLMapperHelper.getToPersistKtblMetadata(contentOfFile);
-				play.Logger.debug("ktblMetadata=" + ktblMetadata);
 
 				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
 
@@ -579,9 +577,11 @@ public class Resource extends MyController {
 				/**
 				 * 2. TOSCIENCE(Json)***************************************
 				 */
-
-				// String result2 =
-				// modify.updateMetadata("toscience", readNode, ktblMetadata);
+				String toscienceMetadata =
+						ToscienceHelper.getToPersistTosMetadata(contentOfFile);
+				play.Logger.debug("toscienceMetadata=" + toscienceMetadata);
+				String result2 =
+						modify.updateMetadata("toscience", readNode, toscienceMetadata);
 
 				/**
 				 * 3. METADATA2(rdf)***************************************
@@ -597,7 +597,7 @@ public class Resource extends MyController {
 
 				Globals.fedora.updateNode(readNode);
 
-				return JsonMessage(new Message(result1));
+				return JsonMessage(new Message(result1 + result2));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}
