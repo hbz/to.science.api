@@ -37,7 +37,7 @@ public class BaseModelTest {
 			JsonNode body) {
 		Result result = new Helpers().invokeWithContext(new RequestBuilder()
 				.bodyJson(body).header("accept", "application/json"), () -> {
-					Http.Context.current.get().args.put("role", "edoweb-admin");
+					Http.Context.current.get().args.put("role", "toscience-admin");
 					return function.get();
 				}).get(5000);
 		String str = Helpers.contentAsString(result);
@@ -48,7 +48,7 @@ public class BaseModelTest {
 	protected Result controllerCall(Supplier<F.Promise<Result>> function) {
 		Result result = new Helpers().invokeWithContext(
 				new RequestBuilder().header("accept", "application/json"), () -> {
-					Http.Context.current.get().args.put("role", "edoweb-admin");
+					Http.Context.current.get().args.put("role", "toscience-admin");
 					return function.get();
 				}).get(10000);
 		String str = Helpers.contentAsString(result);

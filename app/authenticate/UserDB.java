@@ -54,17 +54,26 @@ public class UserDB {
 	private void createAdministrativUsers() {
 		String pwd =
 				Play.application().configuration().getString("regal-api.admin-hash");
+		String adminPrefix =
+				Play.application().configuration().getString("regal-api.admin-prefix");
+		if (adminPrefix == null || adminPrefix.isEmpty()) {
+			adminPrefix = "toscience";
+		}
 		administrativUsers = new HashMap<>();
-		User admin = createAdministrativUser("edoweb-admin", pwd, Role.ADMIN);
+		User admin =
+				createAdministrativUser(adminPrefix + "-admin", pwd, Role.ADMIN);
 		administrativUsers.put(admin.getUsername(), admin);
-		User editor = createAdministrativUser("edoweb-editor", pwd, Role.EDITOR);
+		User editor =
+				createAdministrativUser(adminPrefix + "-editor", pwd, Role.EDITOR);
 		administrativUsers.put(editor.getUsername(), editor);
-		User reader = createAdministrativUser("edoweb-reader", pwd, Role.READER);
+		User reader =
+				createAdministrativUser(adminPrefix + "-reader", pwd, Role.READER);
 		administrativUsers.put(reader.getUsername(), reader);
-		User subscriber =
-				createAdministrativUser("edoweb-subscriber", pwd, Role.SUBSCRIBER);
+		User subscriber = createAdministrativUser(adminPrefix + "-subscriber", pwd,
+				Role.SUBSCRIBER);
 		administrativUsers.put(subscriber.getUsername(), subscriber);
-		User remote = createAdministrativUser("edoweb-remote", pwd, Role.REMOTE);
+		User remote =
+				createAdministrativUser(adminPrefix + "-remote", pwd, Role.REMOTE);
 		administrativUsers.put(remote.getUsername(), remote);
 	}
 
