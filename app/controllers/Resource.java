@@ -586,14 +586,14 @@ public class Resource extends MyController {
 				/**
 				 * 3. METADATA2(rdf)***************************************
 				 */
-				// JSONObject ktblJson = new JSONObject(ktblMetadata);
-				// Map<String, Object> rdf =
-				// KTBLMapperHelper.getMapFromJSONObject(ktblJson);
-				//
-				// String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
-				//
-				// String result3 =
-				// modify.updateMetadata("metadata2", readNode, contentRewrite);
+				JSONObject tosJson = new JSONObject(toscienceMetadata);
+				Map<String, Object> rdf =
+						KTBLMapperHelper.getMapFromJSONObject(tosJson);
+
+				String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
+
+				String result3 =
+						modify.updateMetadata("metadata2", readNode, contentRewrite);
 
 				Globals.fedora.updateNode(readNode);
 
