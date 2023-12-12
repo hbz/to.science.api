@@ -584,20 +584,23 @@ public class Resource extends MyController {
 						modify.updateMetadata("toscience", readNode, toscienceMetadata);
 
 				/**
-				 * 3. METADATA2(rdf)***************************************
+				 * 3. METADATA2(rdf)****************************************
 				 */
-				JSONObject tosJson = new JSONObject(toscienceMetadata);
-				Map<String, Object> rdf =
-						KTBLMapperHelper.getMapFromJSONObject(tosJson);
 
-				String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
+				Map<String, Object> rdf = KTBLMapperHelper
+						.getMapFromJSONObject(new JSONObject(toscienceMetadata));
+				play.Logger.debug("rdf=" + rdf.toString());
+				// RDFFormat.NTRIPLES
+				String tosContent = modify.rdfToString(rdf, RDFFormat.NTRIPLES);
+
+				play.Logger.debug("tosContent=" + tosContent);
 
 				String result3 =
-						modify.updateMetadata("metadata2", readNode, contentRewrite);
+						modify.updateMetadata("metadata2", readNode, tosContent);
 
 				Globals.fedora.updateNode(readNode);
 
-				return JsonMessage(new Message(result1 + result2));
+				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

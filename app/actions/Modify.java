@@ -1115,7 +1115,7 @@ public class Modify extends RegalAction {
 		}
 	}
 
-	private String rdfToString(Map<String, Object> result, RDFFormat format) {
+	public String rdfToString(Map<String, Object> result, RDFFormat format) {
 		try {
 			String rdf = RdfUtils.readRdfToString(
 					new ByteArrayInputStream(json(result).getBytes("utf-8")),
@@ -1167,6 +1167,7 @@ public class Modify extends RegalAction {
 
 			if (metadataType.equals(metadata2)) {
 				content = rewriteContent(content, pid);
+				play.Logger.debug("content: " + content);
 			}
 
 			File file = CopyUtils.copyStringToFile(content);
