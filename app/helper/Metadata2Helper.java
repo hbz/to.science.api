@@ -53,8 +53,8 @@ public class Metadata2Helper {
 			}
 
 			if (tosContent.has("title")) {
-				String title = tosContent.getString("title");
-				// System.out.println("title"+ title);
+				Object obj = tosContent.get("title");
+				String title = getValueBetweenTwoQuotationMarks(obj.toString());
 				rdf.put("title", title);
 			}
 

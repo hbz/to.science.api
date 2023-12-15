@@ -556,6 +556,10 @@ public class Resource extends MyController {
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
+				String fileName = data.getFilename();
+				String mimeType = data.getContentType();
+				readNode.setFileLabel(fileName);
+				readNode.setMimeType(mimeType);
 
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
