@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.KTBLMapperHelper;
+import helper.Metadata2Helper;
 import helper.RdfHelper;
 import helper.ToscienceHelper;
 import helper.WebgatherUtils;
@@ -550,10 +552,8 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, node -> {
 			try {
 
-				play.Logger.debug("Starting KTBL Mapping");
-
+				LinkedHashMap<String, Object> rdf = null;
 				Node readNode = new Read().readNode(pid);
-
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
 
@@ -564,6 +564,8 @@ public class Resource extends MyController {
 				/**
 				 * 1.KTBL(Json)***************************************
 				 */
+				play.Logger.debug("Starting KTBL Mapping");
+
 				String contentOfFile =
 						KTBLMapperHelper.getStringContentFromJsonFile(data);
 
@@ -577,26 +579,38 @@ public class Resource extends MyController {
 				/**
 				 * 2. TOSCIENCE(Json)***************************************
 				 */
+				play.Logger.debug("Starting TOSCIENCE Mapping");
+
 				String toscienceMetadata =
 						ToscienceHelper.getToPersistTosMetadata(contentOfFile);
+
 				play.Logger.debug("toscienceMetadata=" + toscienceMetadata);
+
 				String result2 =
 						modify.updateMetadata("toscience", readNode, toscienceMetadata);
+
+				play.Logger.debug("Done TOSCIENCE Mapping");
 
 				/**
 				 * 3. METADATA2(rdf)****************************************
 				 */
 
-				Map<String, Object> rdf = KTBLMapperHelper
-						.getMapFromJSONObject(new JSONObject(toscienceMetadata));
-				play.Logger.debug("rdf=" + rdf.toString());
-				// RDFFormat.NTRIPLES
-				String tosContent = modify.rdfToString(rdf, RDFFormat.NTRIPLES);
+				play.Logger.debug("Starting METADATA2 Mapping");
 
-				play.Logger.debug("tosContent=" + tosContent);
+				rdf = Metadata2Helper
+						.getRdfFromToscience(new JSONObject(toscienceMetadata));
+
+				play.Logger.debug("rdf=" + rdf.toString());
+
+				String rdfContent = modify.rdfToString(
+						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
+
+				play.Logger.debug("rdfContent=" + rdfContent);
 
 				String result3 =
-						modify.updateMetadata("metadata2", readNode, tosContent);
+						modify.updateMetadata("metadata2", readNode, rdfContent);
+
+				play.Logger.debug("Done METADATA2 Mapping");
 
 				Globals.fedora.updateNode(readNode);
 

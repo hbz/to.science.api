@@ -1117,6 +1117,7 @@ public class Modify extends RegalAction {
 
 	public String rdfToString(Map<String, Object> result, RDFFormat format) {
 		try {
+			play.Logger.debug("result=" + result.toString());
 			String rdf = RdfUtils.readRdfToString(
 					new ByteArrayInputStream(json(result).getBytes("utf-8")),
 					RDFFormat.JSONLD, format, "");
