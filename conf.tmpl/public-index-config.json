@@ -1,0 +1,409 @@
+{
+    "settings":
+    {
+		"index" : {
+		   "analysis" : {
+			  "filter" : {
+				 "germansnow" : {
+					"language" : "German2",
+					"type" : "snowball"
+				 }
+			  },
+			  "analyzer" : {
+				 "german" : {
+					"filter" : [
+					   "germansnow",
+					   "icu_folding"
+					],
+					"type" : "custom",
+					"tokenizer" : "icu_tokenizer"
+				 },
+				 "default" : {
+					"sub_analyzers" : [
+					   "standard",
+					   "german"
+					],
+					"type" : "combo"
+				 }
+			  }
+		   }
+		}
+    },
+	"mappings": 
+	{
+		"monograph": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"file": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"article": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"issue": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"volume": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"journal": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"webpage": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"part": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"version": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"proceeding": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		},
+		"researchData": {
+            "dynamic_templates": [
+                { 
+                	"context":{
+                	  "match":"@context", 
+                      "mapping": {
+                         "type": "object",
+    					 "enabled": false
+                      }
+                	}
+                },
+                {
+                	 "dates": {
+                      "match":"*",
+                      "match_mapping_type": "date",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                },
+                {
+                	 "all": {
+                      "match":"*",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "index":       "not_analyzed"
+                      }
+                	}
+                }
+                
+            ]
+		}
+	}
+}
