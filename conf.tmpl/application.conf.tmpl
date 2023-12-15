@@ -11,7 +11,7 @@ logger.config.developer=conf/logback.xml
 regal-api.serverName="api.localhost"
 regal-api.fedoraIntern="http://localhost:8080/fedora"
 regal-api.fedoraUser="admin"
-regal-api.fedoraUserPassword="admin"
+regal-api.fedoraUserPassword=""
 regal-api.escluster="localhost"
 regal-api.keystoreLocation="/opt/toscience/conf/toscience_keystore"
 regal-api.keystorePassword=""
@@ -19,7 +19,7 @@ regal-api.namespace="toscience"
 regal-api.alephSetName=
 regal-api.etikett.url="http://api.localhost:9002/tools/etikett"
 regal-api.etikett.user="admin"
-regal-api.etikett.pwd="admin"
+regal-api.etikett.pwd=""
 regal-api.zettel.url="http://api.localhost/tools/zettel"
 regal-api.thumby.url="http://api.localhost/tools/thumby"
 regal-api.deepzoom.url="http://api.localhost/deepzoom"
@@ -31,25 +31,22 @@ regal-api.admin-prefix="toscience"
 # Produce hash with  echo -n i/eH15H1lD/NirbFbXTF8IZJhOtjo9IfM9fkkHg0mHY=admin | sha256sum
 regal-api.admin-salt="i/eH15H1lD/NirbFbXTF8IZJhOtjo9IfM9fkkHg0mHY="
 regal-api.admin-hash="1b276263590218d1ed0cd1da411e7570c3370c298745143710aa5c021f985f94"
-regal-api.ipWhiteList="127.0.0"
+regal-api.ipWhiteList="127.0.0.1"
 
 #---------------Drupal specific---------------
 regal-api.rechercheUrl.prefix="/resource?query[0][term]=\""
 regal-api.rechercheUrl.suffix="\""
 
 #-------------Thirdparty----------------
-regal-api.oaiMabXmlAddress="http://api.localhost/oai-pmh/?verb=GetRecord&metadataPrefix=mabxml-1&identifier=oai:api.localhost:"
+regal-api.oaiMabXmlAddress="http://api.localhost/oai-pmh/?verb=GetRecord&metadataPrefix=marcxml&identifier=oai:api.localhost:"
 regal-api.alephAddress="http://193.30.112.134/F/?func=find-c&ccl_term=IDN%3D"
 regal-api.lobidAddress="http://lobid.org/resources/"
 regal-api.hbz01="http://lobid.org/hbz01/"
-regal-api.digitoolAddress="http://klio.hbz-nrw.de:1801/webclient/DeliveryManager?pid="
 
 #-------------DOI------------------------
 regal-api.dataciteUser="$DATACITE_USER"
 regal-api.datacitePassword="$DATACITE_PASSWORD"
-# Test Prefix 10.5072/orga:repo-  "10.5072/FRL01-"
-# Productive Prefix 10.4126/orga:repo-
-regal-api.doiPrefix="10.5072"
+regal-api.doiPrefix=""
 
 #-------------URN------------------------
 regal-api.urnSnid="$URNSNID"
@@ -70,7 +67,7 @@ regal-api.heritrix.port=8443
 regal-api.heritrix.hostname="localhost"
 regal-api.heritrix.rest="https://localhost:8443"
 regal-api.heritrix.user="admin"
-regal-api.heritrix.pwd="admin"
+regal-api.heritrix.pwd=""
 regal-api.heritrix.home="/opt/regal/heritrix"
 regal-api.heritrix.jobDir="/opt/regal/heritrix-data"
 regal-api.heritrix.dataUrl="https://localhost:8443"
@@ -91,7 +88,6 @@ regal-api.restrictedweb.dataUrl="http://localhost/restrictedweb"
 #-------------wpull (Crawler)-----------------------                            
 regal-api.wpull.crawler="/usr/local/bin/wpull3"
 regal-api.wpull.jobDir="/opt/toscience/wpull-data-crawldir"
-regal-api.wpull.tempJobDir="/opt/toscience/wpull-data-tempdir"
 regal-api.wpull.outDir="/opt/toscience/wpull-data"
 regal-api.wpull.dataUrl="http://localhost"
 regal-api.wpull.staticOptions=" --recursive --link-extractors=javascript,html,css --escaped-fragment --strip-session-id --no-host-directories --page-requisites --no-parent --no-check-certificate --no-directories --delete-after"
@@ -115,7 +111,7 @@ to.science.api.researchData.dataUrl="data"
 #------Swagger self documenting----------
 logger.swagger=ERROR
 logger.com.wordnik.swagger=ERROR
-api.version="0.7.0"
+api.version="1.0.0"
 swagger.api.basepath="https://api.localhost"
 swagger.filter="security.AuthorisationFilter"
 http.port=9000
@@ -127,7 +123,7 @@ logger.com.jolbox=WARN // for EBean
 db.default.driver=com.mysql.jdbc.Driver
 db.default.url="jdbc:mysql://localhost/regal_api?characterEncoding=UTF-8"
 db.default.username=regal_api
-db.default.password="admin"
+db.default.password=""
 evolutionplugin=enabled
 play.evolutions.db.default.autoApply=true
 play.evolutions.db.default.autoApplyDowns=true
