@@ -557,6 +557,9 @@ public class Resource extends MyController {
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
 
+				String name = data.getFilename();
+				play.Logger.debug("FileName=" + name);
+
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
@@ -613,6 +616,10 @@ public class Resource extends MyController {
 				play.Logger.debug("Done METADATA2 Mapping");
 
 				Enrich.enrichMetadata2(readNode);
+
+				readNode.setContentType("researchData");
+				readNode.setLabel(name);
+				Globals.fedora.updateNode(readNode);
 
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {

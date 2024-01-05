@@ -68,18 +68,20 @@ public class KTBLMapperHelper {
 
 		JSONObject wantedKtblMetadata = null;
 		JSONObject allKtblMetadata = null;
-		try {
-			allKtblMetadata = new JSONObject(contentJsFile);
-			wantedKtblMetadata = new JSONObject();
 
+		allKtblMetadata = new JSONObject(contentJsFile);
+		wantedKtblMetadata = new JSONObject();
+
+		if (allKtblMetadata.has("recordingPeriod")) {
 			wantedKtblMetadata.put("recordingPeriod",
 					allKtblMetadata.getJSONArray("recordingPeriod"));
+		}
+		if (allKtblMetadata.has("relatedDatasets")) {
 			wantedKtblMetadata.put("relatedDatasets",
 					allKtblMetadata.getJSONArray("relatedDatasets"));
+		}
+		if (allKtblMetadata.has("info")) {
 			wantedKtblMetadata.put("info", allKtblMetadata.get("info"));
-
-		} catch (JSONException e) {
-			play.Logger.debug("JSONException:getToPersistKtblMetadata()");
 		}
 
 		return wantedKtblMetadata.toString();

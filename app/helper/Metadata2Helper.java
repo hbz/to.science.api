@@ -8,6 +8,11 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/**
+ * 
+ * @author adoud
+ *
+ */
 public class Metadata2Helper {
 
 	public static String getValueBetweenTwoQuotationMarks(String s) {
