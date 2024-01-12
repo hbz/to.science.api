@@ -31,9 +31,12 @@ public class Metadata2Helper {
 			JSONObject tosContent, Node n) {
 		// should perhaps be mapped : 1-isPrimaryTopic 2-yearOfCopyright
 		try {
+			JsonMapper jsmapper = new JsonMapper();
+			jsmapper.node = n;
 
-			Map<String, Object> rdf = new LinkedHashMap<String, Object>();
-			// JsonMapper jsmapper = new JsonMapper();
+			Map<String, Object> rdf = n.getLd2();
+			play.Logger.debug("n.getLd2() = " + rdf.toString());
+
 			JSONArray jsArr = null;
 			JSONObject jObj = null;
 			LinkedHashMap<String, Object> metadata2Map = new LinkedHashMap<>();
