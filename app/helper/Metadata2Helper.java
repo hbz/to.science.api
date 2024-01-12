@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import models.Globals;
+import models.Node;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,9 +28,10 @@ public class Metadata2Helper {
 	}
 
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
-			JSONObject tosContent) {
+			JSONObject tosContent, Node n) {
 		// should perhaps be mapped : 1-isPrimaryTopic 2-yearOfCopyright
 		try {
+
 			Map<String, Object> rdf = new LinkedHashMap<String, Object>();
 			// JsonMapper jsmapper = new JsonMapper();
 			JSONArray jsArr = null;
@@ -37,6 +40,9 @@ public class Metadata2Helper {
 
 			if (tosContent == null) {
 				return null;
+			}
+			if (n.getPid() != null) {
+				rdf.put("id", n.getPid());
 			}
 
 			if (tosContent.has("@context")) {
@@ -240,7 +246,8 @@ public class Metadata2Helper {
 				String projectId = getValueBetweenTwoQuotationMarks(obj.toString());
 				rdf.put("projectId", projectId);
 			}
-
+			// rdf.put("@context", Globals.protocol + Globals.server +
+			// "/context.json");
 			metadata2Map.put("metadata2", rdf);
 			return metadata2Map;
 		} catch (Exception e) {

@@ -572,8 +572,8 @@ public class Resource extends MyController {
 				String contentOfFile =
 						KTBLMapperHelper.getStringContentFromJsonFile(data);
 
-				String ktblMetadata =
-						KTBLMapperHelper.getToPersistKtblMetadata(contentOfFile);
+				String ktblMetadata = KTBLMapperHelper
+						.getToPersistKtblMetadata(contentOfFile, readNode.getPid());
 
 				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
 
@@ -584,8 +584,8 @@ public class Resource extends MyController {
 				 */
 				play.Logger.debug("Starting TOSCIENCE Mapping");
 
-				String toscienceMetadata =
-						ToscienceHelper.getToPersistTosMetadata(contentOfFile);
+				String toscienceMetadata = ToscienceHelper
+						.getToPersistTosMetadata(contentOfFile, readNode.getPid());
 
 				play.Logger.debug("toscienceMetadata=" + toscienceMetadata);
 
@@ -601,7 +601,7 @@ public class Resource extends MyController {
 				play.Logger.debug("Starting METADATA2 Mapping");
 
 				rdf = Metadata2Helper
-						.getRdfFromToscience(new JSONObject(toscienceMetadata));
+						.getRdfFromToscience(new JSONObject(toscienceMetadata), readNode);
 
 				play.Logger.debug("rdf=" + rdf.toString());
 
@@ -616,10 +616,6 @@ public class Resource extends MyController {
 				play.Logger.debug("Done METADATA2 Mapping");
 
 				Enrich.enrichMetadata2(readNode);
-
-				readNode.setContentType("researchData");
-				readNode.setLabel(name);
-				Globals.fedora.updateNode(readNode);
 
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {

@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import play.mvc.Http.MultipartFormData.FilePart;
 import org.json.JSONException;
 import java.io.IOException;
+import models.Globals;
 
 /**
  * 
@@ -64,14 +65,22 @@ public class KTBLMapperHelper {
 	 * @param allKtblMetadata
 	 * @return required KTBL metadata, which must be persisted
 	 */
-	static public String getToPersistKtblMetadata(String contentJsFile) {
+	static public String getToPersistKtblMetadata(String contentJsFile,
+			String pid) {
 
 		JSONObject wantedKtblMetadata = null;
 		JSONObject allKtblMetadata = null;
 
 		try {
+			String resource_id =
+					new String(Globals.protocol + Globals.server + "/resource/" + pid);
+
 			allKtblMetadata = new JSONObject(contentJsFile);
 			wantedKtblMetadata = new JSONObject();
+			play.Logger.debug("resource_id= " + resource_id);
+			if (resource_id != null) {
+				wantedKtblMetadata.put("id", resource_id);
+			}
 
 			if (allKtblMetadata.has("recordingPeriod")) {
 				wantedKtblMetadata.put("recordingPeriod",

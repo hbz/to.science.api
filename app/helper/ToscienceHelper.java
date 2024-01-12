@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Iterator;
 import org.json.JSONArray;
 import helper.MyEtikettMaker;
+import models.Globals;
+
 import java.util.stream.Collectors;
 import org.json.JSONException;
 import play.Play;
@@ -90,10 +92,18 @@ public class ToscienceHelper {
 	 * @param contentJsFile contains Tos and Ktbl metadata
 	 * @return a string with Toscience metadata
 	 */
-	static public String getToPersistTosMetadata(String contentJsFile) {
+	static public String getToPersistTosMetadata(String contentJsFile,
+			String pid) {
 		JSONObject ktblAndTos = null;
 		try {
+			String resource_id =
+					new String(Globals.protocol + Globals.server + "/resource/" + pid);
+			play.Logger.debug("resource_id= " + resource_id);
+
 			ktblAndTos = new JSONObject(contentJsFile);
+			if (resource_id != null) {
+				ktblAndTos.put("id", resource_id);
+			}
 			ktblAndTos.remove("recordingPeriod");
 			ktblAndTos.remove("relatedDatasets");
 			ktblAndTos.remove("info");
