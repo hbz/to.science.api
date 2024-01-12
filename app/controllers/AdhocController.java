@@ -34,9 +34,8 @@ public class AdhocController extends MyController {
 		IRI pred = f.createIRI("http://www.w3.org/2004/02/skos/core#prefLabel");
 		Literal obj = f.createLiteral(RdfUtils.urlDecode(authorname));
 		g.add(f.createStatement(subj, pred, obj));
-		g.add(f.createStatement(subj,
-				f.createIRI(
-						"http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson"),
+		g.add(f.createStatement(subj, f.createIRI(
+				"http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson"),
 				obj));
 		g.add(f.createStatement(subj,
 				f.createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
@@ -62,29 +61,35 @@ public class AdhocController extends MyController {
 	public static Promise<Result> getAdhocRdf(@PathParam("type") String type,
 			@PathParam("name") String base64EncodedNameWithMod) {
 
-		response().setHeader("Access-Control-Allow-Origin", "*");
-		Collection<Statement> g = new TreeModel();
-		ValueFactory f = RdfUtils.valueFactory;
-		IRI subj = f.createIRI(Globals.protocol + Globals.server + "/adhoc/"
-				+ RdfUtils.urlEncode(type) + "/" + base64EncodedNameWithMod);
-		IRI pred = f.createIRI("http://www.w3.org/2004/02/skos/core#prefLabel");
-		Literal obj =
-				f.createLiteral(helper.MyURLEncoding.decode(base64EncodedNameWithMod));
-		g.add(f.createStatement(subj, pred, obj));
-		return Promise.promise(() -> {
-			String body = "";
-			if (request().accepts("application/rdf+xml")) {
-				response().setHeader("Content-Type",
-						"application/rdf+xml; charset=utf-8");
-				body = RdfUtils.graphToString(g, RDFFormat.RDFXML);
-			} else if (request().accepts("text/plain")) {
-				response().setContentType("text/plain");
-				body = RdfUtils.graphToString(g, RDFFormat.NTRIPLES);
-			} else {
-				response().setContentType("application/json");
-				body = RdfUtils.graphToString(g, RDFFormat.JSONLD);
-			}
-			return ok(body);
-		});
+		try {
+			play.Logger.trace("type=" + type);
+			play.Logger.trace("base64EncodedNameWithMod=" + base64EncodedNameWithMod);
+			response().setHeader("Access-Control-Allow-Origin", "*");
+			Collection<Statement> g = new TreeModel();
+			ValueFactory f = RdfUtils.valueFactory;
+			IRI subj = f.createIRI(Globals.protocol + Globals.server + "/adhoc/"
+					+ RdfUtils.urlEncode(type) + "/" + base64EncodedNameWithMod);
+			IRI pred = f.createIRI("http://www.w3.org/2004/02/skos/core#prefLabel");
+			Literal obj = f
+					.createLiteral(helper.MyURLEncoding.decode(base64EncodedNameWithMod));
+			g.add(f.createStatement(subj, pred, obj));
+			return Promise.promise(() -> {
+				String body = "";
+				if (request().accepts("application/rdf+xml")) {
+					response().setHeader("Content-Type",
+							"application/rdf+xml; charset=utf-8");
+					body = RdfUtils.graphToString(g, RDFFormat.RDFXML);
+				} else if (request().accepts("text/plain")) {
+					response().setContentType("text/plain");
+					body = RdfUtils.graphToString(g, RDFFormat.NTRIPLES);
+				} else {
+					response().setContentType("application/json");
+					body = RdfUtils.graphToString(g, RDFFormat.JSONLD);
+				}
+				return ok(body);
+			});
+		} catch (Exception e) {
+			throw new RuntimeException("AdhocRdf could not be created!");
+		}
 	}
 }
