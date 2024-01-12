@@ -57,7 +57,7 @@ public class BaseModelTest {
 	}
 
 	@Test
-	void testGlobals() {
+	public void testGlobals() {
 		FedoraFacade f = Globals.fedora;
 	}
 }
