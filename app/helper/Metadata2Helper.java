@@ -198,10 +198,11 @@ public class Metadata2Helper {
 					Map<String, Object> institutionMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					institutionMap.put("prefLabel", jObj.get("prefLabel").toString());
+					institutionMap.put("@id", jObj.get("@id").toString());
 
 					institutionList.add(institutionMap);
 				}
-				rdf.put("dataOrigin", institutionList);
+				rdf.put("institution", institutionList);
 			}
 			if (tosContent.has("rdftype")) {
 				List<Map<String, Object>> rdftypeList = new ArrayList<>();
