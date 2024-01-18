@@ -264,6 +264,8 @@ public class WpullCrawl {
 			for (int i = 0; i < domains.size(); i++) {
 				sb.append("," + domains.get(i));
 			}
+		} else {
+			sb.append(" --no-parent");
 		}
 
 		sb.append(" --recursive");
@@ -333,7 +335,7 @@ public class WpullCrawl {
 		// sb.append(" --http-proxy=externer-web-proxy.hbz-nrw.de:3128");
 		// kommt "Misconfigured redirect"
 		sb.append(" --escaped-fragment --strip-session-id");
-		sb.append(" --no-host-directories --page-requisites --no-parent");
+		sb.append(" --no-host-directories --page-requisites");
 		sb.append(" --database=" + warcFilename + ".db");
 		sb.append(" --no-check-certificate");
 		sb.append(" --no-directories"); // mandatory to prevent runtime errors
