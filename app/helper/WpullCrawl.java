@@ -255,6 +255,9 @@ public class WpullCrawl {
 	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
+		String zusDomain = null;
+		String zusHost = null;
+		boolean noParent = true;
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + urlAscii);
 		ArrayList<String> domains = conf.getDomains();
@@ -262,9 +265,20 @@ public class WpullCrawl {
 			sb.append(" --span-hosts");
 			sb.append(" --hostnames=" + host);
 			for (int i = 0; i < domains.size(); i++) {
-				sb.append("," + domains.get(i));
+				zusDomain = domains.get(i);
+				zusHost = zusDomain.replaceAll("^http://", "")
+						.replaceAll("^https://", "").replaceAll("/.*$", "");
+				WebgatherLogger.debug("zusHost=" + zusHost);
+				if (zusHost.equalsIgnoreCase(host)) {
+					WebgatherLogger.debug("Es soll von der gesamten Domain " + host
+							+ " eingesammelt werden, die Option --no-parent wird entfernt.");
+					noParent = false;
+				} else {
+					sb.append("," + zusHost);
+				}
 			}
-		} else {
+		}
+		if (noParent) {
 			sb.append(" --no-parent");
 		}
 
