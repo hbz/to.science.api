@@ -1,0 +1,88 @@
+<!--
+  ~ Copyright (C) 2009-2015 Typesafe Inc. <http://www.typesafe.com>
+  -->
+<!-- Logback Konfiguration für Entwickler, von I. Kuss (hbz)  -->
+<!--   macht kürzere Log-Zeilen als Standard-Logging -->
+<!--   zeigt Klasse, Methode, Zeile anstatt Logger und Thread -->
+<configuration>
+    
+  <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+     <file>${application.home}/logs/application.log</file>
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+       <!-- Daily rollover with compression -->
+       <fileNamePattern>${application.home}/logs/application-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+       <!-- keep 366 days worth of history -->
+       <maxHistory>9999</maxHistory>
+     </rollingPolicy>
+     <encoder>
+       <pattern>%date [%level] %class{36}.%M Z.%L - %message%n%xException</pattern>
+     </encoder>
+  </appender>
+
+  <appender name="FILE-WEBGATHERER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+     <file>${application.home}/logs/webgatherer.log</file>
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+       <!-- Daily rollover with compression -->
+       <fileNamePattern>${application.home}/logs/webgatherer-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+       <!-- keep 366 days worth of history -->
+       <maxHistory>9999</maxHistory>
+     </rollingPolicy>
+     <encoder>
+       <pattern>%date [%level] %class{36}.%M Z.%L - %message%n%xException</pattern>
+     </encoder>
+  </appender>
+
+  <appender name="FILE-ADDURN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+     <file>${application.home}/logs/addurn.log</file>
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+       <!-- Daily rollover with compression -->
+       <fileNamePattern>${application.home}/logs/addurn-log-%d{yyyy-MM-dd}</fileNamePattern>
+       <!-- keep 366 days worth of history -->
+       <maxHistory>9999</maxHistory>
+     </rollingPolicy>
+     <encoder>
+       <pattern>%date [%level] %class{36}.%M Z.%L - %message%n%xException</pattern>
+     </encoder>
+  </appender>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%coloredLevel %class{36}.%M Z.%L - %message%n%xException{10}</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="ASYNCFILE" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FILE" />
+  </appender>
+
+  <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="STDOUT" />
+  </appender>
+
+  <!--logger name="play" level="INFO" /-->
+  <logger name="application" level="DEBUG" additivity="false">
+    <appender-ref ref="FILE" />
+  </logger>
+  <logger name="webgatherer" level="DEBUG" additivity="false">
+    <appender-ref ref="FILE-WEBGATHERER" />
+  </logger>
+  <logger name="addurn" level="INFO" additivity="false">
+    <appender-ref ref="FILE-ADDURN" />
+  </logger>
+  
+  <!-- Off these ones as they are annoying, and anyway we manage configuration ourself -->
+  <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF" />
+  <logger name="com.avaje.ebeaninternal.server.core.XmlConfigLoader" level="OFF" />
+  <logger name="com.avaje.ebeaninternal.server.lib.BackgroundThread" level="OFF" />
+  <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
+
+  <root level="WARN">
+    <appender-ref ref="FILE" />
+    <!--appender-ref ref="ASYNCFILE" /-->
+    <!--appender-ref ref="ASYNCSTDOUT" /-->
+  </root>
+  
+</configuration>
+
