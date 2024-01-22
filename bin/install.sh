@@ -30,7 +30,7 @@ mkdir $targetDir/$newInstallDir/logs
 
 OLDDIR=`readlink $toscienceDir/$linkDir`
 if [ -L $toscienceDir/$linkDir ]; then
-       	rm $toscienceDir/$linkDir
+        rm $toscienceDir/$linkDir
 fi
 ln -sf $targetDir/$newInstallDir $toscienceDir/$linkDir
 rm -r  $targetDir/$newInstallDir/conf

@@ -187,6 +187,7 @@ public class Helper {
 					}
 					String sourceId = c.at("/source/0/@id").asText();
 					String source = c.at("/source/0/label").asText();
+			
 					String notation = c.at("/notation").asText();
 
 					if (uri == null || uri.isEmpty()) {
@@ -253,8 +254,10 @@ public class Helper {
 			return "";
 		}
 		if (sourceId.endsWith("//w3id.org/lobid/rpb2")) {
+			// LBZ-Notationen
 			source = "lbz " + getLbzId(uri);
-		} else if (sourceId.endsWith("//w3id.org/lobid/rpb")) {
+		} else if (sourceId.endsWith("/lobid/rpb")) {
+			// RPB-Sachsystematik
 			source = "rpb " + getRPbId(uri);
 		} else if (sourceId.endsWith("//d-nb.info/gnd/4149423-4")) {
 			if (notation != null && !notation.isEmpty()) {
@@ -400,8 +403,9 @@ public class Helper {
 		}
 		return result;
 	}
-	
-	public static List<Map<String, Object>> listContributors(Map<String, Object> h) {
+
+	public static List<Map<String, Object>> listContributors(
+			Map<String, Object> h) {
 		List<Map<String, Object>> result = new ArrayList<>();
 		JsonNode hit = new ObjectMapper().valueToTree(h);
 		for (JsonNode c : hit.at("/contribution")) {
