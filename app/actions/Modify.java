@@ -339,9 +339,19 @@ public class Modify extends RegalAction {
 		}
 	}
 
+	/**
+	 * Aktualisiert den Metadata2-Datenstrom einer Ressource auf Basis der
+	 * aktuellen lobid-Daten. Nur, falls sich in lobid etwas geändert hat.
+	 * 
+	 * @author Ingolf Kuss
+	 * @param node Der Node der Ressource
+	 * @param content Der komplette Inhalt des aktuellen Metadata2-Datenstrom (mit
+	 *          der alephid, falls vorhanden)
+	 * @param date Das aktuelle Datum (oder ein Vergleichsdatum)
+	 * @return eine Message
+	 */
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(Node node,
 			String content, LocalDate date) {
-		StringBuffer msg = new StringBuffer();
 		String pid = node.getPid();
 		if (content == null) {
 			throw new HttpArchiveException(406,
@@ -357,22 +367,39 @@ public class Modify extends RegalAction {
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			alephid = alephid.replaceAll("#.*", "");
-			try {
-				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
-						alephid, date);
-				updateMetadata(metadata2, node, content);
-				msg.append(Enrich.enrichMetadata2(node));
-			} catch (NotUpdatedException e) {
-				play.Logger.debug("", e);
-				play.Logger.info(pid + " Not updated. " + e.getMessage());
-				msg.append(pid + " Not updated. " + e.getMessage());
-			}
-			return pid + " metadata successfully updated, lobidified and enriched! "
-					+ msg;
-		} else {
-			return pid + " no updates available. Resource has no AlephId.";
+			return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
+					alephid, date);
 		}
+		return pid + " no updates available. Resource has no AlephId.";
+	}
 
+	/**
+	 * Aktualisiert den Metadata2-Datenstrom einer Ressource auf Basis der
+	 * aktuellen lobid-Daten. Nur, falls sich in lobid etwas geändert hat.
+	 * 
+	 * @author Ingolf Kuss
+	 * @param node Der Node der Ressource
+	 * @param alephid die Alephid der Ressource
+	 * @param date Das aktuelle Datum (oder ein Vergleichsdatum)
+	 * @return eine Message
+	 */
+	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(
+			Node node, String alephid, LocalDate date) {
+		StringBuffer message = new StringBuffer();
+		String pid = node.getPid();
+		String content = "";
+		try {
+			content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
+					alephid, date);
+			updateMetadata(metadata2, node, content);
+			message.append(Enrich.enrichMetadata2(node));
+		} catch (NotUpdatedException e) {
+			play.Logger.debug("", e);
+			play.Logger.info(pid + " Not updated. " + e.getMessage());
+			message.append(pid + " Not updated. " + e.getMessage());
+		}
+		return pid + " metadata successfully updated, lobidified and enriched! "
+				+ message;
 	}
 
 	public String rewriteContent(String content, String pid) {
