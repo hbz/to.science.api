@@ -367,6 +367,7 @@ public class Modify extends RegalAction {
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			alephid = alephid.replaceAll("#.*", "");
+			play.Logger.debug("alephid=" + alephid);
 			return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
 					alephid, date);
 		}

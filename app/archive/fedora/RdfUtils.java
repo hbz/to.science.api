@@ -206,6 +206,7 @@ public class RdfUtils {
 				}
 			}
 			inputStream = con.getInputStream();
+			play.Logger.debug("Got input stream");
 			return inputStream;
 		} catch (SocketTimeoutException e) {
 			play.Logger.warn("Timeout on " + url);
