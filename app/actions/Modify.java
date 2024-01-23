@@ -497,6 +497,9 @@ public class Modify extends RegalAction {
 		while (it.hasNext()) {
 			Statement s = it.next();
 			String predicate = s.getPredicate().stringValue();
+			play.Logger
+					.debug("Subjekt:" + s.getSubject().stringValue() + ", Prädikat:"
+							+ predicate + ", Objekt:" + s.getObject().stringValue());
 			if (predicate.equals("http://purl.org/dc/terms/modified")) {
 				LocalDate date = LocalDate.parse(s.getObject().stringValue(),
 						DateTimeFormatter.ofPattern("yyyyMMdd"));
