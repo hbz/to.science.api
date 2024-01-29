@@ -48,6 +48,8 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -67,6 +69,8 @@ import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.MyEtikettMaker;
+import helper.RdfHelper;
+import helper.ToscienceHelper;
 import helper.URN;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
@@ -265,6 +269,44 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
+		/**
+		 * 1. toscienceJson
+		 */
+
+		try {
+			JSONObject toscienceJson = null;
+			play.Logger.debug("node.getContentType()= " + node.getContentType());
+			if (!node.getContentType().contains("file")
+					&& !node.getContentType().contains("part")) {
+
+				play.Logger.debug("toscienceJson will be mapped");
+
+				RDFFormat format = RDFFormat.NTRIPLES;
+				Map<String, Object> rdf = RdfHelper.getRdfAsMap(node, format, content);
+
+				play.Logger.debug("rdf=" + rdf.toString());
+				toscienceJson = new JSONObject(new JSONObject(rdf).toString());
+
+				play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+
+				toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
+
+				play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+
+				updateMetadataJson(node, toscienceJson.toString());
+				play.Logger
+						.debug("toscience from Node" + node.getMetadata("toscience"));
+				play.Logger.debug("Done toscienceJson Mapping");
+			}
+		} catch (JSONException e) {
+			play.Logger.error("toscience json datastream could not be updated!");
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
+		/**
+		 * 2. METADATA2
+		 */
 		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
@@ -272,8 +314,8 @@ public class Modify extends RegalAction {
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			alephid = alephid.replaceAll("#.*", "");
-			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata("metadata2", node, content);
+			String newContent = getLobid2DataAsNtripleString(node, alephid);
+			updateMetadata("metadata2", node, newContent);
 
 			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "

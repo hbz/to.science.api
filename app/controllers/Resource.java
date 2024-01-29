@@ -444,42 +444,6 @@ public class Resource extends MyController {
 
 		return new ModifyAction().call(pid, node -> {
 			try {
-
-				/**
-				 * 1. toscienceJson
-				 */
-
-				Node readNode = readNodeOrNull(pid);
-				JSONObject toscienceJson = null;
-				play.Logger
-						.debug("readNode.getContentType()= " + readNode.getContentType());
-				if (!readNode.getContentType().contains("file")
-						&& !readNode.getContentType().contains("part")) {
-
-					play.Logger.debug("toscienceJson will be mapped");
-
-					RDFFormat format = RDFFormat.NTRIPLES;
-					Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode, format,
-							request().body().asText());
-
-					play.Logger.debug("rdf=" + rdf.toString());
-					toscienceJson = new JSONObject(new JSONObject(rdf).toString());
-
-					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
-
-					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
-
-					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
-
-					modify.updateMetadataJson(readNode, toscienceJson.toString());
-					play.Logger
-							.debug("tosciecne from Node" + readNode.getMetadata("toscience"));
-					play.Logger.debug("Done toscienceJson Mapping");
-				}
-
-				/**
-				 * 2. METADATA2
-				 */
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
 				return JsonMessage(new Message(result));
