@@ -168,7 +168,7 @@ public class RdfUtils {
 			Statement curStatement = statements.next();
 			String pred = curStatement.getPredicate().stringValue();
 			String obj = curStatement.getObject().stringValue();
-			if ("http://www.w3.org/2002/07/owl#sameAs".equals(pred)) {
+			if ("http://schema.org/sameAs".equals(pred)) {
 				return obj;
 			}
 		}
