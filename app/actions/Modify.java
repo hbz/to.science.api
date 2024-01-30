@@ -461,9 +461,6 @@ public class Modify extends RegalAction {
 	 */
 	public String getAlmaIdFromLobidAutocomplete(String q) {
 		try {
-			final String[] callback =
-					request() == null || request().queryString() == null ? null
-							: request().queryString().get("callback");
 			String lobidSearchUrl = "https://lobid.org/resources/search";
 			WSRequest request = ws.url(lobidSearchUrl);
 			String queryString =
