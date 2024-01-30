@@ -37,8 +37,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.inject.Inject;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
@@ -77,6 +80,13 @@ import models.DublinCoreData;
 import models.Globals;
 import models.Node;
 import models.ToScienceObject;
+import play.libs.F;
+import play.libs.ws.WSClient;
+import play.libs.ws.WSRequest;
+import play.libs.ws.WSResponse;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.mvc.Http.Request;
 
 /**
  * @author Jan Schnasse
@@ -84,6 +94,8 @@ import models.ToScienceObject;
  */
 public class Modify extends RegalAction {
 	String msg = "";
+	@Inject
+	WSClient ws;
 
 	/**
 	 * @param pid the pid that must be updated
@@ -402,18 +414,83 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
-		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
-			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
-					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
-					.get(0);
-			String alephid = lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
-			// String alephid = "990140407120206441";
-			alephid = alephid.replaceAll("#.*", "");
-			play.Logger.debug("alephid=" + alephid);
-			return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
-					alephid, date);
+		try {
+			if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+				String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
+						archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
+						.get(0);
+				String alephid =
+						lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
+				alephid = alephid.replaceAll("#.*", "");
+				play.Logger.debug("alephid=" + alephid);
+				/**
+				 * Es könnte hier bereits eine Almaid sein, aber um sicher zu gehen,
+				 * eine Almaid zu haben, machen wir einen Call auf
+				 * https://lobid.org/resources/search
+				 */
+				String almaid = getAlmaIdFromLobidAutocomplete(alephid);
+				return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
+						almaid, date);
+			}
+		} catch (Exception e) {
+			play.Logger
+					.warn("AlmaId zu Pid " + pid + " konnte nicht ermittelt werden!");
+			throw new RuntimeException(e);
 		}
-		return pid + " no updates available. Resource has no AlephId.";
+		return pid + " no updates available. Resource has no Almaid.";
+	}
+
+	/**
+	 * Returns the current HTTP request.
+	 *
+	 * @return the request
+	 */
+	public static Request request() {
+		return Http.Context.current().request();
+	}
+
+	/**
+	 * Diese Methode holt zu einer Alpehid die Alma-ID per Suche in lobid
+	 * 
+	 * @author I. Kuss
+	 * @param q eine Alephid, oder Teile davon ; es kann auch eine Almaid oder
+	 *          Teile davon sein
+	 * @return die Alma-ID
+	 */
+	public String getAlmaIdFromLobidAutocomplete(String q) {
+		try {
+			final String[] callback =
+					request() == null || request().queryString() == null ? null
+							: request().queryString().get("callback");
+			String lobidSearchUrl = "https://lobid.org/resources/search";
+			WSRequest request = ws.url(lobidSearchUrl);
+			String queryString =
+					"hbzId:" + q + "* almaMmsId:" + q + "* zdbId:" + q + "*";
+			WSRequest complexRequest = request.setQueryParameter("q", queryString)
+					.setQueryParameter("format", "json").setRequestTimeout(5000);
+			play.Logger.debug("queryString: " + queryString);
+			WSResponse response = complexRequest.setFollowRedirects(true).get();
+			JsonNode root = response.asJson();
+			JsonNode member = root.at("/member");
+			// Ermittle ID
+			String id = " ";
+			member.forEach((m) -> {
+				String uri = m.at("/id").asText().replaceAll("#!", "");
+				// Es wird immer die lobid Ressource-ID zurück gegeben
+				String[] parts = uri.split("/");
+				id = parts[parts.length - 1];
+				// "Herausfiltern" von unerwünschten (!) IDs:
+				if (id.startsWith("RPB")) {
+					continue;
+				}
+				break;
+			});
+			return id;
+		} catch (Exception e) {
+			play.Logger.debug(
+					"Keine uri, also auch keine ID zur Anfrage (" + q + ") gefunden!");
+			return q;
+		}
 	}
 
 	/**
