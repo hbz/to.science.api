@@ -603,10 +603,10 @@ public class Modify extends RegalAction {
 
 	public static String getLobid2DataAsNtripleString(Node node, String alephid) {
 		String pid = node.getPid();
-		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
+		String lobidUri = "https://lobid.org/resources/" + alephid + "#!";
 		play.Logger.info("GET " + lobidUri);
 		try {
-			URL lobidUrl = new URL("http://lobid.org/resources/" + alephid);
+			URL lobidUrl = new URL("https://lobid.org/resources/" + alephid);
 			RDFFormat inFormat = RDFFormat.TURTLE;
 			String accept = "text/turtle";
 			Collection<Statement> graph =
