@@ -429,9 +429,10 @@ public class Modify extends RegalAction {
 				 * eine Almaid zu haben, machen wir einen Call auf
 				 * https://lobid.org/resources/search
 				 */
-				String almaid = getAlmaIdFromLobidAutocomplete(alephid);
+				String localAlmaid = getAlmaIdFromLobidAutocomplete(alephid);
+				play.Logger.debug("almaid=" + localAlmaid);
 				return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
-						almaid, date);
+						localAlmaid, date);
 			}
 		} catch (Exception e) {
 			play.Logger
@@ -467,9 +468,9 @@ public class Modify extends RegalAction {
 			WSRequest request = ws.url(lobidSearchUrl);
 			String queryString =
 					"hbzId:" + q + "* almaMmsId:" + q + "* zdbId:" + q + "*";
+			play.Logger.debug("queryString: " + queryString);
 			WSRequest complexRequest = request.setQueryParameter("q", queryString)
 					.setQueryParameter("format", "json").setRequestTimeout(5000);
-			play.Logger.debug("queryString: " + queryString);
 			WSResponse response =
 					(WSResponse) complexRequest.setFollowRedirects(true).get();
 			JsonNode root = response.asJson();
@@ -479,9 +480,11 @@ public class Modify extends RegalAction {
 			try {
 				member.forEach((m) -> {
 					String uri = m.at("/id").asText().replaceAll("#!", "");
+					play.Logger.debug("uri=" + uri);
 					// Es wird immer die lobid Ressource-ID zurück gegeben
 					String[] parts = uri.split("/");
 					almaid = parts[parts.length - 1];
+					play.Logger.debug("almaid=" + almaid);
 					// "Herausfiltern" von unerwünschten (!) IDs:
 					if (!almaid.startsWith("RPB")) {
 						// um die Schleife zu verlassen, wird eine Exception geschmissen
@@ -490,11 +493,13 @@ public class Modify extends RegalAction {
 				});
 			} catch (Exception e) {
 				play.Logger.debug(e.toString());
+				play.Logger.debug("almaid=" + almaid);
 				return almaid;
 			}
 			play.Logger.debug("Keine ID zur Anfrage (" + q + ") gefunden!");
 			return q;
 		} catch (Exception e) {
+			play.Logger.error(e.toString());
 			play.Logger.debug(
 					"Keine uri, also auch keine ID zur Anfrage (" + q + ") gefunden!");
 			return q;
