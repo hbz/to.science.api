@@ -406,8 +406,8 @@ public class Modify extends RegalAction {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 					.get(0);
-			String alephid =
-					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
+			String alephid = lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
+			// String alephid = "990140407120206441";
 			alephid = alephid.replaceAll("#.*", "");
 			play.Logger.debug("alephid=" + alephid);
 			return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
@@ -603,10 +603,10 @@ public class Modify extends RegalAction {
 
 	public static String getLobid2DataAsNtripleString(Node node, String alephid) {
 		String pid = node.getPid();
-		String lobidUri = "https://lobid.org/resources/" + alephid + "#!";
+		String lobidUri = "http://lobid.org/resources/" + alephid + "#!";
 		play.Logger.info("GET " + lobidUri);
 		try {
-			URL lobidUrl = new URL("https://lobid.org/resources/" + alephid);
+			URL lobidUrl = new URL("http://lobid.org/resources/" + alephid);
 			RDFFormat inFormat = RDFFormat.TURTLE;
 			String accept = "text/turtle";
 			Collection<Statement> graph =
