@@ -96,6 +96,7 @@ public class Modify extends RegalAction {
 	String msg = "";
 	@Inject
 	WSClient ws;
+	String almaid = " ";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -469,23 +470,30 @@ public class Modify extends RegalAction {
 			WSRequest complexRequest = request.setQueryParameter("q", queryString)
 					.setQueryParameter("format", "json").setRequestTimeout(5000);
 			play.Logger.debug("queryString: " + queryString);
-			WSResponse response = complexRequest.setFollowRedirects(true).get();
+			WSResponse response =
+					(WSResponse) complexRequest.setFollowRedirects(true).get();
 			JsonNode root = response.asJson();
 			JsonNode member = root.at("/member");
 			// Ermittle ID
-			String id = " ";
-			member.forEach((m) -> {
-				String uri = m.at("/id").asText().replaceAll("#!", "");
-				// Es wird immer die lobid Ressource-ID zurück gegeben
-				String[] parts = uri.split("/");
-				id = parts[parts.length - 1];
-				// "Herausfiltern" von unerwünschten (!) IDs:
-				if (id.startsWith("RPB")) {
-					continue;
-				}
-				break;
-			});
-			return id;
+			almaid = " ";
+			try {
+				member.forEach((m) -> {
+					String uri = m.at("/id").asText().replaceAll("#!", "");
+					// Es wird immer die lobid Ressource-ID zurück gegeben
+					String[] parts = uri.split("/");
+					almaid = parts[parts.length - 1];
+					// "Herausfiltern" von unerwünschten (!) IDs:
+					if (!almaid.startsWith("RPB")) {
+						// um die Schleife zu verlassen, wird eine Exception geschmissen
+						throw new RuntimeException("id zur uri " + uri + " gefunden.");
+					}
+				});
+			} catch (Exception e) {
+				play.Logger.debug(e.toString());
+				return almaid;
+			}
+			play.Logger.debug("Keine ID zur Anfrage (" + q + ") gefunden!");
+			return q;
 		} catch (Exception e) {
 			play.Logger.debug(
 					"Keine uri, also auch keine ID zur Anfrage (" + q + ") gefunden!");
