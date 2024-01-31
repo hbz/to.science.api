@@ -428,11 +428,12 @@ public class Modify extends RegalAction {
 				 * Es könnte hier bereits eine Almaid sein, aber um sicher zu gehen,
 				 * eine Almaid zu haben, machen wir einen Call auf
 				 * https://lobid.org/resources/search
+				 * 
+				 * String localAlmaid = getAlmaIdFromLobidAutocomplete(alephid);
+				 * play.Logger.debug("almaid=" + localAlmaid);
 				 */
-				String localAlmaid = getAlmaIdFromLobidAutocomplete(alephid);
-				play.Logger.debug("almaid=" + localAlmaid);
 				return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
-						localAlmaid, date);
+						alephid, date);
 			}
 		} catch (Exception e) {
 			play.Logger

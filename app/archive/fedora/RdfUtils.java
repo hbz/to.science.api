@@ -142,7 +142,8 @@ public class RdfUtils {
 	 */
 	public static Collection<Statement> readRdfToGraph(URL url, RDFFormat inf,
 			String accept) throws IOException {
-		try (InputStream in = urlToInputStream(url, accept)) {
+		URL redirectUrl = urlToRedirectUrl(url);
+		try (InputStream in = urlToInputStream(redirectUrl, accept)) {
 			return readRdfToGraph(in, inf, url.toString());
 		}
 	}
@@ -150,8 +151,9 @@ public class RdfUtils {
 	public static Collection<Statement> readRdfToGraphAndFollowSameAs(URL url,
 			RDFFormat inf, String accept) throws IOException {
 		Collection<Statement> graph = null;
-		try (InputStream in = urlToInputStream(url, accept)) {
-			graph = readRdfToGraph(in, inf, url.toString());
+		URL redirectUrl = urlToRedirectUrl(url);
+		try (InputStream in = urlToInputStream(redirectUrl, accept)) {
+			graph = readRdfToGraph(in, inf, redirectUrl.toString());
 			String sameAsTarget = getSameAsTarget(graph);
 			play.Logger.info("GET " + sameAsTarget);
 			if (sameAsTarget != null && sameAsTarget.contains("lobid")) {
@@ -175,6 +177,43 @@ public class RdfUtils {
 		return null;
 	}
 
+	/**
+	 * Falls die URL weiterleitet (Redirect), wird die Ziel-URL zurück gegeben
+	 * 
+	 * @author Ingolf Kuss (hbz)
+	 * @param url (original)
+	 * @return url (target)
+	 */
+	public static URL urlToRedirectUrl(URL url) {
+		HttpURLConnection con = null;
+		InputStream inputStream = null;
+		try {
+			con = (HttpURLConnection) url.openConnection();
+			con.setConnectTimeout(15000);
+			con.setRequestProperty("User-Agent", "Regal Webservice");
+			con.setReadTimeout(15000);
+			con.setRequestProperty("Accept", "text/html");
+			con.connect();
+			int responseCode = con.getResponseCode();
+			play.Logger.debug("Request for text/html from " + url.toExternalForm());
+			play.Logger
+					.debug("Get a " + responseCode + " from " + url.toExternalForm());
+			if (responseCode == HttpURLConnection.HTTP_MOVED_PERM
+					|| responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+					|| responseCode == 307 || responseCode == 303) {
+				String redirectUrl = con.getHeaderField("Location");
+				play.Logger.debug("redirectUrl:" + redirectUrl);
+				return new URL(redirectUrl);
+			}
+			return url;
+		} catch (SocketTimeoutException e) {
+			play.Logger.warn("Timeout on " + url);
+			throw new UrlConnectionException(e);
+		} catch (IOException e) {
+			throw new UrlConnectionException(e);
+		}
+	}
+
 	public static InputStream urlToInputStream(URL url, String accept) {
 		HttpURLConnection con = null;
 		InputStream inputStream = null;
@@ -194,6 +233,7 @@ public class RdfUtils {
 					|| responseCode == HttpURLConnection.HTTP_MOVED_TEMP
 					|| responseCode == 307 || responseCode == 303) {
 				String redirectUrl = con.getHeaderField("Location");
+				play.Logger.debug("redirectUrl:" + redirectUrl);
 				try {
 					URL newUrl = new URL(redirectUrl);
 					play.Logger.debug("Redirect to Location: " + newUrl);
