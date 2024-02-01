@@ -699,14 +699,16 @@ public class Modify extends RegalAction {
 			String accept = "text/turtle";
 			Collection<Statement> graph =
 					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
+			String almaid = RdfUtils.getAlmaId(graph, alephid);
+			String lobidUriAlmaId = "http://lobid.org/resources/" + almaid + "#!";
 			ValueFactory f = RdfUtils.valueFactory;
-			;
 			Statement parallelEditionStatement = f.createStatement(f.createIRI(pid),
 					f.createIRI(archive.fedora.Vocabulary.REL_MAB_527),
-					f.createIRI(lobidUri));
+					f.createIRI(lobidUriAlmaId));
 			graph.add(parallelEditionStatement);
 			return RdfUtils.graphToString(
-					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
+					RdfUtils.rewriteSubject(lobidUriAlmaId, pid, graph),
+					RDFFormat.NTRIPLES);
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
 		}

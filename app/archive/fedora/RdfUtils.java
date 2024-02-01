@@ -151,9 +151,9 @@ public class RdfUtils {
 	public static Collection<Statement> readRdfToGraphAndFollowSameAs(URL url,
 			RDFFormat inf, String accept) throws IOException {
 		Collection<Statement> graph = null;
-		URL redirectUrl = urlToRedirectUrl(url);
-		try (InputStream in = urlToInputStream(redirectUrl, accept)) {
-			graph = readRdfToGraph(in, inf, redirectUrl.toString());
+		// URL redirectUrl = urlToRedirectUrl(url);
+		try (InputStream in = urlToInputStream(url, accept)) {
+			graph = readRdfToGraph(in, inf, url.toString());
 			String sameAsTarget = getSameAsTarget(graph);
 			play.Logger.info("GET " + sameAsTarget);
 			if (sameAsTarget != null && sameAsTarget.contains("lobid")) {
@@ -178,6 +178,44 @@ public class RdfUtils {
 	}
 
 	/**
+	 * Dise Methode ermittelt eine Alma-Id aus einem RDF-Graphen
+	 * 
+	 * @author Ingolf Kuss (hbz)
+	 * @since 2024-02-01
+	 * @param graph der Graph mit den Metadaten der Ressource als RDF-Statements
+	 *          (Subjekt, Prädikat, Objekt)
+	 * @param alephid die Aleph-ID zu der Ressource
+	 * @return die Alma-ID der Ressource
+	 */
+	public static String getAlmaId(Collection<Statement> graph, String alephid) {
+
+		if ((alephid != null) && (alephid.length() > 2)
+				&& !(alephid.startsWith("HT") || alephid.startsWith("TT")
+						|| alephid.startsWith("ht") || alephid.startsWith("tt"))) {
+			// "alephid" ist schon die alma-ID !
+			play.Logger.debug("Found Alma-ID: " + alephid);
+			return alephid;
+		}
+		// Suche nach einer Alma-ID in den Metadaten (es muss ein Subjekt sein):
+		Iterator<Statement> statements = graph.iterator();
+		while (statements.hasNext()) {
+			Statement curStatement = statements.next();
+			String subj = curStatement.getSubject().stringValue();
+			if (subj.startsWith("http://lobid.org/resource")) {
+				String almaid = subj.replaceFirst("http://lobid.org/resource[s]*/", "");
+				almaid = almaid.replaceAll("#.*", "");
+				if (!(almaid.startsWith("HT") || almaid.startsWith("TT")
+						|| almaid.startsWith("ht") || almaid.startsWith("tt"))) {
+					play.Logger.debug("Found Alma-ID: " + almaid);
+					return almaid;
+				}
+			}
+		}
+		play.Logger.warn("Alma-ID not found! Returning alephid: " + alephid);
+		return alephid;
+	}
+
+	/**
 	 * Falls die URL weiterleitet (Redirect), wird die Ziel-URL zurück gegeben
 	 * 
 	 * @author Ingolf Kuss (hbz)
@@ -186,7 +224,6 @@ public class RdfUtils {
 	 */
 	public static URL urlToRedirectUrl(URL url) {
 		HttpURLConnection con = null;
-		InputStream inputStream = null;
 		try {
 			con = (HttpURLConnection) url.openConnection();
 			con.setConnectTimeout(15000);
