@@ -461,7 +461,6 @@ public class Modify extends RegalAction {
 			updateMetadata(metadata2, node, content);
 			message.append(Enrich.enrichMetadata2(node));
 		} catch (NotUpdatedException e) {
-			play.Logger.debug("", e);
 			play.Logger.info(pid + " Not updated. " + e.getMessage());
 			message.append(pid + " Not updated. " + e.getMessage());
 		}

@@ -210,7 +210,6 @@ public class MyUtils extends MyController {
 			play.Logger.info(node.getPid()
 					+ " couldn't get modified timestamp from \"isDescribedBy/modified\" "
 					+ e.getMessage());
-			play.Logger.debug("", e);
 		}
 		try {
 			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
@@ -221,7 +220,6 @@ public class MyUtils extends MyController {
 			play.Logger.info(node.getPid()
 					+ " couldn't get modified timestamp from \"describedBy/modified\" "
 					+ e.getMessage());
-			play.Logger.debug("", e);
 		}
 		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
