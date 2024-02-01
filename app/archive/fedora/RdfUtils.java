@@ -201,7 +201,7 @@ public class RdfUtils {
 			String subj = curStatement.getSubject().stringValue();
 			if (subj.startsWith("http://lobid.org/resource")) {
 				String almaid =
-						subj.replaceFirst("http[s]://lobid.org/resource[s]*/", "");
+						subj.replaceFirst("http[s]*://lobid.org/resource[s]*/", "");
 				almaid = almaid.replaceAll("#.*", "");
 				if (!(almaid.startsWith("HT") || almaid.startsWith("TT")
 						|| almaid.startsWith("ht") || almaid.startsWith("tt"))) {

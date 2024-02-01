@@ -417,7 +417,7 @@ public class Modify extends RegalAction {
 						archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
 						.get(0);
 				String alephid =
-						lobidUri.replaceFirst("http[s]://lobid.org/resource[s]*/", "");
+						lobidUri.replaceFirst("http[s]*://lobid.org/resource[s]*/", "");
 				alephid = alephid.replaceAll("#.*", "");
 				play.Logger.debug("alephid=" + alephid);
 				return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
