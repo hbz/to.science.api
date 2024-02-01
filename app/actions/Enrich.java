@@ -116,9 +116,8 @@ public class Enrich {
 			String alephid = new Read().getIdOfParallelEdition(node);
 			String uri = Globals.lobidHbz01 + alephid + "/about?format=source";
 			play.Logger.info("GET " + uri);
-			URL redirectUrl = RdfUtils.urlToRedirectUrl(new URL(uri));
 			try (InputStream in =
-					RdfUtils.urlToInputStream(redirectUrl, "application/xml")) {
+					RdfUtils.urlToInputStream(new URL(uri), "application/xml")) {
 				String gndEndpoint = "http://d-nb.info/gnd/";
 				List<Element> institutionHack = XmlUtils.getElements(
 						"//datafield[@tag='078' and @ind1='r' and @ind2='1']/subfield", in,

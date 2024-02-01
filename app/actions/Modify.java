@@ -81,7 +81,6 @@ import models.Globals;
 import models.Node;
 import models.ToScienceObject;
 import play.libs.F;
-import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import play.mvc.Http;
@@ -94,9 +93,6 @@ import play.mvc.Http.Request;
  */
 public class Modify extends RegalAction {
 	String msg = "";
-	@Inject
-	WSClient ws;
-	String almaid = " ";
 
 	/**
 	 * @param pid the pid that must be updated
@@ -424,14 +420,6 @@ public class Modify extends RegalAction {
 						lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 				alephid = alephid.replaceAll("#.*", "");
 				play.Logger.debug("alephid=" + alephid);
-				/**
-				 * Es könnte hier bereits eine Almaid sein, aber um sicher zu gehen,
-				 * eine Almaid zu haben, machen wir einen Call auf
-				 * https://lobid.org/resources/search
-				 * 
-				 * String localAlmaid = getAlmaIdFromLobidAutocomplete(alephid);
-				 * play.Logger.debug("almaid=" + localAlmaid);
-				 */
 				return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
 						alephid, date);
 			}
@@ -450,58 +438,6 @@ public class Modify extends RegalAction {
 	 */
 	public static Request request() {
 		return Http.Context.current().request();
-	}
-
-	/**
-	 * Diese Methode holt zu einer Alpehid die Alma-ID per Suche in lobid
-	 * 
-	 * @author I. Kuss
-	 * @param q eine Alephid, oder Teile davon ; es kann auch eine Almaid oder
-	 *          Teile davon sein
-	 * @return die Alma-ID
-	 */
-	public String getAlmaIdFromLobidAutocomplete(String q) {
-		try {
-			String lobidSearchUrl = "https://lobid.org/resources/search";
-			WSRequest request = ws.url(lobidSearchUrl);
-			String queryString =
-					"hbzId:" + q + "* almaMmsId:" + q + "* zdbId:" + q + "*";
-			play.Logger.debug("queryString: " + queryString);
-			WSRequest complexRequest = request.setQueryParameter("q", queryString)
-					.setQueryParameter("format", "json").setRequestTimeout(5000);
-			WSResponse response =
-					(WSResponse) complexRequest.setFollowRedirects(true).get();
-			JsonNode root = response.asJson();
-			JsonNode member = root.at("/member");
-			// Ermittle ID
-			almaid = " ";
-			try {
-				member.forEach((m) -> {
-					String uri = m.at("/id").asText().replaceAll("#!", "");
-					play.Logger.debug("uri=" + uri);
-					// Es wird immer die lobid Ressource-ID zurück gegeben
-					String[] parts = uri.split("/");
-					almaid = parts[parts.length - 1];
-					play.Logger.debug("almaid=" + almaid);
-					// "Herausfiltern" von unerwünschten (!) IDs:
-					if (!almaid.startsWith("RPB")) {
-						// um die Schleife zu verlassen, wird eine Exception geschmissen
-						throw new RuntimeException("id zur uri " + uri + " gefunden.");
-					}
-				});
-			} catch (Exception e) {
-				play.Logger.debug(e.toString());
-				play.Logger.debug("almaid=" + almaid);
-				return almaid;
-			}
-			play.Logger.debug("Keine ID zur Anfrage (" + q + ") gefunden!");
-			return q;
-		} catch (Exception e) {
-			play.Logger.error(e.toString());
-			play.Logger.debug(
-					"Keine uri, also auch keine ID zur Anfrage (" + q + ") gefunden!");
-			return q;
-		}
 	}
 
 	/**
@@ -627,11 +563,6 @@ public class Modify extends RegalAction {
 		while (it.hasNext()) {
 			Statement s = it.next();
 			String predicate = s.getPredicate().stringValue();
-			/**
-			 * 
-			 * play.Logger.debug("Subjekt:" + s.getSubject().stringValue() + ",
-			 * Prädikat:" + predicate + ", Objekt:" + s.getObject().stringValue());
-			 */
 			if (predicate.equals("http://purl.org/dc/terms/modified")) {
 				LocalDate date = LocalDate.parse(s.getObject().stringValue(),
 						DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -673,16 +604,18 @@ public class Modify extends RegalAction {
 			String accept = "text/turtle";
 			Collection<Statement> graph =
 					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
+			String almaid = RdfUtils.getAlmaId(graph, alephid);
+			String lobidUriAlmaId = "http://lobid.org/resources/" + almaid + "#!";
 			ValueFactory f = RdfUtils.valueFactory;
-			;
 			Statement parallelEditionStatement = f.createStatement(f.createIRI(pid),
 					f.createIRI(archive.fedora.Vocabulary.REL_MAB_527),
-					f.createIRI(lobidUri));
+					f.createIRI(lobidUriAlmaId));
 			graph.add(parallelEditionStatement);
 			tryToImportOrderingFromLobidData2(node, graph, f);
 			tryToGetTypeFromLobidData2(node, graph, f);
 			return RdfUtils.graphToString(
-					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
+					RdfUtils.rewriteSubject(lobidUriAlmaId, pid, graph),
+					RDFFormat.NTRIPLES);
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
 		}

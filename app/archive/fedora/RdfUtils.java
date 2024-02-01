@@ -142,8 +142,7 @@ public class RdfUtils {
 	 */
 	public static Collection<Statement> readRdfToGraph(URL url, RDFFormat inf,
 			String accept) throws IOException {
-		URL redirectUrl = urlToRedirectUrl(url);
-		try (InputStream in = urlToInputStream(redirectUrl, accept)) {
+		try (InputStream in = urlToInputStream(url, accept)) {
 			return readRdfToGraph(in, inf, url.toString());
 		}
 	}
@@ -151,7 +150,6 @@ public class RdfUtils {
 	public static Collection<Statement> readRdfToGraphAndFollowSameAs(URL url,
 			RDFFormat inf, String accept) throws IOException {
 		Collection<Statement> graph = null;
-		// URL redirectUrl = urlToRedirectUrl(url);
 		try (InputStream in = urlToInputStream(url, accept)) {
 			graph = readRdfToGraph(in, inf, url.toString());
 			String sameAsTarget = getSameAsTarget(graph);
@@ -213,42 +211,6 @@ public class RdfUtils {
 		}
 		play.Logger.warn("Alma-ID not found! Returning alephid: " + alephid);
 		return alephid;
-	}
-
-	/**
-	 * Falls die URL weiterleitet (Redirect), wird die Ziel-URL zurück gegeben
-	 * 
-	 * @author Ingolf Kuss (hbz)
-	 * @param url (original)
-	 * @return url (target)
-	 */
-	public static URL urlToRedirectUrl(URL url) {
-		HttpURLConnection con = null;
-		try {
-			con = (HttpURLConnection) url.openConnection();
-			con.setConnectTimeout(15000);
-			con.setRequestProperty("User-Agent", "Regal Webservice");
-			con.setReadTimeout(15000);
-			con.setRequestProperty("Accept", "text/html");
-			con.connect();
-			int responseCode = con.getResponseCode();
-			play.Logger.debug("Request for text/html from " + url.toExternalForm());
-			play.Logger
-					.debug("Get a " + responseCode + " from " + url.toExternalForm());
-			if (responseCode == HttpURLConnection.HTTP_MOVED_PERM
-					|| responseCode == HttpURLConnection.HTTP_MOVED_TEMP
-					|| responseCode == 307 || responseCode == 303) {
-				String redirectUrl = con.getHeaderField("Location");
-				play.Logger.debug("redirectUrl:" + redirectUrl);
-				return new URL(redirectUrl);
-			}
-			return url;
-		} catch (SocketTimeoutException e) {
-			play.Logger.warn("Timeout on " + url);
-			throw new UrlConnectionException(e);
-		} catch (IOException e) {
-			throw new UrlConnectionException(e);
-		}
 	}
 
 	public static InputStream urlToInputStream(URL url, String accept) {
