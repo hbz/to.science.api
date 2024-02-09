@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ import archive.fedora.RdfUtils;
 import authenticate.BasicAuth;
 import helper.HttpArchiveException;
 import helper.KTBLMapperHelper;
+import helper.Metadata2Helper;
 import helper.RdfHelper;
 import helper.ToscienceHelper;
 import helper.WebgatherUtils;
@@ -546,16 +548,18 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
-	public static Promise<Result> updateKtbl(@PathParam("pid") String pid) {
+
+	public static Promise<Result> updateKtblAndTos(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
 
-				play.Logger.debug("Starting KTBL Mapping");
-
+				LinkedHashMap<String, Object> rdf = null;
 				Node readNode = new Read().readNode(pid);
-
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
+
+				String name = data.getFilename();
+				play.Logger.debug("FileName=" + name);
 
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
@@ -564,13 +568,13 @@ public class Resource extends MyController {
 				/**
 				 * 1.KTBL(Json)***************************************
 				 */
+				play.Logger.debug("Starting KTBL Mapping");
+
 				String contentOfFile =
 						KTBLMapperHelper.getStringContentFromJsonFile(data);
-				play.Logger.debug("contentOfFile=" + contentOfFile);
 
-				String ktblMetadata =
-						KTBLMapperHelper.getToPersistKtblMetadata(contentOfFile);
-				play.Logger.debug("ktblMetadata=" + ktblMetadata);
+				String ktblMetadata = KTBLMapperHelper
+						.getToPersistKtblMetadata(contentOfFile, readNode.getPid());
 
 				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
 
@@ -579,25 +583,42 @@ public class Resource extends MyController {
 				/**
 				 * 2. TOSCIENCE(Json)***************************************
 				 */
+				play.Logger.debug("Starting TOSCIENCE Mapping");
 
-				// String result2 =
-				// modify.updateMetadata("toscience", readNode, ktblMetadata);
+				String toscienceMetadata = ToscienceHelper
+						.getToPersistTosMetadata(contentOfFile, readNode.getPid());
+
+				play.Logger.debug("toscienceMetadata=" + toscienceMetadata);
+
+				String result2 =
+						modify.updateMetadata("toscience", readNode, toscienceMetadata);
+
+				play.Logger.debug("Done TOSCIENCE Mapping");
 
 				/**
-				 * 3. METADATA2(rdf)***************************************
+				 * 3. METADATA2(rdf)****************************************
 				 */
-				// JSONObject ktblJson = new JSONObject(ktblMetadata);
-				// Map<String, Object> rdf =
-				// KTBLMapperHelper.getMapFromJSONObject(ktblJson);
-				//
-				// String contentRewrite = modify.rewriteContent(rdf.toString(), pid);
-				//
-				// String result3 =
-				// modify.updateMetadata("metadata2", readNode, contentRewrite);
 
-				Globals.fedora.updateNode(readNode);
+				play.Logger.debug("Starting METADATA2 Mapping");
 
-				return JsonMessage(new Message(result1));
+				rdf = Metadata2Helper
+						.getRdfFromToscience(new JSONObject(toscienceMetadata), readNode);
+
+				play.Logger.debug("rdf=" + rdf.toString());
+
+				String rdfContent = modify.rdfToString(
+						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
+
+				play.Logger.debug("rdfContent=" + rdfContent);
+
+				String result3 =
+						modify.updateMetadata("metadata2", readNode, rdfContent);
+
+				play.Logger.debug("Done METADATA2 Mapping");
+
+				Enrich.enrichMetadata2(readNode);
+
+				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

@@ -77,6 +77,7 @@ public class Enrich {
 		try {
 			play.Logger.info("Enrich 2 " + node.getPid());
 			String metadata = node.getMetadata2();
+			play.Logger.debug("metadata2 " + metadata);
 			if (metadata == null || metadata.isEmpty()) {
 				play.Logger.info("No metadata2 to enrich " + node.getPid());
 				return "No metadata2 to enrich " + node.getPid();
