@@ -628,6 +628,7 @@ public class JsonMapper {
 						id = agent.get(ID2).toString();
 					}
 					if (id == null) {
+						play.Logger.trace("agent prefLabel=" + prefLabel);
 						id = Globals.protocol + Globals.server + "/adhoc/author/"
 								+ prefLabel;
 					}

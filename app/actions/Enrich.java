@@ -45,6 +45,7 @@ import models.Node;
  * Add a label for each uri
  * 
  * @author Jan Schnasse
+ * @author Ingolf Kuss (hbz)
  *
  */
 public class Enrich {
@@ -155,9 +156,22 @@ public class Enrich {
 	private static void enrichAllUris(Node node, String metadata,
 			List<Statement> enrichStatements) {
 		try {
-			List<String> allUris = findAllUris(metadata);
-			for (String uri : allUris) {
-				enrich(uri, enrichStatements);
+			HashMap<String, String> allUris = findAllUris(metadata);
+			for (String uri : allUris.keySet()) {
+				String label = allUris.get(uri);
+				if (label.equals(uri)) {
+					/*
+					 * Der Label ist noch nicht aufgelöst worden. Das machen wir jetzt mit
+					 * Etikett (labels)
+					 */
+					enrich(uri, enrichStatements);
+				} else {
+					/*
+					 * Der Label ist schon bekannt. Wir rufen Etikett nicht auf sondern
+					 * schreiben den Label direkt in die Statements.
+					 */
+					enrichStatements.add(createLabelStatement(uri, label));
+				}
 			}
 		} catch (Exception e) {
 			play.Logger.debug("", e);
@@ -178,6 +192,10 @@ public class Enrich {
 	private static Statement getLabelStatement(String uri) {
 		play.Logger.debug("uri=" + uri);
 		String prefLabel = MyEtikettMaker.getLabelFromEtikettWs(uri);
+		return createLabelStatement(uri, prefLabel);
+	}
+
+	private static Statement createLabelStatement(String uri, String prefLabel) {
 		ValueFactory v = RdfUtils.valueFactory;
 		Statement newS = v.createStatement(v.createIRI(uri),
 				v.createIRI(PREF_LABEL),
@@ -185,7 +203,7 @@ public class Enrich {
 		return newS;
 	}
 
-	private static List<String> findAllUris(String metadata) {
+	private static HashMap<String, String> findAllUris(String metadata) {
 		HashMap<String, String> result = new HashMap<>();
 		try (
 				RepositoryConnection con = RdfUtils.readRdfInputStreamToRepository(
@@ -197,11 +215,22 @@ public class Enrich {
 				Value o = st.getObject();
 				if (o instanceof IRI) {
 					String objectUri = o.stringValue();
-					result.put(objectUri, objectUri);
+					if (result.get(objectUri) == null)
+						result.put(objectUri, objectUri);
+					continue;
+				}
+				Value subject = st.getSubject();
+				if (subject instanceof IRI) {
+					Value predicate = st.getPredicate();
+					if (predicate.toString()
+							.equals("http://www.w3.org/2000/01/rdf-schema#label")) {
+						// zu dieser URI wurde schon ein Label aufgelöst. Merke diesen.
+						result.put(subject.stringValue(), o.stringValue());
+					}
 				}
 			}
 		}
-		return new Vector<>(result.keySet());
+		return result;
 	}
 
 }

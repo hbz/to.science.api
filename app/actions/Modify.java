@@ -1168,7 +1168,6 @@ public class Modify extends RegalAction {
 
 			if (metadataType.equals(metadata2)) {
 				content = rewriteContent(content, pid);
-				play.Logger.debug("content: " + content);
 			}
 
 			File file = CopyUtils.copyStringToFile(content);

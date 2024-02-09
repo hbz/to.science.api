@@ -255,6 +255,9 @@ public class WpullCrawl {
 	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
+		String zusDomain = null;
+		String zusHost = null;
+		boolean noParent = true;
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + urlAscii);
 		ArrayList<String> domains = conf.getDomains();
@@ -262,8 +265,21 @@ public class WpullCrawl {
 			sb.append(" --span-hosts");
 			sb.append(" --hostnames=" + host);
 			for (int i = 0; i < domains.size(); i++) {
-				sb.append("," + domains.get(i));
+				zusDomain = domains.get(i);
+				zusHost = zusDomain.replaceAll("^http://", "")
+						.replaceAll("^https://", "").replaceAll("/.*$", "");
+				WebgatherLogger.debug("zusHost=" + zusHost);
+				if (zusHost.equalsIgnoreCase(host)) {
+					WebgatherLogger.debug("Es soll von der gesamten Domain " + host
+							+ " eingesammelt werden, die Option --no-parent wird entfernt.");
+					noParent = false;
+				} else {
+					sb.append("," + zusHost);
+				}
 			}
+		}
+		if (noParent) {
+			sb.append(" --no-parent");
 		}
 
 		sb.append(" --recursive");
@@ -333,7 +349,7 @@ public class WpullCrawl {
 		// sb.append(" --http-proxy=externer-web-proxy.hbz-nrw.de:3128");
 		// kommt "Misconfigured redirect"
 		sb.append(" --escaped-fragment --strip-session-id");
-		sb.append(" --no-host-directories --page-requisites --no-parent");
+		sb.append(" --no-host-directories --page-requisites");
 		sb.append(" --database=" + warcFilename + ".db");
 		sb.append(" --no-check-certificate");
 		sb.append(" --no-directories"); // mandatory to prevent runtime errors

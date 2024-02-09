@@ -34,6 +34,7 @@ class HeritrixWebclient {
 				Play.application().configuration().getString("regal-api.heritrix.pwd");
 
 		Client webclient = null;
+		try {
 		ClientConfig cc = new DefaultClientConfig();
 		// cc.getProperties()
 		// .put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, true);
@@ -47,6 +48,9 @@ class HeritrixWebclient {
 		// 10sec
 		webclient.setReadTimeout(1000 * 10);
 		return webclient;
+		} catch (Exception e) {
+			throw new RuntimeException("Can not instantiate webclient com.sun.jersey.api.client.Client", e);
+		}
 	}
 
 	private static SSLContext initSsl(ClientConfig cc, String keystorelocation,

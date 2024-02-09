@@ -125,19 +125,26 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 		try {
 			String result = null;
 			String uri = e.getUri();
+			play.Logger.trace("uri="+uri);
 
 			if (e.getName() != null) {
 				result = e.getName();
+				play.Logger.trace("name="+result);
 			}
 			if (result == null || result.isEmpty()) {
 				String prefix = "";
 				if (uri.startsWith("http://purl.org/dc/elements"))
 					prefix = "dc:";
-				if (uri.contains("#"))
-					return prefix + uri.split("#")[1];
+				if (uri.contains("#")) {
+					String[] uriParts = uri.split("#");
+					if (uriParts.length > 1) 
+						return prefix + uriParts[1];
+				}
 				else if (uri.startsWith("http")) {
 					int i = uri.lastIndexOf("/");
-					return prefix + uri.substring(i + 1);
+					if( (i + 1) < uri.length() ) {
+						return prefix + uri.substring(i + 1);
+					}
 				}
 				result = prefix + uri;
 			}

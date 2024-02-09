@@ -205,6 +205,13 @@ public class Globals {
 	public static Wget wget = new Wget();
 
 	/**
+	 * Die Datei, in der die API die ID der zuletzt gecrawlten Webpage ablegt.
+	 */
+	public static String lastlyCrawledWebpageIdFile =
+			Play.application().configuration()
+					.getString("toscience-api.webgatherer.lastlyCrawledWebpageIdFile");
+
+	/**
 	 * Url to heritrix data directory
 	 */
 	public static String heritrixData = Play.application().configuration()

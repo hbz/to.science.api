@@ -6,7 +6,6 @@ import java.util.Iterator;
 import org.json.JSONArray;
 import helper.MyEtikettMaker;
 import models.Globals;
-
 import java.util.stream.Collectors;
 import org.json.JSONException;
 import play.Play;

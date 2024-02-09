@@ -548,6 +548,7 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "updateKtbl", value = "updateKtbl", notes = "Updates the ktbl datastream of a resource.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
+
 	public static Promise<Result> updateKtblAndTos(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
