@@ -168,11 +168,50 @@ public class RdfUtils {
 			Statement curStatement = statements.next();
 			String pred = curStatement.getPredicate().stringValue();
 			String obj = curStatement.getObject().stringValue();
-			if ("http://www.w3.org/2002/07/owl#sameAs".equals(pred)) {
+			if ("http://schema.org/sameAs".equals(pred)) {
 				return obj;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Dise Methode ermittelt eine Alma-Id aus einem RDF-Graphen
+	 * 
+	 * @author Ingolf Kuss (hbz)
+	 * @since 2024-02-01
+	 * @param graph der Graph mit den Metadaten der Ressource als RDF-Statements
+	 *          (Subjekt, Prädikat, Objekt)
+	 * @param alephid die Aleph-ID zu der Ressource
+	 * @return die Alma-ID der Ressource
+	 */
+	public static String getAlmaId(Collection<Statement> graph, String alephid) {
+
+		if ((alephid != null) && (alephid.length() > 2)
+				&& !(alephid.startsWith("HT") || alephid.startsWith("TT")
+						|| alephid.startsWith("ht") || alephid.startsWith("tt"))) {
+			// "alephid" ist schon die alma-ID !
+			play.Logger.debug("Found Alma-ID: " + alephid);
+			return alephid;
+		}
+		// Suche nach einer Alma-ID in den Metadaten (es muss ein Subjekt sein):
+		Iterator<Statement> statements = graph.iterator();
+		while (statements.hasNext()) {
+			Statement curStatement = statements.next();
+			String subj = curStatement.getSubject().stringValue();
+			if (subj.startsWith("http://lobid.org/resource")) {
+				String almaid =
+						subj.replaceFirst("http[s]*://lobid.org/resource[s]*/", "");
+				almaid = almaid.replaceAll("#.*", "");
+				if (!(almaid.startsWith("HT") || almaid.startsWith("TT")
+						|| almaid.startsWith("ht") || almaid.startsWith("tt"))) {
+					play.Logger.debug("Found Alma-ID: " + almaid);
+					return almaid;
+				}
+			}
+		}
+		play.Logger.warn("Alma-ID not found! Returning alephid: " + alephid);
+		return alephid;
 	}
 
 	public static InputStream urlToInputStream(URL url, String accept) {
@@ -194,6 +233,7 @@ public class RdfUtils {
 					|| responseCode == HttpURLConnection.HTTP_MOVED_TEMP
 					|| responseCode == 307 || responseCode == 303) {
 				String redirectUrl = con.getHeaderField("Location");
+				play.Logger.debug("redirectUrl:" + redirectUrl);
 				try {
 					URL newUrl = new URL(redirectUrl);
 					play.Logger.debug("Redirect to Location: " + newUrl);
@@ -206,6 +246,7 @@ public class RdfUtils {
 				}
 			}
 			inputStream = con.getInputStream();
+			play.Logger.debug("Got input stream");
 			return inputStream;
 		} catch (SocketTimeoutException e) {
 			play.Logger.warn("Timeout on " + url);

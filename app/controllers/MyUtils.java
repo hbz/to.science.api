@@ -182,20 +182,44 @@ public class MyUtils extends MyController {
 		// try to set date to created (should work in any case)
 		try {
 			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("describedby")).iterator().next()).get("created").toString();
+					.get("isDescribedby")).iterator().next()).get("created").toString();
+			play.Logger.debug(
+					"Got last update date from \"isDescribedBy/created\": " + lastUpdate);
 		} catch (Exception e) {
-			play.Logger.warn(
-					node.getPid() + " couldn't get created timestamp " + e.getMessage());
-			play.Logger.debug("", e);
+			play.Logger.warn(node.getPid()
+					+ " couldn't get created timestamp from \"isDescribedBy/created\" "
+					+ e.getMessage());
+		}
+		try {
+			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
+					.get("describedby")).iterator().next()).get("created").toString();
+			play.Logger.debug(
+					"Got last update date from \"describedBy/created\": " + lastUpdate);
+		} catch (Exception e) {
+			play.Logger.warn(node.getPid()
+					+ " couldn't get created timestamp from \"describedBy/created\" "
+					+ e.getMessage());
 		}
 		// try to set date to modified (overrides created)
 		try {
 			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("describedby")).iterator().next()).get("modified").toString();
+					.get("isDescribedby")).iterator().next()).get("modified").toString();
+			play.Logger.debug("Got last update date from \"isDescribedBy/modified\": "
+					+ lastUpdate);
 		} catch (Exception e) {
-			play.Logger.info(
-					node.getPid() + " couldn't get modified timestamp " + e.getMessage());
-			play.Logger.debug("", e);
+			play.Logger.info(node.getPid()
+					+ " couldn't get modified timestamp from \"isDescribedBy/modified\" "
+					+ e.getMessage());
+		}
+		try {
+			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
+					.get("describedby")).iterator().next()).get("modified").toString();
+			play.Logger.debug(
+					"Got last update date from \"describedBy/modified\": " + lastUpdate);
+		} catch (Exception e) {
+			play.Logger.info(node.getPid()
+					+ " couldn't get modified timestamp from \"describedBy/modified\" "
+					+ e.getMessage());
 		}
 		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}

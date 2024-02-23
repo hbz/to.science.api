@@ -1017,7 +1017,7 @@ public class JsonMapper {
 
 	public static String getPublicationMap(JsonNode jsNode) {
 
-		play.Logger.debug("content of JsonNode=" + jsNode.toString());
+
 
 		if (jsNode.has("issued") && !jsNode.get("issued").toString().isEmpty()) {
 			String issued = jsNode.get("issued").toString();
