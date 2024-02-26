@@ -59,11 +59,15 @@ public class AdhocController extends MyController {
 	}
 
 	public static Promise<Result> getAdhocRdf(@PathParam("type") String type,
-			@PathParam("name") String base64EncodedNameWithMod) {
+			@PathParam("name") String name) {
 
 		try {
 			play.Logger.trace("type=" + type);
-			play.Logger.trace("base64EncodedNameWithMod=" + base64EncodedNameWithMod);
+			play.Logger.trace("name=" + name);
+			String base64EncodedNameWithMod = name;
+			if (name.endsWith(",")) {
+				base64EncodedNameWithMod = name.substring(0, name.length() - 1);
+			}
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			Collection<Statement> g = new TreeModel();
 			ValueFactory f = RdfUtils.valueFactory;

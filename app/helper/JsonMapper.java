@@ -155,9 +155,10 @@ public class JsonMapper {
 
 	/**
 	 * Ein Konstruktor für diese Klasse, falls Metadata2-Datenstrom schon
-	 * vorhanden sein muss.
+	 * vorhanden ist.
 	 * 
 	 * @param n the node will be mapped to json ld in accordance to the profile
+	 *          ehcache
 	 */
 	public JsonMapper(final Node n) {
 		try {
@@ -166,15 +167,12 @@ public class JsonMapper {
 			if (node == null)
 				throw new NullPointerException(
 						"JsonMapper can not work on node with value NULL!");
-			// if (node.getMetadata1() == null)
-			// throw new NullPointerException(
-			// node.getPid() + " metadata stream is NULL!");
 			if (node.getMetadata2() == null)
 				throw new NullPointerException(
 						node.getPid() + " metadata2 stream is NULL!");
 		} catch (Exception e) {
-			play.Logger.warn("", e.getMessage());
-			// play.Logger.debug("", e);
+			play.Logger.trace("", e.getMessage());
+			play.Logger.trace("", e);
 		}
 
 	}
@@ -323,8 +321,7 @@ public class JsonMapper {
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger.warn(node.getPid()
-					+ " has no descriptive Metadata2! Try to return metadata instead.");
+			play.Logger.trace(node.getPid() + " has no descriptive Metadata2!");
 			play.Logger.trace("", e);
 		}
 		return null;
