@@ -62,21 +62,26 @@ public class AdhocController extends MyController {
 			@PathParam("name") String name) {
 
 		try {
-			play.Logger.trace("type=" + type);
-			play.Logger.trace("name=" + name);
+			play.Logger.info("type=" + type);
+			play.Logger.info("name=" + name);
 			String base64EncodedNameWithMod = name;
 			if (name.endsWith(",")) {
 				base64EncodedNameWithMod = name.substring(0, name.length() - 1);
 			}
+			play.Logger.info("base64EncodedNameWithMod=" + base64EncodedNameWithMod);
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			Collection<Statement> g = new TreeModel();
 			ValueFactory f = RdfUtils.valueFactory;
 			IRI subj = f.createIRI(Globals.protocol + Globals.server + "/adhoc/"
 					+ RdfUtils.urlEncode(type) + "/" + base64EncodedNameWithMod);
+			play.Logger
+					.info("created IRI " + Globals.protocol + Globals.server + "/adhoc/"
+							+ RdfUtils.urlEncode(type) + "/" + base64EncodedNameWithMod);
 			IRI pred = f.createIRI("http://www.w3.org/2004/02/skos/core#prefLabel");
 			Literal obj = f
 					.createLiteral(helper.MyURLEncoding.decode(base64EncodedNameWithMod));
 			g.add(f.createStatement(subj, pred, obj));
+			play.Logger.info("Statement created");
 			return Promise.promise(() -> {
 				String body = "";
 				if (request().accepts("application/rdf+xml")) {

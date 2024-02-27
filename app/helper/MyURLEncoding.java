@@ -13,14 +13,17 @@ public class MyURLEncoding {
 	}
 
 	public static String decode(String decodeMe) {
-		play.Logger.trace("decodeMe=" + decodeMe);
+		play.Logger.info("decodeMe=" + decodeMe);
 		String base64EncodedName =
 				decodeMe.replaceAll("-", "/").replaceAll("_", "+");
-		play.Logger.trace("base64EncodedName=" + base64EncodedName);
-		if( base64EncodedName.endsWith(",") ) {
-			base64EncodedName = base64EncodedName.substring(0,base64EncodedName.length()-1);
+		play.Logger.info("base64EncodedName=" + base64EncodedName);
+		if (base64EncodedName.endsWith(",")) {
+			base64EncodedName =
+					base64EncodedName.substring(0, base64EncodedName.length() - 1);
 		}
-		play.Logger.trace("base64EncodedName=" + base64EncodedName);
+		play.Logger.info("base64EncodedName=" + base64EncodedName);
+		play.Logger.info(
+				"decoded String=" + Base64.getDecoder().decode(base64EncodedName));
 		return new String(Base64.getDecoder().decode(base64EncodedName));
 	}
 }
