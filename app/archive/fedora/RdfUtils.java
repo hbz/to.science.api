@@ -118,7 +118,7 @@ public class RdfUtils {
 			play.Logger.warn(e.toString());
 			throw new RdfException(e);
 		}
-		play.Logger.info("Returning " + out.getBuffer().toString());
+		play.Logger.trace("Returning " + out.getBuffer().toString());
 		return out.getBuffer().toString();
 	}
 
