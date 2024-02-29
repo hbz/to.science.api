@@ -6,7 +6,7 @@ public class MyURLEncoding {
 	public static String encode(String encodeMe) {
 		play.Logger.trace("encodeMe=" + encodeMe);
 		String base64EncodedName =
-				Base64.getEncoder().encodeToString(encodeMe.getBytes())
+				Base64.getMimeEncoder().encodeToString(encodeMe.getBytes())
 						.replaceAll("/", "-").replaceAll("\\+", "_");
 		play.Logger.trace("base64EncodedName=" + base64EncodedName);
 		return base64EncodedName;
@@ -23,7 +23,7 @@ public class MyURLEncoding {
 		}
 		play.Logger.info("base64EncodedName=" + base64EncodedName);
 		play.Logger.info(
-				"decoded String=" + Base64.getDecoder().decode(base64EncodedName));
-		return new String(Base64.getDecoder().decode(base64EncodedName));
+				"decoded String=" + Base64.getMimeDecoder().decode(base64EncodedName));
+		return new String(Base64.getMimeDecoder().decode(base64EncodedName));
 	}
 }
