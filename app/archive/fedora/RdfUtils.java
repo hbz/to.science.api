@@ -106,7 +106,6 @@ public class RdfUtils {
 	public static String graphToString(Collection<Statement> myGraph,
 			RDFFormat outf) {
 		StringWriter out = new StringWriter();
-		play.Logger.info("Creating writer");
 		RDFWriter writer = Rio.createWriter(outf, out);
 		try {
 			writer.startRDF();
