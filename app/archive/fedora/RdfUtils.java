@@ -114,8 +114,10 @@ public class RdfUtils {
 			}
 			writer.endRDF();
 		} catch (RDFHandlerException e) {
+			play.Logger.warn(e.toString());
 			throw new RdfException(e);
 		}
+		play.Logger.trace("Returning " + out.getBuffer().toString());
 		return out.getBuffer().toString();
 	}
 

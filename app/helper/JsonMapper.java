@@ -155,9 +155,10 @@ public class JsonMapper {
 
 	/**
 	 * Ein Konstruktor für diese Klasse, falls Metadata2-Datenstrom schon
-	 * vorhanden sein muss.
+	 * vorhanden ist.
 	 * 
 	 * @param n the node will be mapped to json ld in accordance to the profile
+	 *          ehcache
 	 */
 	public JsonMapper(final Node n) {
 		try {
@@ -166,15 +167,12 @@ public class JsonMapper {
 			if (node == null)
 				throw new NullPointerException(
 						"JsonMapper can not work on node with value NULL!");
-			// if (node.getMetadata1() == null)
-			// throw new NullPointerException(
-			// node.getPid() + " metadata stream is NULL!");
 			if (node.getMetadata2() == null)
 				throw new NullPointerException(
 						node.getPid() + " metadata2 stream is NULL!");
 		} catch (Exception e) {
-			play.Logger.warn("", e.getMessage());
-			// play.Logger.debug("", e);
+			play.Logger.trace("", e.getMessage());
+			play.Logger.trace("", e);
 		}
 
 	}
@@ -214,7 +212,7 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata1();
+		Map<String, Object> m = getDescriptiveMetadata2();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
 		changeDcIsPartOfToRegalIsPartOf(rdf);
@@ -310,21 +308,6 @@ public class JsonMapper {
 		}
 	}
 
-	private Map<String, Object> getDescriptiveMetadata1() {
-		try {
-			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata(metadata1).getBytes(StandardCharsets.UTF_8));
-			Map<String, Object> rdf = jsonConverter.convert(node.getPid(), stream,
-					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
-			return rdf;
-		} catch (Exception e) {
-			play.Logger
-					.warn(node.getPid() + " can not create JSON! " + e.getMessage());
-			play.Logger.trace("", e);
-		}
-		return null;
-	}
-
 	/**
 	 * Holt Metadaten im Format lobid2 als Java Map
 	 * 
@@ -338,11 +321,10 @@ public class JsonMapper {
 					RDFFormat.NTRIPLES, profile.getContext().get("@context"));
 			return rdf;
 		} catch (Exception e) {
-			play.Logger.warn(node.getPid()
-					+ " has no descriptive Metadata2! Try to return metadata instead.");
-			// play.Logger.debug("", e);
+			play.Logger.trace(node.getPid() + " has no descriptive Metadata2!");
+			play.Logger.trace("", e);
 		}
-		return getDescriptiveMetadata1();
+		return null;
 	}
 
 	/**
@@ -351,7 +333,7 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLdShortStyle() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata1();
+		Map<String, Object> m = getDescriptiveMetadata2();
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		rdf.put(ID2, node.getPid());
 		for (Link l : ls) {
@@ -1016,8 +998,6 @@ public class JsonMapper {
 	}
 
 	public static String getPublicationMap(JsonNode jsNode) {
-
-
 
 		if (jsNode.has("issued") && !jsNode.get("issued").toString().isEmpty()) {
 			String issued = jsNode.get("issued").toString();
