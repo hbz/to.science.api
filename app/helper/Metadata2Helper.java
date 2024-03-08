@@ -174,7 +174,8 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> dataOriginMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					dataOriginMap.put("prefLabel", jObj.get("prefLabel").toString());
+					String dataOriginPrefLabel = jObj.get("prefLabel").toString();
+					dataOriginMap.put("prefLabel", dataOriginPrefLabel);
 
 					dataOriginList.add(dataOriginMap);
 				}
