@@ -175,14 +175,15 @@ public class MyUtils extends MyController {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	private static LocalDate getUpdateTimeStamp(Node node) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 		// initialise date
 		String lastUpdate = formatter.format(new Date());
 		// try to set date to created (should work in any case)
 		try {
-			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("isDescribedby")).iterator().next()).get("created").toString();
+			lastUpdate = ((Map<String, Object>) node.getLd2().get("isDescribedBy"))
+					.get("created").toString();
 			play.Logger.debug(
 					"Got last update date from \"isDescribedBy/created\": " + lastUpdate);
 		} catch (Exception e) {

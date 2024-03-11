@@ -421,7 +421,6 @@ public class JsonMapper {
 	}
 
 	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
-		play.Logger.debug("key=" + key);
 		Object myObj = rdf.get(key);
 		if (myObj instanceof java.util.HashSet) {
 			HashSet<Map<String, String>> all =
