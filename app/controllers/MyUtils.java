@@ -193,7 +193,7 @@ public class MyUtils extends MyController {
 		}
 		// try to set date to modified (overrides created)
 		try {
-			lastUpdate = ((Map<String, Object>) node.getLd2().get("isDescribedby"))
+			lastUpdate = ((Map<String, Object>) node.getLd2().get("isDescribedBy"))
 					.get("modified").toString();
 			play.Logger.debug("Got last update date from \"isDescribedBy/modified\": "
 					+ lastUpdate);
