@@ -177,7 +177,7 @@ public class MyUtils extends MyController {
 
 	@SuppressWarnings("unchecked")
 	private static LocalDate getUpdateTimeStamp(Node node) {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		// initialise date
 		String lastUpdate = formatter.format(new Date());
 		// try to set date to created (should work in any case)
@@ -202,7 +202,8 @@ public class MyUtils extends MyController {
 					+ " couldn't get modified timestamp from \"isDescribedBy/modified\" "
 					+ e.getMessage());
 		}
-		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
+		return LocalDate.parse(lastUpdate,
+				DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 	}
 
 	@ApiOperation(produces = "application/json,application/html", nickname = "addObjectTimestamp", value = "addObjectTimestamp", notes = "Add a objectTimestamp", httpMethod = "POST")

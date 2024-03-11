@@ -941,7 +941,12 @@ public class JsonMapper {
 		if (node.getLastModifiedBy() != null)
 			aboutMap.put(lastModifiedBy, node.getLastModifiedBy());
 
-		aboutMap.put(modified, node.getLastModified());
+		try {
+			aboutMap.put(modified, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+					.format(node.getLastModified()));
+		} catch (Exception e) {
+			aboutMap.put(modified, node.getLastModified());
+		}
 		if (node.getObjectTimestamp() != null) {
 			aboutMap.put(objectTimestamp, node.getObjectTimestamp());
 		} else {
