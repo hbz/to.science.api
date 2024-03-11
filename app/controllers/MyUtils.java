@@ -175,14 +175,16 @@ public class MyUtils extends MyController {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	private static LocalDate getUpdateTimeStamp(Node node) {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat formatter =
+				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		// initialise date
 		String lastUpdate = formatter.format(new Date());
 		// try to set date to created (should work in any case)
 		try {
-			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("isDescribedby")).iterator().next()).get("created").toString();
+			lastUpdate = ((Map<String, Object>) node.getLd2().get("isDescribedBy"))
+					.get("created").toString();
 			play.Logger.debug(
 					"Got last update date from \"isDescribedBy/created\": " + lastUpdate);
 		} catch (Exception e) {
@@ -190,20 +192,10 @@ public class MyUtils extends MyController {
 					+ " couldn't get created timestamp from \"isDescribedBy/created\" "
 					+ e.getMessage());
 		}
-		try {
-			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("describedby")).iterator().next()).get("created").toString();
-			play.Logger.debug(
-					"Got last update date from \"describedBy/created\": " + lastUpdate);
-		} catch (Exception e) {
-			play.Logger.warn(node.getPid()
-					+ " couldn't get created timestamp from \"describedBy/created\" "
-					+ e.getMessage());
-		}
 		// try to set date to modified (overrides created)
 		try {
-			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("isDescribedby")).iterator().next()).get("modified").toString();
+			lastUpdate = ((Map<String, Object>) node.getLd2().get("isDescribedBy"))
+					.get("modified").toString();
 			play.Logger.debug("Got last update date from \"isDescribedBy/modified\": "
 					+ lastUpdate);
 		} catch (Exception e) {
@@ -211,17 +203,8 @@ public class MyUtils extends MyController {
 					+ " couldn't get modified timestamp from \"isDescribedBy/modified\" "
 					+ e.getMessage());
 		}
-		try {
-			lastUpdate = ((Map<String, Object>) ((Set<Object>) node.getLd2()
-					.get("describedby")).iterator().next()).get("modified").toString();
-			play.Logger.debug(
-					"Got last update date from \"describedBy/modified\": " + lastUpdate);
-		} catch (Exception e) {
-			play.Logger.info(node.getPid()
-					+ " couldn't get modified timestamp from \"describedBy/modified\" "
-					+ e.getMessage());
-		}
-		return LocalDate.parse(lastUpdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
+		return LocalDate.parse(lastUpdate,
+				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
 	}
 
 	@ApiOperation(produces = "application/json,application/html", nickname = "addObjectTimestamp", value = "addObjectTimestamp", notes = "Add a objectTimestamp", httpMethod = "POST")

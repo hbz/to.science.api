@@ -421,7 +421,6 @@ public class JsonMapper {
 	}
 
 	private void postProcessLinkFields(String key, Map<String, Object> rdf) {
-		play.Logger.debug("key=" + key);
 		Object myObj = rdf.get(key);
 		if (myObj instanceof java.util.HashSet) {
 			HashSet<Map<String, String>> all =
@@ -942,7 +941,12 @@ public class JsonMapper {
 		if (node.getLastModifiedBy() != null)
 			aboutMap.put(lastModifiedBy, node.getLastModifiedBy());
 
-		aboutMap.put(modified, node.getLastModified());
+		try {
+			aboutMap.put(modified, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+					.format(node.getLastModified()));
+		} catch (Exception e) {
+			aboutMap.put(modified, node.getLastModified());
+		}
 		if (node.getObjectTimestamp() != null) {
 			aboutMap.put(objectTimestamp, node.getObjectTimestamp());
 		} else {
@@ -987,7 +991,6 @@ public class JsonMapper {
 		ObjectMapper mapper = new ObjectMapper();
 
 		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
-		play.Logger.debug("getPublicationMap(), issued=" + issued);
 
 		if (issued != null) {
 			rdf.put("issued", issued);
