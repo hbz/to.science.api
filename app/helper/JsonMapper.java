@@ -991,7 +991,6 @@ public class JsonMapper {
 		ObjectMapper mapper = new ObjectMapper();
 
 		String issued = getPublicationMap(mapper.convertValue(rdf, JsonNode.class));
-		play.Logger.debug("getPublicationMap(), issued=" + issued);
 
 		if (issued != null) {
 			rdf.put("issued", issued);
