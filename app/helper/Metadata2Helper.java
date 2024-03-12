@@ -176,9 +176,12 @@ public class Metadata2Helper {
 					jObj = jsArr.getJSONObject(i);
 					String dataOriginPrefLabel = jObj.get("prefLabel").toString();
 					dataOriginMap.put("prefLabel", dataOriginPrefLabel);
-
+					dataOriginMap.put("@id",
+							"http://hbz-nrw.de/regal#" + dataOriginPrefLabel);
 					dataOriginList.add(dataOriginMap);
+
 				}
+				play.Logger.debug("dataOriginList=" + dataOriginList.toString());
 				rdf.put("dataOrigin", dataOriginList);
 			}
 			if (tosContent.has("fundingId")) {
@@ -205,6 +208,7 @@ public class Metadata2Helper {
 				}
 				rdf.put("institution", institutionList);
 			}
+
 			if (tosContent.has("rdftype")) {
 				List<Map<String, Object>> rdftypeList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("rdftype");
@@ -212,11 +216,13 @@ public class Metadata2Helper {
 					Map<String, Object> rdftypeMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					rdftypeMap.put("prefLabel", jObj.get("prefLabel").toString());
+					rdftypeMap.put("@id", "http://hbz-nrw.de/regal#ResearchData");
 
 					rdftypeList.add(rdftypeMap);
 				}
 				rdf.put("rdftype", rdftypeList);
 			}
+
 			if (tosContent.has("reference")) {
 				Object obj = tosContent.get("reference");
 				String reference = getValueBetweenTwoQuotationMarks(obj.toString());
@@ -251,6 +257,14 @@ public class Metadata2Helper {
 				String projectId = getValueBetweenTwoQuotationMarks(obj.toString());
 				rdf.put("projectId", projectId);
 			}
+
+			if (tosContent.has("issued")) {
+				Object obj = tosContent.get("issued");
+				String issued = getValueBetweenTwoQuotationMarks(obj.toString());
+				play.Logger.debug("issued=" + issued);
+				rdf.put("issued", issued);
+			}
+
 			// rdf.put("@context", Globals.protocol + Globals.server +
 			// "/context.json");
 			metadata2Map.put("metadata2", rdf);
