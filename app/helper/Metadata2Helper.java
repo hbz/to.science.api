@@ -206,6 +206,7 @@ public class Metadata2Helper {
 
 					institutionList.add(institutionMap);
 				}
+				play.Logger.debug("institutionList=" + institutionList.toString());
 				rdf.put("institution", institutionList);
 			}
 
@@ -220,6 +221,7 @@ public class Metadata2Helper {
 
 					rdftypeList.add(rdftypeMap);
 				}
+				play.Logger.debug("rdftypeList = " + rdftypeList.toString());
 				rdf.put("rdftype", rdftypeList);
 			}
 
@@ -259,10 +261,9 @@ public class Metadata2Helper {
 			}
 
 			if (tosContent.has("issued")) {
-				Object obj = tosContent.get("issued");
-				String issued = getValueBetweenTwoQuotationMarks(obj.toString());
-				play.Logger.debug("issued=" + issued);
-				rdf.put("issued", issued);
+				Object issued = tosContent.get("issued");
+				play.Logger.debug("issued=" + issued.toString());
+				rdf.put("issued", issued.toString());
 			}
 
 			// rdf.put("@context", Globals.protocol + Globals.server +
