@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import models.Globals;
 import models.Node;
+import services.KtblService;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -109,11 +110,13 @@ public class Metadata2Helper {
 				List<Map<String, Object>> subjectList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("subject");
 				for (int i = 0; i < jsArr.length(); i++) {
-					// AdHocUriProvider ahu = new AdHocUriProvider();
+					String uri = jObj.getString("@id");
+					String label = jObj.get("prefLabel");
+					KtblService.checkAndLoadUri(uri, label);
 					Map<String, Object> subjectMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					subjectMap.put("@id", jObj.getString("@id"));
-					subjectMap.put("prefLabel", jObj.get("prefLabel"));
+					subjectMap.put("@id", uri);
+					subjectMap.put("prefLabel", label);
 					subjectList.add(subjectMap);
 				}
 				rdf.put("subject", subjectList);
