@@ -111,7 +111,7 @@ public class Metadata2Helper {
 				jsArr = tosContent.getJSONArray("subject");
 				for (int i = 0; i < jsArr.length(); i++) {
 					String uri = jObj.getString("@id");
-					String label = jObj.get("prefLabel");
+					String label = jObj.get("prefLabel").toString();
 					KtblService.checkAndLoadUri(uri, label);
 					Map<String, Object> subjectMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
