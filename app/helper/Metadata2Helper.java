@@ -107,12 +107,20 @@ public class Metadata2Helper {
 				rdf.put("description", description);
 			}
 			if (tosContent.has("subject")) {
+				String uri = null;
+				String label = null;
 				List<Map<String, Object>> subjectList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("subject");
 				for (int i = 0; i < jsArr.length(); i++) {
-					String uri = jObj.getString("@id");
-					String label = jObj.get("prefLabel").toString();
+					AdHocUriProvider ahu = new AdHocUriProvider();
+					label = jObj.get("prefLabel").toString();
+					uri = jObj.getString("@id");
+					if (uri.length() == 0) {
+						uri = ahu.getAdhocUri(label);
+						play.Logger.debug("uri=" + uri);
+					}
 					KtblService.checkAndLoadUri(uri, label);
+					play.Logger.debug("uri=" + uri + ", label=" + label);
 					Map<String, Object> subjectMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					subjectMap.put("@id", uri);

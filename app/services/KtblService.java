@@ -88,6 +88,7 @@ public class KtblService {
 	 */
 	public static void createLabelByEtikett(String uri, String label) {
 		try {
+			play.Logger.debug("createLabelByEtikett() has been called");
 			String endpointUrl = "http://localhost:9002/tools/etikett/update";
 			String auth = etikettUser + ":" + etikettPwd;
 			String authHeaderValue =
