@@ -107,20 +107,14 @@ public class Metadata2Helper {
 				rdf.put("description", description);
 			}
 			if (tosContent.has("subject")) {
-				String uri = null;
-				String label = null;
 				List<Map<String, Object>> subjectList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("subject");
 				for (int i = 0; i < jsArr.length(); i++) {
-					AdHocUriProvider ahu = new AdHocUriProvider();
-					label = jObj.get("prefLabel").toString();
-					uri = jObj.getString("@id");
-					if (uri.length() == 0) {
-						uri = ahu.getAdhocUri(label);
-						play.Logger.debug("uri=" + uri);
-					}
+					String uri = jObj.getString("@id");
+					String label = jObj.get("prefLabel").toString();
+					play.Logger.debug("uri=" + uri + " ,label=" + label);
 					KtblService.checkAndLoadUri(uri, label);
-					play.Logger.debug("uri=" + uri + ", label=" + label);
+
 					Map<String, Object> subjectMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					subjectMap.put("@id", uri);
@@ -168,13 +162,22 @@ public class Metadata2Helper {
 				rdf.put("contributor", contributorList);
 			}
 			if (tosContent.has("other")) {
+				String uri = null;
+				String label = null;
+
 				List<Map<String, Object>> otherList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("other");
 				for (int i = 0; i < jsArr.length(); i++) {
+					AdHocUriProvider ahu = new AdHocUriProvider();
 					Map<String, Object> otherMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					otherMap.put("prefLabel", jObj.get("prefLabel").toString());
-					otherMap.put("@id", jObj.get("@id").toString());
+					uri = jObj.get("@id").toString();
+					label = jObj.get("prefLabel").toString();
+					if (uri.length() == 0) {
+						uri = ahu.getAdhocUri(label);
+					}
+					otherMap.put("prefLabel", label);
+					otherMap.put("@id", uri);
 					otherList.add(otherMap);
 				}
 				rdf.put("other", otherList);
