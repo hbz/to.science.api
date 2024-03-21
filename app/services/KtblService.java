@@ -47,6 +47,7 @@ public class KtblService {
 	 */
 	public static String getLabelFromEtikett(String uri) {
 		try {
+			play.Logger.debug("getLabelFromEtikett() has been called");
 			if (uri == null || uri.isEmpty())
 				return uri;
 			if (uri.endsWith("#!"))
@@ -72,6 +73,8 @@ public class KtblService {
 					response.append(inputLine);
 				}
 			}
+			play.Logger.debug(
+					"getLabelFromEtikett(),response.toString()=" + response.toString());
 			in.close();
 			con.disconnect();
 			return response.toString();
@@ -95,7 +98,8 @@ public class KtblService {
 					"Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
 			String jsonPayload =
 					"{\"uri\": \"" + uri + "\", \"label\": \"" + label + "\"}";
-
+			play.Logger
+					.debug("createLabelByEtikett(), uri=" + uri + "label=" + label);
 			URL url = new URL(endpointUrl);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("POST");

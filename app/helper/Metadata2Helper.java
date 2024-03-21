@@ -30,8 +30,8 @@ public class Metadata2Helper {
 
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
 			JSONObject tosContent, Node n) {
-		// should perhaps be mapped : 1-isPrimaryTopic 2-yearOfCopyright
 		try {
+			AdHocUriProvider ahu = new AdHocUriProvider();
 			JsonMapper jsmapper = new JsonMapper();
 			jsmapper.node = n;
 
@@ -137,38 +137,49 @@ public class Metadata2Helper {
 				rdf.put("medium", mediumList);
 			}
 			if (tosContent.has("creator")) {
+				String uri = null;
+				String label = null;
 				List<Map<String, Object>> creatorList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("creator");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> creatorMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					creatorMap.put("prefLabel", jObj.get("prefLabel").toString());
-					creatorMap.put("@id", jObj.get("@id").toString());
+					uri = jObj.get("@id").toString();
+					label = jObj.get("prefLabel").toString();
+					if (uri.length() == 0) {
+						uri = ahu.getAdhocUri(label);
+					}
+					creatorMap.put("prefLabel", label);
+					creatorMap.put("@id", uri);
 					creatorList.add(creatorMap);
 				}
 				rdf.put("creator", creatorList);
 			}
 			if (tosContent.has("contributor")) {
+				String uri = null;
+				String label = null;
 				List<Map<String, Object>> contributorList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("contributor");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> contributorrMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					contributorrMap.put("prefLabel", jObj.get("prefLabel").toString());
-					contributorrMap.put("@id", jObj.get("@id").toString());
+					uri = jObj.get("@id").toString();
+					label = jObj.get("prefLabel").toString();
+					if (uri.length() == 0) {
+						uri = ahu.getAdhocUri(label);
+					}
+					contributorrMap.put("prefLabel", label);
+					contributorrMap.put("@id", uri);
 					contributorList.add(contributorrMap);
 				}
-
 				rdf.put("contributor", contributorList);
 			}
 			if (tosContent.has("other")) {
 				String uri = null;
 				String label = null;
-
 				List<Map<String, Object>> otherList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("other");
 				for (int i = 0; i < jsArr.length(); i++) {
-					AdHocUriProvider ahu = new AdHocUriProvider();
 					Map<String, Object> otherMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					uri = jObj.get("@id").toString();
