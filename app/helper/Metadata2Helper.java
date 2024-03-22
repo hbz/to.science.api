@@ -28,6 +28,30 @@ public class Metadata2Helper {
 
 	}
 
+	/**
+	 * Diese Methode bereinigt den Eingabetext, indem Zeilenumbrueche und
+	 * Leerzeichen angepasst werden. Zusaetzlich wird der Inhalt zwischen dem
+	 * ersten und dem letzten Anfuehrungszeichen beibehalten
+	 * 
+	 * @param input
+	 * @return
+	 */
+	public static String cleanString(String input) {
+		// leere Zeile wird ersetzt
+		input = input.replace("\n\n", "\n\n\n");
+
+		// neue Zeile wird ersetzt
+		input = input.replace("\n", "\n\n");
+
+		// doppelte Anführungszeichen "" werden entfernt
+		input = input.replaceAll("\"([^\"]*)\"", "$1");
+
+		// Entferne führende und abschließende Leerzeichen
+		input = input.trim();
+
+		return input;
+	}
+
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
 			JSONObject tosContent, Node n) {
 		try {
@@ -106,6 +130,13 @@ public class Metadata2Helper {
 				String description = getValueBetweenTwoQuotationMarks(obj.toString());
 				rdf.put("description", description);
 			}
+
+			if (tosContent.has("usageManual")) {
+				Object obj = tosContent.get("usageManual");
+				String usageManual = cleanString(obj.toString());
+				rdf.put("usageManual", usageManual);
+			}
+
 			if (tosContent.has("subject")) {
 				List<Map<String, Object>> subjectList = new ArrayList<>();
 				jsArr = tosContent.getJSONArray("subject");
