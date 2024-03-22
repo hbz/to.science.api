@@ -37,19 +37,28 @@ public class Metadata2Helper {
 	 * @return
 	 */
 	public static String cleanString(String input) {
-		// leere Zeile wird ersetzt
-		input = input.replace("\n\n", "\n\n\n");
 
-		// neue Zeile wird ersetzt
-		input = input.replace("\n", "\n\n");
+		if (input.startsWith("[") && input.endsWith("]")) {
+			input = input.substring(1, input.length() - 1);
+		}
+		input = input.replaceAll("^\\[", ""); // entferne [
+		input = input.replaceAll("\\]$", ""); // Entferne ]
 
-		// doppelte Anführungszeichen "" werden entfernt
-		input = input.replaceAll("\"([^\"]*)\"", "$1");
+		input = input.replaceAll("\\\\\"", ""); // Entferne \"
+		input = input.replaceAll("\"\\\\", ""); // Entferne \"
 
-		// Entferne führende und abschließende Leerzeichen
-		input = input.trim();
+		String[] lines = input.split("\\\\n\\n");
+		StringBuilder result = new StringBuilder();
 
-		return input;
+		for (int i = 0; i < lines.length; i++) {
+			result.append(lines[i]);
+
+			if (i < lines.length - 1) {
+				result.append("\n\n");
+			}
+		}
+
+		return result.toString();
 	}
 
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
@@ -128,7 +137,8 @@ public class Metadata2Helper {
 			if (tosContent.has("description")) {
 				Object obj = tosContent.get("description");
 				String description = getValueBetweenTwoQuotationMarks(obj.toString());
-				rdf.put("description", description);
+
+				rdf.put("description", cleanString(description));
 			}
 
 			if (tosContent.has("usageManual")) {
