@@ -41,24 +41,8 @@ public class Metadata2Helper {
 		if (input.startsWith("[") && input.endsWith("]")) {
 			input = input.substring(1, input.length() - 1);
 		}
-		input = input.replaceAll("^\\[", ""); // entferne [
-		input = input.replaceAll("\\]$", ""); // Entferne ]
-
-		input = input.replaceAll("\\\\\"", ""); // Entferne \"
-		input = input.replaceAll("\"\\\\", ""); // Entferne \"
-
-		String[] lines = input.split("\\\\n\\n");
-		StringBuilder result = new StringBuilder();
-
-		for (int i = 0; i < lines.length; i++) {
-			result.append(lines[i]);
-
-			if (i < lines.length - 1) {
-				result.append("\n\n");
-			}
-		}
-
-		return result.toString();
+		String result = input.replaceAll("\\n|\\n\\n|\\s+|\"", "");
+		return result;
 	}
 
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
@@ -136,15 +120,14 @@ public class Metadata2Helper {
 
 			if (tosContent.has("description")) {
 				Object obj = tosContent.get("description");
-				String description = getValueBetweenTwoQuotationMarks(obj.toString());
-
-				rdf.put("description", cleanString(description));
+				String description = cleanString(obj.toString());
+				rdf.put("description", getValueBetweenTwoQuotationMarks(description));
 			}
 
 			if (tosContent.has("usageManual")) {
 				Object obj = tosContent.get("usageManual");
 				String usageManual = cleanString(obj.toString());
-				rdf.put("usageManual", usageManual);
+				rdf.put("usageManual", getValueBetweenTwoQuotationMarks(usageManual));
 			}
 
 			if (tosContent.has("subject")) {
