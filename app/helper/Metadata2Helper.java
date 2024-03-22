@@ -120,9 +120,8 @@ public class Metadata2Helper {
 
 			if (tosContent.has("description")) {
 				Object obj = tosContent.get("description");
-				// String description = cleanString(obj.toString());
-				rdf.put("description",
-						getValueBetweenTwoQuotationMarks(obj.toString()));
+				String description = cleanString(obj.toString());
+				rdf.put("description", getValueBetweenTwoQuotationMarks(description));
 			}
 
 			if (tosContent.has("usageManual")) {
