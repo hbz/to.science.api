@@ -251,9 +251,16 @@ public class Metadata2Helper {
 				rdf.put("dataOrigin", dataOriginList);
 			}
 			if (tosContent.has("fundingId")) {
-				Object obj = tosContent.get("fundingId");
-				String fundingId = getValueBetweenTwoQuotationMarks(obj.toString());
-				rdf.put("fundingId", fundingId);
+				List<Map<String, Object>> fundingIdList = new ArrayList<>();
+				jsArr = tosContent.getJSONArray("fundingId");
+				for (int i = 0; i < jsArr.length(); i++) {
+					Map<String, Object> languageMap = new LinkedHashMap<>();
+					jObj = jsArr.getJSONObject(i);
+					languageMap.put("@id", jObj.getString("@id"));
+					languageMap.put("prefLabel", jObj.get("prefLabel"));
+					fundingIdList.add(languageMap);
+				}
+				rdf.put("fundingId", fundingIdList);
 			}
 			if (tosContent.has("fundingProgram")) {
 				Object obj = tosContent.get("fundingProgram");
