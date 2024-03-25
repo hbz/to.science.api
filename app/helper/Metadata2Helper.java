@@ -47,8 +47,18 @@ public class Metadata2Helper {
 		// "\n" wird aus dem String entfernt
 		cleanedString = cleanedString.replace("\n", "");
 
-		// Anfuehrungszeichen am Anfang und Ende des Strings werden entfernt
-		cleanedString = cleanedString.replaceAll("^\"|\"$", "");
+		if (cleanedString.startsWith("[")) {
+			cleanedString = cleanedString.substring(1);
+		}
+		if (cleanedString.endsWith("]")) {
+			cleanedString = cleanedString.substring(0, cleanedString.length() - 1);
+		}
+		if (cleanedString.startsWith("\"")) {
+			cleanedString = cleanedString.substring(1);
+		}
+		if (cleanedString.endsWith("\"")) {
+			cleanedString = cleanedString.substring(0, cleanedString.length() - 1);
+		}
 		return cleanedString;
 	}
 
