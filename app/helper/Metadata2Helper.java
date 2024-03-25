@@ -38,27 +38,18 @@ public class Metadata2Helper {
 	 */
 	public static String cleanString(String input) {
 
-		if (input.startsWith("[") && input.endsWith("]")) {
-			input = input.substring(1, input.length() - 1);
-		}
-		input = input.replaceAll("^\\[", ""); // entferne [
-		input = input.replaceAll("\\]$", ""); // Entferne ]
+		// "\" wird aus dem String entfernt
+		String cleanedString = input.replace("\\", "");
 
-		input = input.replaceAll("\\\\\"", ""); // Entferne \"
-		input = input.replaceAll("\"\\\\", ""); // Entferne \"
+		// "\n\n" wird aus dem String entfernt
+		cleanedString = cleanedString.replace("\n\n", "");
 
-		String[] lines = input.split("\\\\n\\n");
-		StringBuilder result = new StringBuilder();
+		// "\n" wird aus dem String entfernt
+		cleanedString = cleanedString.replace("\n", "");
 
-		for (int i = 0; i < lines.length; i++) {
-			result.append(lines[i]);
-
-			if (i < lines.length - 1) {
-				result.append("\n\n");
-			}
-		}
-
-		return result.toString();
+		// Anfuehrungszeichen am Anfang und Ende des Strings werden entfernt
+		cleanedString = cleanedString.replaceAll("^\"|\"$", "");
+		return cleanedString;
 	}
 
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
