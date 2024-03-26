@@ -256,8 +256,11 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> languageMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
+					String uri = jObj.getString("@id");
+					String label = jObj.get("prefLabel").toString();
 					languageMap.put("@id", jObj.getString("@id"));
 					languageMap.put("prefLabel", jObj.get("prefLabel"));
+					KtblService.checkAndLoadUri(uri, label);
 					fundingIdList.add(languageMap);
 				}
 				rdf.put("fundingId", fundingIdList);
