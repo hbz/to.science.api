@@ -601,8 +601,12 @@ public class Resource extends MyController {
 
 				play.Logger.debug("Starting METADATA2 Mapping");
 
-				rdf = Metadata2Helper
-						.getRdfFromToscience(new JSONObject(toscienceMetadata), readNode);
+				// rdf = Metadata2Helper
+				// .getRdfFromToscience(new JSONObject(toscienceMetadata), readNode);
+				// gesamte Inhalt der Json-Datei wird hier uebergeben und nicht nur der
+				// toscience-Teil
+				rdf = Metadata2Helper.getRdfFromToscience(new JSONObject(contentOfFile),
+						readNode);
 
 				play.Logger.debug("rdf=" + rdf.toString());
 

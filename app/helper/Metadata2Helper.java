@@ -258,8 +258,8 @@ public class Metadata2Helper {
 					jObj = jsArr.getJSONObject(i);
 					String uri = jObj.getString("@id");
 					String label = jObj.get("prefLabel").toString();
-					languageMap.put("@id", jObj.getString("@id"));
-					languageMap.put("prefLabel", jObj.get("prefLabel"));
+					languageMap.put("@id", uri);
+					languageMap.put("prefLabel", label);
 					KtblService.checkAndLoadUri(uri, label);
 					fundingIdList.add(languageMap);
 				}
@@ -342,8 +342,42 @@ public class Metadata2Helper {
 				rdf.put("issued", issued.toString());
 			}
 
-			// rdf.put("@context", Globals.protocol + Globals.server +
-			// "/context.json");
+			// KTBL-Teil
+			if (tosContent.has("info")) {
+				// project_title
+				boolean hasProjectTitle = tosContent.getJSONObject("info")
+						.getJSONObject("ktbl").has("project_title");
+				if (hasProjectTitle) {
+					String projectTitle = tosContent.getJSONObject("info")
+							.getJSONObject("ktbl").getString("project_title");
+					rdf.put("project_title", projectTitle);
+				}
+				// livestock_category
+				boolean hasLivestock_category = tosContent.getJSONObject("info")
+						.getJSONObject("ktbl").has("livestock_category");
+				if (hasLivestock_category) {
+					String livestock = tosContent.getJSONObject("info")
+							.getJSONObject("ktbl").getString("livestock_category");
+					rdf.put("livestock", livestock);
+				}
+				// ventilation_system
+				boolean hasVentilation_system = tosContent.getJSONObject("info")
+						.getJSONObject("ktbl").has("ventilation_system");
+				if (hasLivestock_category) {
+					String ventilation = tosContent.getJSONObject("info")
+							.getJSONObject("ktbl").getString("ventilation_system");
+					rdf.put("ventilation", ventilation);
+				}
+				// housing_systems
+				boolean hasHousing_systems = tosContent.getJSONObject("info")
+						.getJSONObject("ktbl").has("housing_systems");
+				if (hasLivestock_category) {
+					String housing = tosContent.getJSONObject("info")
+							.getJSONObject("ktbl").getString("housing_systems");
+					rdf.put("housing", housing);
+				}
+			}
+
 			metadata2Map.put("metadata2", rdf);
 			return metadata2Map;
 		} catch (Exception e) {
