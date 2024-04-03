@@ -608,18 +608,15 @@ public class Resource extends MyController {
 				rdf = Metadata2Helper.getRdfFromToscience(new JSONObject(contentOfFile),
 						readNode);
 
-				play.Logger.debug("updateKtblAndTos(),rdf=" + rdf.toString()); // ktbl
-																																				// vorhanden
+				play.Logger.debug("rdf=" + rdf.toString());
 
-				// String rdfContent = modify.rdfToString(
-				// (Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
+				String rdfContent = modify.rdfToString(
+						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
 
-				// play.Logger.debug("rdfContent=" + rdfContent);
+				play.Logger.debug("rdfContent=" + rdfContent);
 
-				// String result3 =
-				// modify.updateMetadata("metadata2", readNode, rdfContent);
 				String result3 =
-						modify.updateMetadata("metadata2", readNode, rdf.toString());
+						modify.updateMetadata("metadata2", readNode, rdfContent);
 
 				play.Logger.debug("Done METADATA2 Mapping");
 
