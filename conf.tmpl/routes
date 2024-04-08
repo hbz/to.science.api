@@ -63,6 +63,7 @@ PUT /resource/:pid/data				controllers.Resource.updateData(pid,md5?="")
 PUT /resource/:pid/dc				controllers.Resource.updateDc(pid)
 PUT /resource/:pid/conf			    controllers.Resource.updateConf(pid)
 PUT /resource/:pid					controllers.Resource.updateResource(pid)
+PUT /resource/:pid/ktbl				controllers.Resource.updateKtblAndTos(pid)
 PATCH /resource/:pid			    controllers.Resource.patchResource(pid)
 PATCH /resource/:pid/all			controllers.Resource.patchResources(pid)
 
