@@ -110,6 +110,9 @@ public class RdfUtils {
 		try {
 			writer.startRDF();
 			for (Statement st : myGraph) {
+				play.Logger.debug(st.getSubject().toString());
+				play.Logger.debug(st.getPredicate().toString());
+				play.Logger.debug(st.getObject().toString());
 				writer.handleStatement(st);
 			}
 			writer.endRDF();
