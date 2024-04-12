@@ -331,7 +331,7 @@
 							property="@models.Globals.profile.getEtikettByName("usageManual").getUri()">	
 							<ul id="@key">			
 								@for(field <- d){
-								<li><pre class="@key" style="white-space: pre-line;">@value(field,key)</pre></li>
+								<li><pre class="@key" style="white-space: pre-line;">@Txt(value(field,key))</pre></li>
 								}
 							</ul>
 					<td></tr>
