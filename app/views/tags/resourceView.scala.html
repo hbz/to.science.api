@@ -135,16 +135,16 @@
 			@values match {
 				case d: Set[Any] => { 
 					<tr class="usageManual">
-						<td style="display:none;">@getWeight("abstractText")</td>
+						<td style="display:none;">@getWeight(key)</td>
 						<td class="field-label usageManual">@getLabel("usageManual")</td>
 						<td class="field-item"
 							property="@models.Globals.profile.getEtikettByName("usageManual").getUri()">	
-							<ol id="hasPartList">			
+							<ul id="@key">			
 								@for(field <- d){
 								<li><pre class="@key">@value(field,key)</pre></li>
 								}
-							</ol>
-					</tr>
+							</ul>
+					<td></tr>
 				} case _ =>{} 
 			}
 		}
