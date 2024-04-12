@@ -133,7 +133,7 @@
 		}
 		case "usageManual"=>{
 			@values match {
-					case map:Map[String,String] => {
+				case d: List[Any] => { 
 				<tr class="@key">
 					<td style="display:none;">@getWeight(key)</td>
 					<td class="field-label @key">@getLabel(key)</td>
