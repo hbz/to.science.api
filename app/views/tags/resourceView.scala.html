@@ -41,7 +41,7 @@
 				}
 				
 				@if(ViewerInfo.ViewerType.SEC_PDF.equals(viewerInfo.viewertype)){
-				<em>Download nicht erlaubt<em>
+				<em>Download nicht erlaubt</em>
 				} else {
 				@createViewerLink(viewerInfo)
 				}
@@ -130,23 +130,6 @@
 						</tr>
 					} case _ =>{} 
 				}
-		}
-		case "usageManual"=>{
-			@values match {
-				case d: Set[Any] => { 
-					<tr class="usageManual">
-						<td style="display:none;">@getWeight(key)</td>
-						<td class="field-label usageManual">@getLabel("usageManual")</td>
-						<td class="field-item"
-							property="@models.Globals.profile.getEtikettByName("usageManual").getUri()">	
-							<ul id="@key">			
-								@for(field <- d){
-								<li><pre class="@key">@Text(@value(field,key))</pre></li>
-								}
-							</ul>
-					<td></tr>
-				} case _ =>{} 
-			}
 		}
 		case "fundingJoined"=>{
 			@values match {
@@ -336,6 +319,23 @@
 					}				
 				</tr>
 			}
+			}
+		}
+		case "usageManual"=>{
+			@values match {
+				case d: Set[Any] => { 
+					<tr class="usageManual">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label usageManual">@getLabel("usageManual")</td>
+						<td class="field-item"
+							property="@models.Globals.profile.getEtikettByName("usageManual").getUri()">	
+							<ul id="@key">			
+								@for(field <- d){
+								<li><pre class="@key" style="white-space: pre-line;">@value(field,key)</pre></li>
+								}
+							</ul>
+					<td></tr>
+				} case _ =>{} 
 			}
 		}
 		case "urn"=>{
