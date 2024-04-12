@@ -131,23 +131,6 @@
 					} case _ =>{} 
 				}
 		}
-		case "usageManual"=>{
-			@values match {
-				case d: List[Any] => { 
-				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
-					<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
-						<ol>
-						@for(field <- d){
-						<li><pre class="@vkey">@value(field,key)</pre></li>
-						}
-						</ol>
-					}
-					case _ => {}
-					</td></tr>
-				}
-		}
 		case "fundingJoined"=>{
 			@values match {
 				case map:Map[String,String]=>{
