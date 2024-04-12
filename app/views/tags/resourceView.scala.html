@@ -133,21 +133,20 @@
 		}
 		case "usageManual"=>{
 			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{
-				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
-					<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
-						<ol>
-						@for(field <- d){
-						<li><pre class="@vkey">@value(field,key)</pre></li>
-						}
-						</ol>
-					}
-				case _ => {}
-				</td></tr>
-				}
+				case d: List[Any] => { 
+					<tr class="usageManual">
+						<td style="display:none;">@getWeight("hasPart")</td>
+						<td class="field-label hasPart">@getLabel("hasPart")</td>
+						<td class="field-item"
+							property="@models.Globals.profile.getEtikettByName("usageManual").getUri()">	
+							<ol id="hasPartList">			
+								@for(field <- d){
+								<li><pre class="@key">@value(field,key)</pre></li>
+								}
+							</ol>
+					</tr>
+				} case _ =>{} 
+			}
 		}
 		case "fundingJoined"=>{
 			@values match {
