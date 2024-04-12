@@ -326,12 +326,12 @@
 				case d: Set[Any] => { 
 					<tr class="usageManual">
 						<td style="display:none;">@getWeight(key)</td>
-						<td class="field-label usageManual">@getLabel("usageManual")</td>
+						<td class="field-label @key">@getLabel(key)</td>
 						<td class="field-item"
-							property="@models.Globals.profile.getEtikettByName("usageManual").getUri()">	
+							property="@models.Globals.profile.getEtikettByName(key).getUri()">	
 							<ul id="@key">			
 								@for(field <- d){
-								<li><pre class="@key" style="white-space: pre-line;">@Txt(@value(field,key))</pre></li>
+								<li><pre class="@key"">@value(field,key)</pre></li>
 								}
 							</ul>
 					<td></tr>
@@ -655,7 +655,7 @@
 					@if(Helper.getLinkAdressOrNull(a)!=null){
 						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
 					}else{
-						@a
+						@Txt(a)
 					}
 				}
 				case c : Map[String,Object] => {
