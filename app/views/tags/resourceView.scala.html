@@ -133,7 +133,7 @@
 		}
 		case "usageManual"=>{
 			@values match {
-				case d: List[Any] => { 
+				case d: Set[Any] => { 
 					<tr class="usageManual">
 						<td style="display:none;">@getWeight("hasPart")</td>
 						<td class="field-label hasPart">@getLabel("hasPart")</td>
@@ -457,7 +457,7 @@
 										case b: Set[Any] => {
 										   <ul>
 											@for(field <- b){
-												<li>@value(field,key)</li>
+												<li><span class="@key"></span>@value(field,key)</span</li>
 											}
 											</ul>
 										}
