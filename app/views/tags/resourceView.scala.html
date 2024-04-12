@@ -1,9 +1,8 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
-@(pre: => Txt)
 @import views.Helper
 @import views.ViewerInfo
 @import models.Node
-@(node: Node,hit:Map[String,Object],context:List[String])
+@(node: Node,hit:Map[String,Object],context:List[String])(pre: => Txt)
 
 @{
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
