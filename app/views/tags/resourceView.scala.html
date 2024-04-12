@@ -1,4 +1,5 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
+@(pre: => Txt)
 @import views.Helper
 @import views.ViewerInfo
 @import models.Node
@@ -334,7 +335,7 @@
 								<li><pre class="@key"">@value(field,key)</pre></li>
 								}
 							</ul>
-					<td></tr>
+					</td></tr>
 				} case _ =>{} 
 			}
 		}
@@ -655,7 +656,7 @@
 					@if(Helper.getLinkAdressOrNull(a)!=null){
 						<a href=@Helper.getLinkAdressOrNull(a)>@a</a>
 					}else{
-						@Txt(a)
+						@a
 					}
 				}
 				case c : Map[String,Object] => {
