@@ -114,6 +114,64 @@
 		}
 		case "inCollection"=>{
 			
+		}case "usageManual"=>{
+			case nullCase if nullCase == null =>{}
+			case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+									@values match {
+										case a: String => {
+											@value(a,key)
+								  		}
+										case b: Set[Any] => {
+										   <ul>
+											@for(field <- b){
+												<li>@value(field,key)</li>
+											}
+											</ul>
+										}
+										case d: List[Any] => {
+											<ol>
+											@for(field <- d){
+												<li><pre class="@vkey">@value(field,key)</pre></li>
+											}
+											</ol>
+										}
+										case c : Map[String,Object] => {
+											<table class="table table-striped table-condensed" resource=@c.get("@id")>
+												@for((k,v)<-c){
+													@htmlRow(v,k.asInstanceOf[String])
+													}
+											</table>
+										}
+										case _ => {
+													@values
+										}
+									}
+									
+									</tr>
+				}
+			@values match {
+				case map:Map[String,String]=>{
+						<tr class="">
+							<td style="display:none;">@getWeight(key)</td>
+							<td class="field-label @key">@getLabel(key)</td>
+							<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+										    <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@map.get("prefLabel")@models.Globals.rechercheUrlSuffix">
+						                        @map.get("prefLabel")
+						                    </a>
+						              		<span class="separator">|</span>
+						                    <a href=@map.get("@id")  target="_blank">
+						                               <span class="octicon-link-external"></span>
+						                    </a>
+										</ul>
+												
+						</tr>
+					} case _ =>{} 
+				}
+
 		}case "fundingJoined"=>{
 			@values match {
 				case map:Map[String,String]=>{
