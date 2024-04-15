@@ -638,7 +638,8 @@ public class Helper {
 	 */
 	public static String getKtblJson(Node node) {
 		JsonMdLoader ktbl = new JsonMdLoader(node, "ktbl");
-		return ktbl.getJsonAsString();
+		// return ktbl.getJsonAsString();
+		return "Resultate erwünscht";
 	}
 
 }
