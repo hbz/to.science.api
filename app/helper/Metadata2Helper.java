@@ -39,13 +39,13 @@ public class Metadata2Helper {
 	public static String cleanString(String input) {
 
 		// "\" wird aus dem String entfernt
-		String cleanedString = input.replace("\\", "");
+		String cleanedString = input.replace("\\", "").trim();
 
 		// "\n\n" wird aus dem String entfernt
-		cleanedString = cleanedString.replace("\n\n", "");
+		// cleanedString = cleanedString.replace("\n\n", "");
 
 		// "\n" wird aus dem String entfernt
-		cleanedString = cleanedString.replace("\n", "");
+		cleanedString = cleanedString.replace("\n", "\r\n");
 
 		if (cleanedString.startsWith("[")) {
 			cleanedString = cleanedString.substring(1);
@@ -139,12 +139,12 @@ public class Metadata2Helper {
 				Object obj = tosAndKtblContent.get("description");
 				String description = getValueBetweenTwoQuotationMarks(obj.toString());
 
-				rdf.put("description", description);
+				rdf.put("description", cleanString(description));
 			}
 
 			if (tosAndKtblContent.has("usageManual")) {
 				Object obj = tosAndKtblContent.get("usageManual");
-				String usageManual = obj.toString();
+				String usageManual = cleanString(obj.toString());
 				rdf.put("usageManual", usageManual);
 			}
 
