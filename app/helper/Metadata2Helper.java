@@ -39,7 +39,7 @@ public class Metadata2Helper {
 	public static String cleanString(String input) {
 
 		// "\" wird aus dem String entfernt
-		String cleanedString = input.replace("\\", "").trim();
+		String cleanedString = input.trim();
 
 		// "\n\n" wird aus dem String entfernt
 		// cleanedString = cleanedString.replace("\n\n", "");
