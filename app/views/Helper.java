@@ -21,7 +21,7 @@ import actions.Read;
 import helper.MyEtikettMaker;
 import models.Gatherconf;
 import models.Globals;
-import models.JsonMdLoader;
+import helper.ktbl.JsonMdLoader;
 import models.Link;
 import models.Node;
 
@@ -638,8 +638,7 @@ public class Helper {
 	 */
 	public static String getKtblJson(Node node) {
 		JsonMdLoader ktbl = new JsonMdLoader(node, "ktbl");
-		// return ktbl.getJsonAsString();
-		return "Resultate erwünscht";
+		return "ktbl-JSON-Stream: " + ktbl.getJsonAsString();
 	}
 
 }

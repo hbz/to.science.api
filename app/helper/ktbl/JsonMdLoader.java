@@ -52,15 +52,10 @@ public class JsonMdLoader {
 			InputStreamReader InStReader = new InputStreamReader(stream);
 			BufferedReader bReader = new BufferedReader(InStReader);
 			StringBuilder jsonStringBuilder = new StringBuilder();
-
-			String inputStr;
-			while ((inputStr = bReader.readLine()) != null) {
-				jsonStringBuilder.append(inputStr);
-			}
 			result = jsonStringBuilder.toString();
 		} catch (Exception e) {
 			play.Logger.warn(node.getPid() + " has no " + mdFormat + " Metadata!");
-			// play.Logger.debug("", e);
+			play.Logger.error("", e);
 		}
 		return result;
 	}
