@@ -39,13 +39,17 @@ public class Metadata2Helper {
 	public static String cleanString(String input) {
 
 		// "\" wird aus dem String entfernt
-		String cleanedString = input.replace("\\", "");
+		play.Logger.debug("input-String", input);
+
+		String cleanedString = input.replace("\n", "_n");
+
+		cleanedString = cleanedString.replace("\\", "");
 
 		// "\n\n" wird aus dem String entfernt
-		cleanedString = cleanedString.replace("\n\n", "");
+		// cleanedString = cleanedString.replace("\n\n", "");
 
 		// "\n" wird aus dem String entfernt
-		cleanedString = cleanedString.replace("\n", "");
+		cleanedString = cleanedString.replace("_n", "\r\n");
 
 		if (cleanedString.startsWith("[")) {
 			cleanedString = cleanedString.substring(1);
