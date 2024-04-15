@@ -45,7 +45,7 @@ public class Metadata2Helper {
 		// cleanedString = cleanedString.replace("\n\n", "");
 
 		// "\n" wird aus dem String entfernt
-		cleanedString = cleanedString.replace("\\n", "\\r\\n");
+		cleanedString = cleanedString.replace("\n", "\r\n");
 
 		if (cleanedString.startsWith("[")) {
 			cleanedString = cleanedString.substring(1);
