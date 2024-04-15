@@ -2,7 +2,8 @@
 @import views.Helper
 @import views.ViewerInfo
 @import models.Node
-@(node: Node,hit:Map[String,Object],context:List[String])
+@import helper.ktbl.JsonMdLoader
+@(node:Node,ktbl:JsonMdLoader,hit:Map[String,Object],context:List[String])
 
 @{
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
@@ -72,6 +73,8 @@
 		case _ => {}
 	}
 </table>
+
+<p>@ktbl(node, "ktbl").getJsonAsStream()</p>
 
 
 @htmlRow(values: Any,key: String)={
