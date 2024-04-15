@@ -21,6 +21,7 @@ import actions.Read;
 import helper.MyEtikettMaker;
 import models.Gatherconf;
 import models.Globals;
+import models.JsonMdLoader;
 import models.Link;
 import models.Node;
 
@@ -187,7 +188,7 @@ public class Helper {
 					}
 					String sourceId = c.at("/source/0/@id").asText();
 					String source = c.at("/source/0/label").asText();
-			
+
 					String notation = c.at("/notation").asText();
 
 					if (uri == null || uri.isEmpty()) {
@@ -630,4 +631,14 @@ public class Helper {
 			return value;
 		return null;
 	}
+
+	/**
+	 * @param node
+	 * @return
+	 */
+	public static String getKtblJson(Node node) {
+		JsonMdLoader ktbl = new JsonMdLoader(node, "ktbl");
+		return ktbl.getJsonAsString();
+	}
+
 }

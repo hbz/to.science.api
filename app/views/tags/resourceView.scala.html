@@ -2,12 +2,12 @@
 @import views.Helper
 @import views.ViewerInfo
 @import models.Node
-@import models.JsonMdLoader
-@(node:Node,hit:Map[String,Object],context:List[String],kjson:JsonMdLoader)
+@(node:Node,hit:Map[String,Object],context:List[String])
 
 @{
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
 		createViewerLinks(viewerInfo)
+		var ktblJson:String = Helper.getKtblJson(node)
 }
 @createViewerLinks(viewerInfo:ViewerInfo)={
 	@if(viewerInfo!=null){
@@ -73,6 +73,7 @@
 		case _ => {}
 	}
 </table>
+<p>@ktblJson</p>
 
 
 @htmlRow(values: Any,key: String)={
