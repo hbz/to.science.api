@@ -49,9 +49,14 @@ public class JsonMdLoader {
 		try {
 			InputStream stream = new ByteArrayInputStream(
 					node.getMetadata(mdFormat).getBytes(StandardCharsets.UTF_8));
-			InputStreamReader InStReader = new InputStreamReader(stream);
+			InputStreamReader InStReader = new InputStreamReader(stream, "UTF-8");
 			BufferedReader bReader = new BufferedReader(InStReader);
 			StringBuilder jsonStringBuilder = new StringBuilder();
+
+			String inputStr;
+			while ((inputStr = bReader.readLine()) != null) {
+				jsonStringBuilder.append(inputStr);
+			}
 			result = jsonStringBuilder.toString();
 		} catch (Exception e) {
 			play.Logger.warn(node.getPid() + " has no " + mdFormat + " Metadata!");
