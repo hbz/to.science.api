@@ -41,7 +41,7 @@ public class Metadata2Helper {
 		// "\" wird aus dem String entfernt
 		play.Logger.debug("input-String", input);
 
-		String cleanedString = input.replace("\n", "_n");
+		String cleanedString = input.replace("\\n", "_n");
 
 		cleanedString = input.replace("\\", "");
 
