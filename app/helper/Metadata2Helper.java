@@ -139,12 +139,12 @@ public class Metadata2Helper {
 				Object obj = tosAndKtblContent.get("description");
 				String description = getValueBetweenTwoQuotationMarks(obj.toString());
 
-				rdf.put("description", cleanString(description));
+				rdf.put("description", description);
 			}
 
 			if (tosAndKtblContent.has("usageManual")) {
 				Object obj = tosAndKtblContent.get("usageManual");
-				String usageManual = cleanString(obj.toString());
+				String usageManual = obj.toString();
 				rdf.put("usageManual", usageManual);
 			}
 
