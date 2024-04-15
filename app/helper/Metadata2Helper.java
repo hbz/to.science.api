@@ -39,13 +39,13 @@ public class Metadata2Helper {
 	public static String cleanString(String input) {
 
 		// "\" wird aus dem String entfernt
-		String cleanedString = input.trim();
+		String cleanedString = input.replace("\\", "");
 
 		// "\n\n" wird aus dem String entfernt
 		// cleanedString = cleanedString.replace("\n\n", "");
 
 		// "\n" wird aus dem String entfernt
-		cleanedString = cleanedString.replace("\n", "\r\n");
+		cleanedString = cleanedString.replace("\\n", "\\r\\n");
 
 		if (cleanedString.startsWith("[")) {
 			cleanedString = cleanedString.substring(1);
