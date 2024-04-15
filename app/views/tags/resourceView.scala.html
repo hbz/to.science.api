@@ -9,10 +9,6 @@
 		createViewerLinks(viewerInfo)
 }
 
-@{ 
-	val ktblJson:String = Helper.getKtblJson(node)
-	
-}
 @createViewerLinks(viewerInfo:ViewerInfo)={
 	@if(viewerInfo!=null){
 			@if(!"version".equals(viewerInfo.contentType)) {
@@ -77,7 +73,8 @@
 		case _ => {}
 	}
 </table>
-<p>@ktblJson</p>
+
+<p>@Helper.getKtblJson(node)</p>
 
 
 @htmlRow(values: Any,key: String)={
