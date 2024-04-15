@@ -2,12 +2,16 @@
 @import views.Helper
 @import views.ViewerInfo
 @import models.Node
-@(node:Node,hit:Map[String,Object],context:List[String],ktblJson:String)
+@(node:Node,hit:Map[String,Object],context:List[String])
 
 @{
 		var viewerInfo:ViewerInfo = Helper.getViewerInfo(node)
 		createViewerLinks(viewerInfo)
-		var ktblJson:String = Helper.getKtblJson(node)
+}
+
+@{ 
+	val ktbl:String = Helper.getKtblJson(node)
+	
 }
 @createViewerLinks(viewerInfo:ViewerInfo)={
 	@if(viewerInfo!=null){
