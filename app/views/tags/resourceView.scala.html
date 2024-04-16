@@ -80,18 +80,6 @@
 	}
 	
 
-@listOthers(others:List[String])={
-	<tr class="other">
-	<td style="display:none;">"75"</td>
-	<td class="field-label other">"Sonstige"</td>
-	<td>
-	@for(other <- others){
-		@other<br/> 
-	}
-	</td>
-	</tr>	
-}
-
 </table>
 
 
@@ -305,6 +293,25 @@
 				}
 			}
 		}
+		case "other"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(other <-views.Helper.getOthers(node)){
+						@other
+						}
+					</table>
+					</td>
+				</tr>
+				}
+			}
+		}
+				
 		case "inSeries"=>{
 			@values match {
 			case nullCase if nullCase == null =>{}
