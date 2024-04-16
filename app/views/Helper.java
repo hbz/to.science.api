@@ -647,11 +647,12 @@ public class Helper {
 
 	/**
 	 * 
+	 * @param node
 	 * @return List
 	 */
 	public static List<String> getContributors(Node node) {
 		String mdStream = getTosJson(node);
-		ArrayList<String> contribList = new ArrayList<>();
+		List<String> contribList = new ArrayList<>();
 		JsonNode jNode = null;
 		try {
 			jNode = new ObjectMapper().readTree(mdStream);
@@ -667,7 +668,7 @@ public class Helper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		contribList.add("Andres");
 		return contribList;
 	}
 
