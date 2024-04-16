@@ -296,6 +296,18 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "text/plain", nickname = "listKtblData", value = "listKtblData", notes = "Shows KTBL metadata of a resource.", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listKtblData(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setHeader("Access-Control-Allow-Origin", "*");
+			String result = read.readKtblData(node);
+			response().setContentType("application/json");
+			play.Logger.debug("result=" + result);
+			return ok(result);
+		});
+
+	}
+
 	@SuppressWarnings("resource")
 	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listData(@PathParam("pid") String pid) {

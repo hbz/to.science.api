@@ -592,7 +592,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param metadataType (toscience | metadata2)
+	 * @param metadataType (toscience | metadata2 | ktbl)
 	 * @return returns the corresponding data stream
 	 */
 	public String getMetadata(String metadataType) {
