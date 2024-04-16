@@ -533,21 +533,6 @@ public class Read extends RegalAction {
 	}
 
 	/**
-	 * @author I. Kuss
-	 * @param node Der Knoten, von dem die KTBL-Daten gelesen werden sollen
-	 * @return Die KTBL-Daten, genauso, wie sie gePOSTet wurden
-	 */
-	public String readKtblData(Node node) {
-		try {
-			String ktblData = node.getMetadata(archive.fedora.Vocabulary.ktbl);
-			return ktblData;
-
-		} catch (Exception e) {
-			throw new HttpArchiveException(500, e);
-		}
-	}
-
-	/**
 	 * @param node
 	 * @return a webgather configuration
 	 */
