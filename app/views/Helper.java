@@ -657,15 +657,18 @@ public class Helper {
 		try {
 			jNode = new ObjectMapper().readTree(mdStream);
 
-			List<JsonNode> cardNodes = jNode.findParents("prefLabel");
-			for (int i = 0; i < cardNodes.size(); i++) {
-				String card = cardNodes.get(i).findValues("prefLabel").toString() + "; "
-						+ cardNodes.get(i).findValues("role").toString();
-				contribList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " "));
+			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			contribList.add("Array-Größe: " + cardNode.size());
+			for (int i = 0; i < cardNode.size(); i++) {
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+						+ cardNode.get(i).findValues("role").toString();
+				contribList.add(card);
+				// .replace("[", "").replace("]", "").replace("\"", "")
+				// .replace("_", " "));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			contribList.add("Failed to add");
 			e.printStackTrace();
 		}
 		contribList.add("Andres");
