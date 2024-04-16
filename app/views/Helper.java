@@ -655,16 +655,16 @@ public class Helper {
 		List<String> contribList = new ArrayList<>();
 		JsonNode jNode = null;
 		try {
-			jNode = new ObjectMapper().readTree(mdStream);
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue("other");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			contribList.add("Array-Größe: " + cardNode.size());
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
-				contribList.add(card);
-				// .replace("[", "").replace("]", "").replace("\"", "")
-				// .replace("_", " "));
+				contribList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " "));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
