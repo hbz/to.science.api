@@ -1,5 +1,6 @@
 package views;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -7,21 +8,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
 import helper.MyEtikettMaker;
 import models.Gatherconf;
 import models.Globals;
-import helper.ktbl.JsonMdLoader;
+import helper.JsonMdLoader;
 import models.Link;
 import models.Node;
 
@@ -636,9 +640,54 @@ public class Helper {
 	 * @param node
 	 * @return
 	 */
-	public static String getKtblJson(Node node) {
-		JsonMdLoader ktbl = new JsonMdLoader(node, "toscience");
-		return "ktbl-JSON-Stream: " + ktbl.getJsonAsString();
+	public static String getTosJson(Node node) {
+		JsonMdLoader tos = new JsonMdLoader(node, "toscience");
+		return "TOS-JSON-Stream: " + tos.getJsonAsString();
+	}
+
+	/**
+	 * 
+	 * @return List
+	 */
+	public static List<String> getContributors(Node node) {
+		String mdStream = getTosJson(node);
+		ArrayList<String> contribList = new ArrayList<>();
+		JsonNode jNode = null;
+		try {
+			jNode = new ObjectMapper().readTree(mdStream);
+
+			ArrayList<JsonNode> contributorArray =
+					(ArrayList<JsonNode>) jNode.findValues("contributor");
+			for (int i = 0; i < contributorArray.size(); i++) {
+				JsonNode contributor = contributorArray.get(i);
+				String cCard = contributor.get("prefLabel").asText();
+				contribList.add(cCard);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return contribList;
+	}
+
+	public static Map<String, TreeMap<String, String>> getTos(String mdString) {
+		TreeMap<String, String> tos = new TreeMap<>();
+		try {
+			JsonNode otherP = new ObjectMapper().readTree(mdString);
+
+			Iterator<String> jIt = otherP.fieldNames();
+			while (jIt.hasNext()) {
+				String key = jIt.next();
+				JsonNode value = otherP.get(key);
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 
 }

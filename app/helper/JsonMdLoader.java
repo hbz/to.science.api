@@ -1,7 +1,7 @@
 /**
  * 
  */
-package helper.ktbl;
+package helper;
 
 import models.Node;
 
@@ -18,7 +18,8 @@ import java.util.Map;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 /**
- * 
+ * A class that loads Metadata as json from different sources an provide this
+ * metadata in different forms
  */
 public class JsonMdLoader {
 	private String pid;
@@ -26,14 +27,14 @@ public class JsonMdLoader {
 	private Node node;
 
 	/**
-	 * Constructor
+	 * Constructor for getting json metadata from an instance of class Node
 	 * 
 	 * @param node
 	 * @param mdFormat
 	 */
 	public JsonMdLoader(Node node, String mdFormat) {
 		this.node = node;
-		jsonAsString = getJsonMd(mdFormat);
+		jsonAsString = getJsonMdfromNode(mdFormat);
 
 	}
 
@@ -63,6 +64,16 @@ public class JsonMdLoader {
 			play.Logger.error("", e);
 		}
 		return result;
+	}
+
+	/**
+	 * Get a String representation from a metadata file derived from Node.metadata
+	 * 
+	 * @param String fedora's datastream label of the json md file
+	 * @return String json representation
+	 */
+	private String getJsonMdfromNode(String mdFormat) {
+		return node.getMetadata(mdFormat);
 	}
 
 	/**
