@@ -83,11 +83,14 @@
 
 
 @listContributors(contributors:List[String])={
-	<div class="tos_md"><h2>toscience Metadata</h2></div>
 	@for(contributor <- contributors){
-		<div>
-		<p>@contributor</p>
-		</div>
+		<tr class="other">
+			 			<td> 
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id)@models.Globals.rechercheUrlSuffix">
+	                       @contributor
+	                       </a>
+	                       <br/>	</td> 
+	   </tr>	
 	}
 }
 
