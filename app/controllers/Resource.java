@@ -296,40 +296,23 @@ public class Resource extends MyController {
 		});
 	}
 
-        @SuppressWarnings("resource")
-        @ApiOperation(produces = "application/octet-stream", nickname = "listKtblData", value = "listKtblData", notes = "Shows KTBL Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
-        public static Promise<Result> listKtblData(@PathParam("pid") String pid) {
-                return new ReadDataAction().call(pid, node -> {
-                        HttpURLConnection connection = null;
-                        try {
-                                response().setHeader("Access-Control-Allow-Origin", "*");
-                                URL url = new URL(Globals.fedoraIntern + "/objects/" + pid
-                                                + "/datastreams/ktbl/content");
-                                connection = (HttpURLConnection) url.openConnection();
-                                response().setContentType(connection.getContentType());
-                                response().setHeader("Content-Disposition",
-                                                "inline;filename=\"" + node.getFileLabel() + "\"");
-                                return ok(connection.getInputStream());
-                        } catch (FileNotFoundException e) {
-                                throw new HttpArchiveException(404, e);
-                        } catch (MalformedURLException e) {
-                                throw new HttpArchiveException(500, e);
-                        } catch (IOException e) {
-                                throw new HttpArchiveException(500, e);
-                        }
-                });
-        }
-
-
+	/**
+	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus der Fedora.
+	 *
+	 * @author Ingolf Kuss
+	 * @param pid Die PID der Ressource
+	 * @param datastream Der Name des Datenstroms in der Fedora
+	 */
 	@SuppressWarnings("resource")
-	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
-	public static Promise<Result> listData(@PathParam("pid") String pid) {
+	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows datastream of a resource", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listData(@PathParam("pid") String pid,
+			@QueryParam("datastream") String datastream) {
 		return new ReadDataAction().call(pid, node -> {
 			HttpURLConnection connection = null;
 			try {
 				response().setHeader("Access-Control-Allow-Origin", "*");
 				URL url = new URL(Globals.fedoraIntern + "/objects/" + pid
-						+ "/datastreams/data/content");
+						+ "/datastreams/" + datastream + "/content");
 				connection = (HttpURLConnection) url.openConnection();
 				response().setContentType(connection.getContentType());
 				response().setHeader("Content-Disposition",
