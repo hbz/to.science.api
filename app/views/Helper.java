@@ -650,29 +650,27 @@ public class Helper {
 	 * @param node
 	 * @return List
 	 */
-	public static List<String> getContributors(Node node) {
+	public static List<String> getOthers(Node node) {
 		String mdStream = getTosJson(node);
-		List<String> contribList = new ArrayList<>();
+		List<String> othersList = new ArrayList<>();
 		JsonNode jNode = null;
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
 			jNode = jn.findValue("other");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
-			contribList.add("Array-Größe: " + cardNode.size());
+			othersList.add("Array-Größe: " + cardNode.size());
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
-				contribList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " "));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			contribList.add("Failed to add");
 			e.printStackTrace();
 		}
-		contribList.add("Andres");
-		return contribList;
+		return othersList;
 	}
 
 	public static Map<String, TreeMap<String, String>> getTos(String mdString) {

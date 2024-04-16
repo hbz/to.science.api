@@ -10,8 +10,8 @@
 }
 
 @{
-		val contributors:List[String] = Helper.getContributors(node)
-		listContributors(contributors)
+		val others:List[String] = Helper.getOthers(node)
+		listOthers(others)
 }
 
 
@@ -79,18 +79,20 @@
 		case _ => {}
 	}
 	
-</table>
 
-
-@listContributors(contributors:List[String])={
-	@for(contributor <- contributors){
+@listOthers(others:List[String])={
+	@for(other <- others){
 		<tr class="other">
-			 			<td> 
-	                       @contributor
-	                       <br/>	</td> 
+		<td style="display:none;">"75"</td>
+		<td class="field-label other">"Sonstige"</td>
+		<td>@other<br/>	</td> 
 	   </tr>	
 	}
 }
+
+</table>
+
+
 
 @htmlRow(values: Any,key: String)={
 	@key match {
