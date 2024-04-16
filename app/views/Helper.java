@@ -655,6 +655,15 @@ public class Helper {
 		JsonNode jNode = null;
 		try {
 			jNode = new ObjectMapper().readTree(mdStream);
+
+			List<JsonNode> cardNodes = jNode.findParents("prefLabel");
+			for (int i = 0; i < cardNodes.size(); i++) {
+				String card = cardNodes.get(i).findValues("prefLabel").toString()
+						.replace("[", "").replace("]", "") + "; "
+						+ cardNodes.get(i).findValues("role").toString().replace("_", " ")
+								.replace("[", "").replace("]", "");
+			}
+
 			for (JsonNode coNode : jNode.at("/contributor")) {
 				String vCard = coNode.at("/prefLabel").asText();
 				vCard = vCard + coNode.at("/role").asText();
