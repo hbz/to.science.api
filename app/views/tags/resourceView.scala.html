@@ -78,14 +78,17 @@
 		}
 		case _ => {}
 	}
+	
 </table>
 
+
 @listContributors(contributors:List[String])={
-<div class="tos_md"><h2>toscience Metadata</h2>
-@for(contributor <- contributors){
-<p>@contributor</p>
-</div>
-}
+	<div class="tos_md"><h2>toscience Metadata</h2></div>
+	@for(contributor <- contributors){
+		<div>
+		<p>@contributor</p>
+		</div>
+	}
 }
 
 @htmlRow(values: Any,key: String)={

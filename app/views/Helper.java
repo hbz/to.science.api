@@ -642,7 +642,7 @@ public class Helper {
 	 */
 	public static String getTosJson(Node node) {
 		JsonMdLoader tos = new JsonMdLoader(node, "toscience");
-		return "TOS-JSON-Stream: " + tos.getJsonAsString();
+		return tos.getJsonAsString();
 	}
 
 	/**

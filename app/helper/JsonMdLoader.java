@@ -34,7 +34,7 @@ public class JsonMdLoader {
 	 */
 	public JsonMdLoader(Node node, String mdFormat) {
 		this.node = node;
-		jsonAsString = getJsonMdfromNode(mdFormat);
+		jsonAsString = getJsonMd(mdFormat);
 
 	}
 
