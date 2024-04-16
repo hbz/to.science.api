@@ -74,7 +74,7 @@
 	}
 </table>
 
-<div><span class="ktbl_md">view tos source</span></div>
+<span class="ktbl_md">view tos source as json</span><br />
 
 <div class="ktbl_md"><h2>toscience Metadata</h2>
 <p>@Helper.getKtblJson(node)</p>
@@ -170,7 +170,7 @@
 								@for(field <- d){
 								<td colspan="2" class="field-item" 
 									property="@models.Globals.profile.getEtikettByName(key).getUri()">
-								<pre class="@key">@value(field,key).trim</pre></td>
+								<pre class="@key">@value(field,key)</pre></td>
 								}
 					</tr>
 				} case _ =>{} 
@@ -189,7 +189,7 @@
 								<td style="display:none;">@getWeight(key)</td>
 								<td colspan="2" class="field-item @key" 
 									property="@models.Globals.profile.getEtikettByName(key).getUri()">
-								<span class="@key">@value(field,key).trim</span></td>
+								<span class="@key">@value(field,key)</span></td>
 								}
 					</tr>
 				} case _ =>{} 
