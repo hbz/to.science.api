@@ -655,13 +655,10 @@ public class Helper {
 		JsonNode jNode = null;
 		try {
 			jNode = new ObjectMapper().readTree(mdStream);
-
-			ArrayList<JsonNode> contributorArray =
-					(ArrayList<JsonNode>) jNode.findValues("contributor");
-			for (int i = 0; i < contributorArray.size(); i++) {
-				JsonNode contributor = contributorArray.get(i);
-				String cCard = contributor.get("prefLabel").asText();
-				contribList.add(cCard);
+			for (JsonNode coNode : jNode.at("/contributor")) {
+				String vCard = coNode.at("/prefLabel").asText();
+				vCard = vCard + coNode.at("/role").asText();
+				contribList.add(vCard);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
