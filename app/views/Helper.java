@@ -659,7 +659,6 @@ public class Helper {
 			jNode = jn.findValue("other");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
-			othersList.add("Array-Größe: " + cardNode.size());
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
