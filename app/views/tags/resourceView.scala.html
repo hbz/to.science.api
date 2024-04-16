@@ -74,8 +74,9 @@
 	}
 </table>
 
-<h2>KTBL: @Helper.getKtblJson(node)</h2>
-
+<div class="ktbl_md"><h2>KTBL Metadata</h2>
+<p>@Helper.getKtblJson(node)</p>
+</div>
 
 @htmlRow(values: Any,key: String)={
 	@key match {
@@ -167,9 +168,10 @@
 						<td colspan="2" class="field-item"
 							property="@models.Globals.profile.getEtikettByName(key).getUri()">	
 								@for(field <- d){
-								<pre class="@key">@value(field,key)</pre>
+								<td colspan="2" class="field-item" 
+									property="@models.Globals.profile.getEtikettByName(key).getUri()">
+								@value(field,key)</td>
 								}
-						</td>	
 					</tr>
 				} case _ =>{} 
 			}
@@ -182,12 +184,13 @@
 						<td colspan="2" class="field-label @key">@getLabel(key)</td>
 					</tr>
 					<tr>
-						<td colspan="3" class="field-item"
 							property="@models.Globals.profile.getEtikettByName(key).getUri()">	
 								@for(field <- d){
-								<p class="@key">@value(field,key)</p>
+								<td style="display:none;">@getWeight(key)</td>
+								<td colspan="2" class="field-item" 
+									property="@models.Globals.profile.getEtikettByName(key).getUri()">
+								@value(field,key)</td>
 								}
-						</td>							
 					</tr>
 				} case _ =>{} 
 			}
