@@ -168,7 +168,7 @@
 								@for(field <- d){
 								<td colspan="2" class="field-item" 
 									property="@models.Globals.profile.getEtikettByName(key).getUri()">
-								@value(field,key)</td>
+								<span class="@key">@value(field,key)</span></td>
 								}
 					</tr>
 				} case _ =>{} 
@@ -185,9 +185,9 @@
 							property="@models.Globals.profile.getEtikettByName(key).getUri()">	
 								@for(field <- d){
 								<td style="display:none;">@getWeight(key)</td>
-								<td colspan="2" class="field-item" 
+								<td colspan="2" class="field-item @key" 
 									property="@models.Globals.profile.getEtikettByName(key).getUri()">
-								@value(field,key)</td>
+								<span class="@key">@value(field,key)</span></td>
 								}
 					</tr>
 				} case _ =>{} 
