@@ -658,16 +658,10 @@ public class Helper {
 
 			List<JsonNode> cardNodes = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNodes.size(); i++) {
-				String card = cardNodes.get(i).findValues("prefLabel").toString()
-						.replace("[", "").replace("]", "") + "; "
-						+ cardNodes.get(i).findValues("role").toString().replace("_", " ")
-								.replace("[", "").replace("]", "");
-			}
-
-			for (JsonNode coNode : jNode.at("/contributor")) {
-				String vCard = coNode.at("/prefLabel").asText();
-				vCard = vCard + coNode.at("/role").asText();
-				contribList.add(vCard);
+				String card = cardNodes.get(i).findValues("prefLabel").toString() + "; "
+						+ cardNodes.get(i).findValues("role").toString();
+				contribList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " "));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
