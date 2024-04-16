@@ -732,8 +732,9 @@ public class Read extends RegalAction {
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					entries.put("crawlControllerState",
 							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
-							? "" : WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlExitStatus",
+							WpullCrawl.getCrawlExitStatus(node) < 0 ? ""
+									: WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -

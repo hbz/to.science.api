@@ -296,15 +296,23 @@ public class Resource extends MyController {
 		});
 	}
 
+	/**
+	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus der Fedora.
+	 *
+	 * @author Ingolf Kuss
+	 * @param pid Die PID der Ressource
+	 * @param datastream Der Name des Datenstroms in der Fedora
+	 */
 	@SuppressWarnings("resource")
-	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows Data of a resource", response = play.mvc.Result.class, httpMethod = "GET")
-	public static Promise<Result> listData(@PathParam("pid") String pid) {
+	@ApiOperation(produces = "application/octet-stream", nickname = "listData", value = "listData", notes = "Shows datastream of a resource", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listData(@PathParam("pid") String pid,
+			@QueryParam("datastream") String datastream) {
 		return new ReadDataAction().call(pid, node -> {
 			HttpURLConnection connection = null;
 			try {
 				response().setHeader("Access-Control-Allow-Origin", "*");
 				URL url = new URL(Globals.fedoraIntern + "/objects/" + pid
-						+ "/datastreams/data/content");
+						+ "/datastreams/" + datastream + "/content");
 				connection = (HttpURLConnection) url.openConnection();
 				response().setContentType(connection.getContentType());
 				response().setHeader("Content-Disposition",
