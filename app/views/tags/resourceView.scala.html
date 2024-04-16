@@ -74,10 +74,10 @@
 	}
 </table>
 
+@for(contributor <- Helper.getContributors(node)){
 <div>
 <span class="ktbl_md">view tos source as json</span>
 <div class="ktbl_md"><h2>toscience Metadata</h2>
-@for(contributor <- Helper.getContributors(node)){
 <p>@contributor</p>
 </div></div>
 }
