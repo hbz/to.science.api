@@ -637,6 +637,8 @@ public class Helper {
 	}
 
 	/**
+	 * Get complete toscience.json as String
+	 * 
 	 * @param node
 	 * @return
 	 */
@@ -646,6 +648,18 @@ public class Helper {
 	}
 
 	/**
+	 * Get complete toscience.json as String
+	 * 
+	 * @param node
+	 * @return
+	 */
+	public static String getKtblJson(Node node) {
+		JsonMdLoader ktbl = new JsonMdLoader(node.getPid(), "toscience");
+		return ktbl.getJsonAsString();
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
 	 * 
 	 * @param node
 	 * @return List
@@ -672,23 +686,23 @@ public class Helper {
 		return othersList;
 	}
 
-	public static Map<String, TreeMap<String, String>> getTos(String mdString) {
-		TreeMap<String, String> tos = new TreeMap<>();
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getLivestockCategory(Node node) {
+		String mdStream = getKtblJson(node);
+		String livestockCat = null;
 		try {
-			JsonNode otherP = new ObjectMapper().readTree(mdString);
-
-			Iterator<String> jIt = otherP.fieldNames();
-			while (jIt.hasNext()) {
-				String key = jIt.next();
-				JsonNode value = otherP.get(key);
-			}
-
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			livestockCat = jn.findValue("livestock_category").toString();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
-
+		return livestockCat;
 	}
 
 }

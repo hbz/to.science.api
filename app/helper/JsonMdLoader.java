@@ -4,18 +4,17 @@
 package helper;
 
 import models.Node;
+import models.Globals;
 
-import static archive.fedora.Vocabulary.metadata1;
-import static archive.fedora.Vocabulary.ktbl;
+import play.mvc.Http.Response;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-
-import org.eclipse.rdf4j.rio.RDFFormat;
 
 /**
  * A class that loads Metadata as json from different sources an provide this
@@ -24,17 +23,33 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 public class JsonMdLoader {
 	private String pid;
 	private String jsonAsString;
+	private InputStream contentStream;
 	private Node node;
 
 	/**
-	 * Constructor for getting json metadata from an instance of class Node
+	 * Constructor for getting json metadata from an instance of class Node. A
+	 * minor set of MDFormats is applicable for this only
 	 * 
 	 * @param node
 	 * @param mdFormat
 	 */
 	public JsonMdLoader(Node node, String mdFormat) {
 		this.node = node;
-		jsonAsString = getJsonMd(mdFormat);
+		contentStream = getMdContent(node, mdFormat);
+		jsonAsString = getJsonMd(contentStream);
+
+	}
+
+	/**
+	 * Constructor for getting json metadata from an instance of class Node. A
+	 * minor set of MDFormats is applicable for this only
+	 * 
+	 * @param node
+	 * @param mdFormat
+	 */
+	public JsonMdLoader(String objPid, String mdFormat) {
+		contentStream = getMdContent(objPid, mdFormat);
+		jsonAsString = getJsonMd(contentStream);
 
 	}
 
@@ -45,12 +60,11 @@ public class JsonMdLoader {
 	 * @param String fedora's datastream label of the json md file
 	 * @return String json representation
 	 */
-	private String getJsonMd(String mdFormat) {
+	private String getJsonMd(InputStream mdContentStream) {
 		String result = null;
 		try {
-			InputStream stream = new ByteArrayInputStream(
-					node.getMetadata(mdFormat).getBytes(StandardCharsets.UTF_8));
-			InputStreamReader InStReader = new InputStreamReader(stream, "UTF-8");
+			InputStreamReader InStReader =
+					new InputStreamReader(mdContentStream, "UTF-8");
 			BufferedReader bReader = new BufferedReader(InStReader);
 			StringBuilder jsonStringBuilder = new StringBuilder();
 
@@ -60,20 +74,47 @@ public class JsonMdLoader {
 			}
 			result = jsonStringBuilder.toString();
 		} catch (Exception e) {
-			play.Logger.warn(node.getPid() + " has no " + mdFormat + " Metadata!");
-			play.Logger.error("", e);
+			play.Logger.warn("InputStream generation for " + node.getPid()
+					+ " MD-Content failed!");
 		}
 		return result;
 	}
 
+	private InputStream getMdContent(Node node, String mdFormat) {
+		try {
+			InputStream stream = new ByteArrayInputStream(
+					node.getMetadata(mdFormat).getBytes(StandardCharsets.UTF_8));
+			return stream;
+		} catch (Exception e) {
+			play.Logger
+					.warn(node.getPid() + "does not return " + mdFormat + " Metadata!");
+		}
+		return null;
+	}
+
 	/**
-	 * Get a String representation from a metadata file derived from Node.metadata
+	 * Method calls to.science API to get MD content from MD datastream
 	 * 
-	 * @param String fedora's datastream label of the json md file
-	 * @return String json representation
+	 * @param objPid
+	 * @param mdString
+	 * @return
 	 */
-	private String getJsonMdfromNode(String mdFormat) {
-		return node.getMetadata(mdFormat);
+	private InputStream getMdContent(String objPid, String mdFormat) {
+		HttpURLConnection connection = null;
+		Response response = new Response();
+		try {
+			response.setHeader("Access-Control-Allow-Origin", "*");
+			URL url = new URL(Globals.protocol + Globals.server + "/resource/" + pid
+					+ "/datastreams/" + mdFormat + "/content");
+			connection = (HttpURLConnection) url.openConnection();
+			response.setContentType(connection.getContentType());
+			response.setHeader("Content-Disposition",
+					"inline;filename=\"" + node.getFileLabel() + "\"");
+			return connection.getInputStream();
+		} catch (Exception e) {
+			play.Logger.error("Connection failed");
+		}
+		return null;
 	}
 
 	/**
@@ -81,27 +122,6 @@ public class JsonMdLoader {
 	 */
 	public String getJsonAsString() {
 		return jsonAsString;
-	}
-
-	/**
-	 * @return the jsonAsString
-	 */
-	public String getJsonAsString(String mdFormat) {
-		return getJsonMd(mdFormat);
-	}
-
-	/**
-	 * @return the node
-	 */
-	public Node getNode() {
-		return node;
-	}
-
-	/**
-	 * @param node the node to set
-	 */
-	public void setNode(Node node) {
-		this.node = node;
 	}
 
 }
