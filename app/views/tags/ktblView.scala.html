@@ -77,3 +77,17 @@
 
 }
 
+@if(views.Helper.getKtblArrayValues(node, "relatedDatasets")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Test Design</td>
+	<td class="field-item">
+		@for(rDS <- views.Helper.getKtblArrayValues(node, "relatedDatasets"){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+}
+

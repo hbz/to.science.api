@@ -1,6 +1,9 @@
 package views;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -822,4 +825,51 @@ public class Helper {
 		}
 		return value;
 	}
+
+	public static List<String> getEmissionReductionMethods(Node node) {
+		String mdStream = getKtblJson(node);
+		List<String> othersList = new ArrayList<>();
+		JsonNode jNode = null;
+		try {
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue("emision_reduction_methods");
+
+			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			for (int i = 0; i < cardNode.size(); i++) {
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+						+ cardNode.get(i).findValues("role").toString();
+				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " "));
+			}
+		} catch (IOException e) {
+			play.Logger.warn(e.getMessage());
+		}
+		return othersList;
+	}
+
+	/**
+	 * @param node
+	 * @param key
+	 * @return
+	 */
+	public static List<String> getKtblArrayValues(Node node, String key) {
+		String mdStream = getKtblJson(node);
+		List<String> valueList = new ArrayList<>();
+		if (mdStream != null) {
+			try {
+				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
+				JsonNode jn = jnAll.findValue(key);
+				Iterator<JsonNode> jIt = jn.elements();
+				while (jIt.hasNext()) {
+					JsonNode nextNode = jIt.next();
+					valueList.add(nextNode.asText());
+
+				}
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return valueList;
+	}
+
 }
