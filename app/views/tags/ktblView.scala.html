@@ -22,5 +22,57 @@
 	</td>
 	</tr>
 	}
+
+@if(views.Helper.getLivestockProduction(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Livestock Production</td>
+	<td class="field-item">
+		@views.Helper.getLivestockProduction(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getHousingSystems(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Housing Systems</td>
+	<td class="field-item">
+		@views.Helper.getHousingSystems(node:Node)
+	</td>
+	</tr>
+	}
+	
+@if(views.Helper.getVentilationSystem(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Ventilation System</td>
+	<td class="field-item">
+		@views.Helper.getVentilationSystem(node:Node)
+	</td>
+	</tr>
+	}	
+
+@if(views.Helper.getProjectTitle(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Housing Systems</td>
+	<td class="field-item">
+		@views.Helper.getProjectTitle(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getTestDesign(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Test Design</td>
+	<td class="field-item">
+		@views.Helper.getTestDesign(node:Node)
+	</td>
+	</tr>
+	}
+
+
 }
 

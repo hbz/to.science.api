@@ -697,8 +697,7 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				livestockCat =
-						"Testlauf " + jn.findValue("livestock_category").toString();
+				livestockCat = findValue("livestock_category").toString();
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
@@ -706,4 +705,104 @@ public class Helper {
 		return livestockCat;
 	}
 
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getHousingSystems(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("housing_systems").toString().replace("_", " ");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getTestDesign(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("test_design").toString().replace("_", " ");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getLivestockProduction(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value =
+						jn.findValue("livestock_production").toString().replace("_", " ");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getVentilationSystem(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("ventilation_system").toString().replace("_", " ");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getProjectTitle(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("project_title").toString().replace("_", " ");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
 }
