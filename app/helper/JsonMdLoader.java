@@ -102,6 +102,7 @@ public class JsonMdLoader {
 	private InputStream getMdContent(String objPid, String mdFormat) {
 		HttpURLConnection connection = null;
 		Response response = new Response();
+		URL url = null;
 		try {
 			response.setHeader("Access-Control-Allow-Origin", "*");
 			URL url = new URL(Globals.protocol + Globals.server + "/resource/" + pid
@@ -112,7 +113,7 @@ public class JsonMdLoader {
 					"inline;filename=\"" + node.getFileLabel() + "\"");
 			return connection.getInputStream();
 		} catch (Exception e) {
-			play.Logger.error("Connection failed");
+			play.Logger.error("Connection to " + url.toString() + " failed");
 		}
 		return null;
 	}
