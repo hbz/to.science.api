@@ -686,6 +686,18 @@ public class Helper {
 	}
 
 	/**
+	 * Tests if Metadata Stream is available from Fedora subsystem
+	 * 
+	 * @param pid
+	 * @param mdFormat
+	 * @return
+	 */
+	public static boolean mdStreamExists(String pid, String mdFormat) {
+		JsonMdLoader jMd = new JsonMdLoader(pid, mdFormat);
+		return jMd.datastreamExists();
+	}
+
+	/**
 	 * Get content of Json other-Array from toscience.json
 	 * 
 	 * @param node
@@ -697,7 +709,8 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				livestockCat = jn.findValue("livestock_category").toString();
+				livestockCat = jn.findValue("livestock_category").toString()
+						.replace("_", " ").replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
@@ -717,7 +730,8 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				value = jn.findValue("housing_systems").toString().replace("_", " ");
+				value = jn.findValue("housing_systems").toString().replace("_", " ")
+						.replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
@@ -737,7 +751,8 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				value = jn.findValue("test_design").toString().replace("_", " ");
+				value = jn.findValue("test_design").toString().replace("_", " ")
+						.replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
@@ -757,8 +772,8 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				value =
-						jn.findValue("livestock_production").toString().replace("_", " ");
+				value = jn.findValue("livestock_production").toString()
+						.replace("_", " ").replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
@@ -778,7 +793,8 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				value = jn.findValue("ventilation_system").toString().replace("_", " ");
+				value = jn.findValue("ventilation_system").toString().replace("_", " ")
+						.replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
@@ -798,7 +814,8 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				value = jn.findValue("project_title").toString().replace("_", " ");
+				value = jn.findValue("project_title").toString().replace("_", " ")
+						.replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}

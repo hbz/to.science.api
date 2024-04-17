@@ -3,6 +3,7 @@
 @import models.Node
 @(node:Node,hit:Map[String,Object],context:List[String])
 
+@if(views.Helper.datastreamExists(node.getPid(), "ktbl")){
 <h1>KTBL-Data</h1>
 <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
@@ -56,7 +57,7 @@
 @if(views.Helper.getProjectTitle(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Housing Systems</td>
+	<td class="field-label">Project Title</td>
 	<td class="field-item">
 		@views.Helper.getProjectTitle(node:Node)
 	</td>
@@ -72,7 +73,7 @@
 	</td>
 	</tr>
 	}
-
+}
 
 }
 
