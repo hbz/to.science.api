@@ -105,7 +105,7 @@ public class JsonMdLoader {
 		URL url = null;
 		try {
 			response.setHeader("Access-Control-Allow-Origin", "*");
-			URL url = new URL(Globals.protocol + Globals.server + "/resource/" + pid
+			url = new URL(Globals.protocol + Globals.server + "/resource/" + pid
 					+ "/datastreams/" + mdFormat + "/content");
 			connection = (HttpURLConnection) url.openConnection();
 			response.setContentType(connection.getContentType());

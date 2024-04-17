@@ -694,7 +694,7 @@ public class Helper {
 	 */
 	public static String getLivestockCategory(Node node) {
 		String mdStream = getKtblJson(node);
-		String livestockCat = null;
+		String livestockCat = "teste";
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
 			livestockCat =
