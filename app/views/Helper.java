@@ -654,7 +654,7 @@ public class Helper {
 	 * @return
 	 */
 	public static String getKtblJson(Node node) {
-		JsonMdLoader ktbl = new JsonMdLoader(node.getPid(), "toscience");
+		JsonMdLoader ktbl = new JsonMdLoader(node.getPid(), "ktbl");
 		return ktbl.getJsonAsString();
 	}
 

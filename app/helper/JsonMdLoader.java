@@ -44,8 +44,8 @@ public class JsonMdLoader {
 	 * Constructor for getting json metadata from an instance of class Node. A
 	 * minor set of MDFormats is applicable for this only
 	 * 
-	 * @param node
-	 * @param mdFormat
+	 * @param objPid the pid of the to.science Object
+	 * @param mdFormat the MD format
 	 */
 	public JsonMdLoader(String objPid, String mdFormat) {
 		contentStream = getMdContent(objPid, mdFormat);
