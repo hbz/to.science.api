@@ -3,3 +3,4 @@
 @(hit: Node)
 
 @tags.resourceView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+@tags.ktblView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
