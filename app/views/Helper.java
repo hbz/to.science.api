@@ -680,8 +680,7 @@ public class Helper {
 						.replace("_", " "));
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			play.Logger.warn(e.getMessage());
 		}
 		return othersList;
 	}
@@ -700,8 +699,7 @@ public class Helper {
 			livestockCat =
 					"Testlauf " + jn.findValue("livestock_category").toString();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			play.Logger.warn(e.getMessage());
 		}
 		return livestockCat;
 	}

@@ -21,10 +21,10 @@ import java.nio.charset.StandardCharsets;
  * metadata in different forms
  */
 public class JsonMdLoader {
-	private String pid;
-	private String jsonAsString = "";
-	private InputStream contentStream;
-	private Node node;
+	private String pid = null;
+	private String mdFormat = null;
+	private InputStream contentStream = null;
+	private Node node = null;;
 
 	/**
 	 * Constructor for getting json metadata from an instance of class Node. A
@@ -35,9 +35,7 @@ public class JsonMdLoader {
 	 */
 	public JsonMdLoader(Node node, String mdFormat) {
 		this.node = node;
-		contentStream = getMdContent(node, mdFormat);
-		jsonAsString = getJsonMd(contentStream);
-
+		this.mdFormat = mdFormat;
 	}
 
 	/**
@@ -48,9 +46,8 @@ public class JsonMdLoader {
 	 * @param mdFormat the MD format
 	 */
 	public JsonMdLoader(String objPid, String mdFormat) {
-		contentStream = getMdContent(objPid, mdFormat);
-		jsonAsString = getJsonMd(contentStream);
-
+		this.pid = objPid;
+		this.mdFormat = mdFormat;
 	}
 
 	/**
@@ -118,7 +115,13 @@ public class JsonMdLoader {
 	 * @return the jsonAsString
 	 */
 	public String getJsonAsString() {
-		return jsonAsString;
+		if (pid != null) {
+			contentStream = getMdContent(pid, mdFormat);
+		}
+		if (node != null) {
+			contentStream = getMdContent(node, mdFormat);
+		}
+		return getJsonMd(contentStream);
 	}
 
 }
