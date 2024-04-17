@@ -1,0 +1,24 @@
+@import views.Helper
+@import views.ViewerInfo
+@import models.Node
+@(node:Node,hit:Map[String,Object],context:List[String])
+
+<table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
+<thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead>
+
+@ktblRow(node)
+
+
+@ktblRow(value:Any)={
+@if(views.Helper.getLivestockCategory(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Livestock Category</td>
+	<td class="field-item">
+		@views.Helper.getLivestockCategory(node:Node)
+	</td>
+	</tr>
+	}
+}
+
+</table>
