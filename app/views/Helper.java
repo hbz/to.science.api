@@ -697,7 +697,8 @@ public class Helper {
 		String livestockCat = null;
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
-			livestockCat = jn.findValue("livestock_category").toString();
+			livestockCat =
+					"Testlauf " + jn.findValue("livestock_category").toString();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
