@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class JsonMdLoader {
 	private String pid;
-	private String jsonAsString;
+	private String jsonAsString = "";
 	private InputStream contentStream;
 	private Node node;
 
@@ -105,8 +105,8 @@ public class JsonMdLoader {
 		URL url = null;
 		try {
 			response.setHeader("Access-Control-Allow-Origin", "*");
-			url = new URL(Globals.protocol + Globals.server + "/resource/" + objPid
-					+ "/" + mdFormat);
+			url = new URL(Globals.fedoraIntern + "/" + objPid + "/datastreams/"
+					+ mdFormat + "/content");
 			connection = (HttpURLConnection) url.openConnection();
 			response.setContentType(connection.getContentType());
 			response.setHeader("Content-Disposition",
