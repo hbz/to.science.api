@@ -692,14 +692,16 @@ public class Helper {
 	 * @return List
 	 */
 	public static String getLivestockCategory(Node node) {
-		String mdStream = getKtblJson(node);
 		String livestockCat = "teste";
-		try {
-			JsonNode jn = new ObjectMapper().readTree(mdStream);
-			livestockCat =
-					"Testlauf " + jn.findValue("livestock_category").toString();
-		} catch (IOException e) {
-			play.Logger.warn(e.getMessage());
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				livestockCat =
+						"Testlauf " + jn.findValue("livestock_category").toString();
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
 		}
 		return livestockCat;
 	}

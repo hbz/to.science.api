@@ -24,7 +24,7 @@ public class JsonMdLoader {
 	private String pid = null;
 	private String mdFormat = null;
 	private InputStream contentStream = null;
-	private Node node = null;;
+	private Node node = null;
 
 	/**
 	 * Constructor for getting json metadata from an instance of class Node. A
@@ -48,6 +48,23 @@ public class JsonMdLoader {
 	public JsonMdLoader(String objPid, String mdFormat) {
 		this.pid = objPid;
 		this.mdFormat = mdFormat;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean datastreamExists() {
+		boolean dsExist = false;
+		if (pid != null) {
+			contentStream = getMdContent(pid, mdFormat);
+		}
+		if (node != null) {
+			contentStream = getMdContent(node, mdFormat);
+		}
+		if (contentStream != null) {
+			dsExist = true;
+		}
+		return dsExist;
 	}
 
 	/**
@@ -115,13 +132,10 @@ public class JsonMdLoader {
 	 * @return the jsonAsString
 	 */
 	public String getJsonAsString() {
-		if (pid != null) {
-			contentStream = getMdContent(pid, mdFormat);
+		if (datastreamExists()) {
+			return getJsonMd(contentStream);
 		}
-		if (node != null) {
-			contentStream = getMdContent(node, mdFormat);
-		}
-		return getJsonMd(contentStream);
+		return null;
 	}
 
 }
