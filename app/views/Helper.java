@@ -826,27 +826,6 @@ public class Helper {
 		return value;
 	}
 
-	public static List<String> getEmissionReductionMethods(Node node) {
-		String mdStream = getKtblJson(node);
-		List<String> othersList = new ArrayList<>();
-		JsonNode jNode = null;
-		try {
-			JsonNode jn = new ObjectMapper().readTree(mdStream);
-			jNode = jn.findValue("emision_reduction_methods");
-
-			List<JsonNode> cardNode = jNode.findParents("prefLabel");
-			for (int i = 0; i < cardNode.size(); i++) {
-				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
-						+ cardNode.get(i).findValues("role").toString();
-				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " "));
-			}
-		} catch (IOException e) {
-			play.Logger.warn(e.getMessage());
-		}
-		return othersList;
-	}
-
 	/**
 	 * @param node
 	 * @param key
@@ -862,7 +841,7 @@ public class Helper {
 				Iterator<JsonNode> jIt = jn.elements();
 				while (jIt.hasNext()) {
 					JsonNode nextNode = jIt.next();
-					valueList.add(nextNode.asText());
+					valueList.add(nextNode.asText().replace("_", " ").replace("\"", ""));
 
 				}
 			} catch (IOException e) {
