@@ -697,7 +697,7 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				livestockCat = findValue("livestock_category").toString();
+				livestockCat = jn.findValue("livestock_category").toString();
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
