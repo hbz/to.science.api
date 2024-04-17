@@ -101,16 +101,12 @@ public class JsonMdLoader {
 	 */
 	private InputStream getMdContent(String objPid, String mdFormat) {
 		HttpURLConnection connection = null;
-		Response response = new Response();
 		URL url = null;
 		try {
-			response.setHeader("Access-Control-Allow-Origin", "*");
 			url = new URL(Globals.fedoraIntern + "/objects/" + objPid
 					+ "/datastreams/" + mdFormat + "/content");
 			connection = (HttpURLConnection) url.openConnection();
-			response.setContentType(connection.getContentType());
-			response.setHeader("Content-Disposition",
-					"inline;filename=\"" + node.getFileLabel() + "\"");
+			connection.connect();
 			return connection.getInputStream();
 		} catch (Exception e) {
 			play.Logger.error("Connection to " + url.toString() + " failed");
