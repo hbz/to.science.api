@@ -105,8 +105,8 @@ public class JsonMdLoader {
 		URL url = null;
 		try {
 			response.setHeader("Access-Control-Allow-Origin", "*");
-			url = new URL(Globals.fedoraIntern + "/" + objPid + "/datastreams/"
-					+ mdFormat + "/content");
+			url = new URL(Globals.fedoraIntern + "/objects/" + objPid
+					+ "/datastreams/" + mdFormat + "/content");
 			connection = (HttpURLConnection) url.openConnection();
 			response.setContentType(connection.getContentType());
 			response.setHeader("Content-Disposition",
