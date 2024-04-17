@@ -692,7 +692,7 @@ public class Helper {
 	 * @return List
 	 */
 	public static String getLivestockCategory(Node node) {
-		String livestockCat = "teste";
+		String livestockCat = null;
 		String mdStream = getKtblJson(node);
 		if (mdStream != null) {
 			try {
