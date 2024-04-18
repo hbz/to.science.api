@@ -120,6 +120,7 @@ public class JsonConverter {
 		mainSubjectOfTheResource = subject;
 		collect(g);
 		Map<String, Object> result = createMap(g);
+		play.Logger.debug("result=" + result.toString());
 		result.put("@context", context);
 		return result;
 	}

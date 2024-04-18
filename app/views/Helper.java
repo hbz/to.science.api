@@ -1,5 +1,9 @@
 package views;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -7,20 +11,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.wordnik.swagger.core.util.JsonUtil;
 
 import actions.Read;
 import helper.MyEtikettMaker;
 import models.Gatherconf;
 import models.Globals;
+import helper.JsonMdLoader;
 import models.Link;
 import models.Node;
 
@@ -187,7 +195,7 @@ public class Helper {
 					}
 					String sourceId = c.at("/source/0/@id").asText();
 					String source = c.at("/source/0/label").asText();
-			
+
 					String notation = c.at("/notation").asText();
 
 					if (uri == null || uri.isEmpty()) {
@@ -630,4 +638,253 @@ public class Helper {
 			return value;
 		return null;
 	}
+
+	/**
+	 * Get complete toscience.json as String
+	 * 
+	 * @param node
+	 * @return
+	 */
+	public static String getTosJson(Node node) {
+		JsonMdLoader tos = new JsonMdLoader(node, "toscience");
+		return tos.getJsonAsString();
+	}
+
+	/**
+	 * Get complete toscience.json as String
+	 * 
+	 * @param node
+	 * @return
+	 */
+	public static String getKtblJson(Node node) {
+		JsonMdLoader ktbl = new JsonMdLoader(node.getPid(), "ktbl");
+		return ktbl.getJsonAsString();
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static List<String> getOthers(Node node) {
+		String mdStream = getTosJson(node);
+		List<String> othersList = new ArrayList<>();
+		JsonNode jNode = null;
+		try {
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue("other");
+
+			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			for (int i = 0; i < cardNode.size(); i++) {
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+						+ cardNode.get(i).findValues("role").toString();
+				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " "));
+			}
+		} catch (IOException e) {
+			play.Logger.warn(e.getMessage());
+		}
+		return othersList;
+	}
+
+	/**
+	 * Tests if Metadata Stream is available from Fedora subsystem
+	 * 
+	 * @param pid
+	 * @param mdFormat
+	 * @return
+	 */
+	public static boolean mdStreamExists(String pid, String mdFormat) {
+		JsonMdLoader jMd = new JsonMdLoader(pid, mdFormat);
+		return jMd.datastreamExists();
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getLivestockCategory(Node node) {
+		String livestockCat = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				livestockCat = jn.findValue("livestock_category").toString()
+						.replace("_", " ").replace("\"", "");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return livestockCat;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getHousingSystems(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("housing_systems").toString().replace("_", " ")
+						.replace("\"", "");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getTestDesign(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("test_design").toString().replace("_", " ")
+						.replace("\"", "");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getLivestockProduction(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("livestock_production").toString()
+						.replace("_", " ").replace("\"", "");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getVentilationSystem(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("ventilation_system").toString().replace("_", " ")
+						.replace("\"", "");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static String getProjectTitle(Node node) {
+		String value = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				value = jn.findValue("project_title").toString().replace("_", " ")
+						.replace("\"", "");
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * @param node
+	 * @param key
+	 * @return
+	 */
+	public static List<String> getKtblArrayValues(Node node, String key) {
+		String mdStream = getKtblJson(node);
+		List<String> valueList = new ArrayList<>();
+		if (mdStream != null) {
+			try {
+				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
+				JsonNode jn = jnAll.findValue(key);
+				Iterator<JsonNode> jIt = jn.elements();
+				while (jIt.hasNext()) {
+					JsonNode nextNode = jIt.next();
+					valueList.add(nextNode.asText().replace("_", " ").replace("\"", ""));
+
+				}
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return valueList;
+	}
+
+	/**
+	 * @param node
+	 * @param key
+	 * @return
+	 */
+	public static List<String> getKtblEmissions(Node node, String key) {
+		String mdStream = getKtblJson(node);
+		List<String> valueList = new ArrayList<>();
+		if (mdStream != null) {
+			try {
+				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
+				JsonNode jn = jnAll.findValue(key);
+				Iterator<JsonNode> jIt = jn.elements();
+				while (jIt.hasNext()) {
+					JsonNode nextNode = jIt.next();
+					valueList.add(nextNode.asText().toUpperCase().replace("_", " ")
+							.replace("\"", "").replace("3", "₃").replace("2", "₂")
+							.replace("4", "₄"));
+
+				}
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return valueList;
+	}
+
+	/**
+	 * @param mdStream
+	 * @return
+	 */
+	public static String trimText(Object mdStream) {
+
+		return mdStream.toString().trim().replace("&quot;", "\"");
+	}
+
 }

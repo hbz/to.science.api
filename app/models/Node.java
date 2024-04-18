@@ -65,7 +65,7 @@ public class Node implements java.io.Serializable {
 	 */
 	public DublinCoreData dublinCoreData = new DublinCoreData();
 
-	private HashMap<String, String> metadataFile = new HashMap();
+	private HashMap<String, String> metadataFile = new HashMap<>();
 	private String seqFile = null;
 	private String confFile = null;
 	private String urlHistFile = null;
@@ -75,7 +75,7 @@ public class Node implements java.io.Serializable {
 	private List<Link> links = new Vector<Link>();
 	private List<Transformer> transformer = new Vector<Transformer>();
 
-	private HashMap<String, String> metadata = new HashMap();
+	private HashMap<String, String> metadata = new HashMap<>();
 	private String seq = null;
 	private String conf = null;
 	private String urlHist = null;
@@ -592,7 +592,7 @@ public class Node implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param metadataType (toscience | metadata2)
+	 * @param metadataType (toscience | metadata2 | ktbl)
 	 * @return returns the corresponding data stream
 	 */
 	public String getMetadata(String metadataType) {
