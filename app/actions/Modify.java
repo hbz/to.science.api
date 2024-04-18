@@ -37,8 +37,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.inject.Inject;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
@@ -48,6 +51,8 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -67,12 +72,20 @@ import helper.DataciteClient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.MyEtikettMaker;
+import helper.RdfHelper;
+import helper.ToscienceHelper;
 import helper.URN;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
 import models.Globals;
 import models.Node;
 import models.ToScienceObject;
+import play.libs.F;
+import play.libs.ws.WSRequest;
+import play.libs.ws.WSResponse;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.mvc.Http.Request;
 
 /**
  * @author Jan Schnasse
@@ -265,6 +278,44 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
+		/**
+		 * 1. toscienceJson
+		 */
+
+		try {
+			JSONObject toscienceJson = null;
+			play.Logger.debug("node.getContentType()= " + node.getContentType());
+			if (!node.getContentType().contains("file")
+					&& !node.getContentType().contains("part")) {
+
+				play.Logger.debug("toscienceJson will be mapped");
+
+				RDFFormat format = RDFFormat.NTRIPLES;
+				Map<String, Object> rdf = RdfHelper.getRdfAsMap(node, format, content);
+
+				play.Logger.debug("rdf=" + rdf.toString());
+				toscienceJson = new JSONObject(new JSONObject(rdf).toString());
+
+				play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+
+				toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
+
+				play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+
+				updateMetadataJson(node, toscienceJson.toString());
+				play.Logger
+						.debug("toscience from Node" + node.getMetadata("toscience"));
+				play.Logger.debug("Done toscienceJson Mapping");
+			}
+		} catch (JSONException e) {
+			play.Logger.error("toscience json datastream could not be updated!");
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
+		/**
+		 * 2. METADATA2
+		 */
 		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
 			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
 					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
@@ -272,8 +323,8 @@ public class Modify extends RegalAction {
 			String alephid =
 					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
 			alephid = alephid.replaceAll("#.*", "");
-			content = getLobid2DataAsNtripleString(node, alephid);
-			updateMetadata("metadata2", node, content);
+			String newContent = getLobid2DataAsNtripleString(node, alephid);
+			updateMetadata("metadata2", node, newContent);
 
 			String enrichMessage = Enrich.enrichMetadata2(node);
 			return pid + " metadata successfully updated, lobidified and enriched! "
@@ -339,9 +390,19 @@ public class Modify extends RegalAction {
 		}
 	}
 
+	/**
+	 * Aktualisiert den Metadata2-Datenstrom einer Ressource auf Basis der
+	 * aktuellen lobid-Daten. Nur, falls sich in lobid etwas geändert hat.
+	 * 
+	 * @author Ingolf Kuss
+	 * @param node Der Node der Ressource
+	 * @param content Der komplette Inhalt des aktuellen Metadata2-Datenstrom (mit
+	 *          der alephid, falls vorhanden)
+	 * @param date Das aktuelle Datum (oder ein Vergleichsdatum)
+	 * @return eine Message
+	 */
 	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdated(Node node,
 			String content, LocalDate date) {
-		StringBuffer msg = new StringBuffer();
 		String pid = node.getPid();
 		if (content == null) {
 			throw new HttpArchiveException(406,
@@ -350,29 +411,61 @@ public class Modify extends RegalAction {
 							+ " Use HTTP DELETE instead.\n");
 		}
 
-		if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
-			String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
-					archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
-					.get(0);
-			String alephid =
-					lobidUri.replaceFirst("http://lobid.org/resource[s]*/", "");
-			alephid = alephid.replaceAll("#.*", "");
-			try {
-				content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
+		try {
+			if (content.contains(archive.fedora.Vocabulary.REL_MAB_527)) {
+				String lobidUri = RdfUtils.findRdfObjects(node.getPid(),
+						archive.fedora.Vocabulary.REL_MAB_527, content, RDFFormat.NTRIPLES)
+						.get(0);
+				String alephid =
+						lobidUri.replaceFirst("http[s]*://lobid.org/resource[s]*/", "");
+				alephid = alephid.replaceAll("#.*", "");
+				play.Logger.debug("alephid=" + alephid);
+				return updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(node,
 						alephid, date);
-				updateMetadata(metadata2, node, content);
-				msg.append(Enrich.enrichMetadata2(node));
-			} catch (NotUpdatedException e) {
-				play.Logger.debug("", e);
-				play.Logger.info(pid + " Not updated. " + e.getMessage());
-				msg.append(pid + " Not updated. " + e.getMessage());
 			}
-			return pid + " metadata successfully updated, lobidified and enriched! "
-					+ msg;
-		} else {
-			return pid + " no updates available. Resource has no AlephId.";
+		} catch (Exception e) {
+			play.Logger
+					.warn("AlmaId zu Pid " + pid + " konnte nicht ermittelt werden!");
+			throw new RuntimeException(e);
 		}
+		return pid + " no updates available. Resource has no Almaid.";
+	}
 
+	/**
+	 * Returns the current HTTP request.
+	 *
+	 * @return the request
+	 */
+	public static Request request() {
+		return Http.Context.current().request();
+	}
+
+	/**
+	 * Aktualisiert den Metadata2-Datenstrom einer Ressource auf Basis der
+	 * aktuellen lobid-Daten. Nur, falls sich in lobid etwas geändert hat.
+	 * 
+	 * @author Ingolf Kuss
+	 * @param node Der Node der Ressource
+	 * @param alephid die Alephid der Ressource
+	 * @param date Das aktuelle Datum (oder ein Vergleichsdatum)
+	 * @return eine Message
+	 */
+	public String updateLobidify2AndEnrichMetadataIfRecentlyUpdatedByAlephid(
+			Node node, String alephid, LocalDate date) {
+		StringBuffer message = new StringBuffer();
+		String pid = node.getPid();
+		String content = "";
+		try {
+			content = getLobid2DataAsNtripleStringIfResourceHasRecentlyChanged(node,
+					alephid, date);
+			updateMetadata(metadata2, node, content);
+			message.append(Enrich.enrichMetadata2(node));
+		} catch (NotUpdatedException e) {
+			play.Logger.info(pid + " Not updated. " + e.getMessage());
+			message.append(pid + " Not updated. " + e.getMessage());
+		}
+		return pid + " metadata successfully updated, lobidified and enriched! "
+				+ message;
 	}
 
 	public String rewriteContent(String content, String pid) {
@@ -471,7 +564,7 @@ public class Modify extends RegalAction {
 			String predicate = s.getPredicate().stringValue();
 			if (predicate.equals("http://purl.org/dc/terms/modified")) {
 				LocalDate date = LocalDate.parse(s.getObject().stringValue(),
-						DateTimeFormatter.ofPattern("yyyyMMdd"));
+						DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 				return date;
 			}
 		}
@@ -510,16 +603,18 @@ public class Modify extends RegalAction {
 			String accept = "text/turtle";
 			Collection<Statement> graph =
 					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
+			String almaid = RdfUtils.getAlmaId(graph, alephid);
+			String lobidUriAlmaId = "http://lobid.org/resources/" + almaid + "#!";
 			ValueFactory f = RdfUtils.valueFactory;
-			;
 			Statement parallelEditionStatement = f.createStatement(f.createIRI(pid),
 					f.createIRI(archive.fedora.Vocabulary.REL_MAB_527),
-					f.createIRI(lobidUri));
+					f.createIRI(lobidUriAlmaId));
 			graph.add(parallelEditionStatement);
 			tryToImportOrderingFromLobidData2(node, graph, f);
 			tryToGetTypeFromLobidData2(node, graph, f);
 			return RdfUtils.graphToString(
-					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
+					RdfUtils.rewriteSubject(lobidUriAlmaId, pid, graph),
+					RDFFormat.NTRIPLES);
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
 		}
@@ -536,14 +631,16 @@ public class Modify extends RegalAction {
 			String accept = "text/turtle";
 			Collection<Statement> graph =
 					RdfUtils.readRdfToGraphAndFollowSameAs(lobidUrl, inFormat, accept);
+			String almaid = RdfUtils.getAlmaId(graph, alephid);
+			String lobidUriAlmaId = "http://lobid.org/resources/" + almaid + "#!";
 			ValueFactory f = RdfUtils.valueFactory;
-			;
 			Statement parallelEditionStatement = f.createStatement(f.createIRI(pid),
 					f.createIRI(archive.fedora.Vocabulary.REL_MAB_527),
-					f.createIRI(lobidUri));
+					f.createIRI(lobidUriAlmaId));
 			graph.add(parallelEditionStatement);
 			return RdfUtils.graphToString(
-					RdfUtils.rewriteSubject(lobidUri, pid, graph), RDFFormat.NTRIPLES);
+					RdfUtils.rewriteSubject(lobidUriAlmaId, pid, graph),
+					RDFFormat.NTRIPLES);
 		} catch (Exception e) {
 			throw new HttpArchiveException(500, e);
 		}
