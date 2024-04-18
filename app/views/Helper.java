@@ -852,6 +852,32 @@ public class Helper {
 	}
 
 	/**
+	 * @param node
+	 * @param key
+	 * @return
+	 */
+	public static List<String> getKtblEmissions(Node node, String key) {
+		String mdStream = getKtblJson(node);
+		List<String> valueList = new ArrayList<>();
+		if (mdStream != null) {
+			try {
+				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
+				JsonNode jn = jnAll.findValue(key);
+				Iterator<JsonNode> jIt = jn.elements();
+				while (jIt.hasNext()) {
+					JsonNode nextNode = jIt.next();
+					valueList.add(nextNode.asText().toUpperCase().replace("_", " ")
+							.replace("\"", "").replace("3", "₃").replace("2", "₂"));
+
+				}
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return valueList;
+	}
+
+	/**
 	 * @param mdStream
 	 * @return
 	 */
@@ -859,4 +885,5 @@ public class Helper {
 
 		return mdStream.toString().trim().replace("&quot;", "\"");
 	}
+
 }
