@@ -165,7 +165,7 @@
 						<td class="field-label @key">@getLabel(key)</td>
 						@for(field <- d){
 						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
-						<pre class="@key">@views.Helper.trimText(value(field,key))</pre></td>
+						<span class="@key">@views.Helper.trimText(value(field,key))</span></td>
 								}
 					</tr>
 				} case _ =>{} 
