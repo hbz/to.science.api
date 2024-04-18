@@ -165,7 +165,7 @@
 						<td class="field-label @key">@getLabel(key)</td>
 						@for(field <- d){
 						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
-						@views.Helper.getHtmlBreak(@value(field,key))</td>
+						@views.Helper.getHtmlBreak(value(field,key))</td>
 								}
 					</tr>
 				} case _ =>{} 
