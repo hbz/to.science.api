@@ -698,18 +698,27 @@ public class Helper {
 		String mdStream = getTosJson(node);
 		List<String> contribList = new ArrayList<>();
 		JsonNode jNode = null;
-		StringBuffer itemRef = new StringBuffer("<a href=\"");
+		StringBuffer itemRef = new StringBuffer();
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
 			jNode = jn.findValue("other");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
-				itemRef.append(cardNode.get(i).findValues("@id").toString() + "\">");
-				itemRef.append(cardNode.get(i).findValues("prefLabel").toString()
-						.replace("[", "").replace("]", "").replace("\"", "") + "</a> ; "
-						+ cardNode.get(i).findValues("role").toString().replace("[", "")
-								.replace("]", "").replace("\"", ""));
+				if (cardNode.get(i).findValues("@id").toString() != null) {
+					itemRef.append("<a href=\""
+							+ cardNode.get(i).findValues("@id").toString() + "\">");
+					itemRef.append(cardNode.get(i).findValues("prefLabel").toString()
+							.replace("[", "").replace("]", "").replace("\"", "") + "</a> ; "
+							+ cardNode.get(i).findValues("role").toString().replace("[", "")
+									.replace("]", "").replace("\"", ""));
+				} else {
+					itemRef.append(cardNode.get(i).findValues("@id").toString() + "\">");
+					itemRef.append(cardNode.get(i).findValues("prefLabel").toString()
+							.replace("[", "").replace("]", "").replace("\"", "") + "; "
+							+ cardNode.get(i).findValues("role").toString().replace("[", "")
+									.replace("]", "").replace("\"", ""));
+				}
 				contribList.add(itemRef.toString());
 			}
 		} catch (IOException e) {
@@ -896,8 +905,7 @@ public class Helper {
 				Iterator<JsonNode> jIt = jn.elements();
 				while (jIt.hasNext()) {
 					JsonNode nextNode = jIt.next();
-					valueList.add(nextNode.asText().
-							.toUpperCase().replace("_", " ")
+					valueList.add(nextNode.asText().toUpperCase().replace("_", " ")
 							.replace("\"", "").replace("3", "₃").replace("2", "₂")
 							.replace("4", "₄"));
 
