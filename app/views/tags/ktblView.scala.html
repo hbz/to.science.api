@@ -1,0 +1,129 @@
+@import views.Helper
+@import views.ViewerInfo
+@import models.Node
+@(node:Node,hit:Map[String,Object],context:List[String])
+
+@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
+<!--  <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
+<thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody> -->
+
+@ktblRow(node)
+
+<!--  </tbody></table> -->
+}
+
+
+@ktblRow(value:Any)={
+@if(views.Helper.getLivestockCategory(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Livestock Category</td>
+	<td class="field-item">
+		@views.Helper.getLivestockCategory(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getLivestockProduction(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Livestock Production</td>
+	<td class="field-item">
+		@views.Helper.getLivestockProduction(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getHousingSystems(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Housing Systems</td>
+	<td class="field-item">
+		@views.Helper.getHousingSystems(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getKtblArrayValues(node, "additional_housing_systems")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Additional Housing Systems</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getKtblArrayValues(node, "additional_housing_systems")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+	
+@if(views.Helper.getVentilationSystem(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Ventilation System</td>
+	<td class="field-item">
+		@views.Helper.getVentilationSystem(node:Node)
+	</td>
+	</tr>
+	}	
+
+@if(views.Helper.getKtblArrayValues(node, "emissions")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Emissions</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getKtblEmissions(node, "emissions")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.Helper.getKtblArrayValues(node, "emission_reduction_methods")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Emission Reduction Methods</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getKtblArrayValues(node, "emission_reduction_methods")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getKtblArrayValues(node, "emi_measurement_techniques")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Emi Measurement Techniques</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getKtblArrayValues(node, "emi_measurement_techniques")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.Helper.getProjectTitle(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Project Title</td>
+	<td class="field-item">
+		@views.Helper.getProjectTitle(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getTestDesign(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Test Design</td>
+	<td class="field-item">
+		@views.Helper.getTestDesign(node:Node)
+	</td>
+	</tr>
+	}
+
+}
+
