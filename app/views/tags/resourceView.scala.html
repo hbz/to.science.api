@@ -162,14 +162,10 @@
 				case d: Set[Any] => { 
 					<tr class="@key">
 						<td style="display:none;">@getWeight(key)</td>
-						<td colspan="2" class="field-label @key">@getLabel(key)</td>
-					</tr>
-					<tr>
-                        <td style="display:none;">@getWeight(key)</td>
-								@for(field <- d){
-								<td colspan="2" class="field-item" 
-									property="@models.Globals.profile.getEtikettByName(key).getUri()">
-								<pre class="@key">@value(field,key)</pre></td>
+						<td class="field-label @key">@getLabel(key)</td>
+						@for(field <- d){
+						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+						@views.Helper.getHtmlBreak(@value(field,key))</td>
 								}
 					</tr>
 				} case _ =>{} 
