@@ -705,21 +705,18 @@ public class Helper {
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
-				if (cardNode.get(i).findValues("@id").toString() != null) {
+				if (cardNode.get(i).findValues("@id").toString() != "[\"\"]") {
 					itemRef.append("<a href=\""
 							+ cardNode.get(i).findValues("@id").toString() + "\">");
 					itemRef.append(cardNode.get(i).findValues("prefLabel").toString()
-							.replace("[", "").replace("]", "").replace("\"", "") + "</a> ; "
-							+ cardNode.get(i).findValues("role").toString().replace("[", "")
-									.replace("]", "").replace("\"", ""));
+							+ "</a> ; " + cardNode.get(i).findValues("role").toString());
 				} else {
 					itemRef.append(cardNode.get(i).findValues("@id").toString() + "\">");
 					itemRef.append(cardNode.get(i).findValues("prefLabel").toString()
-							.replace("[", "").replace("]", "").replace("\"", "") + "; "
-							+ cardNode.get(i).findValues("role").toString().replace("[", "")
-									.replace("]", "").replace("\"", ""));
+							+ "; " + cardNode.get(i).findValues("role").toString());
 				}
-				contribList.add(itemRef.toString());
+				contribList.add(itemRef.toString().replace("[", "").replace("]", "")
+						.replace("\"", ""));
 			}
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
