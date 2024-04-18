@@ -855,7 +855,7 @@ public class Helper {
 	 * @param mdStream
 	 * @return
 	 */
-	public static String getHtmlBreak(Object mdStream) {
+	public static String trimText(Object mdStream) {
 
 		return mdStream.toString().trim();
 	}
