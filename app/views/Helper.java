@@ -857,6 +857,6 @@ public class Helper {
 	 */
 	public static String trimText(Object mdStream) {
 
-		return mdStream.toString().trim().substring(1);
+		return mdStream.toString().trim();
 	}
 }
