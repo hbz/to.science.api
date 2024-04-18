@@ -689,42 +689,6 @@ public class Helper {
 	}
 
 	/**
-	 * Get content of Json other-Array from toscience.json
-	 * 
-	 * @param node
-	 * @return List
-	 */
-	public static List<String> getContributors(Node node) {
-		String mdStream = getTosJson(node);
-		List<String> contribList = new ArrayList<>();
-		JsonNode jNode = null;
-		StringBuffer itemRef = new StringBuffer();
-		try {
-			JsonNode jn = new ObjectMapper().readTree(mdStream);
-			jNode = jn.findValue("other");
-
-			List<JsonNode> cardNode = jNode.findParents("prefLabel");
-			for (int i = 0; i < cardNode.size(); i++) {
-				if (cardNode.get(i).findValues("@id").toString() != "[\"\"]") {
-					itemRef.append("<a href=\""
-							+ cardNode.get(i).findValues("@id").toString() + "\">");
-					itemRef.append(cardNode.get(i).findValues("prefLabel").toString()
-							+ "</a> ; " + cardNode.get(i).findValues("role").toString());
-				} else {
-					itemRef.append(cardNode.get(i).findValues("@id").toString() + "\">");
-					itemRef.append(cardNode.get(i).findValues("prefLabel").toString()
-							+ "; " + cardNode.get(i).findValues("role").toString());
-				}
-				contribList.add(itemRef.toString().replace("[", "").replace("]", "")
-						.replace("\"", ""));
-			}
-		} catch (IOException e) {
-			play.Logger.warn(e.getMessage());
-		}
-		return contribList;
-	}
-
-	/**
 	 * Tests if Metadata Stream is available from Fedora subsystem
 	 * 
 	 * @param pid
