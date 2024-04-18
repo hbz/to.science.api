@@ -855,8 +855,8 @@ public class Helper {
 	 * @param mdStream
 	 * @return
 	 */
-	public static String getHtmlBreak(String mdStream) {
+	public static String getHtmlBreak(Object mdStream) {
 
-		return mdStream.replace("\r\n", "<br>").replace("\n", "<br>");
+		return mdStream.toString().replace("\r\n", "<br>").replace("\n", "<br>");
 	}
 }
