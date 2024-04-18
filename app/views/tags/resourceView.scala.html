@@ -299,25 +299,6 @@
 			}
 		}
 				
-		case "contributor"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{
-				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
-					<td>
-					<table>
-					@for(contributor <-views.Helper.getContributors(node)){
-						@contributor <br />
-						}
-					</table>
-					</td>
-				</tr>
-				}
-			}
-		}
-				
 		case "inSeries"=>{
 			@values match {
 			case nullCase if nullCase == null =>{}
