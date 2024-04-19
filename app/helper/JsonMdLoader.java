@@ -123,7 +123,7 @@ public class JsonMdLoader {
 			connection.connect();
 			return connection.getInputStream();
 		} catch (Exception e) {
-			play.Logger.error("Connection to " + url.toString() + " failed");
+			play.Logger.debug("Connection to " + url.toString() + " failed");
 		}
 		return null;
 	}
