@@ -884,7 +884,8 @@ public class Helper {
 	 */
 	public static String trimText(Object mdStream) {
 
-		return mdStream.toString().trim().replace("&quot;", "\"");
+		return mdStream.toString().trim().replace("\n", "\r\n").replace("&quot;",
+				"\"");
 	}
 
 }
