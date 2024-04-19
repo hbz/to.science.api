@@ -164,10 +164,10 @@
 					<tr class="@key">
 						<td style="display:none;">@getWeight(key)</td>
 						<td class="field-label @key">@getLabel(key)</td>
-						@for(field <- d){
-						<td class="field-item" property="@models.Globals.profile.getEtikettByName(key).getUri()">
-						<span class="@key">@views.Helper.trimText(value(field,key))</span></td>
-								}
+						@for(rDs <- views.Helper.getToscienceArrayValues(node, key)){
+						<td class="field-item @key" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+						<span class="@key">@rDs</span></td>
+						}
 					</tr>
 				} case _ =>{} 
 			}
@@ -178,10 +178,10 @@
 					<tr class="@key">
 						<td style="display:none;">@getWeight(key)</td>
 						<td class="field-label @key">@getLabel(key)</td>
-						@for(field <- d){
+						@for(rDs <- views.Helper.getToscienceArrayValues(node, key)){
 						<td class="field-item @key" property="@models.Globals.profile.getEtikettByName(key).getUri()">
-						<span class="@key">@views.Helper.trimText(value(field,key))</span></td>
-								}
+						<span class="@key">@rDs</span></td>
+						}
 					</tr>
 				} case _ =>{} 
 			}
