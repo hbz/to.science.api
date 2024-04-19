@@ -893,7 +893,7 @@ public class Helper {
 					JsonNode nextNode = jIt.next();
 					valueList.add(nextNode.asText().toUpperCase().replace("_", " ")
 							.replace("\"", "").replace("3", "₃").replace("2", "₂")
-							.replace("4", "₄"));
+							.replace("4", "₄").replace("DOUR", "dour"));
 
 				}
 			} catch (IOException e) {

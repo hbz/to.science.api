@@ -172,6 +172,20 @@
 				} case _ =>{} 
 			}
 		}
+		case "fundingProgramm"=>{
+			@values match {
+				case d: Set[Any] => { 
+					<tr class="@key">
+						<td style="display:none;">@getWeight(key)</td>
+						<td class="field-label @key">@getLabel(key)</td>
+						@for(rDs <- views.Helper.getToscienceArrayValues(node, key)){
+						<td class="field-item @key" property="@models.Globals.profile.getEtikettByName(key).getUri()">
+						<span class="@key">@rDs</span></td>
+						}
+					</tr>
+				} case _ =>{} 
+			}
+		}
 		case "description"=>{
 			@values match {
 				case d: Set[Any] => { 
