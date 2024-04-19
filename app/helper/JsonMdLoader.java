@@ -36,6 +36,7 @@ public class JsonMdLoader {
 	public JsonMdLoader(Node node, String mdFormat) {
 		this.node = node;
 		this.mdFormat = mdFormat;
+		this.pid = null;
 	}
 
 	/**
@@ -48,6 +49,7 @@ public class JsonMdLoader {
 	public JsonMdLoader(String objPid, String mdFormat) {
 		this.pid = objPid;
 		this.mdFormat = mdFormat;
+		this.node = null;
 	}
 
 	/**
