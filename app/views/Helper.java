@@ -689,6 +689,31 @@ public class Helper {
 	}
 
 	/**
+	 * @param node
+	 * @param key
+	 * @return
+	 */
+	public static List<String> getToscienceArrayValues(Node node, String key) {
+		String mdStream = getTosJson(node);
+		List<String> valueList = new ArrayList<>();
+		if (mdStream != null) {
+			try {
+				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
+				JsonNode jn = jnAll.findValue(key);
+				Iterator<JsonNode> jIt = jn.elements();
+				while (jIt.hasNext()) {
+					JsonNode nextNode = jIt.next();
+					valueList.add(nextNode.asText().replace("\\u2019", "'"));
+
+				}
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return valueList;
+	}
+
+	/**
 	 * Tests if Metadata Stream is available from Fedora subsystem
 	 * 
 	 * @param pid
@@ -868,7 +893,7 @@ public class Helper {
 					JsonNode nextNode = jIt.next();
 					valueList.add(nextNode.asText().toUpperCase().replace("_", " ")
 							.replace("\"", "").replace("3", "₃").replace("2", "₂")
-							.replace("4", "₄"));
+							.replace("4", "₄").replace("DOUR", "dour"));
 
 				}
 			} catch (IOException e) {
