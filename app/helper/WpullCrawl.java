@@ -279,7 +279,8 @@ public class WpullCrawl {
 			}
 		}
 		if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-			sb.append(" --header=\"Cookie:" + conf.getCookie().trim() + "\"");
+			sb.append(" --header=\"Cookie:" + conf.getCookie().replaceAll(" ", "%20")
+					+ "\"");
 		}
 		if (noParent) {
 			sb.append(" --no-parent");
