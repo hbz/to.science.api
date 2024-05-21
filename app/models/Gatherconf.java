@@ -98,6 +98,7 @@ public class Gatherconf {
 	int httpResponseCode;
 	boolean invalidUrl;
 	String urlNew; // the new URL, yet to be confirmed
+	String cookie;
 	ArrayList<String> domains;
 	int deepness;
 	RobotsPolicy robotsPolicy;
@@ -125,6 +126,7 @@ public class Gatherconf {
 		invalidUrl = false;
 		urlNew = null;
 		domains = new ArrayList<String>();
+		cookie = null;
 		active = true;
 		deepness = -1;
 		robotsPolicy = RobotsPolicy.ignore;
@@ -179,6 +181,22 @@ public class Gatherconf {
 	 */
 	public ArrayList<String> getDomains() {
 		return domains;
+	}
+
+	/**
+	 * @return the cookie the website shall be gathered with
+	 */
+	public String getCookie() {
+		return cookie;
+	}
+
+	/**
+	 * @param cookie a cookie that shall be used when the website is being
+	 *          collected by the crawler. This is to prevent the popping up of
+	 *          cookie banners during site replay.
+	 */
+	public void setCookie(String cookie) {
+		this.cookie = cookie;
 	}
 
 	/**
