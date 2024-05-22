@@ -76,19 +76,19 @@ public class Gatherconf {
 	public static Hashtable<AgentIdSelection, String> agentTable =
 			new Hashtable<AgentIdSelection, String>() {
 				{
-					put(AgentIdSelection.Undefined, "\"InconspiciousWebBrowser/1.0\"");
+					put(AgentIdSelection.Undefined, "InconspiciousWebBrowser/1.0");
 					put(AgentIdSelection.Chrome,
-							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36\"");
+							"Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36");
 					put(AgentIdSelection.Edge,
-							"\"Mozilla/5.0%20(Windows%20NT%2010.0;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/58.0.3029.110%20Safari/537.36%20Edge/16.16299\"");
+							"Mozilla/5.0%20(Windows%20NT%2010.0;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/58.0.3029.110%20Safari/537.36%20Edge/16.16299");
 					put(AgentIdSelection.IE,
-							"\"Mozilla/5.0%20(compatible;%20MSIE%2010.0;%20Windows%20NT%206.1;%20WOW64;%20Trident/6.0;%20MASBJS)\"");
+							"Mozilla/5.0%20(compatible;%20MSIE%2010.0;%20Windows%20NT%206.1;%20WOW64;%20Trident/6.0;%20MASBJS)");
 					put(AgentIdSelection.Firefox,
-							"\"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:40.0)%20Gecko/20100101%20Firefox/40.1\"");
+							"Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:40.0)%20Gecko/20100101%20Firefox/40.1");
 					put(AgentIdSelection.Safari,
-							"\"Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_13_3)%20AppleWebKit/604.5.6%20(KHTML,%20like%20Gecko)%20Version/11.0.3%20Safari/604.5.6\"");
+							"Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_13_3)%20AppleWebKit/604.5.6%20(KHTML,%20like%20Gecko)%20Version/11.0.3%20Safari/604.5.6");
 					put(AgentIdSelection.Googlebot,
-							"\"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)\"");
+							"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)");
 				}
 			};
 
@@ -98,6 +98,7 @@ public class Gatherconf {
 	int httpResponseCode;
 	boolean invalidUrl;
 	String urlNew; // the new URL, yet to be confirmed
+	String cookie;
 	ArrayList<String> domains;
 	int deepness;
 	RobotsPolicy robotsPolicy;
@@ -125,6 +126,7 @@ public class Gatherconf {
 		invalidUrl = false;
 		urlNew = null;
 		domains = new ArrayList<String>();
+		cookie = null;
 		active = true;
 		deepness = -1;
 		robotsPolicy = RobotsPolicy.ignore;
@@ -179,6 +181,22 @@ public class Gatherconf {
 	 */
 	public ArrayList<String> getDomains() {
 		return domains;
+	}
+
+	/**
+	 * @return the cookie the website shall be gathered with
+	 */
+	public String getCookie() {
+		return cookie;
+	}
+
+	/**
+	 * @param cookie a cookie that shall be used when the website is being
+	 *          collected by the crawler. This is to prevent the popping up of
+	 *          cookie banners during site replay.
+	 */
+	public void setCookie(String cookie) {
+		this.cookie = cookie;
 	}
 
 	/**

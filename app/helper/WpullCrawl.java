@@ -278,6 +278,10 @@ public class WpullCrawl {
 				}
 			}
 		}
+		if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
+			sb.append(
+					" --header=Cookie:%20" + conf.getCookie().replaceAll(" ", "%20"));
+		}
 		if (noParent) {
 			sb.append(" --no-parent");
 		}
@@ -367,6 +371,7 @@ public class WpullCrawl {
 		// auskommentiert 27.08.2020 für EDOZWO-1026
 		// sb.append(" --warc-tempdir=" + tempJobDir)
 		sb.append(" --warc-move=" + resultDir);
+		play.Logger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
 	}
 
