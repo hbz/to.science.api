@@ -69,7 +69,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum AgentIdSelection {
-		Undefined, Chrome, Edge, IE, Firefox, Safari, Googlebot;
+		Undefined, Chrome, Edge, IE, Firefox, Safari, Googlebot, Toscience;
 	}
 
 	@SuppressWarnings("javadoc")
@@ -89,6 +89,8 @@ public class Gatherconf {
 							"Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_13_3)%20AppleWebKit/604.5.6%20(KHTML,%20like%20Gecko)%20Version/11.0.3%20Safari/604.5.6");
 					put(AgentIdSelection.Googlebot,
 							"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)");
+					put(AgentIdSelection.Toscience,
+							"to.science%20(https://github.com/hbz/to.science.api;mailto:toscience@hbz-nrw.de)");
 				}
 			};
 
