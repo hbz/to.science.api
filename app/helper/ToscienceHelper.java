@@ -113,4 +113,27 @@ public class ToscienceHelper {
 		return ktblAndTos.toString();
 	}
 
+	/**
+	 * This method converts a string (Json structure) into a Map<String, Object>
+	 * object
+	 * 
+	 * @param json: String with a json structure
+	 * @return Map<String, Object> Object
+	 */
+	public static Map<String, Object> convertJsonToMap(String json) {
+		Map<String, Object> map = null;
+		try {
+			JSONObject jo = new JSONObject(json);
+			map = new LinkedHashMap<>();
+			for (String key : JSONObject.getNames(jo)) {
+				Object value = jo.get(key);
+				map.put(key, value);
+			}
+
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException:getToPersistTosMetadata()");
+		}
+		return map;
+	}
+
 }

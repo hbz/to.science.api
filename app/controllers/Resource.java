@@ -297,7 +297,8 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus der Fedora.
+	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus
+	 * der Fedora.
 	 *
 	 * @author Ingolf Kuss
 	 * @param pid Die PID der Ressource
@@ -1656,6 +1657,87 @@ public class Resource extends MyController {
 			} catch (Exception e) {
 				play.Logger.error(e.toString());
 				return JsonMessage(new Message(json(e)));
+			}
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "updateFromsMetadata", value = "updateMetadata", notes = "Updates all metada from forms", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
+
+	public static Promise<Result> uploadUpdateMetadata(
+			@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			try {
+				String result1, result2, result3;
+				result1 = result2 = result3 = null;
+				Map<String, Object> rdf = null;
+				Node readNode = new Read().readNode(pid);
+				MultipartFormData body = request().body().asMultipartFormData();
+				FilePart data = body.getFile("data");
+
+				String name = data.getFilename();
+
+				if (data == null) {
+					return (Result) JsonMessage(new Message("Missing File.", 400));
+				}
+				if (!readNode.getContentType().contains("file")
+						&& !readNode.getContentType().contains("part")) {
+
+					String contentOfFile =
+							KTBLMapperHelper.getStringContentFromJsonFile(data);
+					rdf = ToscienceHelper.convertJsonToMap(contentOfFile);
+
+					/**
+					 * toscience
+					 */
+					play.Logger.debug("toscience will be mapped");
+
+					JSONObject toscienceJson = null;
+					String toscienceMetadata = ToscienceHelper
+							.getToPersistTosMetadata(contentOfFile, readNode.getPid());
+
+					toscienceJson = new JSONObject(toscienceMetadata);
+
+					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
+
+					result1 = modify.updateMetadata("Toscience", readNode,
+							toscienceJson.toString());
+
+					play.Logger.debug("Done toscience Mapping");
+
+					/**
+					 * KTBL
+					 */
+					play.Logger.debug("KTBL will be mapped");
+
+					if (KTBLMapperHelper.containsKtblBlock(contentOfFile)) {
+
+						String ktblMetadata = KTBLMapperHelper
+								.getToPersistKtblMetadata(contentOfFile, readNode.getPid());
+
+						result2 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
+
+						play.Logger.debug("Done KTBL Mapping");
+
+					}
+
+					/**
+					 * Metadata2
+					 */
+					play.Logger.debug("Metadata2 will be mapped");
+					String metadata2 = modify.rdfToString(rdf, RDFFormat.NTRIPLES);
+
+					result3 = modify.updateMetadata("metadata2", readNode, metadata2);
+
+					Enrich.enrichMetadata2(readNode);
+
+					play.Logger.debug("Done Metadata2 Mapping");
+
+				}
+				return JsonMessage(new Message(result1 + result2 + result3));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
 			}
 		});
 	}

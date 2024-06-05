@@ -127,4 +127,22 @@ public class KTBLMapperHelper {
 		return map;
 	}
 
+	/**
+	 * Method checks if a string with a json structure contains a KTBL block or
+	 * not
+	 * 
+	 * @param json
+	 * @return true if a KTBL block is present in string, otherwise false
+	 */
+	public static boolean containsKtblBlock(String json) {
+		try {
+			JSONObject jo = new JSONObject(json);
+			if (jo.has("info") && jo.getJSONObject("info").has("ktbl")) {
+				return true;
+			}
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException:getMapFromJSONObject()");
+		}
+		return false;
+	}
 }
