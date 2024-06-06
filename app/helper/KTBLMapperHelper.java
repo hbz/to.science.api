@@ -29,6 +29,7 @@ public class KTBLMapperHelper {
 	 * @return the content of the file as a string
 	 */
 	static public String getStringContentFromJsonFile(FilePart fp) {
+		play.Logger.debug("getStringContentFromJsonFile has been called");
 		StringBuilder ktblMetadata = null;
 		BufferedReader br = null;
 

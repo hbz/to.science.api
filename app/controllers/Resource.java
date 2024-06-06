@@ -1661,7 +1661,7 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/json", value = "updateAllMetadata", httpMethod = "PUT")
+	@ApiOperation(produces = "application/json", value = "updateAllMetadata", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
 
@@ -1677,9 +1677,11 @@ public class Resource extends MyController {
 				Map<String, Object> rdf = null;
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
+				play.Logger.debug("MultipartFormData");
 				FilePart data = body.getFile("data");
 
 				String name = data.getFilename();
+				play.Logger.debug("FileName=" + name);
 
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
@@ -1689,7 +1691,9 @@ public class Resource extends MyController {
 
 					String contentOfFile =
 							KTBLMapperHelper.getStringContentFromJsonFile(data);
+					play.Logger.debug("contentOfFile=" + contentOfFile);
 					rdf = ToscienceHelper.convertJsonToMap(contentOfFile);
+					play.Logger.debug("uploadUpdateMetadata, rdf=" + rdf);
 
 					/**
 					 * toscience
