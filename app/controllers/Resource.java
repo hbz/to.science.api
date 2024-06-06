@@ -1661,7 +1661,7 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/json", httpMethod = "PUT")
+	@ApiOperation(produces = "application/json", value = "updateAllMetadata", httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
 
