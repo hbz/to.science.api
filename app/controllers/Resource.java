@@ -1661,14 +1661,17 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/json", nickname = "updateFromsMetadata", value = "updateMetadata", notes = "Updates all metada from forms", response = Message.class, httpMethod = "PUT")
+	@ApiOperation(produces = "application/json", httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
 
 	public static Promise<Result> uploadUpdateMetadata(
 			@PathParam("pid") String pid) {
+		play.Logger.debug("uploadUpdateMetadata has been called");
 		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("uploadUpdateMetadata.ModifyAction");
 			try {
+				play.Logger.debug("uploadUpdateMetadata has been called");
 				String result1, result2, result3;
 				result1 = result2 = result3 = null;
 				Map<String, Object> rdf = null;
