@@ -1674,7 +1674,6 @@ public class Resource extends MyController {
 				play.Logger.debug("uploadUpdateMetadata has been called");
 				String result1, result2, result3;
 				result1 = result2 = result3 = null;
-				Map<String, Object> rdf = null;
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				play.Logger.debug("MultipartFormData");
@@ -1741,11 +1740,12 @@ public class Resource extends MyController {
 
 					play.Logger.debug("metadata2Map=" + metadata2Map.toString());
 
-					rdf = modify.rdfToString(
+					String metadata2Content = modify.rdfToString(
 							(Map<String, Object>) metadata2Map.get("metadata2"),
 							RDFFormat.NTRIPLES);
 
-					result3 = modify.updateMetadata("metadata2", readNode, rdf);
+					result3 =
+							modify.updateMetadata("metadata2", readNode, metadata2Content);
 
 					Enrich.enrichMetadata2(readNode);
 

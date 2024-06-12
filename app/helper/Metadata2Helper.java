@@ -401,6 +401,9 @@ public class Metadata2Helper {
 	}
 
 	/**
+	 * This method iterates through all elements of a JSON content and generates a
+	 * LinkedHashMap<String, Object> object for creating and updating the
+	 * Metadata2 data stream.
 	 * 
 	 * @param jsonObject
 	 * @return
@@ -412,11 +415,6 @@ public class Metadata2Helper {
 		JSONArray jsArr = null;
 		JSONObject jObj = null;
 
-		Set<String> keySet = new HashSet<>(Arrays.asList("usageManual",
-				"description", "title", "associatedPublication", "contributerOrder",
-				"reference", "embargoTime", "fundingProgram", "associatedDataset",
-				"prefLabel", "alternative", "nextVersion", "urn", "previousVersion",
-				"yearOfCopyright", "projectId", "recordingPeriod", "doi"));
 		try {
 			JsonMapper jsmapper = new JsonMapper();
 			jsmapper.node = n;
@@ -427,9 +425,11 @@ public class Metadata2Helper {
 				return null;
 			}
 
-			for (String key : jsonObject.keySet()) {
+			Iterator<String> keys = jsonObject.keys();
+			while (keys.hasNext()) {
+				String key = keys.next();
 				Object value = jsonObject.get(key);
-				if (keySet.stream().anyMatch(key::equals)) {
+				if (isInKeySet(key)) {
 					rdf.put(key, getValueBetweenTwoQuotationMarks(value.toString()));
 				} else if (key.equals("joinedFunding")) {
 					List<Map<String, Object>> keyList = new ArrayList<>();
@@ -453,12 +453,13 @@ public class Metadata2Helper {
 					if (key.equals("info")) {
 						JSONObject infoObject = jsonObject.getJSONObject(key);
 						JSONObject ktblObject = infoObject.getJSONObject("ktbl");
-						for (String ktblKey : ktblObject.keySet()) {
+						Iterator<String> ktblKeys = ktblObject.keys();
+						while (ktblKeys.hasNext()) {
+							String ktblKey = ktblKeys.next();
 							Object ktblValue = ktblObject.get(ktblKey);
 							rdf.put(ktblKey, ktblValue);
 						}
 					}
-
 				} else if (value instanceof JSONArray) {
 					List<Map<String, Object>> keyList = new ArrayList<>();
 					jsArr = jsonObject.getJSONArray(key);
@@ -475,10 +476,12 @@ public class Metadata2Helper {
 					rdf.put(key, object.toString());
 				}
 			}
+
 			metadata2Map.put("metadata2", rdf);
 		} catch (Exception e) {
 			play.Logger.debug("Metadata2 could not be mapped!", e);
 		}
+
 		return metadata2Map;
 	}
 
