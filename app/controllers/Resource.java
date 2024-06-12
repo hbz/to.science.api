@@ -1678,22 +1678,23 @@ public class Resource extends MyController {
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				play.Logger.debug("MultipartFormData");
+
 				FilePart data = body.getFile("data");
+				if (data == null) {
+					return (Result) JsonMessage(new Message("Missing File.", 400));
+				}
 
 				String name = data.getFilename();
 				play.Logger.debug("FileName=" + name);
 
-				if (data == null) {
-					return (Result) JsonMessage(new Message("Missing File.", 400));
-				}
 				if (!readNode.getContentType().contains("file")
 						&& !readNode.getContentType().contains("part")) {
 
 					String contentOfFile =
 							KTBLMapperHelper.getStringContentFromJsonFile(data);
 					play.Logger.debug("contentOfFile=" + contentOfFile);
-					rdf = ToscienceHelper.convertJsonToMap(contentOfFile);
-					play.Logger.debug("uploadUpdateMetadata, rdf=" + rdf);
+					// rdf = ToscienceHelper.convertJsonToMap(contentOfFile);
+					// play.Logger.debug("uploadUpdateMetadata, rdf=" + rdf);
 
 					/**
 					 * toscience
@@ -1708,7 +1709,7 @@ public class Resource extends MyController {
 
 					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
 
-					result1 = modify.updateMetadata("Toscience", readNode,
+					result1 = modify.updateMetadata("toscience", readNode,
 							toscienceJson.toString());
 
 					play.Logger.debug("Done toscience Mapping");
@@ -1733,9 +1734,18 @@ public class Resource extends MyController {
 					 * Metadata2
 					 */
 					play.Logger.debug("Metadata2 will be mapped");
-					String metadata2 = modify.rdfToString(rdf, RDFFormat.NTRIPLES);
 
-					result3 = modify.updateMetadata("metadata2", readNode, metadata2);
+					LinkedHashMap<String, Object> metadata2Map =
+							Metadata2Helper.generateRdfFromJsonCollection(
+									new JSONObject(contentOfFile), readNode);
+
+					play.Logger.debug("metadata2Map=" + metadata2Map.toString());
+
+					rdf = modify.rdfToString(
+							(Map<String, Object>) metadata2Map.get("metadata2"),
+							RDFFormat.NTRIPLES);
+
+					result3 = modify.updateMetadata("metadata2", readNode, rdf);
 
 					Enrich.enrichMetadata2(readNode);
 

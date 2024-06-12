@@ -1,9 +1,13 @@
 package helper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import models.Globals;
 import models.Node;
 import services.KtblService;
@@ -394,6 +398,88 @@ public class Metadata2Helper {
 					"ToscienceJson could not be mapped to Metadata2", e);
 		}
 
+	}
+
+	/**
+	 * 
+	 * @param jsonObject
+	 * @return
+	 */
+	public static LinkedHashMap<String, Object> generateRdfFromJsonCollection(
+			JSONObject jsonObject, Node n) {
+		LinkedHashMap<String, Object> metadata2Map =
+				new LinkedHashMap<String, Object>();
+		JSONArray jsArr = null;
+		JSONObject jObj = null;
+
+		Set<String> keySet = new HashSet<>(Arrays.asList("usageManual",
+				"description", "title", "associatedPublication", "contributerOrder",
+				"reference", "embargoTime", "fundingProgram", "associatedDataset",
+				"prefLabel", "alternative", "nextVersion", "urn", "previousVersion",
+				"yearOfCopyright", "projectId", "recordingPeriod", "doi"));
+		try {
+			JsonMapper jsmapper = new JsonMapper();
+			jsmapper.node = n;
+			Map<String, Object> rdf = n.getLd2();
+
+			if (jsonObject == null) {
+				play.Logger.debug("toscienceJsonContent is empty");
+				return null;
+			}
+
+			for (String key : jsonObject.keySet()) {
+				Object value = jsonObject.get(key);
+				if (keySet.stream().anyMatch(key::equals)) {
+					rdf.put(key, getValueBetweenTwoQuotationMarks(value.toString()));
+				} else if (key.equals("joinedFunding")) {
+					List<Map<String, Object>> keyList = new ArrayList<>();
+					JSONArray jsonArray = jsonObject.getJSONArray(key);
+
+					for (int i = 0; i < jsonArray.length(); i++) {
+						JSONObject innerObj = jsonArray.getJSONObject(i);
+						String projectIdJoined = innerObj.getString("projectIdJoined");
+						JSONObject fundingJoinedObj =
+								innerObj.getJSONObject("fundingJoined");
+						String fundingProgramJoined =
+								innerObj.getString("fundingProgramJoined");
+						Map<String, Object> keyMap = new LinkedHashMap<>();
+						keyMap.put("projectIdJoined", projectIdJoined);
+						keyMap.put("fundingJoined", fundingJoinedObj);
+						keyMap.put("fundingProgramJoined", fundingProgramJoined);
+						keyList.add(keyMap);
+					}
+					rdf.put(key, keyList);
+				} else if (value instanceof JSONObject) {
+					if (key.equals("info")) {
+						JSONObject infoObject = jsonObject.getJSONObject(key);
+						JSONObject ktblObject = infoObject.getJSONObject("ktbl");
+						for (String ktblKey : ktblObject.keySet()) {
+							Object ktblValue = ktblObject.get(ktblKey);
+							rdf.put(ktblKey, ktblValue);
+						}
+					}
+
+				} else if (value instanceof JSONArray) {
+					List<Map<String, Object>> keyList = new ArrayList<>();
+					jsArr = jsonObject.getJSONArray(key);
+					for (int i = 0; i < jsArr.length(); i++) {
+						Map<String, Object> keyMap = new LinkedHashMap<>();
+						jObj = jsArr.getJSONObject(i);
+						keyMap.put("@id", jObj.getString("@id"));
+						keyMap.put("prefLabel", jObj.get("prefLabel"));
+						keyList.add(keyMap);
+					}
+					rdf.put(key, keyList);
+				} else if (value instanceof String) {
+					Object object = jsonObject.get(key);
+					rdf.put(key, object.toString());
+				}
+			}
+			metadata2Map.put("metadata2", rdf);
+		} catch (Exception e) {
+			play.Logger.debug("Metadata2 could not be mapped!", e);
+		}
+		return metadata2Map;
 	}
 
 }
