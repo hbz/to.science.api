@@ -11,9 +11,12 @@ import java.util.Set;
 import models.Globals;
 import models.Node;
 import services.KtblService;
+import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -408,13 +411,17 @@ public class Metadata2Helper {
 	 * @param jsonObject
 	 * @return
 	 */
+
 	public static LinkedHashMap<String, Object> generateRdfFromJsonCollection(
 			JSONObject jsonObject, Node n) {
-		LinkedHashMap<String, Object> metadata2Map =
-				new LinkedHashMap<String, Object>();
-		JSONArray jsArr = null;
-		JSONObject jObj = null;
-
+		LinkedHashMap<String, Object> metadata2Map = new LinkedHashMap<>();
+		JSONArray jsArr;
+		JSONObject jObj;
+		Set<String> isInKeySet = new HashSet<>(Arrays.asList("usageManual",
+				"description", "title", "associatedPublication", "contributerOrder",
+				"reference", "embargoTime", "fundingProgram", "associatedDataset",
+				"prefLabel", "alternative", "nextVersion", "urn", "previousVersion",
+				"yearOfCopyright", "projectId", "recordingPeriod", "doi"));
 		try {
 			JsonMapper jsmapper = new JsonMapper();
 			jsmapper.node = n;
@@ -425,16 +432,14 @@ public class Metadata2Helper {
 				return null;
 			}
 
-			Iterator<String> keys = jsonObject.keys();
-			while (keys.hasNext()) {
-				String key = keys.next();
-				Object value = jsonObject.get(key);
-				if (isInKeySet(key)) {
-					rdf.put(key, getValueBetweenTwoQuotationMarks(value.toString()));
+			for (Iterator<?> iterator = jsonObject.keys(); iterator.hasNext();) {
+				String key = (String) iterator.next();
+				if (isInKeySet.contains(key)) {
+					rdf.put(key,
+							getValueBetweenTwoQuotationMarks(jsonObject.getString(key)));
 				} else if (key.equals("joinedFunding")) {
 					List<Map<String, Object>> keyList = new ArrayList<>();
 					JSONArray jsonArray = jsonObject.getJSONArray(key);
-
 					for (int i = 0; i < jsonArray.length(); i++) {
 						JSONObject innerObj = jsonArray.getJSONObject(i);
 						String projectIdJoined = innerObj.getString("projectIdJoined");
@@ -449,18 +454,17 @@ public class Metadata2Helper {
 						keyList.add(keyMap);
 					}
 					rdf.put(key, keyList);
-				} else if (value instanceof JSONObject) {
-					if (key.equals("info")) {
-						JSONObject infoObject = jsonObject.getJSONObject(key);
-						JSONObject ktblObject = infoObject.getJSONObject("ktbl");
-						Iterator<String> ktblKeys = ktblObject.keys();
-						while (ktblKeys.hasNext()) {
-							String ktblKey = ktblKeys.next();
-							Object ktblValue = ktblObject.get(ktblKey);
-							rdf.put(ktblKey, ktblValue);
-						}
+				} else if (key.equals("info")) {
+					JSONObject infoObject = jsonObject.getJSONObject(key);
+					JSONObject ktblObject = infoObject.getJSONObject("ktbl");
+
+					for (Iterator<?> ktblIterator = ktblObject.keys(); ktblIterator
+							.hasNext();) {
+						String ktblKey = (String) ktblIterator.next();
+						Object ktblValue = ktblObject.get(ktblKey);
+						rdf.put(ktblKey, ktblValue);
 					}
-				} else if (value instanceof JSONArray) {
+				} else if (jsonObject.get(key) instanceof JSONArray) {
 					List<Map<String, Object>> keyList = new ArrayList<>();
 					jsArr = jsonObject.getJSONArray(key);
 					for (int i = 0; i < jsArr.length(); i++) {
@@ -471,7 +475,7 @@ public class Metadata2Helper {
 						keyList.add(keyMap);
 					}
 					rdf.put(key, keyList);
-				} else if (value instanceof String) {
+				} else if (jsonObject.get(key) instanceof String) {
 					Object object = jsonObject.get(key);
 					rdf.put(key, object.toString());
 				}
@@ -479,10 +483,10 @@ public class Metadata2Helper {
 
 			metadata2Map.put("metadata2", rdf);
 		} catch (Exception e) {
-			play.Logger.debug("Metadata2 could not be mapped!", e);
+			play.Logger.debug("Metadata2 could not be mapped!");
+			e.printStackTrace();
 		}
 
 		return metadata2Map;
 	}
-
 }
