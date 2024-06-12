@@ -436,7 +436,7 @@ public class Metadata2Helper {
 				String key = (String) iterator.next();
 				if (isInKeySet.contains(key)) {
 					rdf.put(key,
-							getValueBetweenTwoQuotationMarks(jsonObject.getString(key)));
+							getValueBetweenTwoQuotationMarks(jsonObject.get(key).toString()));
 				} else if (key.equals("joinedFunding")) {
 					List<Map<String, Object>> keyList = new ArrayList<>();
 					JSONArray jsonArray = jsonObject.getJSONArray(key);
