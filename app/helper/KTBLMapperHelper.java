@@ -138,7 +138,8 @@ public class KTBLMapperHelper {
 	public static boolean containsKtblBlock(String json) {
 		try {
 			JSONObject jo = new JSONObject(json);
-			if (jo.has("info") && jo.getJSONObject("info").has("ktbl")) {
+			if (jo.has("info") && jo.getJSONObject("info").has("ktbl")
+					|| jo.has("relatedDatasets") || jo.has("recordingPeriod")) {
 				return true;
 			}
 		} catch (JSONException e) {

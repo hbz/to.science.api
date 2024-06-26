@@ -420,8 +420,8 @@ public class Metadata2Helper {
 		Set<String> isInKeySet = new HashSet<>(Arrays.asList("usageManual",
 				"description", "title", "associatedPublication", "contributerOrder",
 				"reference", "embargoTime", "fundingProgram", "associatedDataset",
-				"prefLabel", "alternative", "nextVersion", "urn", "previousVersion",
-				"yearOfCopyright", "projectId", "recordingPeriod", "doi"));
+				"prefLabel", "alternative", "nextVersion", "previousVersion",
+				"yearOfCopyright", "projectId", "recordingPeriod"));
 		try {
 			JsonMapper jsmapper = new JsonMapper();
 			jsmapper.node = n;
@@ -434,9 +434,11 @@ public class Metadata2Helper {
 
 			for (Iterator<?> iterator = jsonObject.keys(); iterator.hasNext();) {
 				String key = (String) iterator.next();
+				play.Logger.debug("key=" + key + "will be processed");
 				if (isInKeySet.contains(key)) {
 					rdf.put(key,
 							getValueBetweenTwoQuotationMarks(jsonObject.get(key).toString()));
+					play.Logger.debug("key=" + key + "has been added");
 				} else if (key.equals("joinedFunding")) {
 					List<Map<String, Object>> keyList = new ArrayList<>();
 					JSONArray jsonArray = jsonObject.getJSONArray(key);
@@ -454,30 +456,43 @@ public class Metadata2Helper {
 						keyList.add(keyMap);
 					}
 					rdf.put(key, keyList);
+					play.Logger.debug("key=" + key + "has been added");
 				} else if (key.equals("info")) {
 					JSONObject infoObject = jsonObject.getJSONObject(key);
 					JSONObject ktblObject = infoObject.getJSONObject("ktbl");
-
 					for (Iterator<?> ktblIterator = ktblObject.keys(); ktblIterator
 							.hasNext();) {
 						String ktblKey = (String) ktblIterator.next();
 						Object ktblValue = ktblObject.get(ktblKey);
 						rdf.put(ktblKey, ktblValue);
+						play.Logger.debug("ktblKey=" + key + "has been added");
 					}
 				} else if (jsonObject.get(key) instanceof JSONArray) {
 					List<Map<String, Object>> keyList = new ArrayList<>();
+					List<String> sKeyList = new ArrayList<>();
 					jsArr = jsonObject.getJSONArray(key);
 					for (int i = 0; i < jsArr.length(); i++) {
-						Map<String, Object> keyMap = new LinkedHashMap<>();
-						jObj = jsArr.getJSONObject(i);
-						keyMap.put("@id", jObj.getString("@id"));
-						keyMap.put("prefLabel", jObj.get("prefLabel"));
-						keyList.add(keyMap);
+						if (jsArr.get(0) instanceof JSONObject) {
+							Map<String, Object> keyMap = new LinkedHashMap<>();
+							jObj = jsArr.getJSONObject(i);
+							keyMap.put("@id", jObj.getString("@id"));
+							keyMap.put("prefLabel", jObj.get("prefLabel"));
+							keyList.add(keyMap);
+						} else if (jsArr.get(0) instanceof String) {
+							sKeyList.add(jsArr.getString(i));
+						}
 					}
-					rdf.put(key, keyList);
+					if (!sKeyList.isEmpty()) {
+						rdf.put(key, sKeyList);
+					}
+					if (!keyList.isEmpty()) {
+						rdf.put(key, keyList);
+					}
+					play.Logger.debug("key=" + key + "has been added");
 				} else if (jsonObject.get(key) instanceof String) {
 					Object object = jsonObject.get(key);
 					rdf.put(key, object.toString());
+					play.Logger.debug("key=" + key + "has been added");
 				}
 			}
 
@@ -489,4 +504,5 @@ public class Metadata2Helper {
 
 		return metadata2Map;
 	}
+
 }
