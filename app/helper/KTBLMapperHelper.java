@@ -155,11 +155,18 @@ public class KTBLMapperHelper {
 	 * @return true if a KTBL block is present in string, otherwise false
 	 */
 	public static boolean containsKtblBlock(String json) {
+		String[] ktblElements = { "livestock_category", "ventilation_system",
+				"livestock_production", "housing_systems", "additional_housing_systems",
+				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
+				"project_title", "test_design", "info", "relatedDatasets",
+				"recordingPeriod" };
+
 		try {
 			JSONObject jo = new JSONObject(json);
-			if (jo.has("info") && jo.getJSONObject("info").has("ktbl")
-					|| jo.has("relatedDatasets") || jo.has("recordingPeriod")) {
-				return true;
+			for (String element : ktblElements) {
+				if (jo.has(element)) {
+					return true;
+				}
 			}
 		} catch (JSONException e) {
 			play.Logger.debug("JSONException," + e);
