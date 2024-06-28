@@ -912,16 +912,4 @@ public class Helper {
 		return mdStream.toString().trim().replace("&quot;", "\"");
 	}
 
-	public static boolean containsInfoByKtblBlock(String json) {
-		try {
-			JSONObject jo = new JSONObject(json);
-			if (jo.has("info") && jo.getJSONObject("info").has("ktbl")) {
-				return true;
-			}
-		} catch (JSONException e) {
-			play.Logger.debug("JSONException:getMapFromJSONObject()");
-		}
-		return false;
-	}
-
 }
