@@ -78,8 +78,8 @@ public class ToscienceHelper {
 			}
 
 		} catch (JSONException e) {
-			// Behandlung der JSONException
-			e.printStackTrace();
+
+			play.Logger.debug("JSONException," + e);
 		}
 
 		return allJsonObjects;
@@ -96,6 +96,11 @@ public class ToscienceHelper {
 	static public String getToPersistTosMetadata(String contentJsFile,
 			String pid) {
 		JSONObject ktblAndTos = null;
+		String[] elementsToRemove = { "livestock_category", "ventilation_system",
+				"livestock_production", "housing_systems", "additional_housing_systems",
+				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
+				"project_title", "test_design", "relatedDatasets", "recordingPeriod",
+				"info" };
 		try {
 			String resource_id =
 					new String(Globals.protocol + Globals.server + "/resource/" + pid);
@@ -105,11 +110,13 @@ public class ToscienceHelper {
 			if (resource_id != null) {
 				ktblAndTos.put("id", resource_id);
 			}
-			ktblAndTos.remove("recordingPeriod");
-			ktblAndTos.remove("relatedDatasets");
-			ktblAndTos.remove("info");
+			for (String element : elementsToRemove) {
+				if (ktblAndTos.has(element)) {
+					ktblAndTos.remove(element);
+				}
+			}
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException:getToPersistTosMetadata()");
+			play.Logger.debug("JSONException," + e);
 		}
 
 		return ktblAndTos.toString();
@@ -133,7 +140,7 @@ public class ToscienceHelper {
 			}
 
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException:getToPersistTosMetadata()");
+			play.Logger.debug("JSONException," + e);
 		}
 		return map;
 	}

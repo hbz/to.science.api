@@ -10,6 +10,8 @@ import java.util.Map;
 import java.io.FileNotFoundException;
 import org.json.JSONObject;
 import play.mvc.Http.MultipartFormData.FilePart;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import java.io.IOException;
 import models.Globals;
@@ -69,37 +71,49 @@ public class KTBLMapperHelper {
 	static public String getToPersistKtblMetadata(String contentJsFile,
 			String pid) {
 
-		JSONObject wantedKtblMetadata = null;
-		JSONObject allKtblMetadata = null;
+		JSONObject ktbl = new JSONObject();
+		JSONObject result = new JSONObject();
+		JSONObject infoObject = new JSONObject();
+		JSONObject ktblAndTos = null;
+
+		String[] elementsToPut = { "livestock_category", "ventilation_system",
+				"livestock_production", "housing_systems", "additional_housing_systems",
+				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
+				"project_title", "test_design", "relatedDatasets", "recordingPeriod" };
 
 		try {
 			String resource_id =
 					new String(Globals.protocol + Globals.server + "/resource/" + pid);
+			result.put("id", resource_id);
 
-			allKtblMetadata = new JSONObject(contentJsFile);
-			wantedKtblMetadata = new JSONObject();
-			play.Logger.debug("resource_id= " + resource_id);
-			if (resource_id != null) {
-				wantedKtblMetadata.put("id", resource_id);
+			ktblAndTos = new JSONObject(contentJsFile);
+			for (String element : elementsToPut) {
+				if (element == "relatedDatasets" || element == "recordingPeriod") {
+					result.put(element, (JSONArray) ktblAndTos.get(element));
+					continue;
+				}
+				if (ktblAndTos.has(element)) {
+					Object value = ktblAndTos.get(element);
+					if (value instanceof JSONArray) {
+						JSONArray array = (JSONArray) value;
+						ktbl.put(element, array);
+					} else {
+						ktbl.put(element, value);
+					}
+				}
+			}
+			if (!ktblAndTos.has("info")) {
+				infoObject.put("ktbl", ktbl);
+				result.put("info", infoObject);
+			} else {
+				result.put("info", ktblAndTos.get("info"));
 			}
 
-			if (allKtblMetadata.has("recordingPeriod")) {
-				wantedKtblMetadata.put("recordingPeriod",
-						allKtblMetadata.getJSONArray("recordingPeriod"));
-			}
-			if (allKtblMetadata.has("relatedDatasets")) {
-				wantedKtblMetadata.put("relatedDatasets",
-						allKtblMetadata.getJSONArray("relatedDatasets"));
-			}
-			if (allKtblMetadata.has("info")) {
-				wantedKtblMetadata.put("info", allKtblMetadata.get("info"));
-			}
-
-		} catch (Exception e) {
-			play.Logger.debug("Unable to create JSONObject");
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException," + e);
 		}
 
-		return wantedKtblMetadata.toString();
+		return result.toString();
 	}
 
 	/**
@@ -122,7 +136,7 @@ public class KTBLMapperHelper {
 			}
 
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException:getMapFromJSONObject()");
+			play.Logger.debug("JSONException," + e);
 		}
 
 		return map;
@@ -143,7 +157,7 @@ public class KTBLMapperHelper {
 				return true;
 			}
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException:getMapFromJSONObject()");
+			play.Logger.debug("JSONException," + e);
 		}
 		return false;
 	}
