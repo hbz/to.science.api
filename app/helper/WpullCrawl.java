@@ -490,7 +490,7 @@ public class WpullCrawl {
 					.convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
 			// Maskiere Sonderzeichen des Regulären Ausdrucks
 			String regExp2 = urlAscii;
-			regExp2 = regExp2.replaceAll("[?]", "\\?").replaceAll("[^]", "\\^")
+			regExp2 = regExp2.replaceAll("[?]", "\\?").replaceAll("[\\^]", "\\^")
 					.replaceAll("[$]", "\\$").replaceAll("[.]", "\\.")
 					.replaceAll("[*]", "\\*").replaceAll("[|]", "\\|")
 					.replaceAll("[+]", "\\+");
