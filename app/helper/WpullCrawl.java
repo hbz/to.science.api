@@ -488,6 +488,13 @@ public class WpullCrawl {
 		try {
 			String urlAscii = WebgatherUtils
 					.convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
+			// Maskiere Sonderzeichen des Regulären Ausdrucks in der URL
+			urlAscii = urlAscii.replaceAll("?", "\\?").replaceAll("^", "\\^")
+					.replaceAll("$", "\\$").replaceAll(".", "\\.").replaceAll("*", "\\*")
+					.replaceAll("|", "\\|").replaceAll("+", "\\+");
+			urlAscii = urlAscii.replaceAll("(", "\\(").replaceAll(")", "\\)")
+					.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll("{", "\\{")
+					.replaceAll("}", "\\}");
 			String regExp2 = urlAscii;
 			Pattern pattern2 = Pattern.compile(regExp2);
 			Matcher matcher2 = null;
