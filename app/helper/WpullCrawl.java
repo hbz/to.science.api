@@ -34,10 +34,13 @@ import actions.Modify;
 import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -208,6 +211,13 @@ public class WpullCrawl {
 		try {
 			String executeCommand =
 					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
+			AgentIdSelection agentId = conf.getAgentIdSelection();
+			executeCommand =
+					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
+			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
+				executeCommand = executeCommand
+						.concat(" " + conf.getCookie().replaceAll(" ", "%20"));
+			}
 			String[] execArr = executeCommand.split(" ");
 			// unmask spaces in exec command
 			for (int i = 0; i < execArr.length; i++) {
@@ -261,6 +271,16 @@ public class WpullCrawl {
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + urlAscii);
 		ArrayList<String> domains = conf.getDomains();
+		// Add hostnames from cdn precrawl textfile
+		List<String> hostnames = new ArrayList<>();
+		try {
+			hostnames = Files.readAllLines(
+					new File(crawlDir.toString() + "/hostnames.txt").toPath());
+		} catch (IOException e) {
+			WebgatherLogger.warn("File hostnames.txt can not be opened!",
+					e.toString());
+		}
+		domains.addAll(hostnames);
 		if (domains.size() > 0) {
 			sb.append(" --span-hosts");
 			sb.append(" --hostnames=" + host);
@@ -278,6 +298,7 @@ public class WpullCrawl {
 				}
 			}
 		}
+
 		if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
 			sb.append(
 					" --header=Cookie:%20" + conf.getCookie().replaceAll(" ", "%20"));
