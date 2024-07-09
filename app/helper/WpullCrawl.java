@@ -234,6 +234,12 @@ public class WpullCrawl {
 			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+			// Warte 1 Sekunde, bis hostnames.txt geschrieben wurde
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
 			// Bereite Kommando für den Hauptcrawl vor
 			executeCommand = buildExecCommand();
 			WpullThread wpullThread = new WpullThread(pb, 1);
@@ -273,6 +279,8 @@ public class WpullCrawl {
 		ArrayList<String> domains = conf.getDomains();
 		// Add hostnames from cdn precrawl textfile
 		List<String> hostnames = new ArrayList<>();
+		WebgatherLogger.info(
+				"Adding hostnames from file " + crawlDir.toString() + "/hostnames.txt");
 		try {
 			hostnames = Files.readAllLines(
 					new File(crawlDir.toString() + "/hostnames.txt").toPath());
