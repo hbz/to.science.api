@@ -234,12 +234,6 @@ public class WpullCrawl {
 			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-			// Warte 1 Sekunde, bis hostnames.txt geschrieben wurde
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
 			// Bereite Kommando für den Hauptcrawl vor
 			executeCommand = buildExecCommand();
 			WpullThread wpullThread = new WpullThread(pb, 1);
@@ -248,6 +242,7 @@ public class WpullCrawl {
 			wpullThread.setCrawlDir(crawlDir);
 			wpullThread.setOutDir(resultDir);
 			wpullThread.setWarcFilename(warcFilename);
+			wpullThread.setHost(host);
 			wpullThread.setLocalPath(localpath);
 			wpullThread.setExecuteCommand(executeCommand);
 			wpullThread.setLogFileCDN(log);
@@ -271,48 +266,12 @@ public class WpullCrawl {
 	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
-		String zusDomain = null;
-		String zusHost = null;
-		boolean noParent = true;
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + urlAscii);
-		ArrayList<String> domains = conf.getDomains();
-		// Add hostnames from cdn precrawl textfile
-		List<String> hostnames = new ArrayList<>();
-		WebgatherLogger.info(
-				"Adding hostnames from file " + crawlDir.toString() + "/hostnames.txt");
-		try {
-			hostnames = Files.readAllLines(
-					new File(crawlDir.toString() + "/hostnames.txt").toPath());
-		} catch (IOException e) {
-			WebgatherLogger.warn("File hostnames.txt can not be opened!",
-					e.toString());
-		}
-		domains.addAll(hostnames);
-		if (domains.size() > 0) {
-			sb.append(" --span-hosts");
-			sb.append(" --hostnames=" + host);
-			for (int i = 0; i < domains.size(); i++) {
-				zusDomain = domains.get(i);
-				zusHost = zusDomain.replaceAll("^http://", "")
-						.replaceAll("^https://", "").replaceAll("/.*$", "");
-				WebgatherLogger.debug("zusHost=" + zusHost);
-				if (zusHost.equalsIgnoreCase(host)) {
-					WebgatherLogger.debug("Es soll von der gesamten Domain " + host
-							+ " eingesammelt werden, die Option --no-parent wird entfernt.");
-					noParent = false;
-				} else {
-					sb.append("," + zusHost);
-				}
-			}
-		}
 
 		if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
 			sb.append(
 					" --header=Cookie:%20" + conf.getCookie().replaceAll(" ", "%20"));
-		}
-		if (noParent) {
-			sb.append(" --no-parent");
 		}
 
 		sb.append(" --recursive");
