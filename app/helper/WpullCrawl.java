@@ -34,10 +34,13 @@ import actions.Modify;
 import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -208,12 +211,19 @@ public class WpullCrawl {
 		try {
 			String executeCommand =
 					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
+			AgentIdSelection agentId = conf.getAgentIdSelection();
+			executeCommand =
+					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
+			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
+				executeCommand = executeCommand
+						.concat(" " + conf.getCookie().replaceAll(" ", "%20"));
+			}
 			String[] execArr = executeCommand.split(" ");
 			// unmask spaces in exec command
-			for (int i = 0; i < execArr.length; i++) {
-				execArr[i] = execArr[i].replaceAll("%20", " ");
-			}
-			executeCommand = executeCommand.replaceAll("%20", " ");
+			// for (int i = 0; i < execArr.length; i++) {
+			// execArr[i] = execArr[i].replaceAll("%20", " ");
+			// }
+			// executeCommand = executeCommand.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger
 					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
@@ -232,6 +242,7 @@ public class WpullCrawl {
 			wpullThread.setCrawlDir(crawlDir);
 			wpullThread.setOutDir(resultDir);
 			wpullThread.setWarcFilename(warcFilename);
+			wpullThread.setHost(host);
 			wpullThread.setLocalPath(localpath);
 			wpullThread.setExecuteCommand(executeCommand);
 			wpullThread.setLogFileCDN(log);
@@ -255,35 +266,12 @@ public class WpullCrawl {
 	 * @return the ExecCommand for wpull
 	 */
 	private String buildExecCommand() {
-		String zusDomain = null;
-		String zusHost = null;
-		boolean noParent = true;
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawler + " " + urlAscii);
-		ArrayList<String> domains = conf.getDomains();
-		if (domains.size() > 0) {
-			sb.append(" --span-hosts");
-			sb.append(" --hostnames=" + host);
-			for (int i = 0; i < domains.size(); i++) {
-				zusDomain = domains.get(i);
-				zusHost = zusDomain.replaceAll("^http://", "")
-						.replaceAll("^https://", "").replaceAll("/.*$", "");
-				WebgatherLogger.debug("zusHost=" + zusHost);
-				if (zusHost.equalsIgnoreCase(host)) {
-					WebgatherLogger.debug("Es soll von der gesamten Domain " + host
-							+ " eingesammelt werden, die Option --no-parent wird entfernt.");
-					noParent = false;
-				} else {
-					sb.append("," + zusHost);
-				}
-			}
-		}
+
 		if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
 			sb.append(
 					" --header=Cookie:%20" + conf.getCookie().replaceAll(" ", "%20"));
-		}
-		if (noParent) {
-			sb.append(" --no-parent");
 		}
 
 		sb.append(" --recursive");
