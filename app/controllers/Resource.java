@@ -97,6 +97,7 @@ import views.html.oai.mets;
 import views.html.oai.oaidc;
 import views.html.oai.wgl;
 import views.html.tags.getTitle;
+import views.Helper;
 
 /**
  * In dieser Klasse werden API-Calls (Endpoint-Calls) auf Ressourcen (sub-path
