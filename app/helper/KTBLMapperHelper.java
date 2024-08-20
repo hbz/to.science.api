@@ -97,11 +97,16 @@ public class KTBLMapperHelper {
 			for (String element : elementsToPut) {
 				if (ktblAndTos.has(element)) {
 					Object value = ktblAndTos.get(element);
-					if (value instanceof JSONArray) {
+					if (value instanceof JSONArray
+							&& (element.contains("additional_housing_systems")
+									|| element.contains("emissions")
+									|| element.contains("emission_reduction_methods")
+									|| element.contains("emi_measurement_techniques"))) {
 						JSONArray array = (JSONArray) value;
 						ktbl.put(element, array);
 					} else {
 						ktbl.put(element, value);
+						ktbl.put(element, Metadata2Helper.cleanString(value.toString()));
 					}
 				}
 			}

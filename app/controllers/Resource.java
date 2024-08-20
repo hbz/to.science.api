@@ -465,26 +465,22 @@ public class Resource extends MyController {
 				JSONObject allMetadata = null;
 				JSONObject toscienceJson = null;
 
-				if (!readNode.getContentType().contains("file")
-						&& !readNode.getContentType().contains("part")) {
-					play.Logger.debug("toscienceJson will be mapped");
+				play.Logger.debug("toscienceJson will be mapped");
 
-					RDFFormat format = RDFFormat.NTRIPLES;
-					Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode, format,
-							request().body().asText());
+				RDFFormat format = RDFFormat.NTRIPLES;
+				Map<String, Object> rdf =
+						RdfHelper.getRdfAsMap(readNode, format, request().body().asText());
 
-					allMetadata = new JSONObject(new JSONObject(rdf).toString());
+				allMetadata = new JSONObject(new JSONObject(rdf).toString());
 
-					String toscienceMetadata = ToscienceHelper
-							.getToPersistTosMetadata(allMetadata.toString(), pid);
+				String toscienceMetadata = ToscienceHelper
+						.getToPersistTosMetadata(allMetadata.toString(), pid);
 
-					toscienceJson = ToscienceHelper
-							.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
+				toscienceJson = ToscienceHelper
+						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
-					modify.updateMetadata("toscience", readNode,
-							toscienceJson.toString());
-					play.Logger.debug("Done toscienceJson Mapping");
-				}
+				modify.updateMetadata("toscience", readNode, toscienceJson.toString());
+				play.Logger.debug("Done toscienceJson Mapping");
 
 				/**
 				 * KTBL
