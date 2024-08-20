@@ -69,6 +69,9 @@ public class Metadata2Helper {
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
 			JSONObject tosAndKtblContent, Node n) {
 		try {
+			play.Logger.debug(
+					"getRdfFromToscience(), tosAndKtblContent= " + tosAndKtblContent);
+
 			AdHocUriProvider ahu = new AdHocUriProvider();
 			JsonMapper jsmapper = new JsonMapper();
 			jsmapper.node = n;
@@ -345,7 +348,6 @@ public class Metadata2Helper {
 				play.Logger.debug("issued=" + issued.toString());
 				rdf.put("issued", issued.toString());
 			}
-
 			// KTBL-Teil
 			if (tosAndKtblContent.has("info")) {
 				play.Logger.debug("Found info");
@@ -354,40 +356,123 @@ public class Metadata2Helper {
 						.getJSONObject("ktbl").has("project_title");
 				play.Logger.debug("hasProjectTitle=" + hasProjectTitle);
 				if (hasProjectTitle) {
-					String projectTitle = tosAndKtblContent.getJSONObject("info")
+					String project_title = tosAndKtblContent.getJSONObject("info")
 							.getJSONObject("ktbl").getString("project_title");
-					rdf.put("project_title", projectTitle);
+					rdf.put("project_title", project_title);
 				}
+
+				// test_design
+				boolean hasTestDesign = tosAndKtblContent.getJSONObject("info")
+						.getJSONObject("ktbl").has("test_design");
+				play.Logger.debug("hasTestDesign=" + hasTestDesign);
+				if (hasTestDesign) {
+					String test_design = tosAndKtblContent.getJSONObject("info")
+							.getJSONObject("ktbl").getString("test_design");
+					rdf.put("test_design", test_design);
+				}
+
 				// livestock_category
 				boolean hasLivestock_category = tosAndKtblContent.getJSONObject("info")
 						.getJSONObject("ktbl").has("livestock_category");
 				play.Logger.debug("hasLivestock_category=" + hasLivestock_category);
 				if (hasLivestock_category) {
-					String livestock = tosAndKtblContent.getJSONObject("info")
+					String livestock_category = tosAndKtblContent.getJSONObject("info")
 							.getJSONObject("ktbl").getString("livestock_category");
-					rdf.put("livestock", livestock);
+					rdf.put("livestock_category", livestock_category);
 				}
+
+				// livestock_production
+				boolean hasLivestock_production =
+						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
+								.has("livestock_production");
+				play.Logger.debug("hasLivestock_production=" + hasLivestock_production);
+				if (hasLivestock_production) {
+					String livestock_production = tosAndKtblContent.getJSONObject("info")
+							.getJSONObject("ktbl").getString("livestock_production");
+					rdf.put("livestock_production", livestock_production);
+				}
+
 				// ventilation_system
 				boolean hasVentilation_system = tosAndKtblContent.getJSONObject("info")
 						.getJSONObject("ktbl").has("ventilation_system");
 				play.Logger.debug("hasVentilation_system=" + hasVentilation_system);
-				if (hasLivestock_category) {
-					String ventilation = tosAndKtblContent.getJSONObject("info")
+				if (hasLivestock_production) {
+					String ventilation_system = tosAndKtblContent.getJSONObject("info")
 							.getJSONObject("ktbl").getString("ventilation_system");
-					rdf.put("ventilation", ventilation);
+					rdf.put("ventilation_system", ventilation_system);
 				}
+
 				// housing_systems
 				boolean hasHousing_systems = tosAndKtblContent.getJSONObject("info")
 						.getJSONObject("ktbl").has("housing_systems");
 				play.Logger.debug("hasHousing_systems=" + hasHousing_systems);
-				if (hasLivestock_category) {
-					String housing = tosAndKtblContent.getJSONObject("info")
+				if (hasLivestock_production) {
+					String housing_systems = tosAndKtblContent.getJSONObject("info")
 							.getJSONObject("ktbl").getString("housing_systems");
-					rdf.put("housing", housing);
+					rdf.put("housing_systems", housing_systems);
+				}
+
+				// additional_housing_systems
+				boolean hasAdditionalHousingSystems =
+						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
+								.has("additional_housing_systems");
+				if (hasAdditionalHousingSystems) {
+					JSONArray additionalHousingSystemsArray =
+							tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
+									.getJSONArray("additional_housing_systems");
+					List<String> additionalHousingSystems = new ArrayList<>();
+					for (int i = 0; i < additionalHousingSystemsArray.length(); i++) {
+						additionalHousingSystems
+								.add(additionalHousingSystemsArray.getString(i));
+					}
+					rdf.put("additional_housing_systems", additionalHousingSystems);
+				}
+
+				// emi_measurement_techniques
+				boolean hasEmi_measurement_techniques =
+						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
+								.has("emi_measurement_techniques");
+				if (hasEmi_measurement_techniques) {
+					JSONArray emi_measurement_techniquesArray =
+							tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
+									.getJSONArray("emi_measurement_techniques");
+					List<String> emi_measurement_techniques = new ArrayList<>();
+					for (int i = 0; i < emi_measurement_techniquesArray.length(); i++) {
+						emi_measurement_techniques
+								.add(emi_measurement_techniquesArray.getString(i));
+					}
+					rdf.put("emi_measurement_techniques", emi_measurement_techniques);
+				}
+				// emissions
+				boolean hasEmissions = tosAndKtblContent.getJSONObject("info")
+						.getJSONObject("ktbl").has("emissions");
+				if (hasEmissions) {
+					JSONArray emissionsArray = tosAndKtblContent.getJSONObject("info")
+							.getJSONObject("ktbl").getJSONArray("emissions");
+					List<String> emissions = new ArrayList<>();
+					for (int i = 0; i < emissionsArray.length(); i++) {
+						emissions.add(emissionsArray.getString(i));
+					}
+					rdf.put("emissions", emissions);
+				}
+
+				// emission_reduction_methods
+				boolean hasEmission_reduction_methods =
+						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
+								.has("emission_reduction_methods");
+				if (hasEmission_reduction_methods) {
+					JSONArray ermArray = tosAndKtblContent.getJSONObject("info")
+							.getJSONObject("ktbl").getJSONArray("emission_reduction_methods");
+					List<String> emission_reduction_methods = new ArrayList<>();
+					for (int i = 0; i < ermArray.length(); i++) {
+						emission_reduction_methods.add(ermArray.getString(i));
+					}
+					rdf.put("emission_reduction_methods", emission_reduction_methods);
 				}
 			}
-
 			metadata2Map.put("metadata2", rdf);
+			play.Logger.debug(
+					"getRdfFromToscience.metadata2Map()" + metadata2Map.toString());
 			return metadata2Map;
 		} catch (Exception e) {
 			throw new RuntimeException(
