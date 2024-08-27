@@ -13,6 +13,7 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import org.json.JSONException;
 import java.io.IOException;
 import models.Globals;
+import org.json.JSONArray;
 
 /**
  * 
@@ -68,37 +69,59 @@ public class KTBLMapperHelper {
 	static public String getToPersistKtblMetadata(String contentJsFile,
 			String pid) {
 
-		JSONObject wantedKtblMetadata = null;
-		JSONObject allKtblMetadata = null;
+		JSONObject ktbl = new JSONObject();
+		JSONObject result = new JSONObject();
+		JSONObject infoObject = new JSONObject();
+		JSONObject ktblAndTos = null;
+
+		String[] elementsToPut = { "livestock_category", "ventilation_system",
+				"livestock_production", "housing_systems", "additional_housing_systems",
+				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
+				"project_title", "test_design", "info" };
 
 		try {
 			String resource_id =
 					new String(Globals.protocol + Globals.server + "/resource/" + pid);
+			result.put("id", resource_id);
 
-			allKtblMetadata = new JSONObject(contentJsFile);
-			wantedKtblMetadata = new JSONObject();
-			play.Logger.debug("resource_id= " + resource_id);
-			if (resource_id != null) {
-				wantedKtblMetadata.put("id", resource_id);
+			ktblAndTos = new JSONObject(contentJsFile);
+			if (ktblAndTos.has("relatedDatasets")) {
+				result.put("relatedDatasets",
+						(JSONArray) ktblAndTos.get("relatedDatasets"));
 			}
-
-			if (allKtblMetadata.has("recordingPeriod")) {
-				wantedKtblMetadata.put("recordingPeriod",
-						allKtblMetadata.getJSONArray("recordingPeriod"));
-			}
-			if (allKtblMetadata.has("relatedDatasets")) {
-				wantedKtblMetadata.put("relatedDatasets",
-						allKtblMetadata.getJSONArray("relatedDatasets"));
-			}
-			if (allKtblMetadata.has("info")) {
-				wantedKtblMetadata.put("info", allKtblMetadata.get("info"));
+			if (ktblAndTos.has("recordingPeriod")) {
+				result.put("recordingPeriod",
+						(JSONArray) ktblAndTos.get("recordingPeriod"));
 			}
 
-		} catch (Exception e) {
-			play.Logger.debug("Unable to create JSONObject");
+			for (String element : elementsToPut) {
+				if (ktblAndTos.has(element)) {
+					Object value = ktblAndTos.get(element);
+					if (value instanceof JSONArray
+							&& (element.contains("additional_housing_systems")
+									|| element.contains("emissions")
+									|| element.contains("emission_reduction_methods")
+									|| element.contains("emi_measurement_techniques"))) {
+						JSONArray array = (JSONArray) value;
+						ktbl.put(element, array);
+					} else {
+						ktbl.put(element, value);
+						ktbl.put(element, Metadata2Helper.cleanString(value.toString()));
+					}
+				}
+			}
+			if (!ktblAndTos.has("info")) {
+				infoObject.put("ktbl", ktbl);
+				result.put("info", infoObject);
+			} else {
+				result.put("info", ktblAndTos.get("info"));
+			}
+
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException," + e);
 		}
 
-		return wantedKtblMetadata.toString();
+		return result.toString();
 	}
 
 	/**
@@ -125,6 +148,33 @@ public class KTBLMapperHelper {
 		}
 
 		return map;
+	}
+
+	/**
+	 * Method checks if a string with a json structure contains a KTBL block or
+	 * not
+	 * 
+	 * @param json
+	 * @return true if a KTBL block is present in string, otherwise false
+	 */
+	public static boolean containsKtblBlock(String json) {
+		String[] ktblElements = { "livestock_category", "ventilation_system",
+				"livestock_production", "housing_systems", "additional_housing_systems",
+				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
+				"project_title", "test_design", "info", "relatedDatasets",
+				"recordingPeriod" };
+
+		try {
+			JSONObject jo = new JSONObject(json);
+			for (String element : ktblElements) {
+				if (jo.has(element)) {
+					return true;
+				}
+			}
+		} catch (JSONException e) {
+			play.Logger.debug("JSONException," + e);
+		}
+		return false;
 	}
 
 }
