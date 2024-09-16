@@ -85,14 +85,6 @@ public class KTBLMapperHelper {
 			result.put("id", resource_id);
 
 			ktblAndTos = new JSONObject(contentJsFile);
-			if (ktblAndTos.has("relatedDatasets")) {
-				result.put("relatedDatasets",
-						(JSONArray) ktblAndTos.get("relatedDatasets"));
-			}
-			if (ktblAndTos.has("recordingPeriod")) {
-				result.put("recordingPeriod",
-						(JSONArray) ktblAndTos.get("recordingPeriod"));
-			}
 
 			for (String element : elementsToPut) {
 				if (ktblAndTos.has(element)) {
