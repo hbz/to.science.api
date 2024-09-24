@@ -412,6 +412,14 @@ public class Helper {
 		return result;
 	}
 
+	/**
+	 * This method is buggy and incomplete, please do not use anymore!
+	 * 
+	 * @deprecated
+	 * @param h
+	 * @return
+	 */
+	// TODO: remove method
 	public static List<Map<String, Object>> listContributors(
 			Map<String, Object> h) {
 		List<Map<String, Object>> result = new ArrayList<>();
@@ -662,7 +670,9 @@ public class Helper {
 	}
 
 	/**
-	 * Get content of Json other-Array from toscience.json
+	 * Get content of Json other-Array from toscience.json Method to provide field
+	 * "others" (persons) in correct sequence and with roles from json instead of
+	 * N-triples
 	 * 
 	 * @param node
 	 * @return List
@@ -674,6 +684,35 @@ public class Helper {
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
 			jNode = jn.findValue("other");
+
+			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			for (int i = 0; i < cardNode.size(); i++) {
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+						+ cardNode.get(i).findValues("role").toString();
+				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " "));
+			}
+		} catch (IOException e) {
+			play.Logger.warn(e.getMessage());
+		}
+		return othersList;
+	}
+
+	/**
+	 * Get content of Json contributor-Array from toscience.json Method to provide
+	 * field "contributor" (persons) in correct sequence and with roles from json
+	 * instead of N-triples
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static List<String> getContributors(Node node) {
+		String mdStream = getTosJson(node);
+		List<String> othersList = new ArrayList<>();
+		JsonNode jNode = null;
+		try {
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue("contributor");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
