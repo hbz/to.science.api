@@ -746,6 +746,7 @@ public class Helper {
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+						+ cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " "));
