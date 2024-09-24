@@ -4,12 +4,13 @@
 @(node:Node,hit:Map[String,Object],context:List[String])
 
 @if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
-<!--  <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
-<thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody> -->
+<p>In use</p>
+<table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
+<thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody>
 
 @ktblRow(node)
 
-<!--  </tbody></table> -->
+</tbody></table>
 }
 
 
