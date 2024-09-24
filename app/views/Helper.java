@@ -691,7 +691,7 @@ public class Helper {
 						+ cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " "));
+						.replace("_", " ").replace(",", ", "));
 			}
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
@@ -721,7 +721,7 @@ public class Helper {
 						+ cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " "));
+						.replace("_", " ").replace(",", ", "));
 			}
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
@@ -751,7 +751,7 @@ public class Helper {
 						+ cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " "));
+						.replace("_", " ").replace(",", ", "));
 			}
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());

@@ -272,6 +272,23 @@
 				}
 			}
 		}
+		
+		case "emissions"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+ 			 	<tr class="ktbl:emimin">
+				<td style="display:none;">"80"</td>
+				<td class="field-label">Emissions</td>
+				<td class="field-item">
+				  @for(rDs <- views.Helper.getKtblEmissions(node, "emissions")){
+				  @rDs <br>
+				  }
+				</td></tr>
+				}
+			 }
+		}
+		
 		case "creator"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}
