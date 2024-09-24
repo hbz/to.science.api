@@ -670,20 +670,20 @@ public class Helper {
 	}
 
 	/**
-	 * Get content of Json other-Array from toscience.json Method to provide field
-	 * "others" (persons) in correct sequence and with roles from json instead of
-	 * N-triples
+	 * Get content of Json creator-Array from toscience.json Method to provide
+	 * field "creator" (persons) in correct sequence and with roles from json
+	 * instead of N-triples
 	 * 
 	 * @param node
 	 * @return List
 	 */
-	public static List<String> getOthers(Node node) {
+	public static List<String> getCreators(Node node) {
 		String mdStream = getTosJson(node);
 		List<String> othersList = new ArrayList<>();
 		JsonNode jNode = null;
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
-			jNode = jn.findValue("other");
+			jNode = jn.findValue("creator");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
@@ -713,6 +713,35 @@ public class Helper {
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
 			jNode = jn.findValue("contributor");
+
+			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			for (int i = 0; i < cardNode.size(); i++) {
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+						+ cardNode.get(i).findValues("role").toString();
+				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " "));
+			}
+		} catch (IOException e) {
+			play.Logger.warn(e.getMessage());
+		}
+		return othersList;
+	}
+
+	/**
+	 * Get content of Json other-Array from toscience.json Method to provide field
+	 * "others" (persons) in correct sequence and with roles from json instead of
+	 * N-triples
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static List<String> getOthers(Node node) {
+		String mdStream = getTosJson(node);
+		List<String> othersList = new ArrayList<>();
+		JsonNode jNode = null;
+		try {
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue("other");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
