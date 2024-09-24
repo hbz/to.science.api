@@ -278,7 +278,7 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
  			 	<tr class="ktbl:emimin">
-				<td style="display:none;">"80"</td>
+				<td style="display:none;">"500"</td>
 				<td class="field-label">Livestock category</td>
 				<td class="field-item">
 				  @views.Helper.getLivestockCategory(node:Node)
@@ -292,10 +292,40 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
  			 	<tr class="ktbl:emimin">
-				<td style="display:none;">"80"</td>
+				<td style="display:none;">"490"</td>
 				<td class="field-label">Livestock production</td>
 				<td class="field-item">
 				  @views.Helper.getLivestockProduction(node:Node)
+				</td></tr>
+				}
+			 }
+		}
+		
+		case "housing_systems"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+ 			 	<tr class="ktbl:emimin">
+				<td style="display:none;">"480"</td>
+				<td class="field-label">Housing Systems</td>
+				<td class="field-item">
+				  @views.Helper.getHousingSystems(node:Node)
+				</td></tr>
+				}
+			 }
+		}
+		
+		case "additional_housing_systems"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+ 			 	<tr class="ktbl:emimin">
+				<td style="display:none;">"470"</td>
+				<td class="field-label">Additional Housing Systems</td>
+				<td class="field-item">
+				  @for(rDs <- views.Helper.getKtblArrayValues(node, "additional_housing_systems")){
+				    @rDs <br>
+		   			}
 				</td></tr>
 				}
 			 }
@@ -306,7 +336,7 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
  			 	<tr class="ktbl:emimin">
-				<td style="display:none;">"80"</td>
+				<td style="display:none;">"100"</td>
 				<td class="field-label">Emissions</td>
 				<td class="field-item">
 				  @for(rDs <- views.Helper.getKtblEmissions(node, "emissions")){
@@ -322,7 +352,7 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
  			 	<tr class="ktbl:emimin">
-				<td style="display:none;">"80"</td>
+				<td style="display:none;">"150"</td>
 				<td class="field-label">Emission reduction methods</td>
 				<td class="field-item">
 				  @for(rDs <- views.Helper.getKtblArrayValues(node, "emission_reduction_methods")){
