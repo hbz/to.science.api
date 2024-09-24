@@ -272,6 +272,24 @@
 				}
 			}
 		}
+		case "creator"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(other <-views.Helper.getCreators(node)){
+						@other <br />
+						}
+					</table>
+					</td>
+				</tr>
+				}
+			}
+		}
 		case "contributor"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}
