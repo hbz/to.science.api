@@ -289,6 +289,22 @@
 			 }
 		}
 		
+		case "emission_reduction_methods"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+ 			 	<tr class="ktbl:emimin">
+				<td style="display:none;">"80"</td>
+				<td class="field-label">Emissions</td>
+				<td class="field-item">
+				  @for(rDs <- views.Helper.getKtblArrayValues()node, "emission_reduction_methods")){
+				  @rDs <br>
+				  }
+				</td></tr>
+				}
+			 }
+		}
+		
 		case "creator"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}

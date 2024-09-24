@@ -942,6 +942,7 @@ public class Helper {
 				}
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
+				return null;
 			}
 		}
 		return valueList;
