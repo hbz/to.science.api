@@ -914,7 +914,7 @@ public class Helper {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				value = jn.findValue("project_title").toString().replace("_", " ")
-						.replace("\"", "");
+						.replace("\"", "").replace("emim", "EmiM").replace("dat", "DaT");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
