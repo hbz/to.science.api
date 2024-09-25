@@ -693,10 +693,11 @@ public class Helper {
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", "));
 			}
+			return othersList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
-		return othersList;
+		return null;
 	}
 
 	/**
@@ -723,10 +724,11 @@ public class Helper {
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", "));
 			}
+			return othersList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
-		return othersList;
+		return null;
 	}
 
 	/**
@@ -753,10 +755,11 @@ public class Helper {
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", "));
 			}
+			return othersList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
-		return othersList;
+		return null;
 	}
 
 	/**
@@ -777,11 +780,12 @@ public class Helper {
 					valueList.add(nextNode.asText().replace("\\u2019", "'"));
 
 				}
+				return valueList;
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
-		return valueList;
+		return null;
 	}
 
 	/**
@@ -940,12 +944,12 @@ public class Helper {
 					valueList.add(nextNode.asText().replace("_", " ").replace("\"", ""));
 
 				}
+				return valueList;
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
-				return null;
 			}
 		}
-		return valueList;
+		return null;
 	}
 
 	/**
@@ -968,11 +972,12 @@ public class Helper {
 							.replace("4", "₄").replace("DOUR", "dour"));
 
 				}
+				return valueList;
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
-		return valueList;
+		return null;
 	}
 
 	/**
