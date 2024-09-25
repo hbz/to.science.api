@@ -2,6 +2,9 @@
 
 @import views.Helper
 @import org.elasticsearch.search.aggregations.Aggregations
+@import models.Node
+@(node:Node,hit:Map[String,Object],context:List[String])
+
 
 @(hit:Node,aggregations:Aggregations)
 @pid={@hit.getPid()}
