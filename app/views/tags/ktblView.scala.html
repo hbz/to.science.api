@@ -4,7 +4,6 @@
 @(node:Node,hit:Map[String,Object],context:List[String])
 
 @if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
-<p>ktblView in use</p>
 <!--  <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody> -->
 
@@ -18,7 +17,7 @@
 @if(views.Helper.getLivestockCategory(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Livestock Category</td>
+	<td class="field-label">Livestock category</td>
 	<td class="field-item">
 		@views.Helper.getLivestockCategory(node:Node)
 	</td>
@@ -28,7 +27,7 @@
 @if(views.Helper.getLivestockProduction(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Livestock Production</td>
+	<td class="field-label">Livestock production</td>
 	<td class="field-item">
 		@views.Helper.getLivestockProduction(node:Node)
 	</td>
@@ -38,7 +37,7 @@
 @if(views.Helper.getHousingSystems(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Housing Systems</td>
+	<td class="field-label">Housing systems</td>
 	<td class="field-item">
 		@views.Helper.getHousingSystems(node:Node)
 	</td>
@@ -48,7 +47,7 @@
 @if(views.Helper.getKtblArrayValues(node, "additional_housing_systems")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Additional Housing Systems</td>
+	<td class="field-label">Additional housing systems</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getKtblArrayValues(node, "additional_housing_systems")){
 			@rDs <br>
@@ -61,7 +60,7 @@
 @if(views.Helper.getVentilationSystem(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Ventilation System</td>
+	<td class="field-label">Ventilation system</td>
 	<td class="field-item">
 		@views.Helper.getVentilationSystem(node:Node)
 	</td>
@@ -84,7 +83,7 @@
 @if(views.Helper.getKtblArrayValues(node, "emission_reduction_methods")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Emission Reduction</td>
+	<td class="field-label">Emission reduction</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getKtblArrayValues(node, "emission_reduction_methods")){
 			@rDs <br>
@@ -96,7 +95,7 @@
 @if(views.Helper.getKtblArrayValues(node, "emi_measurement_techniques")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Emi Measurement Techniques</td>
+	<td class="field-label">Emission measurement techniques</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getKtblArrayValues(node, "emi_measurement_techniques")){
 			@rDs <br>
@@ -109,7 +108,7 @@
 @if(views.Helper.getProjectTitle(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Project Title</td>
+	<td class="field-label">Project title</td>
 	<td class="field-item">
 		@views.Helper.getProjectTitle(node:Node)
 	</td>
@@ -119,7 +118,7 @@
 @if(views.Helper.getTestDesign(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Test Design</td>
+	<td class="field-label">Test design</td>
 	<td class="field-item">
 		@views.Helper.getTestDesign(node:Node)
 	</td>
