@@ -3,8 +3,6 @@
 @import views.Helper
 @import org.elasticsearch.search.aggregations.Aggregations
 @import models.Node
-@(node:Node,hit:Map[String,Object],context:List[String])
-
 
 @(hit:Node,aggregations:Aggregations)
 @pid={@hit.getPid()}
@@ -24,8 +22,8 @@
 					<div class="tab-content">
 				  		<div class="tab-pane active" id="1a">
 				  	
-			@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
-				@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+			@if(views.Helper.mdStreamExists(hit.getPid(), "ktbl")){
+				@tags.ktblView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
 			} else { 
 				@tags.resourceView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
 			}        	</div>
