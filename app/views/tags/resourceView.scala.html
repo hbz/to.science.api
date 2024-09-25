@@ -71,11 +71,9 @@
 				@tableRow(k,hit)
 			}
 		}
-		case _ => {}
-	}
-@if(hit.get("contentType").equals("researchData")){
-	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+	case _ => {}
 }
+
 
 </tbody>
 </table>
