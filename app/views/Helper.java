@@ -648,6 +648,32 @@ public class Helper {
 	}
 
 	/**
+	 * @param node
+	 * @param key
+	 * @return
+	 */
+	public static List<String> getAssociatedDataset(Node node, String key) {
+		String mdStream = getTosJson(node);
+		List<String> valueList = new ArrayList<>();
+		if (mdStream != null) {
+			try {
+				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
+				JsonNode jn = jnAll.findValue(key);
+				Iterator<JsonNode> jIt = jn.elements();
+				while (jIt.hasNext()) {
+					JsonNode nextNode = jIt.next();
+					valueList.add(nextNode.asText().replace("_", " ").replace("\"", ""));
+
+				}
+				return valueList;
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Get complete toscience.json as String
 	 * 
 	 * @param node
