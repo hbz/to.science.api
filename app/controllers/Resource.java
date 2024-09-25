@@ -97,6 +97,7 @@ import views.html.oai.mets;
 import views.html.oai.oaidc;
 import views.html.oai.wgl;
 import views.html.tags.getTitle;
+import views.Helper;
 
 /**
  * In dieser Klasse werden API-Calls (Endpoint-Calls) auf Ressourcen (sub-path
@@ -460,35 +461,43 @@ public class Resource extends MyController {
 				 */
 
 				Node readNode = readNodeOrNull(pid);
+				JSONObject allMetadata = null;
 				JSONObject toscienceJson = null;
-				play.Logger
-						.debug("readNode.getContentType()= " + readNode.getContentType());
-				if (!readNode.getContentType().contains("file")
-						&& !readNode.getContentType().contains("part")) {
 
-					play.Logger.debug("toscienceJson will be mapped");
+				play.Logger.debug("toscienceJson will be mapped");
 
-					RDFFormat format = RDFFormat.NTRIPLES;
-					Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode, format,
-							request().body().asText());
+				RDFFormat format = RDFFormat.NTRIPLES;
+				Map<String, Object> rdf =
+						RdfHelper.getRdfAsMap(readNode, format, request().body().asText());
 
-					play.Logger.debug("rdf=" + rdf.toString());
-					toscienceJson = new JSONObject(new JSONObject(rdf).toString());
+				allMetadata = new JSONObject(new JSONObject(rdf).toString());
 
-					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+				String toscienceMetadata = ToscienceHelper
+						.getToPersistTosMetadata(allMetadata.toString(), pid);
 
-					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
+				toscienceJson = ToscienceHelper
+						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
-					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+				modify.updateMetadata("toscience", readNode, toscienceJson.toString());
+				play.Logger.debug("Done toscienceJson Mapping");
 
-					modify.updateMetadataJson(readNode, toscienceJson.toString());
-					play.Logger
-							.debug("tosciecne from Node" + readNode.getMetadata("toscience"));
-					play.Logger.debug("Done toscienceJson Mapping");
+				/**
+				 * KTBL
+				 */
+
+				if (KTBLMapperHelper.containsKtblBlock(allMetadata.toString())
+						&& Helper.mdStreamExists(pid, "ktbl")) {
+					play.Logger.debug("KTBL will be mapped");
+
+					String ktblMetadata = KTBLMapperHelper.getToPersistKtblMetadata(
+							allMetadata.toString(), readNode.getPid());
+					modify.updateMetadata("ktbl", readNode, ktblMetadata);
+
+					play.Logger.debug("Done KTBL Mapping");
 				}
 
 				/**
-				 * 2. METADATA2
+				 * 3. METADATA2
 				 */
 				String result = modify.updateLobidify2AndEnrichMetadata(pid,
 						request().body().asText());
@@ -561,7 +570,8 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, node -> {
 			try {
 
-				LinkedHashMap<String, Object> rdf = null;
+				LinkedHashMap<String, Object> rdfTos = null;
+				LinkedHashMap<String, Object> rdfKtbl = null;
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
@@ -580,6 +590,7 @@ public class Resource extends MyController {
 
 				String contentOfFile =
 						KTBLMapperHelper.getStringContentFromJsonFile(data);
+				play.Logger.debug("contentOfFile=" + contentOfFile);
 
 				String ktblMetadata = KTBLMapperHelper
 						.getToPersistKtblMetadata(contentOfFile, readNode.getPid());
@@ -609,22 +620,19 @@ public class Resource extends MyController {
 
 				play.Logger.debug("Starting METADATA2 Mapping");
 
-				// rdf = Metadata2Helper
-				// .getRdfFromToscience(new JSONObject(toscienceMetadata), readNode);
-				// gesamte Inhalt der Json-Datei wird hier uebergeben und nicht nur der
-				// toscience-Teil
-				rdf = Metadata2Helper.getRdfFromToscience(new JSONObject(contentOfFile),
-						readNode);
+				rdfTos = Metadata2Helper
+						.getRdfFromToscience(new JSONObject(toscienceMetadata), readNode);
+				rdfKtbl = Metadata2Helper
+						.getRdfFromToscience(new JSONObject(ktblMetadata), readNode);
 
-				play.Logger.debug("rdf=" + rdf.toString());
+				String rdfContentTos = modify.rdfToString(
+						(Map<String, Object>) rdfTos.get("metadata2"), RDFFormat.NTRIPLES);
 
-				String rdfContent = modify.rdfToString(
-						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
+				String rdfContentKtbl = modify.rdfToString(
+						(Map<String, Object>) rdfKtbl.get("metadata2"), RDFFormat.NTRIPLES);
 
-				play.Logger.debug("rdfContent=" + rdfContent);
-
-				String result3 =
-						modify.updateMetadata("metadata2", readNode, rdfContent);
+				String result3 = modify.updateMetadataTosAndKtbl("metadata2", readNode,
+						rdfContentTos, rdfContentKtbl);
 
 				play.Logger.debug("Done METADATA2 Mapping");
 
