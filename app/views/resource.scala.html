@@ -22,11 +22,10 @@
 					<div class="tab-content">
 				  		<div class="tab-pane active" id="1a">
 				  	
-			@if(views.Helper.mdStreamExists(hit.getPid(), "ktbl")){
 				@tags.ktblView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
-			} else { 
 				@tags.resourceView(hit,hit.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
-			}        	</div>
+			
+			        	</div>
 				  		<div class="tab-pane" id="2a">
 		
 			        	</div>
