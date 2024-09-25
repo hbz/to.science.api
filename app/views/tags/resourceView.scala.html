@@ -74,6 +74,10 @@
 	case _ => {}
 }
 
+@if(hit.get("contentType").equals("researchData")){
+	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+}
+
 </tbody>
 </table>
 
@@ -269,96 +273,6 @@
 						</td>
 					</tr>
 				}
-				}
-			}
-		}
-		
-		case "livestock_category"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "livestock_production"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "housing_systems"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "additional_housing_systems"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "ventilation_system"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "project_title"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "test_design"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "emissions"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		case "emission_reduction_methods"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			 }
-		}
-		
-		
-		case "emi_measurement_techniques"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{ }
-			}
-		}
-		
-		case "associatedDataset"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{
-				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
-					<td>
-					<table>
-					@for(other <-views.Helper.getCreators(node)){
-						@other <br />
-						}
-					</table>
-					</td>
-				</tr>
 				}
 			}
 		}
