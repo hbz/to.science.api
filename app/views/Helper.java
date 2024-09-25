@@ -688,7 +688,7 @@ public class Helper {
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
-						+ cardNode.get(i).findValues("@id").toString() + "; "
+				// + cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", "));
@@ -719,7 +719,7 @@ public class Helper {
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
-						+ cardNode.get(i).findValues("@id").toString() + "; "
+				// + cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", "));
@@ -750,7 +750,7 @@ public class Helper {
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
-						+ cardNode.get(i).findValues("@id").toString() + "; "
+				// + cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", "));
@@ -918,7 +918,8 @@ public class Helper {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				value = jn.findValue("project_title").toString().replace("_", " ")
-						.replace("\"", "").replace("emim", "EmiM").replace("dat", "DaT");
+						.replace("\"", "").replace("emim", "EmiM")
+						.replace("emidat", "EmiDaT");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
@@ -989,4 +990,12 @@ public class Helper {
 		return mdStream.toString().trim().replace("&quot;", "\"");
 	}
 
+	/**
+	 * @param mdStream
+	 * @return
+	 */
+	public static String capitalizeFirst(String value) {
+
+		return value.substring(0, 0).toUpperCase() + value.substring(1);
+	}
 }
