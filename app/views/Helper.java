@@ -830,6 +830,28 @@ public class Helper {
 	}
 
 	/**
+	 * Tests if role Array exists in creator, contributor or other object
+	 * 
+	 * @param node
+	 * @param field
+	 * @return
+	 */
+	public static boolean hasRole(Node node, String field) {
+
+		boolean hasRole = false;
+		String mdStream = getTosJson(node);
+		JsonNode jNode = null;
+		try {
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue(field);
+			hasRole = jNode.has("role");
+		} catch (IOException e) {
+			play.Logger.warn(e.getMessage());
+		}
+		return hasRole;
+	}
+
+	/**
 	 * Get content of Json other-Array from toscience.json
 	 * 
 	 * @param node

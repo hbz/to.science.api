@@ -126,6 +126,7 @@
 	</tr>
 	}
 
+@if(views.Helper.hasRole(node)){
 @if(views.Helper.getCreators(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
@@ -136,6 +137,7 @@
 		}
 	</td>
 	</tr>
+	}
 	}
 }
 
