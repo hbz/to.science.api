@@ -20,8 +20,8 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
 				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
+					<td style="display:none;">60</td>
+					<td class="field-label @key">Associated dataset(s)</td>
 					<td>
 					<table>
 					@for(other <-views.Helper.getCreators(node)){
@@ -39,8 +39,8 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
 				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
+					<td style="display:none;">20</td>
+					<td class="field-label @key">Author</td>
 					<td>
 					<table>
 					@for(other <-views.Helper.getCreators(node)){
@@ -59,8 +59,8 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
 				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
+					<td style="display:none;">21</td>
+					<td class="field-label @key">Contributor</td>
 					<td>
 					<table>
 					@for(other <-views.Helper.getContributors(node)){
@@ -77,8 +77,8 @@
 				case nullCase if nullCase == null =>{}
 				case _ =>{
 				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
+					<td style="display:none;">22</td>
+					<td class="field-label @key">Other person</td>
 					<td>
 					<table>
 					@for(other <-views.Helper.getOthers(node)){
