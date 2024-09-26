@@ -725,8 +725,7 @@ public class Helper {
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
-		creatorsList.add("Merde");
-		return creatorsList;
+		return null;
 	}
 
 	/**
@@ -757,7 +756,8 @@ public class Helper {
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
-		return null;
+		contributorsList.add("Huhu");
+		return contributorsList;
 	}
 
 	/**
