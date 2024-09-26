@@ -353,7 +353,6 @@
 			@values match {
 				case nullCase if nullCase == null =>{}
 				case _ =>{ 
-					@if(views.Helper.hasRole(node, "creator")){
 							<tr class="ktbl:emimin">
 							<td style="display:none;">"80"</td>
 							<td class="field-label">Author(s)</td>
@@ -362,9 +361,7 @@
 							 <br>
 						
 						</td>
-						</tr>
-					}				
-				
+						</tr>				
 				}
 			}
 		}
