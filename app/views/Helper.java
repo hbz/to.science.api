@@ -705,7 +705,7 @@ public class Helper {
 	 */
 	public static List<String> getCreators(Node node) {
 		String mdStream = getTosJson(node);
-		List<String> othersList = new ArrayList<>();
+		List<String> creatorsList = new ArrayList<>();
 		JsonNode jNode = null;
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
@@ -716,10 +716,12 @@ public class Helper {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 				// + cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
-				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " ").replace(",", ", "));
+				card = card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " ").replace(",", ", ");
+				play.Logger.info("Creator string: " + card);
+				creatorsList.add(card);
 			}
-			return othersList;
+			return creatorsList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
@@ -736,7 +738,7 @@ public class Helper {
 	 */
 	public static List<String> getContributors(Node node) {
 		String mdStream = getTosJson(node);
-		List<String> othersList = new ArrayList<>();
+		List<String> contributorsList = new ArrayList<>();
 		JsonNode jNode = null;
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
@@ -747,10 +749,10 @@ public class Helper {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 				// + cardNode.get(i).findValues("@id").toString() + "; "
 						+ cardNode.get(i).findValues("role").toString();
-				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " ").replace(",", ", "));
+				contributorsList.add(card.replace("[", "").replace("]", "")
+						.replace("\"", "").replace("_", " ").replace(",", ", "));
 			}
-			return othersList;
+			return contributorsList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
