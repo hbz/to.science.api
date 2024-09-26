@@ -844,7 +844,7 @@ public class Helper {
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
 			jNode = jn.findValue(field);
-			hasRole = jNode.has("role");
+			hasRole = !jNode.findParents("role").isEmpty();
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
