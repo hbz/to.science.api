@@ -134,7 +134,7 @@
 @tosRow(value:Any)={
 
 
-@if(views.Helper.getVentilationSystem(node)!=null){
+@if(views.Helper.getAssociatedDataset(node, "associated_dataset")!=null){
 		case "associatedDataset"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}
@@ -144,7 +144,7 @@
 					<td class="field-label @key">Associated dataset(s)</td>
 					<td>
 					<table>
-					@for(other <-views.Helper.getCreators(node)){
+					@for(other <-views.Helper.getAssociatedDataset(node, "associated_dataset")){
 						@other <br />
 						}
 					</table>
