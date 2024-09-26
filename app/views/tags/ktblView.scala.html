@@ -43,6 +43,7 @@
 	</tr>
 	}
 
+@if(views.Helper.getContributors(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Contributor(s)</td>
@@ -52,6 +53,7 @@
 		}
 	</td>
 	</tr>
+	}
 
 @if(views.Helper.getOthers(node)!=null){
 	<tr class="ktbl:emimin">
