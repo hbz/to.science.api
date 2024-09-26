@@ -782,10 +782,9 @@ public class Helper {
 						.replace("_", " ").replace(",", ", "));
 			}
 			return othersList;
-		} catch (IOException e) {
-			play.Logger.warn(e.getMessage());
+		} finally {
+			return null;
 		}
-		return null;
 	}
 
 	/**
