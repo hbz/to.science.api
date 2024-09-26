@@ -756,8 +756,7 @@ public class Helper {
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
-		contributorsList.add("Huhu");
-		return contributorsList;
+		return null;
 	}
 
 	/**
