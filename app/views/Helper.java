@@ -726,7 +726,7 @@ public class Helper {
 			play.Logger.warn(e.getMessage());
 		}
 		creatorsList.add("Merde");
-		return null;
+		return creatorsList;
 	}
 
 	/**
