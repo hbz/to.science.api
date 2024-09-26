@@ -800,23 +800,26 @@ public class Helper {
 	 */
 	public static List<String> getToscienceArrayValues(Node node, String key) {
 		String mdStream = getTosJson(node);
-		List<String> valueList = new ArrayList<>();
+		List<String> valueList = null;
 		if (mdStream != null) {
 			try {
 				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
 				JsonNode jn = jnAll.findValue(key);
-				Iterator<JsonNode> jIt = jn.elements();
-				while (jIt.hasNext()) {
-					JsonNode nextNode = jIt.next();
-					valueList.add(nextNode.asText().replace("\\u2019", "'"));
+				if (jn != null && !jn.isNull()) {
+					valueList = new ArrayList<>();
 
+					Iterator<JsonNode> jIt = jn.elements();
+					while (jIt.hasNext()) {
+						JsonNode nextNode = jIt.next();
+						valueList.add(nextNode.asText().replace("\\u2019", "'"));
+					}
 				}
-				return valueList;
+
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
-		return null;
+		return valueList;
 	}
 
 	/**
