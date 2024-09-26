@@ -713,7 +713,6 @@ public class Helper {
 			jNode = jn.findValue("creator");
 
 			List<JsonNode> cardNode = jNode.findParents("role");
-			play.Logger.info(Integer.toString(cardNode.size()));
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 				// + cardNode.get(i).findValues("@id").toString() + "; " +
@@ -721,12 +720,12 @@ public class Helper {
 				card = card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", ");
 				creatorsList.add(card);
-				creatorsList.add(card);
 			}
 			return creatorsList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
+		creatorsList.add("Merde");
 		return null;
 	}
 
