@@ -17,32 +17,6 @@
 @ktblRow(value:Any)={
 
 
-@if(views.Helper.getToscienceArrayValues(node, "alternative")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Alternative title</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceArrayValues(node, "alternative")){
-			@rDs <br>
-		}
-	</td>
-	</tr>
-}
-
-@if(views.Helper.getToscienceArrayValues(node, "descripion")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Alternative title</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceArrayValues(node, "description")){
-			@rDs <br>
-		}
-	</td>
-	</tr>
-}
-
-
-
 @if(views.Helper.getCreators(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
