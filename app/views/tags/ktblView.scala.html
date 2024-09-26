@@ -126,17 +126,6 @@
 	</tr>
 	}
 
-@if(views.Helper.getAssociatedDataset(node, "associated_dataset")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Associated datasets</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getAssociatedDataset(node, "associated_dataset")){
-			@rDs <br>
-		}
-	</td>
-	</tr>
-	}
 }
 
 
