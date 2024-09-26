@@ -754,10 +754,8 @@ public class Helper {
 			return contributorsList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
-		} finally {
 			return null;
 		}
-
 	}
 
 	/**
