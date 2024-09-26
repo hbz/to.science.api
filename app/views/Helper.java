@@ -715,11 +715,12 @@ public class Helper {
 			List<JsonNode> cardNode = jNode.findParents("role");
 			play.Logger.info(Integer.toString(cardNode.size()));
 			for (int i = 0; i < cardNode.size(); i++) {
-				String card = cardNode.get(i).findValues("prefLabel").toString() + ";
-				 // + cardNode.get(i).findValues("@id").toString() + "; " +
-				 cardNode.get(i).findValues("role").toString(); card =
-				 card.replace("[", "").replace("]", "").replace("\"", "")
-				 .replace("_", " ").replace(",", ", "); creatorsList.add(card);				
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+				// + cardNode.get(i).findValues("@id").toString() + "; " +
+						+ cardNode.get(i).findValues("role").toString();
+				card = card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " ").replace(",", ", ");
+				creatorsList.add(card);
 				creatorsList.add(card);
 			}
 			return creatorsList;
