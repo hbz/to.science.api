@@ -737,24 +737,22 @@ public class Helper {
 	 * @return List
 	 */
 	public static List<String> getContributors(Node node) {
-		String mdStream = getTosJson(node);
-		List<String> contributorsList = new ArrayList<>();
-		JsonNode jNode = null;
 		/*
-		 * try { JsonNode jn = new ObjectMapper().readTree(mdStream); jNode =
-		 * jn.findValue("contributor"); List<JsonNode> cardNode =
-		 * jNode.findParents("prefLabel"); for (int i = 0; i < cardNode.size(); i++)
-		 * { String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
-		 * // + cardNode.get(i).findValues("@id").toString() + "; " +
+		 * String mdStream = getTosJson(node); List<String> contributorsList = new
+		 * ArrayList<>(); JsonNode jNode = null; try { JsonNode jn = new
+		 * ObjectMapper().readTree(mdStream); jNode = jn.findValue("contributor");
+		 * 
+		 * List<JsonNode> cardNode = jNode.findParents("prefLabel"); for (int i = 0;
+		 * i < cardNode.size(); i++) { String card =
+		 * cardNode.get(i).findValues("prefLabel").toString() + "; " // +
+		 * cardNode.get(i).findValues("@id").toString() + "; " +
 		 * cardNode.get(i).findValues("role").toString();
 		 * contributorsList.add(card.replace("[", "").replace("]", "")
-		 * .replace("\"", "").replace("_", " ").replace(",", ", ")); } } catch
-		 * (IOException e) { play.Logger.warn(e.getMessage()); }
+		 * .replace("\"", "").replace("_", " ").replace(",", ", ")); } return
+		 * contributorsList; } catch (IOException e) {
+		 * play.Logger.warn(e.getMessage()); }
 		 */
-		contributorsList.add("Andres");
-		contributorsList.add("Ingolf");
-
-		return contributorsList;
+		return null;
 	}
 
 	/**
