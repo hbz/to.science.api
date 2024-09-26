@@ -16,22 +16,6 @@
 
 @ktblRow(value:Any)={
 
-@if(views.Helper.getToscienceArrayValues(node, "alternative")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Description</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceArrayValues(node, "alternative")){
-		 @rDs match {
-		   case res: String => {
-			@res <br>
-			} case _ =>{ }
-		 }
-	    }
-	</td>
-	</tr>
-	}
-
 @if(views.Helper.getToscienceArrayValues(node, "description")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
