@@ -29,7 +29,7 @@
 	</tr>
 	}
 
-@if(views.Helper.getContributors(node).isEmpty){
+@if(!views.Helper.getContributors(node).isEmpty){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Contributor(s)</td>
