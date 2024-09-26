@@ -23,11 +23,13 @@
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceArrayValues(node, "alternative")){
 		 @rDs = x match {
-		   case d: value[Any] => {
-			@rDs <br>
+		   case result: String => {
+			@result <br>
 			}
+			
 		   case _ => { }
-		}
+		 }
+	    }
 	</td>
 	</tr>
 	}
