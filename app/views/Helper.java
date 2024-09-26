@@ -739,11 +739,13 @@ public class Helper {
 	public static List<String> getContributors(Node node) {
 		String mdStream = getTosJson(node);
 		List<String> contributorsList = new ArrayList<>();
+		contributorsList.add("");
 		JsonNode jNode = null;
 		try {
 			JsonNode jn = new ObjectMapper().readTree(mdStream);
 			jNode = jn.findValue("contributor");
 
+			contributorsList = new ArrayList<>();
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
 				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
@@ -752,11 +754,10 @@ public class Helper {
 				contributorsList.add(card.replace("[", "").replace("]", "")
 						.replace("\"", "").replace("_", " ").replace(",", ", "));
 			}
-			return contributorsList;
 		} catch (IOException e) {
 			play.Logger.warn(e.getMessage());
 		}
-		return null;
+		return contributorsList;
 	}
 
 	/**
