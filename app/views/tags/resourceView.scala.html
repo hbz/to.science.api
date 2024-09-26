@@ -65,18 +65,21 @@
 
 <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody>
-@context match{
+
+@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
+
+	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+} else {
+
+	@context match{
 		case list : List[String] => {
 			@for(k<-context){
 				@tableRow(k,hit)
 			}
 		}
-	case _ => {}
-}
+		case _ => {}
+	}
 
-@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
-
-	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
 }
 
 </tbody>
@@ -353,15 +356,20 @@
 			@values match {
 				case nullCase if nullCase == null =>{}
 				case _ =>{ 
+					@if(views.Helper.hasRole(node, "creator")){
+						@if(views.Helper.getCreators(node)!=null){
 							<tr class="ktbl:emimin">
 							<td style="display:none;">"80"</td>
 							<td class="field-label">Author(s)</td>
 							<td class="field-item">
-							Huhu
-							 <br>
-						
+							@for(rDs <- views.Helper.getCreators(node)){
+						@rDs <br>
+						}
 						</td>
-						</tr>				
+						</tr>
+						}
+					}				
+				
 				}
 			}
 		}
