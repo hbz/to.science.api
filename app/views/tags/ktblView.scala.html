@@ -22,12 +22,10 @@
 	<td class="field-label">Description</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceArrayValues(node, "alternative")){
-		 @rDs = x match {
-		   case result: String => {
-			@result <br>
-			}
-			
-		   case _ => { }
+		 @rDs match {
+		   case res: String => {
+			@res <br>
+			} case _ =>{ }
 		 }
 	    }
 	</td>
