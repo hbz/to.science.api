@@ -3,6 +3,98 @@
 @import models.Node
 @(node:Node,hit:Map[String,Object],context:List[String])
 
+@context match{
+		case list : List[String] => {
+			@for(k<-context){
+				@tableRow(k,hit)
+			}
+		}
+	case _ => {}
+}
+
+@htmlRow(values: Any,key: String)={
+	@key match {
+
+		case "associatedDataset"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(other <-views.Helper.getCreators(node)){
+						@other <br />
+						}
+					</table>
+					</td>
+				</tr>
+				}
+			}
+		}
+
+		case "creator"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(other <-views.Helper.getCreators(node)){
+						@other <br />
+						}
+					</table>
+					</td>
+				</tr>
+				}
+			}
+		}
+		
+		
+		case "contributor"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(other <-views.Helper.getContributors(node)){
+						@other <br />
+						}
+					</table>
+					</td>
+				</tr>
+				}
+			}
+		}
+		case "other"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(other <-views.Helper.getOthers(node)){
+						@other <br />
+						}
+					</table>
+					</td>
+				</tr>
+				}
+			}
+		}
+	}				
+}
+
+
+
 @if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
 <!--  <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody> -->
