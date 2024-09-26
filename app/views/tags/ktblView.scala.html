@@ -135,24 +135,15 @@
 
 
 @if(views.Helper.getAssociatedDataset(node, "associated_dataset")!=null){
-		case "associatedDataset"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{
-				<tr class="@key">
-					<td style="display:none;">60</td>
-					<td class="field-label @key">Associated dataset(s)</td>
-					<td>
-					<table>
-					@for(other <-views.Helper.getAssociatedDataset(node, "associated_dataset")){
-						@other <br />
-						}
-					</table>
-					</td>
-				</tr>
-				}
-			}
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Associated datasets</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getAssociatedDataset(node, "associated_dataset")){
+			@rDs <br>
 		}
+	</td>
+	</tr>
 	}
 }
 
