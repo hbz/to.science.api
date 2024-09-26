@@ -720,6 +720,7 @@ public class Helper {
 				card = card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", ");
 				play.Logger.info("Creator string: " + card);
+				card = Integer.toString(i) + "; ";
 				creatorsList.add(card);
 			}
 			return creatorsList;
