@@ -74,7 +74,8 @@
 	case _ => {}
 }
 
-@if(hit.get("contentType").equals("researchData")){
+@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
+
 	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
 }
 
