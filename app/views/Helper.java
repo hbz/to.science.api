@@ -740,9 +740,15 @@ public class Helper {
 		String mdStream = getTosJson(node);
 		List<String> contributorsList = null;
 		JsonNode jNode = null;
+		JsonNode jn = null;
 		try {
-			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jn = new ObjectMapper().readTree(mdStream);
 			jNode = jn.findValue("contributor");
+		} catch (IOException e) {
+			play.Logger.warn(e.getMessage());
+		}
+
+		if (jNode != null && !jNode.isNull()) {
 			contributorsList = new ArrayList<>();
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
@@ -752,8 +758,6 @@ public class Helper {
 				contributorsList.add(card.replace("[", "").replace("]", "")
 						.replace("\"", "").replace("_", " ").replace(",", ", "));
 			}
-		} catch (IOException e) {
-			play.Logger.warn(e.getMessage());
 		}
 		return contributorsList;
 	}
