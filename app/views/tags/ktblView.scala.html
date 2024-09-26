@@ -16,7 +16,7 @@
 
 @ktblRow(value:Any)={
 
-@if(views.Helper.getToscienceArrayValues(node, "alternative")!=null){
+@if(views.Helper.getToscienceArrayValues(node, "alternative")!=null && !views.Helper.getToscienceArrayValues(node, "alternative").isEmpty){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Description</td>
