@@ -21,8 +21,12 @@
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Description</td>
 	<td class="field-item">
-		@for(rDs <- Option(views.Helper.getToscienceArrayValues(node, "alternative")).getOrElse("empty")){
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "alternative")){
+		 @rDs = x match {
+		   case d: value[Any] => {
 			@rDs <br>
+			}
+		   case _ => { }
 		}
 	</td>
 	</tr>
