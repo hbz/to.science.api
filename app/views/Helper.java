@@ -31,6 +31,7 @@ import models.Globals;
 import helper.JsonMdLoader;
 import models.Link;
 import models.Node;
+import play.Logger;
 
 public class Helper {
 
@@ -712,16 +713,16 @@ public class Helper {
 			jNode = jn.findValue("creator");
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			play.Logger.info(Integer.toString(cardNode.size()));
 			for (int i = 0; i < cardNode.size(); i++) {
-				play.Logger.info(cardNode.toString());
-				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
-						+ cardNode.get(i).findValues("@id").toString() + "; "
-						+ cardNode.get(i).findValues("role").toString();
-				card = card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " ").replace(",", ", ");
-				play.Logger.info("Creator string: " + card);
-				card = Integer.toString(i) + "; ";
-				creatorsList.add(card);
+				/**
+				 * String card = cardNode.get(i).findValues("prefLabel").toString() + ";
+				 * " // + cardNode.get(i).findValues("@id").toString() + "; " +
+				 * cardNode.get(i).findValues("role").toString(); card =
+				 * card.replace("[", "").replace("]", "").replace("\"", "")
+				 * .replace("_", " ").replace(",", ", "); creatorsList.add(card);
+				 **/
+				creatorsList.add(Integer.toString(i));
 			}
 			return creatorsList;
 		} catch (IOException e) {
@@ -748,9 +749,9 @@ public class Helper {
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
-				String card = cardNode.get(i).findValues("prefLabel").toString() + "; ";
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 				// + cardNode.get(i).findValues("@id").toString() + "; "
-				// + cardNode.get(i).findValues("role").toString();
+						+ cardNode.get(i).findValues("role").toString();
 				contributorsList.add(card.replace("[", "").replace("]", "")
 						.replace("\"", "").replace("_", " ").replace(",", ", "));
 			}
@@ -779,9 +780,9 @@ public class Helper {
 
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
-				String card = cardNode.get(i).findValues("prefLabel").toString() + "; ";
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
 				// + cardNode.get(i).findValues("@id").toString() + "; "
-				// + cardNode.get(i).findValues("role").toString();
+						+ cardNode.get(i).findValues("role").toString();
 				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
 						.replace("_", " ").replace(",", ", "));
 			}
