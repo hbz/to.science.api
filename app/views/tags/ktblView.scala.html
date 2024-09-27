@@ -229,23 +229,24 @@
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Funding</td>
+	<td><table>
 	<td class="field-label">Funder</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "fundingId")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a><br> 
 		}
-	</td>
+	</td></table></td>
 	</tr>
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">&nbsp;</td>
+	<td><table>
 	<td class="field-label">Funding program</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceArrayValues(node, "fundingProgram")){
 			@rDs <br>
 		}
-	</td>
+	</td></table></td>
 	</tr>
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
@@ -255,7 +256,7 @@
 		@for(rDs <- views.Helper.getToscienceArrayValues(node, "projectId")){
 			@rDs <br>
 		}
-	</td>
+	</td></table></td>
 	</tr>
 	}
 
