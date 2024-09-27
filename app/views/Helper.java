@@ -802,18 +802,18 @@ public class Helper {
 	 * @return List
 	 */
 	public static String getToscienceLiteralValue(Node node, String key) {
-		String livestockCat = null;
+		String literalValue = null;
 		String mdStream = getTosJson(node);
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				livestockCat =
+				literalValue =
 						jn.findValue(key).toString().replace("_", " ").replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
-		return livestockCat;
+		return literalValue;
 	}
 
 	/**
