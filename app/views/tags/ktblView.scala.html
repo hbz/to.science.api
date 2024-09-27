@@ -106,7 +106,8 @@
 	<td class="field-label">Medium</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "medium")){
-			@rDs.get("prefLabel") <br> 
+		<a href="/resource?query[0][term]=@rDs.get("id")">
+			@rDs.get("prefLabel") </a><br> 
 		}
 	</td>
 	</tr>

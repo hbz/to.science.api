@@ -842,9 +842,10 @@ public class Helper {
 			List<JsonNode> cardNode = jNode.findParents("prefLabel");
 			for (int i = 0; i < cardNode.size(); i++) {
 				Hashtable<String, String> valueHash = new Hashtable<>();
-				valueHash.put("prefLabel",
-						cardNode.get(i).findValues("prefLabel").toString());
-				valueHash.put("id", cardNode.get(i).findValues("@id").toString());
+				valueHash.put("prefLabel", cardNode.get(i).findValues("prefLabel")
+						.toString().replace("[", "").replace("]", "").replace("\"", ""));
+				valueHash.put("id", cardNode.get(i).findValues("@id").toString()
+						.replace("[", "").replace("]", "").replace("\"", ""));
 				valueList.add(valueHash);
 			}
 			return valueList;
