@@ -88,14 +88,12 @@
 	</tr>
 	}
 
-@if(views.Helper.getToscienceArrayValues(node, "issued")!=null){
+@if(views.Helper.getToscienceLiteralValue(node, "issued")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Year of Publication</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceArrayValues(node, "issued")){
-			@rDs <br>
-		}
+		@views.Helper.getToscienceLiteralValue(node, "issued"))
 	</td>
 	</tr>
 	}
@@ -113,14 +111,14 @@
 	</tr>
 	}
 
-
-@if(views.Helper.getToscienceArrayValues(node, "rdfType")!=null){
+@if(views.Helper.getToscienceObjectArray(node, "rdfType")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Type of publication</td>
+	<td class="field-label">Type of Publication</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceArrayValues(node, "rdfType")){
-			@rDs <br>
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "rdfType")){
+		<a href="/resource?query[0][term]=@rDs.get("id")">
+			@rDs.get("prefLabel") </a><br> 
 		}
 	</td>
 	</tr>
