@@ -722,7 +722,7 @@ public class Helper {
 				creatorsList.add(card);
 			}
 			return creatorsList;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			play.Logger.warn(e.getMessage());
 		}
 		return null;
@@ -787,7 +787,7 @@ public class Helper {
 						.replace("_", " ").replace(",", ", "));
 			}
 			return othersList;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			play.Logger.warn(e.getMessage());
 		}
 		return null;
@@ -805,15 +805,17 @@ public class Helper {
 			try {
 				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
 				JsonNode jn = jnAll.findValue(key);
-				valueList = new ArrayList<>();
+				if (jn != null && !jn.isNull()) {
+					valueList = new ArrayList<>();
 
-				Iterator<JsonNode> jIt = jn.elements();
-				while (jIt.hasNext()) {
-					JsonNode nextNode = jIt.next();
-					valueList.add(nextNode.asText().replace("\\u2019", "'"));
+					Iterator<JsonNode> jIt = jn.elements();
+					while (jIt.hasNext()) {
+						JsonNode nextNode = jIt.next();
+						valueList.add(nextNode.asText().replace("\\u2019", "'"));
+					}
 				}
 
-			} catch (Exception e) {
+			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
@@ -830,28 +832,6 @@ public class Helper {
 	public static boolean mdStreamExists(String pid, String mdFormat) {
 		JsonMdLoader jMd = new JsonMdLoader(pid, mdFormat);
 		return jMd.datastreamExists();
-	}
-
-	/**
-	 * Tests if role Array exists in creator, contributor or other object
-	 * 
-	 * @param node
-	 * @param field
-	 * @return
-	 */
-	public static boolean hasRole(Node node, String field) {
-
-		boolean hasRole = false;
-		String mdStream = getTosJson(node);
-		JsonNode jNode = null;
-		try {
-			JsonNode jn = new ObjectMapper().readTree(mdStream);
-			jNode = jn.findValue(field);
-			hasRole = !jNode.findParents("role").isEmpty();
-		} catch (IOException e) {
-			play.Logger.warn(e.getMessage());
-		}
-		return hasRole;
 	}
 
 	/**
@@ -1000,7 +980,7 @@ public class Helper {
 
 				}
 				return valueList;
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}

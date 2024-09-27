@@ -76,6 +76,56 @@
 	</tr>
 	}
 
+@if(views.Helper.getToscienceArrayValues(node, "associatedDataset")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Associated dataset(s)</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "associatedDataset")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getToscienceArrayValues(node, "issued")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Year of Publication</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "issued")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getToscienceArrayValues(node, "medium")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Medium</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "medium")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.Helper.getToscienceArrayValues(node, "rdfType")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Type of publication</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "rdfType")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+<hr>
 @if(views.Helper.getLivestockProduction(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
