@@ -143,7 +143,7 @@
 	<td class="field-label">Publication's language</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "language")){
-		<a href="/resource?query[0][term]=@rDs.get("id")">
+		<a href="/resource?query[0][term]=@rDs.get(\""id"\")">
 			@rDs.get("prefLabel") </a><br> 
 		}
 	</td>
@@ -165,7 +165,6 @@
 
 
 @if(views.Helper.getLivestockProduction(node)!=null){
-	<hr>
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Livestock production</td>
