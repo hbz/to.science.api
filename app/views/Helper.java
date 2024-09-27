@@ -805,17 +805,15 @@ public class Helper {
 			try {
 				JsonNode jnAll = new ObjectMapper().readTree(mdStream);
 				JsonNode jn = jnAll.findValue(key);
-				if (jn != null && !jn.isNull()) {
-					valueList = new ArrayList<>();
+				valueList = new ArrayList<>();
 
-					Iterator<JsonNode> jIt = jn.elements();
-					while (jIt.hasNext()) {
-						JsonNode nextNode = jIt.next();
-						valueList.add(nextNode.asText().replace("\\u2019", "'"));
-					}
+				Iterator<JsonNode> jIt = jn.elements();
+				while (jIt.hasNext()) {
+					JsonNode nextNode = jIt.next();
+					valueList.add(nextNode.asText().replace("\\u2019", "'"));
 				}
 
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
