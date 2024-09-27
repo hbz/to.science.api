@@ -124,6 +124,16 @@
 	</tr>
 	}
 	
+@if(views.Helper.getToscienceLiteralValue(node, "yearOfCopyright")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Year of Copyright</td>
+	<td class="field-item">
+		@views.Helper.getToscienceLiteralValue(node, "yearOfCopyright")
+	</td>
+	</tr>
+	}
+
 @if(views.Helper.getToscienceObjectArray(node, "licence")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
@@ -188,6 +198,66 @@
 	</tr>
 	}
 
+@if(views.Helper.getToscienceObjectArray(node, "dataOrigin")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Data origin</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "dataOrigin")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a><br> 
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.Helper.getToscienceObjectArray(node, "ddc")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Dewey decimal classification</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "ddc")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a><br> 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getToscienceObjectArray(node, "fundingId")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Funding</td>
+	<td class="field-label">Funder</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "fundingId")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a><br> 
+		}
+	</td>
+	</tr>
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">&nbsp;</td>
+	<td class="field-label">Funding program</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "fundingProgram")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">&nbsp;</td>
+	<td class="field-label">Project ID</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "projectId")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
 
 @if(views.Helper.getLivestockProduction(node)!=null){
 	<tr class="ktbl:emimin">

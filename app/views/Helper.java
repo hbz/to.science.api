@@ -834,8 +834,7 @@ public class Helper {
 					Iterator<JsonNode> jIt = jn.elements();
 					while (jIt.hasNext()) {
 						JsonNode nextNode = jIt.next();
-						valueList.add(
-								nextNode.asText().replace("\u2019", "'").replace("\n", "<br>"));
+						valueList.add(nextNode.asText().replace("\u2019", "'"));
 					}
 				}
 
