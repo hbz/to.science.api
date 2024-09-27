@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -823,6 +824,37 @@ public class Helper {
 	}
 
 	/**
+	 * Get content of an Array of objects with prefLabel from toscience.json
+	 * 
+	 * @param node
+	 * @param key
+	 * @return List
+	 */
+	public static List<Hashtable<String, String>> getToscienceObjectArray(
+			Node node, String key) {
+		List<Hashtable<String, String>> valueList = new ArrayList<>();
+		String mdStream = getTosJson(node);
+		JsonNode jNode = null;
+		try {
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue(key);
+
+			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			for (int i = 0; i < cardNode.size(); i++) {
+				Hashtable<String, String> valueHash = new Hashtable<>();
+				valueHash.put("prefLabel",
+						cardNode.get(i).findValues("prefLabel").toString());
+				valueHash.put("id", cardNode.get(i).findValues("@id").toString());
+				valueList.add(valueHash);
+			}
+			return valueList;
+		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
+		}
+		return null;
+	}
+
+	/**
 	 * Tests if Metadata Stream is available from Fedora subsystem
 	 * 
 	 * @param pid
@@ -932,7 +964,7 @@ public class Helper {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				value = jn.findValue("ventilation_system").toString().replace("_", " ")
 						.replace("\"", "");
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
