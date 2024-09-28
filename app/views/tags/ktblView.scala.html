@@ -142,6 +142,11 @@
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "license")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a><br/>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+			<br/>
 			 
 		}
 	</td>
@@ -156,11 +161,6 @@
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "language")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a><br> 
-			<span class="separator">|</span>
-			<a href=@rDs.get("id")  target="_blank">
-					<span class="octicon-link-external"></span>
-			</a>
-			<br/>
 		}
 	</td>
 	</tr>
@@ -285,12 +285,12 @@
 	</tr>
 	}
 	
-@if(views.Helper.getToscienceLiteralValue(node, "prefLabel")!=null){
+@if(views.Helper.getToscienceLiteralValue(node, "@id")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Label</td>
 	<td class="field-item">
-		@views.Helper.getToscienceLiteralValue(node, "prefLabel")
+		@views.Helper.getToscienceLiteralValue(node, "@id")
 	</td>
 	</tr>
 	}
