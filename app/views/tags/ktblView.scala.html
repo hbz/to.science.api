@@ -150,7 +150,7 @@
 @if(views.Helper.getToscienceObjectArray(node, "language")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Publication's language</td>
+	<td class="field-label">Language</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "language")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
@@ -187,10 +187,6 @@
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "subject")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a>
-			<span class="separator">|</span>
-			<a href=@rDs.get("id")  target="_blank">
-					<span class="octicon-link-external"></span>
-			</a>
 			<br/>
 			 
 		}
@@ -210,10 +206,54 @@
 	</tr>
 	}
 
+@if(views.Helper.getToscienceObjectArray(node, "recordingLocation")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Collection place</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "recordingLocation")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<br/>
+			 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getToscienceArrayValues(node, "recordingLPeriod")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Collection period</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceArrayValues(node, "recordingPeriod")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+
+
+@if(views.Helper.getToscienceObjectArray(node, "recordingLocation")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Collection place</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "subject")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<br/>
+			 
+		}
+	</td>
+	</tr>
+	}
+
 @if(views.Helper.getToscienceObjectArray(node, "dataOrigin")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Data origin</td>
+	<td class="field-label">Type of data collection</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "dataOrigin")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
@@ -227,15 +267,11 @@
 @if(views.Helper.getToscienceObjectArray(node, "ddc")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Dewey decimal classification</td>
+	<td class="field-label">Subject classification (DDC)</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "ddc")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a>
-			<span class="separator">|</span>
-			<a href=@rDs.get("id")  target="_blank">
-					<span class="octicon-link-external"></span>
-			</a>
 			<br/>
 			
 		}
