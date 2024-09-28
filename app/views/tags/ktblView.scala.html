@@ -91,7 +91,7 @@
 @if(views.Helper.getToscienceLiteralValue(node, "issued")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Year of Publication</td>
+	<td class="field-label">Publication year</td>
 	<td class="field-item">
 		@views.Helper.getToscienceLiteralValue(node, "issued")
 	</td>
@@ -101,7 +101,7 @@
 @if(views.Helper.getToscienceObjectArray(node, "medium")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Medium</td>
+	<td class="field-label">Resource type</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "medium")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
@@ -127,19 +127,19 @@
 @if(views.Helper.getToscienceLiteralValue(node, "yearOfCopyright")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Year of Copyright</td>
+	<td class="field-label">Copyright year</td>
 	<td class="field-item">
 		@views.Helper.getToscienceLiteralValue(node, "yearOfCopyright")
 	</td>
 	</tr>
 	}
 
-@if(views.Helper.getToscienceObjectArray(node, "licence")!=null){
+@if(views.Helper.getToscienceObjectArray(node, "license")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Licence</td>
+	<td class="field-label">License</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceObjectArray(node, "licence")){
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "license")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a><br> 
 		}
@@ -163,11 +163,17 @@
 @if(views.Helper.getToscienceObjectArray(node, "institution")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">FRL-collection</td>
+	<td class="field-label">FRL collection</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "institution")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a><br> 
+			@rDs.get("prefLabel") </a>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+			<br/>
+			 
 		}
 	</td>
 	</tr>
@@ -180,7 +186,13 @@
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "subject")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a><br> 
+			@rDs.get("prefLabel") </a>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+			<br/>
+			 
 		}
 	</td>
 	</tr>
@@ -219,7 +231,13 @@
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "ddc")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a><br> 
+			@rDs.get("prefLabel") </a>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+			<br/>
+			
 		}
 	</td>
 	</tr>
@@ -235,7 +253,13 @@
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "fundingId")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a><br> 
+			@rDs.get("prefLabel") </a>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+			<br/>
+			 
 		}
 	</td></tr></table></td>
 	</tr>
@@ -243,7 +267,7 @@
 	<td style="display:none;">"80"</td>
 	<td class="field-label">&nbsp;</td>
 	<td><table><tr>
-	<td class="field-label">Funding program</td>
+	<td class="field-label">Grant program</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceArrayValues(node, "fundingProgram")){
 			@rDs <br>
@@ -254,7 +278,7 @@
 	<td style="display:none;">"80"</td>
 	<td class="field-label">&nbsp;</td>
 	<td><table><tr>
-	<td class="field-label">Project ID</td>
+	<td class="field-label">Grant number</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceArrayValues(node, "projectId")){
 			@rDs <br>

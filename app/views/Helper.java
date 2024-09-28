@@ -807,8 +807,8 @@ public class Helper {
 		if (mdStream != null) {
 			try {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				literalValue =
-						jn.findValue(key).toString().replace("_", " ").replace("\"", "");
+				literalValue = jn.findValue(key).toString().replace("_", " ")
+						.replace("[", "").replace("]", "").replace("\"", "");
 			} catch (IOException e) {
 				play.Logger.warn(e.getMessage());
 			}
