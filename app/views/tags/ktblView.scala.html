@@ -40,6 +40,22 @@
 	</tr>
 	}
 
+
+@if(views.Helper.getToscienceObjectArray(node, "creator")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Resource type</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "creator")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a> <span class="separator">|</span>
+		    @rDs.get("roles") </br>
+		}
+	</td>
+	</tr>
+	}
+
+
 @if(views.Helper.getCreators(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
@@ -295,8 +311,6 @@
 	</tr>
 	}
 
-
-
 @if(views.Helper.getToscienceObjectArray(node, "fundingId")!=null){
 	<tr class="joinedFunding">
 	<td style="display:none;">"80"</td>
@@ -341,6 +355,27 @@
 	</ol></td></tr>
 	}
 	
+@if(views.Helper.getLivestockCategory(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Livestock category</td>
+	<td class="field-item">
+		@views.Helper.getLivestockCategory(node:Node)
+	</td>
+	</tr>
+	}
+
+	
+@if(views.Helper.getVentilationSystem(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Ventilation system</td>
+	<td class="field-item">
+		@views.Helper.getVentilationSystem(node:Node)
+	</td>
+	</tr>
+	}	
+
 
 @if(views.Helper.getLivestockProduction(node)!=null){
 	<tr class="ktbl:emimin">
@@ -374,41 +409,6 @@
 	</tr>
 	}
 
-	
-@if(views.Helper.getVentilationSystem(node)!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Ventilation system</td>
-	<td class="field-item">
-		@views.Helper.getVentilationSystem(node:Node)
-	</td>
-	</tr>
-	}	
-
-@if(views.Helper.getKtblArrayValues(node, "emissions")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Emissions</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getKtblEmissions(node, "emissions")){
-			@rDs <br>
-		}
-	</td>
-	</tr>
-	}
-
-
-@if(views.Helper.getKtblArrayValues(node, "emission_reduction_methods")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Emission reduction</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getKtblArrayValues(node, "emission_reduction_methods")){
-			@rDs <br>
-		}
-	</td>
-	</tr>
-	}
 
 @if(views.Helper.getKtblArrayValues(node, "emi_measurement_techniques")!=null){
 	<tr class="ktbl:emimin">
@@ -422,6 +422,30 @@
 	</tr>
 	}
 
+
+@if(views.Helper.getKtblArrayValues(node, "emissions")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Emissions</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getKtblEmissions(node, "emissions")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.Helper.getKtblArrayValues(node, "emission_reduction_methods")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Emission reduction</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getKtblArrayValues(node, "emission_reduction_methods")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
 
 @if(views.Helper.getProjectTitle(node)!=null){
 	<tr class="ktbl:emimin">

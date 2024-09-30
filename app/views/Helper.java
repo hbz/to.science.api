@@ -795,6 +795,37 @@ public class Helper {
 	}
 
 	/**
+	 * Get content of Json other-Array from toscience.json Method to provide field
+	 * "others" (persons) in correct sequence and with roles from json instead of
+	 * N-triples
+	 * 
+	 * @param node
+	 * @return List
+	 */
+	public static List<String> getAgent(Node node, String key) {
+		String mdStream = getTosJson(node);
+		List<Hashtable<String, String>> valueList = new ArrayList<>();
+		JsonNode jNode = null;
+		try {
+			JsonNode jn = new ObjectMapper().readTree(mdStream);
+			jNode = jn.findValue(key);
+
+			List<JsonNode> cardNode = jNode.findParents("prefLabel");
+			for (int i = 0; i < cardNode.size(); i++) {
+				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
+				// + cardNode.get(i).findValues("@id").toString() + "; "
+						+ cardNode.get(i).findValues("role").toString();
+				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
+						.replace("_", " ").replace(",", ", "));
+			}
+			return othersList;
+		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
+		}
+		return null;
+	}
+
+	/**
 	 * Get content of Json other-Array from toscience.json
 	 * 
 	 * @param node
@@ -809,7 +840,7 @@ public class Helper {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				literalValue = jn.findValue(key).toString().replace("_", " ")
 						.replace("[", "").replace("]", "").replace("\"", "");
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
@@ -868,6 +899,10 @@ public class Helper {
 						.toString().replace("[", "").replace("]", "").replace("\"", ""));
 				valueHash.put("id", cardNode.get(i).findValues("@id").toString()
 						.replace("[", "").replace("]", "").replace("\"", ""));
+				if (cardNode.get(i).has("role")) {
+					valueHash.put("roles", cardNode.get(i).findValues("role").toString()
+							.replace("[", "").replace("]", "").replace("\"", ""));
+				}
 				valueList.add(valueHash);
 			}
 			return valueList;
@@ -903,7 +938,7 @@ public class Helper {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				livestockCat = jn.findValue("livestock_category").toString()
 						.replace("_", " ").replace("\"", "");
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
@@ -924,7 +959,7 @@ public class Helper {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				value = jn.findValue("housing_systems").toString().replace("_", " ")
 						.replace("\"", "");
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
@@ -945,7 +980,7 @@ public class Helper {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				value = jn.findValue("test_design").toString().replace("_", " ")
 						.replace("\"", "");
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
@@ -966,7 +1001,7 @@ public class Helper {
 				JsonNode jn = new ObjectMapper().readTree(mdStream);
 				value = jn.findValue("livestock_production").toString()
 						.replace("_", " ").replace("\"", "");
-			} catch (IOException e) {
+			} catch (Exception e) {
 				play.Logger.warn(e.getMessage());
 			}
 		}
