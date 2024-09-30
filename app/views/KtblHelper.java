@@ -238,9 +238,9 @@ public class KtblHelper {
 					String roles = "";
 					List<String> roleList = cardNode.get(i).findValuesAsText("role");
 					for (int k = 0; i < roleList.size(); i++) {
-						roles = roles + ", " + roleList.get(k).replace("-", " ");
+						roles = roles + ", " + roleList.get(k).replace("_", " ");
 					}
-					valueHash.put("roles", roles);
+					valueHash.put("roles", "huhu");
 				}
 				valueList.add(valueHash);
 			}
