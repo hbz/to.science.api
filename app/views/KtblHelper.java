@@ -235,10 +235,12 @@ public class KtblHelper {
 				valueHash.put("id", cardNode.get(i).findValues("@id").toString()
 						.replace("[", "").replace("]", "").replace("\"", ""));
 				if (cardNode.get(i).has("role")) {
-					valueHash.put("roles",
-							cardNode.get(i).findValues("role").toString().replace("[", "")
-									.replace(",", ", ").replace("]", "").replace("\"", "")
-									.replace("_", " "));
+					String roles = "";
+					List<String> roleList = cardNode.get(i).findValuesAsText("role");
+					for (int k = 0; i < roleList.size(); i++) {
+						roles = roles + ", " + roleList.get(k).replace("-", " ");
+					}
+					valueHash.put("roles", roles);
 				}
 				valueList.add(valueHash);
 			}
