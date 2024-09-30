@@ -65,6 +65,12 @@
 
 <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody>
+
+@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
+
+	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+} else {
+
 	@context match{
 		case list : List[String] => {
 			@for(k<-context){
@@ -73,9 +79,9 @@
 		}
 		case _ => {}
 	}
-@if(hit.get("contentType").equals("researchData")){
-	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+
 }
+
 </tbody>
 </table>
 
