@@ -85,6 +85,17 @@
 	</tr>
 	}
 
+@if(views.Helper.getToscienceLiteralValue(node, "reference")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Source</td>
+	<td class="field-item"><a href="@views.Helper.getToscienceLiteralValue(node, "reference")" target="_blank">
+		@views.Helper.getToscienceLiteralValue(node, "reference")</a>
+	</td>
+	</tr>
+	}
+
+
 @if(views.Helper.getToscienceArrayValues(node, "associatedDataset")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
@@ -248,23 +259,6 @@
 	</tr>
 	}
 
-
-
-@if(views.Helper.getToscienceObjectArray(node, "recordingLocation")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Collection place</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceObjectArray(node, "subject")){
-		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a>
-			<br/>
-			 
-		}
-	</td>
-	</tr>
-	}
-
 @if(views.Helper.getToscienceObjectArray(node, "dataOrigin")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
@@ -305,21 +299,31 @@
 	}
 	
 
-@if(views.Helper.getToscienceObjectArray(node, "hasPart")!=null){
+@if(views.Helper.getToscienceLiteralValue(node, "doi")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">File(s)</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getToscienceObjectArray(node, "hasPart")){
-		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a>
-			<br/>
-			 
-		}
+	<td class="field-label">DOI</td>
+	<td class="field-item"><a href="https://doi.org/@views.Helper.getToscienceLiteralValue(node, "doi")" target="_blank">
+		@views.Helper.getToscienceLiteralValue(node, "reference")</a>
 	</td>
 	</tr>
 	}
 
+
+@if(views.Helper.getToscienceObjectArray(node, "hasPart")!=null){
+	<tr class="hasPart">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">File(s)</td>
+	<td class="field-item" property="http://purl.org/dc/terms/hasPart">
+	<ol>> 
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "hasPart")){
+			<li>@tags.partsView(rDs)</li>
+		}
+	</ol>
+	</td>
+	</tr>
+	}
+	
 @if(views.Helper.getToscienceObjectArray(node, "fundingId")!=null){
 	<tr class="joinedFunding">
 	<td style="display:none;">"80"</td>
