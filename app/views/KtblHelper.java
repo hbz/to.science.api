@@ -240,7 +240,7 @@ public class KtblHelper {
 					for (int k = 0; i < roleList.size(); i++) {
 						roles = roles + ", " + roleList.get(k).replace("_", " ");
 					}
-					valueHash.put("roles", "huhu");
+					valueHash.put("roles", roles);
 				}
 				valueList.add(valueHash);
 			}
