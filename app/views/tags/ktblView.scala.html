@@ -303,6 +303,22 @@
 	</td>
 	</tr>
 	}
+	
+
+@if(views.Helper.getToscienceObjectArray(node, "hasPart")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">File(s)</td>
+	<td class="field-item">
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "hasPart")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<br/>
+			 
+		}
+	</td>
+	</tr>
+	}
 
 @if(views.Helper.getToscienceObjectArray(node, "fundingId")!=null){
 	<tr class="joinedFunding">
