@@ -44,7 +44,7 @@
 @if(views.Helper.getToscienceObjectArray(node, "creator")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Resource type</td>
+	<td class="field-label">Author(s)</td>
 	<td class="field-item">
 		@for(rDs <- views.Helper.getToscienceObjectArray(node, "creator")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
@@ -56,37 +56,30 @@
 	}
 
 
-@if(views.Helper.getCreators(node)!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Author(s)</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getCreators(node)){
-			@rDs <br>
-		}
-	</td>
-	</tr>
-	}
-
-@if(views.Helper.getContributors(node)!=null){
+@if(views.Helper.getToscienceObjectArray(node, "contributor")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Contributor(s)</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getContributors(node)){
-			@rDs <br>
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "contributor")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a> <span class="separator">|</span>
+		    @rDs.get("roles") </br>
 		}
 	</td>
 	</tr>
 	}
 
-@if(views.Helper.getOthers(node)!=null){
+
+@if(views.Helper.getToscienceObjectArray(node, "other")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Other(s)</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getOthers(node)){
-			@rDs <br>
+		@for(rDs <- views.Helper.getToscienceObjectArray(node, "other")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a> <span class="separator">|</span>
+		    @rDs.get("roles") </br>
 		}
 	</td>
 	</tr>
