@@ -795,37 +795,6 @@ public class Helper {
 	}
 
 	/**
-	 * Get content of Json other-Array from toscience.json Method to provide field
-	 * "others" (persons) in correct sequence and with roles from json instead of
-	 * N-triples
-	 * 
-	 * @param node
-	 * @return List
-	 */
-	public static List<String> getAgent(Node node, String key) {
-		String mdStream = getTosJson(node);
-		List<Hashtable<String, String>> valueList = new ArrayList<>();
-		JsonNode jNode = null;
-		try {
-			JsonNode jn = new ObjectMapper().readTree(mdStream);
-			jNode = jn.findValue(key);
-
-			List<JsonNode> cardNode = jNode.findParents("prefLabel");
-			for (int i = 0; i < cardNode.size(); i++) {
-				String card = cardNode.get(i).findValues("prefLabel").toString() + "; "
-				// + cardNode.get(i).findValues("@id").toString() + "; "
-						+ cardNode.get(i).findValues("role").toString();
-				othersList.add(card.replace("[", "").replace("]", "").replace("\"", "")
-						.replace("_", " ").replace(",", ", "));
-			}
-			return othersList;
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
-		}
-		return null;
-	}
-
-	/**
 	 * Get content of Json other-Array from toscience.json
 	 * 
 	 * @param node
