@@ -65,6 +65,12 @@
 
 <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
 <thead><tr><th style="display:none;">Weight</th><th>Name</th><th>Value</th></tr></thead><tbody>
+
+@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
+
+	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+} else {
+
 	@context match{
 		case list : List[String] => {
 			@for(k<-context){
@@ -73,9 +79,9 @@
 		}
 		case _ => {}
 	}
-@if(hit.get("contentType").equals("researchData")){
-	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
+
 }
+
 </tbody>
 </table>
 
@@ -274,45 +280,79 @@
 				}
 			}
 		}
-		case "contribution"=>{
+		
+		case "livestock_category"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}
-				case _ =>{
-			    @if(views.Helper.contributionContainsAdditionalFields(hit)){
-				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
-					<td>
-					<table>
-					@for(c <-views.Helper.listContributions(hit)){
-						@displayContributions(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())
-					}
-					</table>
-					</td>
-				</tr>
-				}
-				}
-			}
+				case _ =>{ }
+			 }
 		}
-		case "other"=>{
+		
+		case "livestock_production"=>{
 			@values match {
 				case nullCase if nullCase == null =>{}
-				case _ =>{
-				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
-					<td>
-					<table>
-					@for(other <-views.Helper.getOthers(node)){
-						@other <br />
-						}
-					</table>
-					</td>
-				</tr>
-				}
+				case _ =>{ }
+			 }
+		}
+		
+		case "housing_systems"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
+			 }
+		}
+		
+		case "additional_housing_systems"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
+			 }
+		}
+		
+		case "ventilation_system"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
+			 }
+		}
+		
+		case "project_title"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
+			 }
+		}
+		
+		case "test_design"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
+			 }
+		}
+		
+		case "emissions"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
+			 }
+		}
+		
+		case "emission_reduction_methods"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
+			 }
+		}
+		
+		
+		case "emi_measurement_techniques"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{ }
 			}
 		}
-				
+		
+		
 		case "inSeries"=>{
 			@values match {
 			case nullCase if nullCase == null =>{}
