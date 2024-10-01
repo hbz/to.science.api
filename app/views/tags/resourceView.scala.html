@@ -280,6 +280,46 @@
 				}
 			}
 		}
+		
+		case "contribution"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+			    @if(views.Helper.contributionContainsAdditionalFields(hit)){
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(c <-views.Helper.listContributions(hit)){
+						@displayContributions(c.get("id").toString(),c.get("label").toString(),c.get("roleId").toString(),c.get("roleName").toString())
+					}
+					</table>
+					</td>
+				</tr>
+				}
+				}
+			}
+		}
+		case "other"=>{
+			@values match {
+				case nullCase if nullCase == null =>{}
+				case _ =>{
+				<tr class="@key">
+					<td style="display:none;">@getWeight(key)</td>
+					<td class="field-label @key">@getLabel(key)</td>
+					<td>
+					<table>
+					@for(other <-views.Helper.getOthers(node)){
+						@other <br />
+						}
+					</table>
+					</td>
+				</tr>
+				}
+			}
+		}
+				
 		case "inSeries"=>{
 			@values match {
 			case nullCase if nullCase == null =>{}
