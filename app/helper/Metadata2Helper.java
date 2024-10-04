@@ -417,11 +417,10 @@ public class Metadata2Helper {
 		LinkedHashMap<String, Object> metadata2Map = new LinkedHashMap<>();
 		JSONArray jsArr;
 		JSONObject jObj;
-		Set<String> isInKeySet = new HashSet<>(Arrays.asList("usageManual",
-				"description", "title", "associatedPublication", "contributerOrder",
-				"reference", "embargoTime", "fundingProgram", "associatedDataset",
-				"prefLabel", "alternative", "nextVersion", "previousVersion",
-				"yearOfCopyright", "projectId", "recordingPeriod"));
+		Set<String> isInKeySet = new HashSet<>(
+				Arrays.asList("usageManual", "description", "title", "contributerOrder",
+						"embargoTime", "prefLabel", "alternative", "nextVersion",
+						"previousVersion", "yearOfCopyright", "recordingPeriod"));
 		try {
 			JsonMapper jsmapper = new JsonMapper();
 			jsmapper.node = n;

@@ -158,8 +158,7 @@ public class KTBLMapperHelper {
 		String[] ktblElements = { "livestock_category", "ventilation_system",
 				"livestock_production", "housing_systems", "additional_housing_systems",
 				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
-				"project_title", "test_design", "info", "relatedDatasets",
-				"recordingPeriod" };
+				"project_title", "test_design", "info" };
 
 		try {
 			JSONObject jo = new JSONObject(json);
