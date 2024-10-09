@@ -1,8 +1,12 @@
 package helper;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.Process;
 import java.lang.ProcessBuilder;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 import actions.Create;
 import models.Gatherconf;
@@ -23,6 +27,7 @@ public class WpullThread extends Thread {
 	private File crawlDir = null;
 	private File outDir = null;
 	private String warcFilename = null;
+	private String host = null;
 	private String localpath = null;
 	private String executeCommand = null;
 	/**
@@ -109,6 +114,16 @@ public class WpullThread extends Thread {
 	}
 
 	/**
+	 * Die Methode, um den Parameter host zu setzen.
+	 * 
+	 * @param host Der Hostname der zu crawlenden URL; ohne Protokollangaben
+	 *          (http[s]//:) und ohne Pfadangaben (/.*$)
+	 */
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	/**
 	 * Die Methode, um den Parameter localpath zu setzen.
 	 * 
 	 * @param localpath Eine URI, unter der die Archivdatei lokal gepeichert ist.
@@ -164,7 +179,46 @@ public class WpullThread extends Thread {
 			WebgatherLogger.info("CDN-Crawl für " + conf.getName()
 					+ " wurde beendet mit Exit-Status " + CDNGathererExitState);
 
-			// 2. Ausführung des Hauptcrawls (URL)
+			// 2. Auslesen der vom cdnparse angelegten Datei hostnames.txt
+			// cdnparse ist der 1. Schritt des CDN-Precrawls und ein Python-Programm
+			ArrayList<String> domains = conf.getDomains();
+			// Add hostnames from cdn precrawl textfile
+			List<String> hostnames = new ArrayList<>();
+			WebgatherLogger.info("Adding hostnames from file " + crawlDir.toString()
+					+ "/hostnames.txt");
+			try {
+				hostnames = Files.readAllLines(
+						new File(crawlDir.toString() + "/hostnames.txt").toPath());
+			} catch (IOException e) {
+				WebgatherLogger.warn("File hostnames.txt can not be opened!",
+						e.toString());
+			}
+			domains.addAll(hostnames);
+			boolean noParent = true;
+			String zusDomain = null;
+			String zusHost = null;
+			if (domains.size() > 0) {
+				executeCommand += " --span-hosts";
+				executeCommand += " --hostnames=" + host;
+				for (int i = 0; i < domains.size(); i++) {
+					zusDomain = domains.get(i);
+					zusHost = zusDomain.replaceAll("^http://", "")
+							.replaceAll("^https://", "").replaceAll("/.*$", "");
+					WebgatherLogger.debug("zusHost=" + zusHost);
+					if (zusHost.equalsIgnoreCase(host)) {
+						WebgatherLogger.debug("Es soll von der gesamten Domain " + host
+								+ " eingesammelt werden, die Option --no-parent wird entfernt.");
+						noParent = false;
+					} else {
+						executeCommand += "," + zusHost;
+					}
+				}
+			}
+			if (noParent) {
+				executeCommand += " --no-parent";
+			}
+
+			// 3. Ausführung des Hauptcrawls (URL)
 			String[] execArr = executeCommand.split(" ");
 			// unmask spaces in exec command
 			for (int i = 0; i < execArr.length; i++) {

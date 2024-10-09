@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import java.io.IOException;
 import models.Globals;
+import org.json.JSONArray;
 
 /**
  * 
@@ -99,11 +100,19 @@ public class KTBLMapperHelper {
 			for (String element : elementsToPut) {
 				if (ktblAndTos.has(element)) {
 					Object value = ktblAndTos.get(element);
-					if (value instanceof JSONArray) {
+
+					if (value instanceof JSONArray
+							&& (element.contains("additional_housing_systems")
+									|| element.contains("emissions")
+									|| element.contains("emission_reduction_methods")
+									|| element.contains("emi_measurement_techniques"))) {
+
 						JSONArray array = (JSONArray) value;
 						ktbl.put(element, array);
 					} else {
-						ktbl.put(element, value);
+
+						ktbl.put(element, Metadata2Helper.cleanString(value.toString()));
+
 					}
 				}
 			}
@@ -139,7 +148,6 @@ public class KTBLMapperHelper {
 				Object value = jsonObject.get(key);
 				map.put(key, value);
 			}
-
 		} catch (JSONException e) {
 			play.Logger.debug("JSONException," + e);
 		}
@@ -158,6 +166,7 @@ public class KTBLMapperHelper {
 		String[] ktblElements = { "livestock_category", "ventilation_system",
 				"livestock_production", "housing_systems", "additional_housing_systems",
 				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
+
 				"project_title", "test_design", "info" };
 
 		try {
@@ -172,4 +181,5 @@ public class KTBLMapperHelper {
 		}
 		return false;
 	}
+
 }

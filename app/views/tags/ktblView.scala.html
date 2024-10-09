@@ -1,7 +1,9 @@
+@import views.KtblHelper
 @import views.Helper
 @import views.ViewerInfo
 @import models.Node
 @(node:Node,hit:Map[String,Object],context:List[String])
+
 
 @if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
 <!--  <table class="table table-striped table-condensed resourceTable display" cellspacing="0" width="100%" resource=@hit.get("primaryTopic") data-entity-bundle=@hit.get("contentType")>
@@ -14,116 +16,470 @@
 
 
 @ktblRow(value:Any)={
-@if(views.Helper.getLivestockCategory(node)!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Livestock Category</td>
-	<td class="field-item">
-		@views.Helper.getLivestockCategory(node:Node)
-	</td>
-	</tr>
-	}
 
-@if(views.Helper.getLivestockProduction(node)!=null){
+@if(views.KtblHelper.getToscienceArrayValues(node, "alternative")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Livestock Production</td>
+	<td class="field-label">Alternative title</td>
 	<td class="field-item">
-		@views.Helper.getLivestockProduction(node:Node)
-	</td>
-	</tr>
-	}
-
-@if(views.Helper.getHousingSystems(node)!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Housing Systems</td>
-	<td class="field-item">
-		@views.Helper.getHousingSystems(node:Node)
-	</td>
-	</tr>
-	}
-
-@if(views.Helper.getKtblArrayValues(node, "additional_housing_systems")!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Additional Housing Systems</td>
-	<td class="field-item">
-		@for(rDs <- views.Helper.getKtblArrayValues(node, "additional_housing_systems")){
+		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "alternative")){
 			@rDs <br>
 		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceArrayValues(node, "description")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Description</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "description")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "creator")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Author(s)</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "creator")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a> <span class="separator">|</span>
+		    @rDs.get("roles") </br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "contributor")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Contributor(s)</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "contributor")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a> <span class="separator">|</span>
+		    @rDs.get("roles") </br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "other")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Other(s)</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "other")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a> <span class="separator">|</span>
+		    @rDs.get("roles") </br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceLiteralValue(node, "reference")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Source</td>
+	<td class="field-item"><a href="@views.KtblHelper.getToscienceLiteralValue(node, "reference")" target="_blank">
+		@views.KtblHelper.getToscienceLiteralValue(node, "reference")</a>
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getToscienceArrayValues(node, "associatedDataset")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Associated dataset(s)</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "associatedDataset")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceLiteralValue(node, "issued")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Publication year</td>
+	<td class="field-item">
+		@views.KtblHelper.getToscienceLiteralValue(node, "issued")
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "medium")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Resource type</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "medium")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a><br> 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "rdfType")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Type of Publication</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "rdfType")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a><br> 
+		}
+	</td>
+	</tr>
+	}
+	
+@if(views.KtblHelper.getToscienceLiteralValue(node, "yearOfCopyright")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Copyright year</td>
+	<td class="field-item">
+		@views.KtblHelper.getToscienceLiteralValue(node, "yearOfCopyright")
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "license")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">License</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "license")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+			<br/>
+			 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "language")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Language</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "language")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a><br> 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "institution")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">FRL collection</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "institution")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+			<br/>
+			 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "subject")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">subject(s)</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "subject")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<br/>
+			 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceArrayValues(node, "usageManual")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Usage manual</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "usageManual")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "recordingLocation")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Collection place</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "recordingLocation")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<br/>
+			 
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceArrayValues(node, "recordingLPeriod")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Collection period</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "recordingPeriod")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "dataOrigin")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Type of data collection</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "dataOrigin")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a><br> 
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "ddc")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Subject classification (DDC)</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "ddc")){
+		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<br/>
+			
+		}
+	</td>
+	</tr>
+	}
+	
+@if(views.KtblHelper.getToscienceLiteralValue(node, "@id")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Label</td>
+	<td class="field-item">
+		@views.KtblHelper.getToscienceLiteralValue(node, "@id")
+	</td>
+	</tr>
+	}
+	
+
+@if(views.KtblHelper.getToscienceLiteralValue(node, "doi")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">DOI</td>
+	<td class="field-item"><a href="https://doi.org/@views.KtblHelper.getToscienceLiteralValue(node, "doi")" target="_blank">
+		@views.KtblHelper.getToscienceLiteralValue(node, "reference")</a>
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getToscienceObjectArray(node, "hasPart")!=null){
+	<tr class="hasPart">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">File(s)</td>
+	<td class="field-item" property="http://purl.org/dc/terms/hasPart">
+	<ol>> 
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "hasPart")){
+			<li>@tags.partsView(rDs)</li>
+		}
+	</ol>
+	</td>
+	</tr>
+	}
+	
+@if(views.KtblHelper.getToscienceObjectArray(node, "fundingId")!=null){
+	<tr class="joinedFunding">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Funding</td>
+	<td class="field-item" property="info:regal/regal/joinedFunding">
+	<ol>
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "fundingId")){
+	<li><table>
+	<tr class="fundingJoined-child">
+	<td style="display:none;">"80"</td>
+	<td class="field-label fundingJoined">Funder</td>
+	<td class="field-item" property="info:regal/regal/joinedFunding">
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "fundingId")){
+		<a title="search for similar objects" href="/resource?query[0][term]=%22@rDs.get("id")%22">
+			@rDs.get("prefLabel") </a>
+			<span class="separator">|</span>
+			<a href=@rDs.get("id")  target="_blank">
+					<span class="octicon-link-external"></span>
+			</a>
+		 }
+	</td></tr>
+	<tr class="fundingJoined-child">
+	<td style="display:none;">"80"</td>
+	<td class="field-label fundingJoined">Grant program</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "fundingProgram")){
+			@rDs <br>
+		}
+	</td></tr>
+	<tr class="fundingJoined-child">
+	<td style="display:none;">"80"</td>
+	<td class="field-label fundingJoined">Grant number</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "projectId")){
+			@rDs <br>
+		}
+		
+	</td>	
+	</tr></table>
+	</li>
+	}
+	</ol></td></tr>
+	}
+	
+@if(views.KtblHelper.getLivestockCategory(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Livestock category</td>
+	<td class="field-item">
+		@views.KtblHelper.getLivestockCategory(node:Node)
 	</td>
 	</tr>
 	}
 
 	
-@if(views.Helper.getVentilationSystem(node)!=null){
+@if(views.KtblHelper.getVentilationSystem(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Ventilation System</td>
+	<td class="field-label">Ventilation system</td>
 	<td class="field-item">
-		@views.Helper.getVentilationSystem(node:Node)
+		@views.KtblHelper.getVentilationSystem(node:Node)
 	</td>
 	</tr>
 	}	
 
-@if(views.Helper.getKtblArrayValues(node, "emissions")!=null){
+
+@if(views.KtblHelper.getLivestockProduction(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Livestock production</td>
+	<td class="field-item">
+		@views.KtblHelper.getLivestockProduction(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getHousingSystems(node)!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Housing systems</td>
+	<td class="field-item">
+		@views.KtblHelper.getHousingSystems(node:Node)
+	</td>
+	</tr>
+	}
+
+@if(views.KtblHelper.getKtblArrayValues(node, "additional_housing_systems")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Additional housing systems</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getKtblArrayValues(node, "additional_housing_systems")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getKtblArrayValues(node, "emi_measurement_techniques")!=null){
+	<tr class="ktbl:emimin">
+	<td style="display:none;">"80"</td>
+	<td class="field-label">Emission measurement techniques</td>
+	<td class="field-item">
+		@for(rDs <- views.KtblHelper.getKtblArrayValues(node, "emi_measurement_techniques")){
+			@rDs <br>
+		}
+	</td>
+	</tr>
+	}
+
+
+@if(views.KtblHelper.getKtblArrayValues(node, "emissions")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Emissions</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getKtblEmissions(node, "emissions")){
+		@for(rDs <- views.KtblHelper.getKtblEmissions(node, "emissions")){
 			@rDs <br>
 		}
 	</td>
 	</tr>
 	}
 
-
-@if(views.Helper.getKtblArrayValues(node, "emission_reduction_methods")!=null){
+@if(views.KtblHelper.getKtblArrayValues(node, "emission_reduction_methods")!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Emission Reduction</td>
+	<td class="field-label">Emission reduction</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getKtblArrayValues(node, "emission_reduction_methods")){
+		@for(rDs <- views.KtblHelper.getKtblArrayValues(node, "emission_reduction_methods")){
 			@rDs <br>
 		}
 	</td>
 	</tr>
 	}
 
-@if(views.Helper.getKtblArrayValues(node, "emi_measurement_techniques")!=null){
+@if(views.KtblHelper.getProjectTitle(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Emi Measurement Techniques</td>
+	<td class="field-label">Project title</td>
 	<td class="field-item">
-		@for(rDs <- views.Helper.getKtblArrayValues(node, "emi_measurement_techniques")){
-			@rDs <br>
-		}
+		@views.KtblHelper.getProjectTitle(node:Node)
 	</td>
 	</tr>
 	}
 
-
-@if(views.Helper.getProjectTitle(node)!=null){
+@if(views.KtblHelper.getTestDesign(node)!=null){
 	<tr class="ktbl:emimin">
 	<td style="display:none;">"80"</td>
-	<td class="field-label">Project Title</td>
+	<td class="field-label">Test design</td>
 	<td class="field-item">
-		@views.Helper.getProjectTitle(node:Node)
+		@views.KtblHelper.getTestDesign(node:Node)
 	</td>
 	</tr>
 	}
-
-@if(views.Helper.getTestDesign(node)!=null){
-	<tr class="ktbl:emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Test Design</td>
-	<td class="field-item">
-		@views.Helper.getTestDesign(node:Node)
-	</td>
-	</tr>
-	}
-
 }
+
 

@@ -671,4 +671,5 @@ public class MyController extends Controller {
 			throw new HttpArchiveException(406, e.getMessage() + "\n" + xml);
 		}
 	}
+
 }

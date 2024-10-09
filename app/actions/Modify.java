@@ -284,28 +284,25 @@ public class Modify extends RegalAction {
 
 		try {
 			JSONObject toscienceJson = null;
+			JSONObject allMetadata = null;
 			play.Logger.debug("node.getContentType()= " + node.getContentType());
 			if (!node.getContentType().contains("file")
 					&& !node.getContentType().contains("part")) {
-
-				play.Logger.debug("toscienceJson will be mapped");
 
 				RDFFormat format = RDFFormat.NTRIPLES;
 				Map<String, Object> rdf = RdfHelper.getRdfAsMap(node, format, content);
 
 				play.Logger.debug("rdf=" + rdf.toString());
-				toscienceJson = new JSONObject(new JSONObject(rdf).toString());
+				allMetadata = new JSONObject(new JSONObject(rdf).toString());
 
-				play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+				String toscienceMetadata = ToscienceHelper
+						.getToPersistTosMetadata(allMetadata.toString(), pid);
 
-				toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
-
-				play.Logger.debug("toscienceJson=" + toscienceJson.toString());
+				toscienceJson = ToscienceHelper
+						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
 				updateMetadataJson(node, toscienceJson.toString());
-				play.Logger
-						.debug("toscience from Node" + node.getMetadata("toscience"));
-				play.Logger.debug("Done toscienceJson Mapping");
+
 			}
 		} catch (JSONException e) {
 			play.Logger.error("toscience json datastream could not be updated!");
@@ -1272,6 +1269,35 @@ public class Modify extends RegalAction {
 					.debug("content.file.getAbsolutePath():" + file.getAbsolutePath());
 			node.setMetadataFile(metadataType, file.getAbsolutePath());
 			node.setMetadata(metadataType, content);
+			OaiDispatcher.makeOAISet(node);
+			reindexNodeAndParent(node);
+			return pid + " metadata of type " + metadataType
+					+ " successfully updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	public String updateMetadataTosAndKtbl(String metadataType, Node node,
+			String contentTos, String contentKtbl) {
+		try {
+			String pid = node.getPid();
+
+			if (contentTos == null || contentKtbl == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			if (metadataType.equals(metadata2)) {
+				contentTos = rewriteContent(contentTos, pid);
+				contentKtbl = rewriteContent(contentKtbl, pid);
+			}
+			File file = CopyUtils.copyStringToFile(contentTos);
+			node.setMetadataFile(metadataType, file.getAbsolutePath());
+			node.setMetadata(metadataType, contentTos + contentKtbl);
 			OaiDispatcher.makeOAISet(node);
 			reindexNodeAndParent(node);
 			return pid + " metadata of type " + metadataType

@@ -76,6 +76,9 @@ public class Metadata2Helper {
 	public static LinkedHashMap<String, Object> getRdfFromToscience(
 			JSONObject tosAndKtblContent, Node n) {
 		try {
+			play.Logger.debug(
+					"getRdfFromToscience(), tosAndKtblContent= " + tosAndKtblContent);
+
 			AdHocUriProvider ahu = new AdHocUriProvider();
 			JsonMapper jsmapper = new JsonMapper();
 			jsmapper.node = n;
@@ -352,7 +355,6 @@ public class Metadata2Helper {
 				play.Logger.debug("issued=" + issued.toString());
 				rdf.put("issued", issued.toString());
 			}
-
 			// KTBL-Teil
 
 			if (tosAndKtblContent.has("info")) {
@@ -477,6 +479,8 @@ public class Metadata2Helper {
 				}
 			}
 			metadata2Map.put("metadata2", rdf);
+			play.Logger.debug(
+					"getRdfFromToscience.metadata2Map()" + metadata2Map.toString());
 			return metadata2Map;
 		} catch (Exception e) {
 			throw new RuntimeException(
