@@ -1706,9 +1706,8 @@ public class Resource extends MyController {
 					/**
 					 * Metadata2
 					 */
-					LinkedHashMap<String, Object> metadata2Map =
-							Metadata2Helper.generateRdfFromJsonCollection(
-									new JSONObject(contentOfFile), readNode);
+					LinkedHashMap<String, Object> metadata2Map = Metadata2Helper
+							.getRdfFromToscience(new JSONObject(contentOfFile), readNode);
 					String metadata2Content = modify.rdfToString(
 							(Map<String, Object>) metadata2Map.get("metadata2"),
 							RDFFormat.NTRIPLES);
