@@ -1706,14 +1706,14 @@ public class Resource extends MyController {
 					/**
 					 * Metadata2
 					 */
-					LinkedHashMap<String, Object> metadata2Map = Metadata2Helper
-							.getRdfFromToscience(new JSONObject(contentOfFile), readNode);
-					String metadata2Content = modify.rdfToString(
-							(Map<String, Object>) metadata2Map.get("metadata2"),
-							RDFFormat.NTRIPLES);
-					result3 =
-							modify.updateMetadata("metadata2", readNode, metadata2Content);
-					Enrich.enrichMetadata2(readNode);
+					/*
+					 * LinkedHashMap<String, Object> metadata2Map = Metadata2Helper
+					 * .getRdfFromToscience(new JSONObject(contentOfFile), readNode);
+					 * String metadata2Content = modify.rdfToString( (Map<String, Object>)
+					 * metadata2Map.get("metadata2"), RDFFormat.NTRIPLES); result3 =
+					 * modify.updateMetadata("metadata2", readNode, metadata2Content);
+					 * Enrich.enrichMetadata2(readNode);
+					 */
 				}
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
