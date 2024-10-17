@@ -97,8 +97,7 @@ public class ToscienceHelper {
 		String[] elementsToRemove = { "livestock_category", "ventilation_system",
 				"livestock_production", "housing_systems", "additional_housing_systems",
 				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
-				"project_title", "test_design", "relatedDatasets", "recordingPeriod",
-				"info" };
+				"project_title", "test_design", "info" };
 		try {
 			String resource_id =
 					new String(Globals.protocol + Globals.server + "/resource/" + pid);

@@ -298,7 +298,8 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus der Fedora.
+	 * Diese Methode holt (GET) den Inhalt eines beliebigen Datenstroms direkt aus
+	 * der Fedora.
 	 *
 	 * @author Ingolf Kuss
 	 * @param pid Die PID der Ressource
@@ -570,8 +571,7 @@ public class Resource extends MyController {
 		return new ModifyAction().call(pid, node -> {
 			try {
 
-				LinkedHashMap<String, Object> rdfTos = null;
-				LinkedHashMap<String, Object> rdfKtbl = null;
+				LinkedHashMap<String, Object> rdf = null;
 				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
@@ -620,24 +620,22 @@ public class Resource extends MyController {
 
 				play.Logger.debug("Starting METADATA2 Mapping");
 
-				rdfTos = Metadata2Helper
-						.getRdfFromToscience(new JSONObject(toscienceMetadata), readNode);
-				rdfKtbl = Metadata2Helper
-						.getRdfFromToscience(new JSONObject(ktblMetadata), readNode);
+				rdf = Metadata2Helper.getRdfFromToscience(new JSONObject(contentOfFile),
+						readNode);
 
-				String rdfContentTos = modify.rdfToString(
-						(Map<String, Object>) rdfTos.get("metadata2"), RDFFormat.NTRIPLES);
+				play.Logger.debug("updateKtblAndTos,rdf=" + rdf.toString());
 
-				String rdfContentKtbl = modify.rdfToString(
-						(Map<String, Object>) rdfKtbl.get("metadata2"), RDFFormat.NTRIPLES);
+				String rdfContent = modify.rdfToString(
+						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
 
-				String result3 = modify.updateMetadataTosAndKtbl("metadata2", readNode,
-						rdfContentTos, rdfContentKtbl);
+				play.Logger.debug("rdfContent=" + rdfContent);
+
+				String result3 =
+						modify.updateMetadata("metadata2", readNode, rdfContent);
 
 				play.Logger.debug("Done METADATA2 Mapping");
 
 				Enrich.enrichMetadata2(readNode);
-
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
