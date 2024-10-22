@@ -85,6 +85,7 @@ import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import play.mvc.Http;
 import play.mvc.Result;
+import views.Helper;
 import play.mvc.Http.Request;
 
 /**
@@ -300,6 +301,11 @@ public class Modify extends RegalAction {
 
 				toscienceJson = ToscienceHelper
 						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
+
+				if (Helper.mdStreamExists(pid, "ktbl")) {
+					toscienceJson = ToscienceHelper.getPrefLabelsResolved(new JSONObject(
+							new Read().readNode(pid).getMetadata("toscience")));
+				}
 
 				updateMetadataJson(node, toscienceJson.toString());
 

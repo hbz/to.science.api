@@ -19,6 +19,61 @@ import play.Play;
 public class ToscienceHelper {
 
 	/**
+	 * If a resource is edited via Drupal, the method gets the roles from the old
+	 * data stream and saves them in the newly edited toscience data stream
+	 * 
+	 * @param tosOld
+	 * @param tosNew
+	 * @return The newly edited data stream(toscience) with the roles for ‘other’,
+	 *         ‘creator’ and ‘contributor
+	 */
+
+	public static String getRoles(String tosOld, String tosNew) {
+		JSONObject joOld;
+		JSONObject joNew;
+
+		try {
+			joOld = new JSONObject(tosOld);
+			joNew = new JSONObject(tosNew);
+
+			String[] keysToCheck = { "other", "creator", "contributor" };
+
+			for (String key : keysToCheck) {
+				if (joNew.has(key) && joOld.has(key)) {
+					JSONArray newEntries = joNew.getJSONArray(key);
+					JSONArray oldEntries = joOld.getJSONArray(key);
+
+					for (int i = 0; i < newEntries.length(); i++) {
+						JSONObject newEntry = newEntries.getJSONObject(i);
+						String newPrefLabel = newEntry.getString("prefLabel");
+
+						for (int j = 0; j < oldEntries.length(); j++) {
+							JSONObject oldEntry = oldEntries.getJSONObject(j);
+							String oldPrefLabel = oldEntry.getString("prefLabel");
+
+							if (newPrefLabel.equals(oldPrefLabel)) {
+								if (oldEntry.has("role")) {
+									JSONArray oldRoles = oldEntry.getJSONArray("role");
+									newEntries.getJSONObject(i).put("role", oldRoles);
+
+								}
+
+							}
+						}
+
+					}
+
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return joNew.toString();
+	}
+
+	/**
 	 * This method gets all unresolved PrefLabels and resolves them using the
 	 * MyEtikettMaker
 	 * 

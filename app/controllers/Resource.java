@@ -463,23 +463,31 @@ public class Resource extends MyController {
 
 				Node readNode = readNodeOrNull(pid);
 				JSONObject allMetadata = null;
-				JSONObject toscienceJson = null;
+				JSONObject tosToPersist = null;
+
+				String tosOld = null;
+				String tosNew = null;
+				String tosWithRoles = null;
 
 				play.Logger.debug("toscienceJson will be mapped");
 
-				RDFFormat format = RDFFormat.NTRIPLES;
-				Map<String, Object> rdf =
-						RdfHelper.getRdfAsMap(readNode, format, request().body().asText());
-
+				Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode,
+						RDFFormat.NTRIPLES, request().body().asText());
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());
+				tosNew = ToscienceHelper.getToPersistTosMetadata(allMetadata.toString(),
+						pid);
+				tosToPersist =
+						ToscienceHelper.getPrefLabelsResolved(new JSONObject(tosNew));
 
-				String toscienceMetadata = ToscienceHelper
-						.getToPersistTosMetadata(allMetadata.toString(), pid);
+				if (Helper.mdStreamExists(pid, "ktbl")) {
+					tosOld = readNode.getMetadata("toscience");
+					tosWithRoles =
+							ToscienceHelper.getRoles(tosOld, tosToPersist.toString());
+					tosToPersist = new JSONObject(tosWithRoles);
 
-				toscienceJson = ToscienceHelper
-						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
+				}
+				modify.updateMetadata("toscience", readNode, tosToPersist.toString());
 
-				modify.updateMetadata("toscience", readNode, toscienceJson.toString());
 				play.Logger.debug("Done toscienceJson Mapping");
 
 				/**
