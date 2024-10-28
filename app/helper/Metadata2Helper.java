@@ -357,11 +357,14 @@ public class Metadata2Helper {
 			}
 
 			if (tosAndKtblContent.has("associatedDataset")) {
-				JSONArray associatedDatasetArray =
-						tosAndKtblContent.getJSONArray("associatedDataset");
+				jsArr = tosAndKtblContent.getJSONArray("associatedDataset");
 				List<String> associatedDataset = new ArrayList<>();
-				for (int i = 0; i < associatedDatasetArray.length(); i++) {
-					associatedDataset.add(associatedDatasetArray.getString(i));
+				for (int i = 0; i < jsArr.length(); i++) {
+					jObj = jsArr.getJSONObject(i);
+
+					if (jObj.has("@id")) {
+						associatedDataset.add((jObj.getString("@id")).toString());
+					}
 				}
 				rdf.put("associatedDataset", associatedDataset);
 			}
