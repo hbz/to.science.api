@@ -102,7 +102,7 @@
 	<td style="display:none;">"80"</td>
 	<td class="field-label">Associated dataset(s)</td>
 	<td class="field-item">
-		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "associatedDataset")){
+		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "associatedDataset")){
 		<a href="@rDs.get("id")">
 			@rDs.get("prefLabel") </a><br> 
 		}
