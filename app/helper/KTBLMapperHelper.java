@@ -85,15 +85,6 @@ public class KTBLMapperHelper {
 			result.put("id", resource_id);
 
 			ktblAndTos = new JSONObject(contentJsFile);
-			if (ktblAndTos.has("relatedDatasets")) {
-				result.put("relatedDatasets",
-						(JSONArray) ktblAndTos.get("relatedDatasets"));
-			}
-			if (ktblAndTos.has("recordingPeriod")) {
-				result.put("recordingPeriod",
-						(JSONArray) ktblAndTos.get("recordingPeriod"));
-			}
-
 			for (String element : elementsToPut) {
 				if (ktblAndTos.has(element)) {
 					Object value = ktblAndTos.get(element);
@@ -161,8 +152,7 @@ public class KTBLMapperHelper {
 		String[] ktblElements = { "livestock_category", "ventilation_system",
 				"livestock_production", "housing_systems", "additional_housing_systems",
 				"emi_measurement_techniques", "emissions", "emission_reduction_methods",
-				"project_title", "test_design", "info", "relatedDatasets",
-				"recordingPeriod" };
+				"project_title", "test_design", "info" };
 
 		try {
 			JSONObject jo = new JSONObject(json);

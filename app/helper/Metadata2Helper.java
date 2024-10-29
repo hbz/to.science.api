@@ -348,6 +348,27 @@ public class Metadata2Helper {
 				play.Logger.debug("issued=" + issued.toString());
 				rdf.put("issued", issued.toString());
 			}
+
+			if (tosAndKtblContent.has("recordingPeriod")) {
+				Object obj = tosAndKtblContent.get("recordingPeriod");
+				String recordingPeriod =
+						getValueBetweenTwoQuotationMarks(obj.toString());
+				rdf.put("recordingPeriod", recordingPeriod);
+			}
+
+			if (tosAndKtblContent.has("associatedDataset")) {
+				jsArr = tosAndKtblContent.getJSONArray("associatedDataset");
+				List<String> associatedDataset = new ArrayList<>();
+				for (int i = 0; i < jsArr.length(); i++) {
+					jObj = jsArr.getJSONObject(i);
+
+					if (jObj.has("@id")) {
+						associatedDataset.add((jObj.getString("@id")).toString());
+					}
+				}
+				rdf.put("associatedDataset", associatedDataset);
+			}
+
 			// KTBL-Teil
 			if (tosAndKtblContent.has("info")) {
 				play.Logger.debug("Found info");
