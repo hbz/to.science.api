@@ -67,7 +67,7 @@
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "contributor")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a> <span class="separator">|</span>
+			@rDs.get("prefLabel")
 			@if(rDs.get("roles") != null){
 			<span class="separator">|</span>
 		    @rDs.get("roles") <br/>
