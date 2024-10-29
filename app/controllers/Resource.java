@@ -483,6 +483,10 @@ public class Resource extends MyController {
 					tosOld = readNode.getMetadata("toscience");
 					tosWithRoles =
 							ToscienceHelper.getRoles(tosOld, tosToPersist.toString());
+					tosWithRoles =
+							ToscienceHelper.getAssociatedDatasets(tosOld, tosWithRoles);
+
+					// hier sollen die associatedDatasets gerettet werden
 					tosToPersist = new JSONObject(tosWithRoles);
 
 				}

@@ -2,6 +2,9 @@ package helper;
 
 import org.json.JSONObject;
 import java.util.List;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import org.json.JSONArray;
 import helper.MyEtikettMaker;
@@ -172,6 +175,45 @@ public class ToscienceHelper {
 		}
 
 		return ktblAndTos.toString();
+	}
+
+	static public String getAssociatedDatasets(String tosOld, String tosNew) {
+		JSONObject joOld;
+		JSONObject joNew;
+
+		try {
+			joOld = new JSONObject(tosOld);
+			joNew = new JSONObject(tosNew);
+			JSONArray oldDatasets = joOld.getJSONArray("associatedDataset");
+			JSONArray newDatasets = joNew.getJSONArray("associatedDataset");
+
+			List<String> oldIds = new ArrayList<>();
+			for (int i = 0; i < oldDatasets.length(); i++) {
+				JSONObject oldDataset = oldDatasets.getJSONObject(i);
+				oldIds.add(oldDataset.getString("@id"));
+			}
+
+			JSONArray updatedDatasets = new JSONArray();
+			for (int i = 0; i < newDatasets.length(); i++) {
+				String newId = newDatasets.getString(i);
+				boolean found = false;
+				for (int j = 0; j < oldIds.size(); j++) {
+					if (oldIds.get(j).equals(newId)) {
+						updatedDatasets.put(oldDatasets.getJSONObject(j));
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					updatedDatasets.put(newId);
+				}
+			}
+			joNew.put("associatedDataset", updatedDatasets);
+			return joNew.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }
