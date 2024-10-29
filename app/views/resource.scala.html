@@ -11,7 +11,7 @@
 						models.Globals.users.getUser(ctx())){
 
 @if(views.Helper.mdStreamExists(hit.getPid(), "ktbl")){
-			        		@tags.getKtblTitle(hit.getLd2())
+			        		@tags.getKtblTitle(hit.getLd2(), hit)
 } else {
 			        		@tags.getTitle(hit.getLd2())
 }
