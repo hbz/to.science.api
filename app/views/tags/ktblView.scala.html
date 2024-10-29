@@ -68,7 +68,7 @@
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "contributor")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a> <span class="separator">|</span>
-			@if(@rDs.get("roles") != null){
+			@if(rDs.get("roles") != null){
 			<span class="separator">|</span>
 		    @rDs.get("roles") <br/>
 		    }
@@ -86,7 +86,7 @@
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "other")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
 			@rDs.get("prefLabel") </a> 
-			@if(@rDs.get("roles") != null){
+			@if(rDs.get("roles") != null){
 			<span class="separator">|</span>
 		    @rDs.get("roles") <br/>
 		    }
