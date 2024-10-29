@@ -9,7 +9,7 @@
 @main(hit.getPid(),aggregations,models.Globals.users.isLoggedIn(ctx()),
 						models.Globals.users.getUser(ctx())){
 
-@if(views.Helper.mdStreamExists(node.getPid(), "ktbl")){
+@if(views.Helper.mdStreamExists(hit.getPid(), "ktbl")){
 			        		@tags.getKtblTitle(hit.getLd2())
 } else {
 			        		@tags.getTitle(hit.getLd2())
