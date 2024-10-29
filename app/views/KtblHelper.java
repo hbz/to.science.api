@@ -200,7 +200,7 @@ public class KtblHelper {
 					Iterator<JsonNode> jIt = jn.elements();
 					while (jIt.hasNext()) {
 						JsonNode nextNode = jIt.next();
-						valueList.add(nextNode.asText().replace("\u2019", "'"));
+						valueList.add(nextNode.asText().replace("\\u2019", "'"));
 					}
 				}
 
