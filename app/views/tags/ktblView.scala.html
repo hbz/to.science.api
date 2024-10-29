@@ -49,8 +49,11 @@
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "creator")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a> <span class="separator">|</span>
-		    @rDs.get("roles") </br>
+			@rDs.get("prefLabel") </a> 
+			@if(rDs.get("roles")!=null){
+			<span class="separator">|</span>
+		    @rDs.get("roles") <br/>
+		    }
 		}
 	</td>
 	</tr>
@@ -64,8 +67,11 @@
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "contributor")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a> <span class="separator">|</span>
-		    @rDs.get("roles") </br>
+			@rDs.get("prefLabel")
+			@if(rDs.get("roles") != null){
+			<span class="separator">|</span>
+		    @rDs.get("roles") <br/>
+		    }
 		}
 	</td>
 	</tr>
@@ -79,8 +85,11 @@
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "other")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a> <span class="separator">|</span>
-		    @rDs.get("roles") </br>
+			@rDs.get("prefLabel") </a> 
+			@if(rDs.get("roles") != null){
+			<span class="separator">|</span>
+		    @rDs.get("roles") <br/>
+		    }
 		}
 	</td>
 	</tr>
@@ -104,7 +113,7 @@
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "associatedDataset")){
 		<a href="@rDs.get("id")">
-			@rDs.get("prefLabel") </a><br> 
+			@rDs.get("prefLabel") </a><br/> 
 		}
 	</td>
 	</tr>
@@ -140,7 +149,7 @@
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "rdfType")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a><br> 
+			@rDs.get("prefLabel") </a><br/> 
 		}
 	</td>
 	</tr>
@@ -182,7 +191,7 @@
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceObjectArray(node, "language")){
 		<a href="/resource?query[0][term]=%22@rDs.get("id")%22">
-			@rDs.get("prefLabel") </a><br> 
+			@rDs.get("prefLabel") </a><br/> 
 		}
 	</td>
 	</tr>
@@ -228,7 +237,7 @@
 	<td class="field-label">Usage manual</td>
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "usageManual")){
-			@rDs <br>
+			@rDs <br/>
 		}
 	</td>
 	</tr>

@@ -1,6 +1,7 @@
 @* Copyright 2014 Jan Schnasse, hbz. Licensed under the Apache License 2.0 *@
 
 @import views.Helper
+@import views.KtblHelper
 @import org.elasticsearch.search.aggregations.Aggregations
 @import models.Node
 
@@ -9,7 +10,11 @@
 @main(hit.getPid(),aggregations,models.Globals.users.isLoggedIn(ctx()),
 						models.Globals.users.getUser(ctx())){
 
+@if(views.Helper.mdStreamExists(hit.getPid(), "ktbl")){
+			        		@tags.getKtblTitle(hit.getLd2(), hit)
+} else {
 			        		@tags.getTitle(hit.getLd2())
+}
 					<ul class="nav nav-tabs">
 					 	<li class="active"><a href="#1a" data-toggle="tab">Object</a></li>
 					  	<li><a href="#2a" data-toggle="tab">Download</a></li>

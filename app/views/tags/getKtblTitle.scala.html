@@ -1,0 +1,90 @@
+@* Copyright 2016 Jan Schnasse, hbz. Licensed under the Apache License2.0 *@ 
+@import views.Title 
+@import views.Helper
+@import views.KtblHelper
+@import models.Node
+@(hit:Map[String,Object], node:Node)
+
+@displayCreators(id:Object,label:String)={
+						@if(id != null && !id.toString().isEmpty()){
+			 			   <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(id.toString())@models.Globals.rechercheUrlSuffix">
+	                       @label
+	                       @if(id.toString().startsWith("https://orcid.org")||id.toString().startsWith("http://orcid.org")){
+	                       <a href=@Helper.getLinkAdressOrNull(id.toString())  target="_blank">
+	                               <img class="orcid-pic" width="16" height="16" alt="ORCID logo" src="/public/images/ORCID-iD_icon-vector.svg" />
+	                       </a>
+	                       }else{
+	                       <a href=@Helper.getLinkAdressOrNull(id.toString())  target="_blank">
+	                               <span class="octicon-link-external"></span>
+	                       </a>
+	                       }
+	                       }else{
+	                        <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
+	                       	@label
+	                       	</a>
+	                       }
+}
+
+<div class="row">
+<div class="title">
+			<div class="col-md-8">
+					<div class="titlePre"></div>
+					
+					<a href="/resource/@hit.get("@id")">
+					<h1 class="title" id="page-title">
+					<span class="titleMain">
+							@Html(Title.getTitle(hit))
+					</span>
+					@if(hit.contains("corporateBodyForTitle")){
+					    <span class="corporateBodyForTitle">
+						/ @hit.get("corporateBodyForTitle").asInstanceOf[Collection[String]].toArray()
+						</span>
+					 }
+					@if(hit.contains("otherTitleInformation")){
+						<span class="otherTitleInformation">
+						: @hit.get("otherTitleInformation").asInstanceOf[Collection[String]].toArray()
+						</span>
+					 }
+					
+					</h1>
+					</a>
+					<h2 id="page-title-suffix" class="titlePost title-suffix">
+							<ol class="creators-title-list">
+							@for(c <-views.KtblHelper.getToscienceObjectArray(node, "creator")){
+									<li>@displayCreators(c.get("id"),c.get("label").toString())</li>
+								}
+								</ol>
+					<p>
+					@if(hit.contains("edition")){
+						
+						<span class="edition">
+						@hit.get("edition").asInstanceOf[Collection[String]].toArray() .
+						</span>
+						
+					 }
+					 @if(hit.contains("publication")){
+					
+					 @hit.get("publication") match {
+					    	case publication:Set[ Map[String,Object]] => {
+					    		@Html(Title.getIssued(publication)) 
+					    	}
+					    	case _ => {}
+					    }
+					 
+					 }
+					 </p>
+					</h2>
+<!--
+<span>Metadaten exportieren:</span>
+<a href="https://@models.Globals.server/resource/@hit.get("@id")%2Ebibtex">BIBTEX</a> |
+<a href="https://@models.Globals.server/resource/@hit.get("@id")%2Eend">ENDNOTE</a> |
+<a href="https://@models.Globals.server/resource/@hit.get("@id")%2Eris">RIS</a> |
+<a href="https://@models.Globals.server/resource/@hit.get("@id")%2Emods">MODS</a>
+-->  
+			</div>
+			
+		</div>
+
+
+	
+</div>
