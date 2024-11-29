@@ -3,11 +3,13 @@ package controllers;
 import authenticate.BasicAuth;
 import controllers.MyController.BulkActionAccessor;
 import models.Globals;
+import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 import play.cache.Cache;
 
+@IgnoreSizeOf
 public class Context extends MyController {
 
 	public static Promise<Result> getContext() {
