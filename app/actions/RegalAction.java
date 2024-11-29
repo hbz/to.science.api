@@ -20,12 +20,14 @@ import java.util.List;
 
 import models.Globals;
 import models.Node;
+import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 import play.cache.Cache;
 
 /**
  * @author Jan Schnasse
  *
  */
+@IgnoreSizeOf
 public class RegalAction {
 
 	@SuppressWarnings("javadoc")
@@ -51,8 +53,7 @@ public class RegalAction {
 	@SuppressWarnings("javadoc")
 	protected String createAggregationUri(String pid) {
 		return Globals.useHttpUris
-				? Globals.protocol + Globals.server + "/resource/" + pid
-				: pid;
+				? Globals.protocol + Globals.server + "/resource/" + pid : pid;
 	}
 
 	/**

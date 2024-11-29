@@ -46,6 +46,7 @@ import models.Node;
 import models.Pair;
 import models.UrlHist;
 import models.Urn;
+import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -67,6 +68,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
  * @author Jan Schnasse
  *
  */
+@IgnoreSizeOf
 public class Read extends RegalAction {
 
 	/**

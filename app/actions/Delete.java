@@ -31,11 +31,13 @@ import archive.fedora.RdfUtils;
 import static archive.fedora.Vocabulary.*;
 import models.Globals;
 import models.Node;
+import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 
 /**
  * @author Jan Schnasse
  *
  */
+@IgnoreSizeOf
 public class Delete extends RegalAction {
 
 	/**
