@@ -701,4 +701,47 @@ public class Create extends RegalAction {
 		}
 	}
 
+	/**
+	 * Diese Methode legt einen Node vom contentType "webpage" an. Der Node kann
+	 * dabei mit einem vorläufigen Titel (in den Metadaten) sowie mit einer
+	 * Konfigurationsdatei für das Webgathering (Gatherconf) mit URL und
+	 * Intervallangabe versehen werden.
+	 * 
+	 * @author Ingolf Kuss 21.01.2025 | Neuanlage für TOS-1178
+	 *
+	 * @param namespace Der Namensraum, in der die PID angelegt werden soll
+	 * @param url Die URL, die gesammelt werdn soll
+	 * @param title Der vorläufige Titel der Webpage
+	 * @param intervall Das Sammelintervall
+	 * @param object ToScienceObject für die neue Webpage
+	 * @return Der modifizierte Node vom contentType webpage
+	 */
+	public Node createWebpage(String namespace, String url, String title,
+			String intervall, ToScienceObject object) {
+		try {
+			ApplicationLogger.debug("Create Webpage for url: " + url + ", title: "
+					+ title + ", intervall: " + intervall);
+
+			Node node = createResource(namespace, object);
+			ApplicationLogger
+					.debug("INFO Webpage mit PID " + node.getPid() + " erzeugt.");
+
+			new Modify().updateLobidifyAndEnrichMetadata(node, "<" + node.getPid()
+					+ "> <http://purl.org/dc/terms/title> \"" + title + "\" .");
+
+			// node = updateResource(node); braucht man das ?
+
+			ApplicationLogger.info("Successfully created webpage " + node.getPid()
+					+ "  with title " + title + " !");
+			return node;
+
+		} catch (Exception e) {
+			ApplicationLogger.error(
+					"Creation of webpage in namespace {} for URL {} has failed !\n\tReason: {}",
+					namespace, url, e.getMessage());
+			ApplicationLogger.debug("", e);
+			throw new RuntimeException(e);
+		}
+	}
+
 } /* END of Class Create */
