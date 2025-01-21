@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.MyController;
 import helper.HttpArchiveException;
+import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
 import models.Gatherconf;
@@ -35,6 +36,8 @@ import models.Globals;
 import models.Node;
 import models.ResearchDataResource;
 import models.ToScienceObject;
+import models.Gatherconf.Interval;
+import models.Gatherconf.RobotsPolicy;
 import models.ToScienceObject.Provenience;
 import play.Logger;
 import play.Play;
@@ -722,13 +725,40 @@ public class Create extends RegalAction {
 			ApplicationLogger.debug("Create Webpage for url: " + url + ", title: "
 					+ title + ", intervall: " + intervall);
 
+			object.setContentType("webpage");
+			object.setAccessScheme("restricted");
 			Node node = createResource(namespace, object);
 			ApplicationLogger
 					.debug("INFO Webpage mit PID " + node.getPid() + " erzeugt.");
 
-			new Modify().updateLobidify2AndEnrichMetadata(node, "<" + node.getPid()
-					+ "> <http://purl.org/dc/terms/title> \"" + title + "\" .");
+			/* Erzeuge Metadaten mit einem Titel */
+			new actions.Modify().updateLobidify2AndEnrichMetadata(node,
+					"<" + node.getPid() + "> <http://purl.org/dc/terms/title> \"" + title
+							+ "\" .");
 
+			/*
+			 * Erzeuge eine Konfigurationsdatei für das Crawling (Gatherconf)
+			 */
+			Gatherconf conf = new Gatherconf();
+			conf.setUrl(WebgatherUtils.convertUnicodeURLToAscii(url));
+			conf.setName(node.getPid());
+			conf.setDeepness(-1);
+			if (intervall == null || intervall.length() == 0) {
+				conf.setInterval(Interval.halfYearly);
+			} else if (intervall.equals("halbjährlich")) {
+				conf.setInterval(Interval.halfYearly);
+			} else if (intervall.equals("einmal jährlich")
+					|| intervall.equals("einmal Jährlich")) {
+				conf.setInterval(Interval.annually);
+			} else if (intervall.equals("einmalig")) {
+				conf.setInterval(Interval.once);
+			} else {
+				conf.setInterval(Interval.halfYearly);
+			}
+			conf.setRobotsPolicy(RobotsPolicy.ignore);
+			conf.setStartDate(new Date());
+			// node.setConf(conf.toString()); braucht man das ?
+			new actions.Modify().updateConf(node, conf.toString());
 			// node = updateResource(node); braucht man das ?
 
 			ApplicationLogger.info("Successfully created webpage " + node.getPid()

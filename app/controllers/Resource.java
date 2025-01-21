@@ -1398,8 +1398,6 @@ public class Resource extends MyController {
 			@QueryParam("interval") String intervall) {
 		return new CreateAction().call(userId -> {
 			ToScienceObject object = getRegalObject(request().body().asJson());
-			object.setContentType("webpage");
-			object.setAccessScheme("restricted");
 			Node result =
 					create.createWebpage(namespace, url, title, intervall, object);
 			response().setHeader("Location", read.getHttpUriOfResource(result));
