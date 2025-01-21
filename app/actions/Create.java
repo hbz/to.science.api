@@ -726,7 +726,7 @@ public class Create extends RegalAction {
 			ApplicationLogger
 					.debug("INFO Webpage mit PID " + node.getPid() + " erzeugt.");
 
-			new Modify().updateLobidifyAndEnrichMetadata(node, "<" + node.getPid()
+			new Modify().updateLobidify2AndEnrichMetadata(node, "<" + node.getPid()
 					+ "> <http://purl.org/dc/terms/title> \"" + title + "\" .");
 
 			// node = updateResource(node); braucht man das ?
