@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.MyController;
 import helper.HttpArchiveException;
+import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
 import models.Gatherconf;
@@ -35,6 +36,8 @@ import models.Globals;
 import models.Node;
 import models.ResearchDataResource;
 import models.ToScienceObject;
+import models.Gatherconf.Interval;
+import models.Gatherconf.RobotsPolicy;
 import models.ToScienceObject.Provenience;
 import play.Logger;
 import play.Play;
@@ -696,6 +699,76 @@ public class Create extends RegalAction {
 			ApplicationLogger.error(
 					"Creation of research data resource {} for research data (Forschungsdaten) of PID {} has failed !\n\tReason: {}",
 					filename, n.getPid(), e.getMessage());
+			ApplicationLogger.debug("", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Diese Methode legt einen Node vom contentType "webpage" an. Der Node kann
+	 * dabei mit einem vorläufigen Titel (in den Metadaten) sowie mit einer
+	 * Konfigurationsdatei für das Webgathering (Gatherconf) mit URL und
+	 * Intervallangabe versehen werden.
+	 * 
+	 * @author Ingolf Kuss 21.01.2025 | Neuanlage für TOS-1178
+	 *
+	 * @param namespace Der Namensraum, in der die PID angelegt werden soll
+	 * @param url Die URL, die gesammelt werdn soll
+	 * @param title Der vorläufige Titel der Webpage
+	 * @param intervall Das Sammelintervall
+	 * @param object ToScienceObject für die neue Webpage
+	 * @return Der modifizierte Node vom contentType webpage
+	 */
+	public Node createWebpage(String namespace, String url, String title,
+			String intervall, ToScienceObject object) {
+		try {
+			ApplicationLogger.debug("Create Webpage for url: " + url + ", title: "
+					+ title + ", intervall: " + intervall);
+
+			object.setContentType("webpage");
+			object.setAccessScheme("restricted");
+			Node node = createResource(namespace, object);
+			ApplicationLogger
+					.debug("INFO Webpage mit PID " + node.getPid() + " erzeugt.");
+
+			/* Erzeuge Metadaten mit einem Titel */
+			new actions.Modify().updateLobidify2AndEnrichMetadata(node,
+					"<" + node.getPid() + "> <http://purl.org/dc/terms/title> \"" + title
+							+ "\" .");
+
+			/*
+			 * Erzeuge eine Konfigurationsdatei für das Crawling (Gatherconf)
+			 */
+			Gatherconf conf = new Gatherconf();
+			conf.setUrl(WebgatherUtils.convertUnicodeURLToAscii(url));
+			conf.setName(node.getPid());
+			conf.setDeepness(-1);
+			if (intervall == null || intervall.length() == 0) {
+				conf.setInterval(Interval.halfYearly);
+			} else if (intervall.equals("halbjährlich")) {
+				conf.setInterval(Interval.halfYearly);
+			} else if (intervall.equals("einmal jährlich")
+					|| intervall.equals("einmal Jährlich")) {
+				conf.setInterval(Interval.annually);
+			} else if (intervall.equals("einmalig")) {
+				conf.setInterval(Interval.once);
+			} else {
+				conf.setInterval(Interval.halfYearly);
+			}
+			conf.setRobotsPolicy(RobotsPolicy.ignore);
+			conf.setStartDate(new Date());
+			// node.setConf(conf.toString()); braucht man das ?
+			new actions.Modify().updateConf(node, conf.toString());
+			// node = updateResource(node); braucht man das ?
+
+			ApplicationLogger.info("Successfully created webpage " + node.getPid()
+					+ "  with title " + title + " !");
+			return node;
+
+		} catch (Exception e) {
+			ApplicationLogger.error(
+					"Creation of webpage in namespace {} for URL {} has failed !\n\tReason: {}",
+					namespace, url, e.getMessage());
 			ApplicationLogger.debug("", e);
 			throw new RuntimeException(e);
 		}

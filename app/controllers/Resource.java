@@ -1383,6 +1383,28 @@ public class Resource extends MyController {
 		});
 	}
 
+	/**
+	 * Mit diesem Endpoint kann man eine Webpage mitsamt URL und vorläufigem Titel
+	 * anlegen.
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 */
+	@ApiOperation(produces = "application/json", nickname = "createWebpage", value = "createNewWebpage", notes = "Creates a Webpage on a new position", response = Message.class, httpMethod = "POST")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "New Object", required = true, dataType = "Node", paramType = "body") })
+	public static Promise<Result> createWebpage(
+			@PathParam("namespace") String namespace, @QueryParam("url") String url,
+			@QueryParam("title") String title,
+			@QueryParam("interval") String intervall) {
+		return new CreateAction().call(userId -> {
+			ToScienceObject object = getRegalObject(request().body().asJson());
+			Node result =
+					create.createWebpage(namespace, url, title, intervall, object);
+			response().setHeader("Location", read.getHttpUriOfResource(result));
+			return getJsonResult(result);
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "linkVersion", value = "linkVersion", response = Result.class, httpMethod = "POST")
 	public static Promise<Result> linkVersion(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, userId -> {
