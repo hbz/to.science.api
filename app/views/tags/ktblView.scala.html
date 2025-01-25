@@ -35,7 +35,7 @@
 	<td class="field-label">Description</td>
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "description")){
-			<pre class="description">@rDs</pre> <br>
+			<p class="description">@rDs</p> <br>
 		}
 	</td>
 	</tr>
@@ -237,7 +237,7 @@
 	<td class="field-label">Usage manual</td>
 	<td class="field-item">
 		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "usageManual")){
-			<pre class="manual">@rDs</pre><br/>
+			<p class="manual">@rDs</p><br/>
 		}
 	</td>
 	</tr>
