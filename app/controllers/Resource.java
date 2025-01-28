@@ -1699,4 +1699,63 @@ public class Resource extends MyController {
 			}
 		});
 	}
+
+	@ApiOperation(produces = "application/json", value = "updateAllMetadata", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "data", value = "data", dataType = "file", required = true, paramType = "body") })
+	public static Promise<Result> uploadUpdateMetadata(
+			@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			try {
+
+				String result1, result2, result3;
+				result1 = result2 = result3 = null;
+				Node readNode = new Read().readNode(pid);
+				MultipartFormData body = request().body().asMultipartFormData();
+				FilePart data = body.getFile("data");
+				if (data == null) {
+					return (Result) JsonMessage(new Message("Missing File.", 400));
+				}
+				String name = data.getFilename();
+				if (!readNode.getContentType().contains("file")
+						&& !readNode.getContentType().contains("part")) {
+					String contentOfFile =
+							KTBLMapperHelper.getStringContentFromJsonFile(data);
+					/**
+					 * toscience
+					 */
+					JSONObject toscienceJson = null;
+					String toscienceMetadata = ToscienceHelper
+							.getToPersistTosMetadata(contentOfFile, readNode.getPid());
+					toscienceJson = new JSONObject(toscienceMetadata);
+					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
+					result1 = modify.updateMetadata("toscience", readNode,
+							toscienceJson.toString());
+					/**
+					 * KTBL
+					 */
+					if (KTBLMapperHelper.containsKtblBlock(contentOfFile)) {
+						String ktblMetadata = KTBLMapperHelper
+								.getToPersistKtblMetadata(contentOfFile, readNode.getPid());
+						result2 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
+					}
+					/**
+					 * Metadata2
+					 */
+					/*
+					 * LinkedHashMap<String, Object> metadata2Map = Metadata2Helper
+					 * .getRdfFromToscience(new JSONObject(contentOfFile), readNode);
+					 * String metadata2Content = modify.rdfToString( (Map<String, Object>)
+					 * metadata2Map.get("metadata2"), RDFFormat.NTRIPLES); result3 =
+					 * modify.updateMetadata("metadata2", readNode, metadata2Content);
+					 * Enrich.enrichMetadata2(readNode);
+					 */
+				}
+				return JsonMessage(new Message(result1 + result2 + result3));
+			} catch (Exception e) {
+				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
 }
