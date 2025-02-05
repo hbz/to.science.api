@@ -248,7 +248,9 @@ public class WpullThread extends Thread {
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
 			proc.destroy();
-			if (exitState == 0 || exitState == 4 || exitState == 8) {
+			if (exitState == 0 || exitState == 4 || exitState == 7 || exitState == 8) {
+				/* der Beobachtung zufolge wird bei exitState == 7 das WARC ge-moved */
+				/* daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für TOS-1182 und TOS-1224 */
 				new Create().createWebpageVersion(node, conf, outDir, localpath);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
