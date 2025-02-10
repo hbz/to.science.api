@@ -716,18 +716,25 @@ public class Create extends RegalAction {
 	 * @param url Die URL, die gesammelt werdn soll
 	 * @param title Der vorläufige Titel der Webpage
 	 * @param intervall Das Sammelintervall
+	 * @param pid Die PID (persistenter Identifier) für die Webpage. Falls null
+	 *          oder leer, wird ein neuer PID angelegt.
 	 * @param object ToScienceObject für die neue Webpage
 	 * @return Der modifizierte Node vom contentType webpage
 	 */
 	public Node createWebpage(String namespace, String url, String title,
-			String intervall, ToScienceObject object) {
+			String intervall, String pid, ToScienceObject object) {
 		try {
 			ApplicationLogger.debug("Create Webpage for url: " + url + ", title: "
-					+ title + ", intervall: " + intervall);
+					+ title + ", intervall: " + intervall + ", pid: " + pid);
 
 			object.setContentType("webpage");
 			object.setAccessScheme("restricted");
-			Node node = createResource(namespace, object);
+			Node node = null;
+			if (pid == null || pid.length() == 0) {
+				node = createResource(namespace, object);
+			} else {
+				node = createResource(pid, namespace, object);
+			}
 			ApplicationLogger
 					.debug("INFO Webpage mit PID " + node.getPid() + " erzeugt.");
 

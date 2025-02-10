@@ -1330,7 +1330,6 @@ public class Resource extends MyController {
 				});
 			}
 			new WebgatherUtils().startCrawl(node);
-			/* KS20200525 war: create.createWebpageVersion(node); */
 			return Promise.promise(() -> {
 				return JsonMessage(
 						new Message("Neuen Webcrawl zur Website " + pid + " angefangen."));
@@ -1395,11 +1394,11 @@ public class Resource extends MyController {
 	public static Promise<Result> createWebpage(
 			@PathParam("namespace") String namespace, @QueryParam("url") String url,
 			@QueryParam("title") String title,
-			@QueryParam("interval") String intervall) {
+			@QueryParam("interval") String intervall, @QueryParam("pid") String pid) {
 		return new CreateAction().call(userId -> {
 			ToScienceObject object = getRegalObject(request().body().asJson());
 			Node result =
-					create.createWebpage(namespace, url, title, intervall, object);
+					create.createWebpage(namespace, url, title, intervall, pid, object);
 			response().setHeader("Location", read.getHttpUriOfResource(result));
 			return getJsonResult(result);
 		});
