@@ -116,7 +116,7 @@ public class Read extends RegalAction {
 	 * @return node
 	 */
 	public Node getLastModifiedChildOrNull(Node node, String contentType) {
-		play.Logger.debug("BEGIN getLastModifiedChildOrNull for pidi: "
+		play.Logger.debug("BEGIN getLastModifiedChildOrNull for pid: "
 				+ node.getPid() + "; contentType: " + contentType);
 		if (contentType == null || contentType.isEmpty()) {
 			return null;
@@ -190,6 +190,72 @@ public class Read extends RegalAction {
 	 */
 	public Node getLastModifiedChild(Node node) {
 		return getLastModifiedChild(node, node);
+	}
+
+	/**
+	 * Liefert das zuletzt erzeugte Kind vom Type "contentType". Wie
+	 * getLastlyCreatedChild, jedoch wir Null zurück gegeben, falls: - der
+	 * Inhaltstyp leer ist, oder - kein Kind von dem gewünschten Inhaltstyp
+	 * gefunden wurde. Die Methode getLastModifiedChild liefert dagegen in diesem
+	 * Falle ein Kind irgendeinen Types bzw. den Knoten selber. Für Ermittlung des
+	 * neuesten Webschnitts im Webgatherer.
+	 * 
+	 * @author Ingolf Kuss
+	 * @param node Der Knoten, dessen Kinder gesucht werden.
+	 * @param contentType der Inhaltstyp, von dem das Kind sein muss.
+	 * @return node
+	 */
+	public Node getLastlyCreatedChildOrNull(Node node, String contentType) {
+		play.Logger.debug("BEGIN getLastlyCreatedChildOrNull for pid: "
+				+ node.getPid() + "; contentType: " + contentType);
+		if (contentType == null || contentType.isEmpty()) {
+			return null;
+		}
+		Node oldestNode = null;
+		for (Node n : getParts(node)) {
+			play.Logger.debug("found child with pid: " + n.getPid()
+					+ "; contentType: " + n.getContentType());
+			if (contentType.equals(n.getContentType())) {
+				oldestNode = compareCreationDates(n, oldestNode);
+				play.Logger.debug("oldest node is now: pid: " + oldestNode.getPid());
+			}
+		}
+		if (oldestNode == null)
+			return null;
+		play.Logger.debug("returning oldest node with pid: " + oldestNode.getPid());
+		return oldestNode;
+	}
+
+	private static Node compareCreationDates(Node currentNode, Node oldestNode) {
+		Date currentNodeDate = currentNode.getCreationDate();
+		if (currentNodeDate == null)
+			currentNodeDate = currentNode.getObjectTimestamp();
+		if (currentNodeDate == null)
+			currentNodeDate = currentNode.getLastModified();
+		currentNode.setCreationDate(currentNodeDate);
+		if (oldestNode != null) {
+			Date oldestNodeDate = oldestNode.getCreationDate();
+			if (oldestNodeDate == null)
+				oldestNodeDate = oldestNode.getObjectTimestamp();
+			if (oldestNodeDate == null)
+				oldestNodeDate = oldestNode.getLastModified();
+			oldestNode.setCreationDate(oldestNodeDate);
+			if (currentNodeDate.after(oldestNodeDate)) {
+				oldestNode = currentNode;
+			}
+			// Special case: Since input has not to be sorted in any way, we
+			// need a condition to prefer child nodes over parent nodes.
+			// If both nodes have the same timestamp, the currentNode
+			// will win, if it is NOT a parent the oldest.
+			if (currentNodeDate.equals(oldestNodeDate)) {
+				if (!currentNode.getPid().equals(oldestNode.getParentPid())) {
+					oldestNode = currentNode;
+				}
+			}
+		} else {
+			return currentNode;
+		}
+		return oldestNode;
 	}
 
 	/**
@@ -734,8 +800,9 @@ public class Read extends RegalAction {
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					entries.put("crawlControllerState",
 							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
-							? "" : WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlExitStatus",
+							WpullCrawl.getCrawlExitStatus(node) < 0 ? ""
+									: WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -

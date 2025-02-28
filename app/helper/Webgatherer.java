@@ -218,15 +218,15 @@ public class Webgatherer implements Runnable {
 	public static Date getLastLaunch(Node n) throws Exception {
 		WebgatherLogger
 				.debug("BEGIN getLastLaunch for node with pid: " + n.getPid());
-		Node lastModifiedChild =
-				new Read().getLastModifiedChildOrNull(n, "version");
-		if (lastModifiedChild == null)
+		Node lastlyCreatedChild =
+				new Read().getLastlyCreatedChildOrNull(n, "version");
+		if (lastlyCreatedChild == null)
 			return null;
 		WebgatherLogger
-				.debug("lastModifiedChild has pid: " + lastModifiedChild.getPid());
-		WebgatherLogger.debug("lastModifiedChild was last modified on: "
-				+ lastModifiedChild.getLastModified().toString());
-		return lastModifiedChild.getLastModified();
+				.debug("lastlyCreatedChild has pid: " + lastlyCreatedChild.getPid());
+		WebgatherLogger.debug("lastlyCreatedChild was created on: "
+				+ lastlyCreatedChild.getCreationDate().toString());
+		return lastlyCreatedChild.getCreationDate();
 	}
 
 	/**
@@ -235,9 +235,13 @@ public class Webgatherer implements Runnable {
 	 * @throws Exception can be IOException or Json related Exceptions
 	 */
 	public static Date nextLaunch(Node n) throws Exception {
-		Date lastHarvest =
-				new Read().getLastModifiedChild(n, (Node) null).getLastModified();
+		Node lastlyCreatedChild =
+				new Read().getLastlyCreatedChildOrNull(n, "version");
 		Gatherconf conf = Gatherconf.create(n.getConf());
+		if (lastlyCreatedChild == null) {
+			return conf.getStartDate();
+		}
+		Date lastHarvest = lastlyCreatedChild.getCreationDate();
 		if (lastHarvest == null) {
 			return conf.getStartDate();
 		}
