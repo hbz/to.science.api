@@ -261,7 +261,7 @@ public class WpullCrawl {
 			AgentIdSelection agentId = conf.getAgentIdSelection();
 			executeCommand =
 					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
-			executeCommand = executeCommand.concat(" Cookie:%20");
+			executeCommand = executeCommand.concat(" Cookie:");
 			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
 				executeCommand =
 						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
