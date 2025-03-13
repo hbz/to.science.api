@@ -27,7 +27,7 @@ public class WpullThread extends Thread {
 	private File crawlDir = null;
 	private File outDir = null;
 	private String warcFilename = null;
-	private String host = null;
+	private String host = null; /* = domain */
 	private String localpath = null;
 	private String executeCommand = null;
 	/**
@@ -202,8 +202,7 @@ public class WpullThread extends Thread {
 				executeCommand += " --hostnames=" + host;
 				for (int i = 0; i < domains.size(); i++) {
 					zusDomain = domains.get(i);
-					zusHost = zusDomain.replaceAll("^http://", "")
-							.replaceAll("^https://", "").replaceAll("/.*$", "");
+					zusHost = WebgatherUtils.getDomain(zusDomain);
 					WebgatherLogger.debug("zusHost=" + zusHost);
 					if (zusHost.equalsIgnoreCase(host)) {
 						WebgatherLogger.debug("Es soll von der gesamten Domain " + host
@@ -248,10 +247,15 @@ public class WpullThread extends Thread {
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
 			proc.destroy();
-			if (exitState == 0 || exitState == 4 || exitState == 7 || exitState == 8) {
+			if (exitState == 0 || exitState == 4 || exitState == 7
+					|| exitState == 8) {
 				/* der Beobachtung zufolge wird bei exitState == 7 das WARC ge-moved */
-				/* daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für TOS-1182 und TOS-1224 */
-				new Create().createWebpageVersion(node, conf, outDir, localpath);
+				/*
+				 * daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für
+				 * TOS-1182 und TOS-1224
+				 */
+				new Create().createWebpageVersion(node, conf, warcFilename, outDir,
+						localpath);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
 				return;

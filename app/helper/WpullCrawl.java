@@ -175,8 +175,7 @@ public class WpullCrawl {
 			WebgatherLogger.debug("URL=" + conf.getUrl());
 			this.urlAscii = WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
 			WebgatherLogger.debug("urlAscii=" + urlAscii);
-			this.host = urlAscii.replaceAll("^http://", "")
-					.replaceAll("^https://", "").replaceAll("/.*$", "");
+			this.host = WebgatherUtils.getDomain(urlAscii);
 			WebgatherLogger.debug("host=" + host);
 			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
 			this.datetime =
@@ -270,10 +269,6 @@ public class WpullCrawl {
 				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
 			}
 			String[] execArr = executeCommand.split(" ");
-			// unmask spaces in exec command
-			for (int i = 0; i < execArr.length; i++) {
-				execArr[i] = execArr[i].replaceAll("%20", " ");
-			}
 			executeCommand = executeCommand.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger
@@ -410,6 +405,8 @@ public class WpullCrawl {
 		// auskommentiert 27.08.2020 für EDOZWO-1026
 		// sb.append(" --warc-tempdir=" + tempJobDir)
 		sb.append(" --warc-move=" + resultDir);
+		sb.append(" --warc-cdx");
+		sb.append(" --warc-dedup=" + warcFilename + ".cdx");
 		play.Logger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
 	}
