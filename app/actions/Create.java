@@ -68,8 +68,6 @@ public class Create extends RegalAction {
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 	private static final BigInteger bigInt1024 = new BigInteger("1024");
-	private final static String wpullOutBaseDir =
-			Play.application().configuration().getString("regal-api.wpull.outDir");
 
 	@SuppressWarnings({ "javadoc", "serial" })
 	public class WebgathererTooBusyException extends HttpArchiveException {
@@ -400,7 +398,8 @@ public class Create extends RegalAction {
 			File cdxFileNew =
 					new File(outDir.getAbsolutePath() + "/" + warcFilename + ".cdx");
 			if (cdxFileNew.exists()) {
-				File cdxFileSave = new File(wpullOutBaseDir + "/" + conf.getName()
+				File cdxFileSave = new File(Play.application().configuration()
+						.getString("regal-api.wpull.outDir") + "/" + conf.getName()
 						+ "/WEB-" + WebgatherUtils.getDomain(conf.getUrl()) + ".cdx");
 				FileUtils.copyFile(cdxFileNew, cdxFileSave);
 				WebgatherLogger.debug(
