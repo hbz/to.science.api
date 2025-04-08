@@ -527,6 +527,9 @@ public class Gatherconf {
 			return !moveUrl(node);
 		}
 		// jetzt Prüfung, ob die aktuell hinterlegte URL umgezogen ist
+		play.Logger.debug("Prüfe, ob die URL " + url + "umjetrocke is.");
+		play.Logger.debug(
+				"converted url: " + WebgatherUtils.convertUnicodeURLToAscii(url));
 		HttpURLConnection httpConnection = (HttpURLConnection) new URL(
 				WebgatherUtils.convertUnicodeURLToAscii(url)).openConnection();
 		httpConnection.setInstanceFollowRedirects(false);
