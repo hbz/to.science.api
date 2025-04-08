@@ -564,7 +564,7 @@ public class Gatherconf {
 	 * @returns true if successfully moved
 	 */
 	private boolean moveUrl(Node node) {
-		String msg = "von " + url + " nach " + urlNew + ".";
+		String msg = "vun " + url + " noh " + urlNew + ".";
 		try {
 			if (urlNew == null || urlNew.isEmpty()) {
 				return false;
@@ -574,11 +574,11 @@ public class Gatherconf {
 			invalidUrl = false;
 			urlNew = null;
 			new Modify().updateConf(node, this.toString());
-			play.Logger.info("URL wurde umgezogen " + msg);
+			play.Logger.info("De Sick word umjetrocke " + msg);
 			return true;
 		} catch (Exception e) {
 			play.Logger.error(e.toString());
-			play.Logger.warn("URL konnte nicht umgezogen werden " + msg);
+			play.Logger.warn("De Sick kunnt nich worde umjetrocke! " + msg);
 			return false;
 		}
 	}

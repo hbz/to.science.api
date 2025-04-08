@@ -1651,8 +1651,6 @@ public class Resource extends MyController {
 				// Jetzt Update der Gatherconf
 				String msg = modify.updateConf(node, conf.toString());
 				play.Logger.info(msg);
-				// return getJsonResult(conf); für Aufruf von Kommandozeile OK, aber
-				// nicht für Aufruf über API - muss code und text haben
 				return JsonMessage(new Message(
 						"URL wurde umgezogen von " + urlOld + " nach " + conf.getUrl(),
 						200));

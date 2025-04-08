@@ -107,18 +107,11 @@ public class WebgatherUtils {
 
 			String siteName =
 					conf.getName() == null ? node.getAggregationUri() : conf.getName();
-			String mailMsg = "Die Website " + siteName + " ist ";
-			if (conf.getUrlNew() == null) {
-				mailMsg += "unbekannt verzogen.\n"
-						+ "Bitte geben Sie auf diesem Webformular eine neue, gültige URL ein. Solange wird die Website nicht erneut eingesammelt: ";
-			} else {
-				// dieser Fall sollte eigentlich nicht mehr vorkommen, nachdem die
-				// Methode Gatherconf.moveUrl entwickelt wurde.
-				mailMsg += "umgezogen.\n"
-						+ "Bitte bestätigen Sie den Umzug auf diesem Webformular (URL kann dort vorher editiert werden): ";
-			}
+			String mailMsg = "Die Website " + siteName + " ist umgezogen.\n";
+			mailMsg +=
+					"Bitte geben Sie auf diesem Webformular eine neue, gültige URL ein und bestätigen Sie die neue URL\n.";
+			mailMsg += "Solange wird diese Website nicht erneut eingesammelt: ";
 			mailMsg += Globals.urnbase + node.getAggregationUri() + "/crawler .";
-
 			try {
 				Mail.sendMail(mailMsg, "Die Website " + siteName + " ist umgezogen ! ");
 			} catch (Exception e) {

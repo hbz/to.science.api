@@ -157,15 +157,7 @@ public class Webgatherer implements Runnable {
 				WebgatherLogger.info(
 						"Die Website " + n.getPid() + " soll jetzt eingesammelt werden.");
 				if (conf.hasUrlMoved(n)) {
-					if (conf.getUrlNew() == null) {
-						WebgatherLogger
-								.info("De Sick " + n.getPid() + " is unbekannt vertrocke !");
-					} else {
-						// dieser Fall sollte eigentlich nicht mehr vorkommen, nachdem die
-						// Methode Gatherconf.moveUrl entwickelt wurde.
-						WebgatherLogger.info("De Sick " + n.getPid() + " is umjetrocke noh "
-								+ conf.getUrlNew() + " .");
-					}
+					WebgatherLogger.info("De Sick " + n.getPid() + " is umjetrocke !");
 					WebgatherUtils.sendInvalidUrlEmail(n, conf);
 				} else {
 					WebgatherLogger
