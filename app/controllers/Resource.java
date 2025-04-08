@@ -1328,6 +1328,9 @@ public class Resource extends MyController {
 					return JsonMessage(WebgatherUtils.createInvalidUrlMessage(conf));
 				});
 			}
+			// conf im Node neu setzen, weil die URLs vom Umzugsservice evtl.
+			// verändert wurden
+			node.setConf(conf.toString());
 			new WebgatherUtils().startCrawl(node);
 			return Promise.promise(() -> {
 				return JsonMessage(
@@ -1647,47 +1650,10 @@ public class Resource extends MyController {
 				conf.setHttpResponseCode(0);
 				conf.setUrlNew((String) null);
 				// Die URL-Historie weiterschreiben
-				play.Logger.debug("About to continue URL-History.");
-				String msg = null;
-				UrlHist urlHist = null;
-				if (node.getUrlHist() == null) {
-					play.Logger.warn(
-							"Keine URL-Historie vorhanden ! Lege eine neue URL-Umzugshistorie an !");
-					urlHist = new UrlHist(urlOld, new Date());
-					urlHist.addUrlHistEntry(urlNew);
-					play.Logger.debug(
-							"First urlHistEntry has endDate: " + WebgatherUtils.dateFormat
-									.format(urlHist.getUrlHistEntry(0).getEndDate()));
-					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
-					play.Logger.debug("URL-Historie neu angelegt: " + urlHistResult);
-				} else {
-					play.Logger.debug("Creating urlHist.");
-					play.Logger.debug("Former urlHist: " + node.getUrlHist());
-					urlHist = UrlHist.create(node.getUrlHist());
-					play.Logger.debug("Former urlHist recreated, urlHist.toString()="
-							+ urlHist.toString());
-					// Prüfung, ob man auch wirklich den richtigen Eintrag erwischt
-					String urlLatest = urlHist
-							.getUrlHistEntry(urlHist.getUrlHistEntries().size() - 1).getUrl();
-					play.Logger
-							.debug("Neueste URL in URL-Historie gefunden: " + urlLatest);
-					if (!urlLatest.equals(urlOld)) {
-						msg =
-								"Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
-										+ urlLatest + " vs. bisherige URL: " + urlOld;
-						play.Logger.warn(msg);
-					}
-					play.Logger.debug("urlHist überprüft.");
-					urlHist.updateLatestUrlHistEntry(new Date());
-					urlHist.addUrlHistEntry(urlNew);
-					String urlHistResult = modify.updateUrlHist(node, urlHist.toString());
-					play.Logger.info("URL-Historie aktualsiert: " + urlHistResult);
-				}
+				node.writeUrlHist(urlOld, urlNew);
 				// Jetzt Update der Gatherconf
-				msg = modify.updateConf(node, conf.toString());
+				String msg = modify.updateConf(node, conf.toString());
 				play.Logger.info(msg);
-				// return getJsonResult(conf); für Aufruf von Kommandozeile OK, aber
-				// nicht für Aufruf über API - muss code und text haben
 				return JsonMessage(new Message(
 						"URL wurde umgezogen von " + urlOld + " nach " + conf.getUrl(),
 						200));

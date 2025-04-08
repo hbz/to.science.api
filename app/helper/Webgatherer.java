@@ -157,18 +157,13 @@ public class Webgatherer implements Runnable {
 				WebgatherLogger.info(
 						"Die Website " + n.getPid() + " soll jetzt eingesammelt werden.");
 				if (conf.hasUrlMoved(n)) {
-					if (conf.getUrlNew() == null) {
-						WebgatherLogger
-								.info("De Sick " + n.getPid() + " is unbekannt vertrocke !");
-					} else {
-						WebgatherLogger.info("De Sick " + n.getPid() + " is umjetrocke noh "
-								+ conf.getUrlNew() + " .");
-					}
+					WebgatherLogger.info("De Sick " + n.getPid() + " is umjetrocke !");
 					WebgatherUtils.sendInvalidUrlEmail(n, conf);
 				} else {
 					WebgatherLogger
 							.info("HTTP Response Code = " + conf.getHttpResponseCode());
 					WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
+					n.setConf(conf.toString());
 					/* new Create().createWebpageVersion(n); */
 					new WebgatherUtils().startCrawl(n);
 					count++; // count erst hier, so dass fehlgeschlagene Launches nicht
