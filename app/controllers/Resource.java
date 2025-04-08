@@ -1328,6 +1328,9 @@ public class Resource extends MyController {
 					return JsonMessage(WebgatherUtils.createInvalidUrlMessage(conf));
 				});
 			}
+			// conf im Node neu setzen, weil die URLs vom Umzugsservice evtl.
+			// verändert wurden
+			node.setConf(conf.toString());
 			new WebgatherUtils().startCrawl(node);
 			return Promise.promise(() -> {
 				return JsonMessage(

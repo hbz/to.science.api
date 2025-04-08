@@ -163,6 +163,7 @@ public class Webgatherer implements Runnable {
 					WebgatherLogger
 							.info("HTTP Response Code = " + conf.getHttpResponseCode());
 					WebgatherLogger.info("Create new version for: " + n.getPid() + ".");
+					n.setConf(conf.toString());
 					/* new Create().createWebpageVersion(n); */
 					new WebgatherUtils().startCrawl(n);
 					count++; // count erst hier, so dass fehlgeschlagene Launches nicht
