@@ -20,6 +20,7 @@ import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.Vocabulary.*;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
+import helper.WebgatherUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -47,6 +48,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.core.util.JsonUtil;
+
+import actions.Modify;
 
 /**
  * A Node of object graph. Nodes are used to model complex objects Diese Klasse
@@ -1311,4 +1314,62 @@ public class Node implements java.io.Serializable {
 		}
 		return result;
 	}
+
+	/**
+	 * Diese Methode schreibt die URL-Historie weiter. Das wird nach einem Umzug
+	 * der URL (einer Website) gemacht.
+	 * 
+	 * @author I. Kuss
+	 * @date 2025-04-08
+	 * @param urlOld die alte URL
+	 * @param urlNew die neue URL
+	 */
+	public void writeUrlHist(String urlOld, String urlNew) {
+		try {
+			play.Logger.debug("Schreibe URL-Historie weiter.");
+			String msg = null;
+			UrlHist urlHistorie = null;
+			if (getUrlHist() == null) {
+				play.Logger.warn(
+						"Keine URL-Historie vorhanden ! Lege eine neue URL-Umzugshistorie an !");
+				urlHistorie = new UrlHist(urlOld, new Date());
+				urlHistorie.addUrlHistEntry(urlNew);
+				play.Logger.debug(
+						"First urlHistEntry has endDate: " + WebgatherUtils.dateFormat
+								.format(urlHistorie.getUrlHistEntry(0).getEndDate()));
+				urlHist = urlHistorie.toString();
+				String urlHistResult =
+						new Modify().updateUrlHist(this, urlHistorie.toString());
+				play.Logger.debug("URL-Historie neu angelegt: " + urlHistResult);
+			} else {
+				play.Logger.debug("Bisherige urlHist: " + this.getUrlHist());
+				urlHistorie = UrlHist.create(this.getUrlHist());
+				play.Logger
+						.debug("Former urlHist recreated, urlHist.toString()=" + urlHist);
+				// Prüfung, ob man auch wirklich den richtigen Eintrag erwischt
+				String urlLatest = urlHistorie
+						.getUrlHistEntry(urlHistorie.getUrlHistEntries().size() - 1)
+						.getUrl();
+				play.Logger.debug("Neueste URL in URL-Historie gefunden: " + urlLatest);
+				if (!urlLatest.equals(urlOld)) {
+					msg =
+							"Neuester Eintrag in URL Historie stimmt nicht mit bisherger URL überein !! URL-Hist: "
+									+ urlLatest + " vs. bisherige URL: " + urlOld;
+					play.Logger.warn(msg);
+				}
+				play.Logger.debug("urlHist überprüft.");
+				urlHistorie.updateLatestUrlHistEntry(new Date());
+				urlHistorie.addUrlHistEntry(urlNew);
+				urlHist = urlHistorie.toString();
+				String urlHistResult =
+						new Modify().updateUrlHist(this, urlHistorie.toString());
+				play.Logger.info("URL-Historie aktualsiert: " + urlHistResult);
+			}
+		} catch (Exception e) {
+			play.Logger.error(e.toString());
+			play.Logger.warn("URL-Historie für " + getPid()
+					+ " konnte nicht aktualisiert werden!");
+		}
+	}
+
 }

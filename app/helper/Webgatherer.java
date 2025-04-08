@@ -161,6 +161,8 @@ public class Webgatherer implements Runnable {
 						WebgatherLogger
 								.info("De Sick " + n.getPid() + " is unbekannt vertrocke !");
 					} else {
+						// dieser Fall sollte eigentlich nicht mehr vorkommen, nachdem die
+						// Methode Gatherconf.moveUrl entwickelt wurde.
 						WebgatherLogger.info("De Sick " + n.getPid() + " is umjetrocke noh "
 								+ conf.getUrlNew() + " .");
 					}

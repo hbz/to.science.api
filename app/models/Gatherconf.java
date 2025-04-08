@@ -509,7 +509,8 @@ public class Gatherconf {
 	}
 
 	/**
-	 * Stellt fest, ob die URL umgezogen ist.
+	 * Stellt fest, ob die URL umgezogen ist. Falls ja, wird die URL automatisch
+	 * auch in toscience umgezogen.
 	 * 
 	 * @param node der Knoten für die Pid (resource, Website), an der die
 	 *          Gatherconf hängt
@@ -522,8 +523,10 @@ public class Gatherconf {
 
 		play.Logger.debug("Starting hasUrlMoved");
 		if (invalidUrl) {
-			return true;
-		} // keine erneute Prüfung
+			// keine erneute Prüfung
+			return !moveUrl(node);
+		}
+		// jetzt Prüfung, ob die aktuell hinterlegte URL umgezogen ist
 		HttpURLConnection httpConnection = (HttpURLConnection) new URL(
 				WebgatherUtils.convertUnicodeURLToAscii(url)).openConnection();
 		httpConnection.setInstanceFollowRedirects(false);
@@ -545,8 +548,39 @@ public class Gatherconf {
 		}
 		play.Logger.debug("urlNew: " + urlNew);
 		httpConnection.disconnect();
-		new Modify().updateConf(node, this.toString());
-		return true;
+		if (urlNew == null || urlNew.isEmpty()) {
+			new Modify().updateConf(node, this.toString());
+			return true;
+		}
+		return !moveUrl(node);
+	}
+
+	/**
+	 * Diese Methode zieht eine ungültige URL automatisch um, falls möglich.
+	 * 
+	 * @author I. Kuss
+	 * @date 2025-04-08
+	 * @param node Der Node der Webpage
+	 * @returns true if successfully moved
+	 */
+	private boolean moveUrl(Node node) {
+		String msg = "von " + url + " nach " + urlNew + ".";
+		try {
+			if (urlNew == null || urlNew.isEmpty()) {
+				return false;
+			}
+			node.writeUrlHist(url, urlNew);
+			url = urlNew;
+			invalidUrl = false;
+			urlNew = null;
+			new Modify().updateConf(node, this.toString());
+			play.Logger.info("URL wurde umgezogen " + msg);
+			return true;
+		} catch (Exception e) {
+			play.Logger.error(e.toString());
+			play.Logger.warn("URL konnte nicht umgezogen werden " + msg);
+			return false;
+		}
 	}
 
 }

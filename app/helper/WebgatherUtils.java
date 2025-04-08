@@ -112,6 +112,8 @@ public class WebgatherUtils {
 				mailMsg += "unbekannt verzogen.\n"
 						+ "Bitte geben Sie auf diesem Webformular eine neue, gültige URL ein. Solange wird die Website nicht erneut eingesammelt: ";
 			} else {
+				// dieser Fall sollte eigentlich nicht mehr vorkommen, nachdem die
+				// Methode Gatherconf.moveUrl entwickelt wurde.
 				mailMsg += "umgezogen.\n"
 						+ "Bitte bestätigen Sie den Umzug auf diesem Webformular (URL kann dort vorher editiert werden): ";
 			}
