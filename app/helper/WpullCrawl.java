@@ -319,11 +319,11 @@ public class WpullCrawl {
 		if (waitRetry != 0) {
 			sb.append(" --waitretry=" + Integer.toString(waitRetry)); // wait between
 																																// re-tries
-		}
-
-		boolean random = conf.isRandomWait();
-		if (random == true) {
-			sb.append(" --random-wait"); // randomize wait times
+		} else {
+			boolean random = conf.isRandomWait();
+			if (random == true) {
+				sb.append(" --random-wait"); // randomize wait times
+			}
 		}
 
 		// select agent-string for http-request
