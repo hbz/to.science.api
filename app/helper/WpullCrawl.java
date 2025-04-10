@@ -306,6 +306,11 @@ public class WpullCrawl {
 			sb.append(" --wait=" + Integer.toString(waitSec)); // number of second
 																													// wpull waits between
 																													// requests
+		} else {
+			boolean random = conf.isRandomWait();
+			if (random == true) {
+				sb.append(" --random-wait"); // randomize wait times
+			}
 		}
 
 		int tries = conf.getTries();
@@ -319,11 +324,6 @@ public class WpullCrawl {
 		if (waitRetry != 0) {
 			sb.append(" --waitretry=" + Integer.toString(waitRetry)); // wait between
 																																// re-tries
-		} else {
-			boolean random = conf.isRandomWait();
-			if (random == true) {
-				sb.append(" --random-wait"); // randomize wait times
-			}
 		}
 
 		// select agent-string for http-request
