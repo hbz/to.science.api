@@ -58,6 +58,11 @@ public class Gatherconf {
 	}
 
 	@SuppressWarnings("javadoc")
+	public enum CrawlSubdomains {
+		domains, hostnames
+	}
+
+	@SuppressWarnings("javadoc")
 	public enum CrawlerSelection {
 		heritrix, wpull
 	}
@@ -102,6 +107,7 @@ public class Gatherconf {
 	String urlNew; // the new URL, yet to be confirmed
 	String cookie;
 	ArrayList<String> domains;
+	CrawlSubdomains crawlSubdomains;
 	int deepness;
 	RobotsPolicy robotsPolicy;
 	Interval interval;
@@ -128,6 +134,7 @@ public class Gatherconf {
 		invalidUrl = false;
 		urlNew = null;
 		domains = new ArrayList<String>();
+		crawlSubdomains = CrawlSubdomains.hostnames;
 		cookie = null;
 		active = true;
 		deepness = -1;
@@ -237,10 +244,24 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @param robotsPolicy
+	 * @param robotsPolicy if robots policy shall be followed
 	 */
 	public void setRobotsPolicy(RobotsPolicy robotsPolicy) {
 		this.robotsPolicy = robotsPolicy;
+	}
+
+	/**
+	 * @return define if subdomains will be crawled
+	 */
+	public CrawlSubdomains getCrawlSubdomains() {
+		return crawlSubdomains;
+	}
+
+	/**
+	 * @param crawlSubdomains if subdomains shall be crawled
+	 */
+	public void setCrawlSubdomains(CrawlSubdomains crawlSubdomains) {
+		this.crawlSubdomains = crawlSubdomains;
 	}
 
 	/**

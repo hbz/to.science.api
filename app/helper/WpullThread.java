@@ -11,6 +11,8 @@ import java.util.List;
 import actions.Create;
 import models.Gatherconf;
 import models.Node;
+import models.Gatherconf.RobotsPolicy;
+import models.Gatherconf.CrawlSubdomains;
 import play.Logger;
 
 /**
@@ -199,7 +201,11 @@ public class WpullThread extends Thread {
 			String zusHost = null;
 			if (domains.size() > 0) {
 				executeCommand += " --span-hosts";
-				executeCommand += " --hostnames=" + host;
+				if (conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
+					executeCommand += " --domains=" + host;
+				} else {
+					executeCommand += " --hostnames=" + host;
+				}
 				for (int i = 0; i < domains.size(); i++) {
 					zusDomain = domains.get(i);
 					zusHost = zusDomain.replaceAll("^http://", "")
@@ -248,9 +254,13 @@ public class WpullThread extends Thread {
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " exited with exitState " + exitState);
 			proc.destroy();
-			if (exitState == 0 || exitState == 4 || exitState == 7 || exitState == 8) {
+			if (exitState == 0 || exitState == 4 || exitState == 7
+					|| exitState == 8) {
 				/* der Beobachtung zufolge wird bei exitState == 7 das WARC ge-moved */
-				/* daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für TOS-1182 und TOS-1224 */
+				/*
+				 * daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für
+				 * TOS-1182 und TOS-1224
+				 */
 				new Create().createWebpageVersion(node, conf, outDir, localpath);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
