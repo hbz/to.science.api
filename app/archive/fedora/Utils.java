@@ -284,9 +284,9 @@ public class Utils {
 			String label = node.getFileLabel();
 			if (label == null || label.isEmpty())
 				label = file.getName();
-			new AddDatastream(node.getPid(), "data").versionable(true).dsLabel(label)
-					.dsState("A").controlGroup("M").mimeType(node.getMimeType())
-					.dsLocation(location).execute();
+			new AddDatastream(node.getPid(), "data").checksumType("MD5")
+					.versionable(true).dsLabel(label).dsState("A").controlGroup("M")
+					.mimeType(node.getMimeType()).dsLocation(location).execute();
 
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
@@ -400,14 +400,15 @@ public class Utils {
 		try {
 			File file = new File(node.getUploadFile());
 			if (dataStreamExists(node.getPid(), "data")) {
-				new ModifyDatastream(node.getPid(), "data").versionable(true)
-						.dsState("A").dsLabel(node.getFileLabel())
-						.mimeType(node.getMimeType()).controlGroup("M").content(file)
-						.execute();
+				new ModifyDatastream(node.getPid(), "data").checksumType("MD5")
+						.versionable(true).dsState("A").dsLabel(node.getFileLabel())
+						.mimeType(node.getMimeType()).controlGroup("M").checksumType("MD5")
+						.content(file).execute();
 			} else {
-				new AddDatastream(node.getPid(), "data").versionable(true).dsState("A")
-						.mimeType(node.getMimeType()).dsLabel(node.getFileLabel())
-						.content(file).controlGroup("M").execute();
+				new AddDatastream(node.getPid(), "data").checksumType("MD5")
+						.versionable(true).dsState("A").mimeType(node.getMimeType())
+						.dsLabel(node.getFileLabel()).content(file).controlGroup("M")
+						.execute();
 			}
 		} catch (FedoraClientException e) {
 			throw new HttpArchiveException(e.getStatus(), e);
