@@ -331,7 +331,7 @@ public class Create extends RegalAction {
 			ZonedDateTime startdateUTC = startdateLocal.atZone(ZoneId.systemDefault())
 					.withZoneSameInstant(ZoneOffset.UTC);
 			String owDatestamp =
-					new SimpleDateFormat("yyyyMMddHHmmss").format(startdateUTC);
+					DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(startdateUTC);
 			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
 					owDatestamp);
 		} catch (Exception e) {
