@@ -21,6 +21,9 @@ import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import java.io.File;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 // import javax.activation.MimetypesFileTypeMap;
@@ -309,15 +312,18 @@ public class Create extends RegalAction {
 			 * get basename of outDir = the timestamp for when the crawl has started
 			 */
 			String datetime = outDir.getName();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-			Date startdate = sdf.parse(datetime);
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+			LocalDate startdate = LocalDate.parse(datetime, dtf);
 			String label =
 					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startdate);
 			/*
 			 * Der Zeitstempel, mit dem die Open Wayback (oder Python Wayback)
 			 * einsteigen soll
 			 */
-			String owDatestamp = datetime;
+			Date startdateUTC =
+					Date.from(startdate.atStartOfDay().toInstant(ZoneOffset.UTC));
+			String owDatestamp =
+					new SimpleDateFormat("yyyyMMddHHmmss").format(startdateUTC);
 			String versionPid = null;
 			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
 					owDatestamp);
@@ -520,11 +526,20 @@ public class Create extends RegalAction {
 			String localpath = Globals.heritrixData + "/wpull-data" + "/"
 					+ conf.getName() + "/" + timestamp + "/" + filename;
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-			Date startdate = sdf.parse(timestamp);
+
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+			LocalDate startdate = LocalDate.parse(timestamp, dtf);
 			String label =
 					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startdate);
-			String owDatestamp = timestamp;
+			/*
+			 * Der Zeitstempel, mit dem die Open Wayback (oder Python Wayback)
+			 * einsteigen soll
+			 */
+			Date startdateUTC =
+					Date.from(startdate.atStartOfDay().toInstant(ZoneOffset.UTC));
+			String owDatestamp =
+					new SimpleDateFormat("yyyyMMddHHmmss").format(startdateUTC);
+
 			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
 					owDatestamp);
 
