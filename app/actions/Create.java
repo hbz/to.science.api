@@ -302,29 +302,33 @@ public class Create extends RegalAction {
 	 *          Version des neuen Webschnitts liegt.
 	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
 	 *          wird
+	 * @param versionPid Die PID für die WebpageVersion, oder null. Bei null wird
+	 *          PID vom System vergeben.
 	 * @return Der Knoten der neuen Webpage-Version
 	 */
 	public Node createWebpageVersion(Node n, Gatherconf conf, File outDir,
-			String localpath) {
+			String localpath, String versionPid) {
 		try {
 			/* Das Label, das auf dem Link "Zum Webschnitt" angezeigt werden soll */
 			/*
 			 * get basename of outDir = the timestamp for when the crawl has started
 			 */
 			String datetime = outDir.getName();
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			LocalDate startdate = LocalDate.parse(datetime, dtf);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date startdate = sdf.parse(datetime);
 			String label =
 					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startdate);
+			WebgatherLogger.info("Webschnitt Label=" + label);
 			/*
 			 * Der Zeitstempel, mit dem die Open Wayback (oder Python Wayback)
-			 * einsteigen soll
+			 * einsteigen soll. Es ist standardmäßig in UTC anzugeben.
 			 */
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+			LocalDate startdateLocal = LocalDate.parse(datetime, dtf);
 			Date startdateUTC =
-					Date.from(startdate.atStartOfDay().toInstant(ZoneOffset.UTC));
+					Date.from(startdateLocal.atStartOfDay().toInstant(ZoneOffset.UTC));
 			String owDatestamp =
 					new SimpleDateFormat("yyyyMMddHHmmss").format(startdateUTC);
-			String versionPid = null;
 			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
 					owDatestamp);
 		} catch (Exception e) {
@@ -527,22 +531,7 @@ public class Create extends RegalAction {
 					+ conf.getName() + "/" + timestamp + "/" + filename;
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
 
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			LocalDate startdate = LocalDate.parse(timestamp, dtf);
-			String label =
-					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startdate);
-			/*
-			 * Der Zeitstempel, mit dem die Open Wayback (oder Python Wayback)
-			 * einsteigen soll
-			 */
-			Date startdateUTC =
-					Date.from(startdate.atStartOfDay().toInstant(ZoneOffset.UTC));
-			String owDatestamp =
-					new SimpleDateFormat("yyyyMMddHHmmss").format(startdateUTC);
-
-			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
-					owDatestamp);
-
+			return createWebpageVersion(n, conf, outDir, localpath, versionPid);
 		} catch (Exception e) {
 			ApplicationLogger.error(
 					"Anlegen der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
