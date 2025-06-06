@@ -22,7 +22,10 @@ import java.io.File;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -324,9 +327,9 @@ public class Create extends RegalAction {
 			 * einsteigen soll. Es ist standardmäßig in UTC anzugeben.
 			 */
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			LocalDate startdateLocal = LocalDate.parse(datetime, dtf);
-			Date startdateUTC =
-					Date.from(startdateLocal.atStartOfDay().toInstant(ZoneOffset.UTC));
+			LocalDateTime startdateLocal = LocalDateTime.parse(datetime, dtf);
+			ZonedDateTime startdateUTC = startdateLocal.atZone(ZoneId.systemDefault())
+					.withZoneSameInstant(ZoneOffset.UTC);
 			String owDatestamp =
 					new SimpleDateFormat("yyyyMMddHHmmss").format(startdateUTC);
 			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
