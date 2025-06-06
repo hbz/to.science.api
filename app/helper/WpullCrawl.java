@@ -158,7 +158,7 @@ public class WpullCrawl {
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
-			this.warcFilename = "WEB-" + host + "-" + date;
+			this.warcFilename = "WEB-" + host + "-" + datetime;
 			/*
 			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
 			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback
