@@ -168,7 +168,9 @@ public class WebgatherUtils {
 
 				localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
 				WebgatherLogger.debug("Path to WARC " + localpath);
-				new Create().createWebpageVersion(node, conf, crawlDir, localpath);
+				String versionPid = null;
+				new Create().createWebpageVersion(node, conf, crawlDir, localpath,
+						versionPid);
 			} else if (conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.wpull)) {
 				WpullCrawl wpullCrawl = new WpullCrawl(node, conf);

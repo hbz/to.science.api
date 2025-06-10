@@ -21,6 +21,12 @@ import static archive.fedora.Vocabulary.TYPE_OBJECT;
 import java.io.File;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 // import javax.activation.MimetypesFileTypeMap;
@@ -299,15 +305,42 @@ public class Create extends RegalAction {
 	 *          Version des neuen Webschnitts liegt.
 	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
 	 *          wird
+	 * @param versionPid Die PID für die WebpageVersion, oder null. Bei null wird
+	 *          PID vom System vergeben.
 	 * @return Der Knoten der neuen Webpage-Version
 	 */
 	public Node createWebpageVersion(Node n, Gatherconf conf, File outDir,
-			String localpath) {
-		String label = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-		String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
-		String versionPid = null;
-		return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
-				owDatestamp);
+			String localpath, String versionPid) {
+		try {
+			/* Das Label, das auf dem Link "Zum Webschnitt" angezeigt werden soll */
+			/*
+			 * get basename of outDir = the timestamp for when the crawl has started
+			 */
+			String datetime = outDir.getName();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date startdate = sdf.parse(datetime);
+			String label =
+					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startdate);
+			WebgatherLogger.info("Webschnitt Label=" + label);
+			/*
+			 * Der Zeitstempel, mit dem die Open Wayback (oder Python Wayback)
+			 * einsteigen soll. Es ist standardmäßig in UTC anzugeben.
+			 */
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+			LocalDateTime startdateLocal = LocalDateTime.parse(datetime, dtf);
+			ZonedDateTime startdateUTC = startdateLocal.atZone(ZoneId.systemDefault())
+					.withZoneSameInstant(ZoneOffset.UTC);
+			String owDatestamp =
+					DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(startdateUTC);
+			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
+					owDatestamp);
+		} catch (Exception e) {
+			WebgatherLogger.warn("Anlage einer Webpage-Version zu PID,URL "
+					+ n.getPid() + "," + conf.getUrl()
+					+ " ist fehlgeschlagen !\n\tGrund: " + e.getMessage());
+			WebgatherLogger.debug("", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -500,12 +533,8 @@ public class Create extends RegalAction {
 			String localpath = Globals.heritrixData + "/wpull-data" + "/"
 					+ conf.getName() + "/" + timestamp + "/" + filename;
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
-			String label = timestamp.substring(0, 4) + "-" + timestamp.substring(4, 6)
-					+ "-" + timestamp.substring(6, 8);
-			String owDatestamp = timestamp.substring(0, 8);
-			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
-					owDatestamp);
 
+			return createWebpageVersion(n, conf, outDir, localpath, versionPid);
 		} catch (Exception e) {
 			ApplicationLogger.error(
 					"Anlegen der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",

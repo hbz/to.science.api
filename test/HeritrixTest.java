@@ -49,8 +49,9 @@ public class HeritrixTest {
 				String uriPath = Globals.heritrix.getUriPath(warcPath);
 				String localpath =
 						Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
-				Node webpageVersion =
-						create.createWebpageVersion(webpage, conf, crawlDir, localpath);
+				String versionPid = null;
+				Node webpageVersion = create.createWebpageVersion(webpage, conf,
+						crawlDir, localpath, versionPid);
 			}
 		});
 	}

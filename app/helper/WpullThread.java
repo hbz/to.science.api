@@ -261,7 +261,9 @@ public class WpullThread extends Thread {
 				 * daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für
 				 * TOS-1182 und TOS-1224
 				 */
-				new Create().createWebpageVersion(node, conf, outDir, localpath);
+				String versionPid = null;
+				new Create().createWebpageVersion(node, conf, outDir, localpath,
+						versionPid);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
 				return;
