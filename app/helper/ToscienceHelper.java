@@ -306,11 +306,10 @@ public class ToscienceHelper {
 			play.Logger.debug("Exception by jsonToMap(), Key=" + key + " , value="
 					+ value + "," + e);
 		}
-		// play.Logger.debug("map="+map.toString());
+
 		map = removeQuotes(map);
-		// play.Logger.debug("map="+map.toString());
 		map = transformMap(map, jo);
-		// play.Logger.debug("map="+map.toString());
+
 		return map;
 	}
 
