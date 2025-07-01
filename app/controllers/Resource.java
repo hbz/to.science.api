@@ -206,16 +206,13 @@ public class Resource extends MyController {
 		JSONObject allMetadata = null;
 		Node node = readNodeOrNull(pid);
 		try {
-			if (!Helper.mdStreamExists(pid, "toscience")
-					|| node.getMetadata("toscience").length() < 5) {
+			if ((!Helper.mdStreamExists(pid, "toscience")
+					|| node.getMetadata("toscience").length() < 5)
+					&& (!Helper.mdStreamExists(pid, "ktbl"))) {
 				Map<String, Object> rdf = RdfHelper.getRdfAsMap(node,
 						RDFFormat.NTRIPLES, node.getMetadata("metadata2"));
-				play.Logger.debug("listResource()rdf: " + rdf);
 				allMetadata = new JSONObject(rdf);
-				play.Logger.debug("allMetadata=" + allMetadata.toString());
 				allMetadata = ToscienceHelper.getPrefLabelsResolved(allMetadata);
-				play.Logger.debug("allMetadata=" + allMetadata.toString());
-
 				modify.updateMetadata("toscience", node, allMetadata.toString());
 			}
 		} catch (Exception e) {

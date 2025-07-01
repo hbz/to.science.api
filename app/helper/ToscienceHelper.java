@@ -18,13 +18,11 @@ import java.util.Map;
 import actions.Read;
 import actions.Modify;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.TreeMap;
 
 /**
  * 
@@ -288,27 +286,18 @@ public class ToscienceHelper {
 
 	public static Map<String, Object> jsonToMap(String tosDs) {
 		Map<String, Object> map = null;
-		String key = null;
-		Object value = null;
+
 		JSONObject jo = null;
 		try {
-			map = new LinkedHashMap<>();
+
 			jo = new JSONObject(tosDs);
-			Iterator<String> keys = jo.keys();
-			while (keys.hasNext()) {
-				key = keys.next();
-				value = jo.get(key);
-				play.Logger.debug("Key=" + key + " ,value=" + value);
-				map.put(key, value);
 
-			}
 		} catch (Exception e) {
-			play.Logger.debug("Exception by jsonToMap(), Key=" + key + " , value="
-					+ value + "," + e);
-		}
+			play.Logger.debug("Exception by jsonToMap()" + e);
 
-		map = removeQuotes(map);
-		map = transformMap(map, jo);
+		}
+		// map = removeQuotes(map);
+		map = transformMap(jo);
 
 		return map;
 	}
@@ -362,48 +351,50 @@ public class ToscienceHelper {
 		return cleanedString;
 	}
 
-	public static Map<String, Object> transformMap(Map<String, Object> inputMap,
-			JSONObject jo) {
+	public static Map<String, Object> transformMap(JSONObject jo) {
 		Map<String, Object> newMap = new LinkedHashMap<>();
 		JSONArray jsonArray = null;
 		String key = null;
 		Object value = null;
-		try {
-			for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
-				key = entry.getKey();
-				value = entry.getValue();
-				String strValue = (String) value;
-				strValue = cleanBrackets(strValue);
-				strValue = restructureDataRecords(strValue);
 
+		try {
+
+			Iterator<String> keys = jo.keys();
+			while (keys.hasNext()) {
+				key = keys.next();
+				value = jo.get(key);
+				String strValue = value.toString();
+				strValue = cleanBrackets(strValue);
+				// strValue = restructureDataRecords(strValue);
 				if ("id".equals(key)) {
 					continue;
 					// (ArrayList, Strings)
 				} else if ("fundingProgram".equals(key) || "projectId".equals(key)
 						|| "contributorOrder".equals(key)) {
-					ArrayList<String> arrayList = new ArrayList<>();
+					List<String> arrayList = new ArrayList<>();
 					jsonArray = jo.getJSONArray(key);
 					for (int i = 0; i < jsonArray.length(); i++) {
 						arrayList.add(jsonArray.get(i).toString());
 					}
 					newMap.put(key, arrayList);
+
 					// (ArraList,TreeMap)
 				} else if ("fundingId".equals(key) || "creator".equals(key)
 						|| "contributor".equals(key) || "publisherVersion".equals(key)
-						|| "fulltextVersion".equals(key)
-						|| "additionalMaterial".equals(key)) {
-					ArrayList<Map<String, Object>> arrayList = new ArrayList<>();
+						|| "fulltextVersion".equals(key) || "additionalMaterial".equals(key)
+						|| "contribution".equals(key)) {
+					List<Map<String, Object>> arrayList = new ArrayList<>();
 					jsonArray = jo.getJSONArray(key);
 					for (int i = 0; i < jsonArray.length(); i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
 						Map<String, Object> keyMap = new TreeMap<>();
-						keyMap.put("@id", jsonObject.getString("@id"));
-						keyMap.put("prefLabel", jsonObject.getString("prefLabel"));
+						keyMap = jsonObjectToMap(jsonObject);
 						arrayList.add(keyMap);
 					}
 					newMap.put(key, arrayList);
 				} else if ("@id".equals(key)) {
 					newMap.put(key, cleanBrackets(value.toString()));
+
 					// (HashSet,TreeMap)
 				} else if ("language".equals(key) || "dataOrigin".equals(key)
 						|| "ddc".equals(key) || "license".equals(key)
@@ -414,37 +405,40 @@ public class ToscienceHelper {
 						|| "editor".equals(key) || "containedIn".equals(key)
 						|| "publicationStatus".equals(key) || "reviewStatus".equals(key)
 						|| "collectionTwo".equals(key) || "internalReference".equals(key)
-						|| "parallelEdition".equals(key)) {
-
+						|| "parallelEdition".equals(key) || "recordingLocation".equals(key)
+						|| "recordingCoordinates".equals(key)
+						|| "bibliographicLevel".equals(key) || "describedby".equals(key)
+						|| "fulltextOnline".equals(key) || "hasItem".equals(key)
+						|| "inCollection".equals(key) || "lv:isPartOf".equals(key)
+						|| "parallelEdition".equals(key) || "publication".equals(key)
+						|| "sameAs".equals(key) || "spatial".equals(key)
+						|| "relation".equals(key) || "natureOfContent".equals(key)
+						|| "successor".equals(key) || "predecessor".equals(key)
+						|| "exampleOfWork".equals(key) || "tableOfContents".equals(key)
+						|| "containsExampleOfWork".equals(key)) {
 					jsonArray = jo.getJSONArray(key);
-					// List<Map<String, Object>> keyList = new ArrayList<>();
-					HashSet<Map<String, Object>> mySet = new HashSet<>();
+					Set<Map<String, Object>> mySet = new HashSet<>();
 
 					for (int i = 0; i < jsonArray.length(); i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
 						Map<String, Object> keyMap = new TreeMap<>();
-						keyMap.put("@id", jsonObject.getString("@id"));
-						keyMap.put("prefLabel", jsonObject.getString("prefLabel"));
+						keyMap = jsonObjectToMap(jsonObject);
 						mySet.add(keyMap);
-
 					}
 					newMap.put(key, mySet);
-
 				} else if ("publishScheme".equals(key) || "accessScheme".equals(key)
 						|| "catalogId".equals(key)) {
 					play.Logger.debug("jo.get(key).toString()=" + jo.get(key).toString());
-					HashSet<String> mySet = new HashSet<>();
+					Set<String> mySet = new HashSet<>();
 					mySet.add(jo.get(key).toString());
 					newMap.put(key, mySet);
 				} else {
-					// z.B description | usageManual | urn(HashSet, Strings)
-					HashSet<String> mySet = new HashSet<>();
+					// z.B description | usageManual | urn (HashSet, Strings)
+					Set<String> mySet = new HashSet<>();
 					jsonArray = jo.getJSONArray(key);
 					for (int i = 0; i < jsonArray.length(); i++) {
 						mySet.add(jsonArray.get(i).toString());
 					}
-
-					// mySet.add(strValue);
 					newMap.put(key, mySet);
 				}
 			}
@@ -452,7 +446,7 @@ public class ToscienceHelper {
 			newMap.put("prefLabel", new HashSet<>(Arrays.asList(jo.get("@id"))));
 
 		} catch (Exception e) {
-			play.Logger.debug("Exception by transformMap(), Key=" + key + " , value="
+			play.Logger.debug("Exception by transformMap(), Key=" + key + ", value="
 					+ value + "," + e);
 		}
 
@@ -502,4 +496,44 @@ public class ToscienceHelper {
 			play.Logger.debug("key=" + key + ", Value=null, Type=null");
 		}
 	}
+
+	private static Map<String, Object> jsonObjectToMap(JSONObject jsonObject) {
+		Map<String, Object> map = new TreeMap<>();
+		try {
+			Iterator<String> keys = jsonObject.keys();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				Object value = jsonObject.get(key);
+				if (value instanceof JSONObject) {
+					map.put(key, jsonObjectToMap((JSONObject) value));
+				} else if (value instanceof JSONArray) {
+					map.put(key, jsonArrayToList((JSONArray) value));
+				} else {
+					map.put(key, value);
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.debug("Exception in jsonObjectToMap(): " + e);
+		}
+		return map;
+	}
+
+	private static List<Object> jsonArrayToList(JSONArray jsonArray) {
+		List<Object> list = new ArrayList<>();
+		try {
+			for (int i = 0; i < jsonArray.length(); i++) {
+				Object value = jsonArray.get(i);
+				if (value instanceof JSONObject) {
+					list.add(jsonObjectToMap((JSONObject) value));
+				} else {
+					list.add(value);
+				}
+			}
+		} catch (Exception e) {
+			play.Logger.debug("Exception in jsonArrayToList(): " + e);
+		}
+
+		return list;
+	}
+
 }
