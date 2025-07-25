@@ -54,6 +54,10 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import play.Play;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.TreeMap;
+import java.util.Arrays;
 
 /**
  * @author jan schnasse
@@ -894,13 +898,106 @@ public class JsonMapper {
 	 * @return
 	 */
 	public Map<String, Object> getLd2() {
+		play.Logger.debug("getLd2() has been called");
+		Map<String, Object> m2 = null;
+
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata2();
-		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
+		for (String key1 : m.keySet()) {
+			Object obj = m.get(key1);
+			if (obj != null) {
+				String typeName;
+				if (obj.getClass().isArray()) {
+					typeName = obj.getClass().getComponentType().getName();
+				} else {
+					typeName = obj.getClass().getName();
+				}
+				play.Logger
+						.debug("key1=" + key1 + ", Value=" + obj + ", Type=" + typeName);
+			} else {
+				play.Logger.debug("key1=" + key1 + ", Value=null, Type=null");
+			}
+
+		}
+		m2 = ToscienceHelper.jsonToMap(node.getMetadata("toscience"));
+		m2.put("@context", profile.getContext().get("@context"));
+
+		for (String key2 : m2.keySet()) {
+			Object obj = m2.get(key2);
+
+			if (obj != null) {
+				String typeName;
+				if (obj.getClass().isArray()) {
+					typeName = obj.getClass().getComponentType().getName();
+				} else {
+					typeName = obj.getClass().getName();
+				}
+				play.Logger
+						.debug("key2=" + key2 + ", Value=" + obj + ", Type=" + typeName);
+			} else {
+				play.Logger.debug("key2=" + key2 + ", Value=null, Type=null");
+			}
+
+		}
+
+		play.Logger.debug("***********************************");
+		for (Map.Entry<String, Object> entry : m.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			// Datenstruktur ermitteln
+			String dataStructure = value.getClass().getSimpleName();
+			play.Logger.debug("Key1: " + key + ", Datenstruktur: " + dataStructure);
+
+			// Typ der Elemente ermitteln
+			if (value instanceof HashSet) {
+				HashSet<?> set = (HashSet<?>) value;
+				play.Logger.debug("  Elementtyp im HashSet:");
+				for (Object element : set) {
+					play.Logger.debug("    " + element.getClass().getSimpleName());
+				}
+			} else if (value instanceof ArrayList) {
+				ArrayList<?> list = (ArrayList<?>) value;
+				play.Logger.debug("  Elementtyp in ArrayList:");
+				for (Object element : list) {
+					play.Logger.debug("    " + element.getClass().getSimpleName());
+				}
+			} else {
+				play.Logger.debug("  Datentyp: " + value.getClass().getSimpleName());
+			}
+		}
+
+		play.Logger.debug("***********************************");
+		for (Map.Entry<String, Object> entry : m2.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			// Datenstruktur ermitteln
+			String dataStructure = value.getClass().getSimpleName();
+			play.Logger.debug("Key2: " + key + ", Datenstruktur: " + dataStructure);
+
+			// Typ der Elemente ermitteln
+			if (value instanceof HashSet) {
+				HashSet<?> set = (HashSet<?>) value;
+				play.Logger.debug("  Elementtyp im HashSet:");
+				for (Object element : set) {
+					play.Logger.debug("    " + element.getClass().getSimpleName());
+				}
+			} else if (value instanceof ArrayList) {
+				ArrayList<?> list = (ArrayList<?>) value;
+				play.Logger.debug("  Elementtyp in ArrayList:");
+				for (Object element : list) {
+					play.Logger.debug("    " + element.getClass().getSimpleName());
+				}
+			} else {
+				play.Logger.debug("  Datentyp: " + value.getClass().getSimpleName());
+			}
+		}
+
+		// Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+		Map<String, Object> rdf = m2 == null ? new HashMap<>() : m2;
 		changeDcIsPartOfToRegalIsPartOf(rdf);
-		// rdf.remove("describedby");
-		// rdf.remove("sameAs");
 
 		rdf.put(ID2, node.getPid());
 		rdf.put(primaryTopic, node.getPid());
@@ -922,7 +1019,6 @@ public class JsonMapper {
 		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
 		rdf.put(catalogId, node.getCatalogId());
-		// rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
 			rdf.put(fulltext_ocr, node.getFulltext());
@@ -995,6 +1091,22 @@ public class JsonMapper {
 			rdf.put("issued", issued);
 		}
 		rdf.put("@context", Globals.protocol + Globals.server + "/context.json");
+		play.Logger.debug("***********************************");
+		for (String key3 : rdf.keySet()) {
+			Object obj = rdf.get(key3);
+			if (obj != null) {
+				String typeName;
+				if (obj.getClass().isArray()) {
+					typeName = obj.getClass().getComponentType().getName();
+				} else {
+					typeName = obj.getClass().getName();
+				}
+				play.Logger
+						.debug("key3=" + key3 + ", Value=" + obj + ", Type=" + typeName);
+			} else {
+				play.Logger.debug("key3=" + key3 + ", Value=null, Type=null");
+			}
+		}
 		postprocessing(rdf);
 		return rdf;
 	}
