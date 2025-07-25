@@ -454,46 +454,53 @@ public class ToscienceHelper {
 	}
 
 	public static void displayDataStructuresAndTypes(Map<String, Object> map) {
-		play.Logger.debug("***********************************");
-		for (Map.Entry<String, Object> entry : map.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
 
-			// Datenstruktur ermitteln
-			String dataStructure = value.getClass().getSimpleName();
-			play.Logger.debug("Key: " + key + ", Datenstruktur: " + dataStructure);
+		if (map != null) {
+			for (Map.Entry<String, Object> entry : map.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				// Datenstruktur ermitteln
+				String dataStructure = value.getClass().getSimpleName();
+				play.Logger.debug("Key: " + key + ", Datenstruktur: " + dataStructure);
 
-			// Typ der Elemente ermitteln
-			if (value instanceof HashSet) {
-				HashSet<?> set = (HashSet<?>) value;
-				play.Logger.debug("  Elementtyp im HashSet:");
-				for (Object element : set) {
-					play.Logger.debug("    " + element.getClass().getSimpleName());
+				// Typ der Elemente ermitteln
+				if (value instanceof HashSet) {
+					HashSet<?> set = (HashSet<?>) value;
+					play.Logger.debug("  Elementtyp im HashSet:");
+					for (Object element : set) {
+						play.Logger.debug("    " + element.getClass().getSimpleName());
+					}
+				} else if (value instanceof ArrayList) {
+					ArrayList<?> list = (ArrayList<?>) value;
+					play.Logger.debug("  Elementtyp in ArrayList:");
+					for (Object element : list) {
+						play.Logger.debug("    " + element.getClass().getSimpleName());
+					}
+				} else {
+					play.Logger.debug("  Datentyp: " + value.getClass().getSimpleName());
 				}
-			} else if (value instanceof ArrayList) {
-				ArrayList<?> list = (ArrayList<?>) value;
-				play.Logger.debug("  Elementtyp in ArrayList:");
-				for (Object element : list) {
-					play.Logger.debug("    " + element.getClass().getSimpleName());
-				}
-			} else {
-				play.Logger.debug("  Datentyp: " + value.getClass().getSimpleName());
 			}
 		}
 	}
 
-	public static void logObjectInfo(String key, Object obj) {
-		play.Logger.debug("***********************************");
-		if (obj != null) {
-			String typeName;
-			if (obj.getClass().isArray()) {
-				typeName = obj.getClass().getComponentType().getName();
-			} else {
-				typeName = obj.getClass().getName();
+	public static void logObjectInfo(Map<String, Object> m) {
+
+		if (m != null) {
+			for (String key : m.keySet()) {
+				Object obj = m.get(key);
+				if (obj != null) {
+					String typeName;
+					if (obj.getClass().isArray()) {
+						typeName = obj.getClass().getComponentType().getName();
+					} else {
+						typeName = obj.getClass().getName();
+					}
+					play.Logger
+							.debug("key=" + key + ", Value=" + obj + ", Type=" + typeName);
+				} else {
+					play.Logger.debug("key=" + key + ", Value=null, Type=null");
+				}
 			}
-			play.Logger.debug("key=" + key + ", Value=" + obj + ", Type=" + typeName);
-		} else {
-			play.Logger.debug("key=" + key + ", Value=null, Type=null");
 		}
 	}
 

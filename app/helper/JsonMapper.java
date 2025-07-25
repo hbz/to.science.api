@@ -904,96 +904,12 @@ public class JsonMapper {
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata2();
 
-		for (String key1 : m.keySet()) {
-			Object obj = m.get(key1);
-			if (obj != null) {
-				String typeName;
-				if (obj.getClass().isArray()) {
-					typeName = obj.getClass().getComponentType().getName();
-				} else {
-					typeName = obj.getClass().getName();
-				}
-				play.Logger
-						.debug("key1=" + key1 + ", Value=" + obj + ", Type=" + typeName);
-			} else {
-				play.Logger.debug("key1=" + key1 + ", Value=null, Type=null");
-			}
+		ToscienceHelper.logObjectInfo(m);
 
-		}
 		m2 = ToscienceHelper.jsonToMap(node.getMetadata("toscience"));
 		m2.put("@context", profile.getContext().get("@context"));
-
-		for (String key2 : m2.keySet()) {
-			Object obj = m2.get(key2);
-
-			if (obj != null) {
-				String typeName;
-				if (obj.getClass().isArray()) {
-					typeName = obj.getClass().getComponentType().getName();
-				} else {
-					typeName = obj.getClass().getName();
-				}
-				play.Logger
-						.debug("key2=" + key2 + ", Value=" + obj + ", Type=" + typeName);
-			} else {
-				play.Logger.debug("key2=" + key2 + ", Value=null, Type=null");
-			}
-
-		}
-
 		play.Logger.debug("***********************************");
-		for (Map.Entry<String, Object> entry : m.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
-
-			// Datenstruktur ermitteln
-			String dataStructure = value.getClass().getSimpleName();
-			play.Logger.debug("Key1: " + key + ", Datenstruktur: " + dataStructure);
-
-			// Typ der Elemente ermitteln
-			if (value instanceof HashSet) {
-				HashSet<?> set = (HashSet<?>) value;
-				play.Logger.debug("  Elementtyp im HashSet:");
-				for (Object element : set) {
-					play.Logger.debug("    " + element.getClass().getSimpleName());
-				}
-			} else if (value instanceof ArrayList) {
-				ArrayList<?> list = (ArrayList<?>) value;
-				play.Logger.debug("  Elementtyp in ArrayList:");
-				for (Object element : list) {
-					play.Logger.debug("    " + element.getClass().getSimpleName());
-				}
-			} else {
-				play.Logger.debug("  Datentyp: " + value.getClass().getSimpleName());
-			}
-		}
-
-		play.Logger.debug("***********************************");
-		for (Map.Entry<String, Object> entry : m2.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
-
-			// Datenstruktur ermitteln
-			String dataStructure = value.getClass().getSimpleName();
-			play.Logger.debug("Key2: " + key + ", Datenstruktur: " + dataStructure);
-
-			// Typ der Elemente ermitteln
-			if (value instanceof HashSet) {
-				HashSet<?> set = (HashSet<?>) value;
-				play.Logger.debug("  Elementtyp im HashSet:");
-				for (Object element : set) {
-					play.Logger.debug("    " + element.getClass().getSimpleName());
-				}
-			} else if (value instanceof ArrayList) {
-				ArrayList<?> list = (ArrayList<?>) value;
-				play.Logger.debug("  Elementtyp in ArrayList:");
-				for (Object element : list) {
-					play.Logger.debug("    " + element.getClass().getSimpleName());
-				}
-			} else {
-				play.Logger.debug("  Datentyp: " + value.getClass().getSimpleName());
-			}
-		}
+		ToscienceHelper.logObjectInfo(m2);
 
 		// Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		Map<String, Object> rdf = m2 == null ? new HashMap<>() : m2;
