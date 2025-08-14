@@ -351,6 +351,7 @@ public class DublinCoreHandler {
 
 		try {
 			String result = preamble + update.toString() + fazit;
+			play.Logger.debug("DC result: " + result);
 
 			new ModifyDatastream(node.getPid(), "DC").mimeType("text/xml")
 					.formatURI("http://www.openarchives.org/OAI/2.0/oai_dc/")
