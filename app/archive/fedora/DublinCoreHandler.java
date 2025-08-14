@@ -288,6 +288,7 @@ public class DublinCoreHandler {
 				String sidentifier = tagStart + "identifier" + tagEnd
 						+ transformToXMLEntity(str.getLeft()) + endTagStart + "identifier"
 						+ tagEnd;
+				play.Logger.debug("sidentifier: " + sidentifier);
 				update.append(sidentifier + "\n");
 			}
 		}
@@ -336,6 +337,7 @@ public class DublinCoreHandler {
 			for (String str : title) {
 				String stitle = tagStart + "title" + tagEnd + transformToXMLEntity(str)
 						+ endTagStart + "title" + tagEnd;
+				play.Logger.debug("stitle: " + stitle);
 				update.append(stitle + "\n");
 			}
 		}
