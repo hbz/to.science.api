@@ -60,6 +60,7 @@ public class RdfHelper {
 				play.Logger.debug("rewriteContent=" + rewriteContent);
 
 			} else {
+				// play.Logger.debug("content=" + content);
 				rewriteContent = new Modify().rewriteContent(content, n.getPid());
 				play.Logger.debug("rewriteContent=" + rewriteContent);
 			}
