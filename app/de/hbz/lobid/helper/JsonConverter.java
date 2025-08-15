@@ -36,6 +36,9 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import models.Node;
+import actions.Read;
+
 /**
  * Converts ntriples to a map, ennhancing the data with data constructed via
  * {@link EtikettMaker}.
@@ -62,6 +65,7 @@ public class JsonConverter {
 	Set<Statement> all = new HashSet<>();
 
 	private String mainSubjectOfTheResource;
+	private Node node;
 
 	private EtikettMakerInterface etikette;
 	private Map<Statement, Statement> visited = new HashMap<>();
@@ -118,6 +122,8 @@ public class JsonConverter {
 	private Map<String, Object> convert(String subject, Object context,
 			Collection<Statement> g) {
 		mainSubjectOfTheResource = subject;
+		// mainSubjectOfTheResource ist die PID
+		node = new Read().readNode(subject);
 		collect(g);
 		Map<String, Object> result = createMap(g);
 		play.Logger.debug("result=" + result.toString());
@@ -148,8 +154,12 @@ public class JsonConverter {
 						"Misconfiguration! Please provide a name for " + e.getUri()
 								+ " in labels.json");
 			if (s.getObject() instanceof org.eclipse.rdf4j.model.Literal) {
-				play.Logger.debug(
-						"key, statement: " + key + ", " + s.getObject().stringValue());
+				// play.Logger.debug("key, statement: " + key + ", " +
+				// s.getObject().stringValue());
+				if (key.equals("title")) {
+					// Schreibe den Titel in die DublinCore Metadaten
+					node.dublinCoreData.addTitle(s.getObject().stringValue());
+				}
 				addLiteralToJsonResult(jsonResult, key, s.getObject().stringValue());
 			} else {
 				if (s.getObject() instanceof org.eclipse.rdf4j.model.BNode) {
