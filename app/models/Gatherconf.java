@@ -111,6 +111,7 @@ public class Gatherconf {
 	int deepness;
 	RobotsPolicy robotsPolicy;
 	Interval interval;
+	String notices;
 	CrawlerSelection crawlerSelection;
 	QuotaUnitSelection quotaUnitSelection;
 	AgentIdSelection agentIdSelection;
@@ -140,6 +141,7 @@ public class Gatherconf {
 		deepness = -1;
 		robotsPolicy = RobotsPolicy.ignore;
 		interval = null;
+		notices = null;
 		crawlerSelection = CrawlerSelection.wpull;
 		quotaUnitSelection = null;
 		agentIdSelection = AgentIdSelection.Chrome;
@@ -276,6 +278,20 @@ public class Gatherconf {
 	 */
 	public void setInterval(Interval interval) {
 		this.interval = interval;
+	}
+
+	/**
+	 * @return internal notices
+	 */
+	public String getNotices() {
+		return notices;
+	}
+
+	/**
+	 * @param notices internal notices to a website crawl
+	 */
+	public void setNotices(String notices) {
+		this.notices = notices;
 	}
 
 	/**
