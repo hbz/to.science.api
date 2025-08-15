@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.rdf4j.model.BNode;
@@ -124,6 +125,7 @@ public class JsonConverter {
 		mainSubjectOfTheResource = subject;
 		// mainSubjectOfTheResource ist die PID
 		node = new Read().readNode(subject);
+		node.dublinCoreData.setTitle(new Vector<>());
 		collect(g);
 		Map<String, Object> result = createMap(g);
 		play.Logger.debug("result=" + result.toString());
