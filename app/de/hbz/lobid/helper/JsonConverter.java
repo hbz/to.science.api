@@ -148,6 +148,8 @@ public class JsonConverter {
 						"Misconfiguration! Please provide a name for " + e.getUri()
 								+ " in labels.json");
 			if (s.getObject() instanceof org.eclipse.rdf4j.model.Literal) {
+				play.Logger.debug(
+						"key, statement: " + key + ", " + s.getObject().stringValue());
 				addLiteralToJsonResult(jsonResult, key, s.getObject().stringValue());
 			} else {
 				if (s.getObject() instanceof org.eclipse.rdf4j.model.BNode) {
