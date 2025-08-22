@@ -95,17 +95,7 @@
 	</tr>
 	}
 		
-	@if(views.KtblHelper.getToscienceArrayValues(node, "embargoTime")!=null){
-			<tr class="ktbl emimin">
-			<td style="display:none;">"80"</td>
-			<td class="field-label">EmbargoTime</td>
-			<td class="field-item">
-				@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "embargoTime")){
-					<p class="description">@rDs</p> <br>
-				}
-			</td>
-			</tr>
-			}
+
 
 @if(views.KtblHelper.getToscienceLiteralValue(node, "reference")!=null){
 	<tr class="ktbl emimin">
@@ -195,6 +185,18 @@
 	</td>
 	</tr>
 	}
+	
+	@if(views.KtblHelper.getToscienceArrayValues(node, "embargoTime")!=null){
+			<tr class="ktbl emimin">
+			<td style="display:none;">"80"</td>
+			<td class="field-label">Embargo end date</td>
+			<td class="field-item">
+				@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "embargoTime")){
+					<p class="description">@rDs</p> <br>
+				}
+			</td>
+			</tr>
+			}
 
 @if(views.KtblHelper.getToscienceObjectArray(node, "language")!=null){
 	<tr class="ktbl emimin">
