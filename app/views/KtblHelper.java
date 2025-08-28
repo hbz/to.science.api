@@ -505,8 +505,8 @@ public class KtblHelper {
 
 	public static String getDoi(Node node) {
 		try {
-			if (node.getDoi() != null && !node.getDoi().isEmpty()) {
-				JSONObject jo = new JSONObject(node.getMetadata("toscience"));
+			JSONObject jo = new JSONObject(node.getMetadata("toscience"));
+			if (node.hasDoi() && !jo.has("doi")) {
 				jo.put("doi", node.getDoi());
 				node.setMetadata("toscience", jo.toString());
 				new Modify().updateMetadata("toscience", node, jo.toString());
