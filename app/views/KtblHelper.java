@@ -12,6 +12,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import helper.JsonMdLoader;
 import models.Node;
 import play.Logger;
+import models.Globals;
+import actions.Modify;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.json.JSONObject;
 
 public class KtblHelper {
 
@@ -462,4 +467,55 @@ public class KtblHelper {
 
 		return value.substring(0, 0).toUpperCase() + value.substring(1);
 	}
+
+	public static String getRecordingPeriod(Node node) {
+		String output = null;
+		String mdStream = getKtblJson(node);
+		if (mdStream != null) {
+			try {
+				JsonNode jn = new ObjectMapper().readTree(mdStream);
+				output = jn.findValue("recordingPeriod").toString().replace("_", " ")
+						.replace("\"", "");
+
+			} catch (Exception e) {
+				play.Logger.warn(e.getMessage());
+			}
+		}
+		return output;
+	}
+
+	public static String getLabel(Node node) {
+		String label = null;
+		try {
+			JSONObject jo = new JSONObject(node.getMetadata("toscience"));
+			if (!jo.has("@id") || jo.get("@id").toString().isEmpty()) {
+				String id = Globals.urnbase + node.getPid();
+				jo.put("@id", id);
+				node.setMetadata("toscience", jo.toString());
+				new Modify().updateMetadata("toscience", node, jo.toString());
+			}
+			label = jo.get("@id").toString();
+
+		} catch (Exception e) {
+			play.Logger.debug("Exception in getLabel(): " + e);
+		}
+
+		return label;
+	}
+
+	public static String getDoi(Node node) {
+		try {
+			JSONObject jo = new JSONObject(node.getMetadata("toscience"));
+			if (node.hasDoi() && !jo.has("doi")) {
+				jo.put("doi", node.getDoi());
+				node.setMetadata("toscience", jo.toString());
+				new Modify().updateMetadata("toscience", node, jo.toString());
+			}
+		} catch (Exception e) {
+			play.Logger.debug("Exception in getDoi():" + e);
+		}
+
+		return node.getDoi();
+	}
+
 }

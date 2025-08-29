@@ -296,6 +296,16 @@
 	</td>
 	</tr>
 	}
+	
+	@if(views.KtblHelper.getRecordingPeriod(node)!=null){
+	    <tr class="ktbl emimin">
+	    <td style="display:none;">"80"</td>
+	    <td class="field-label">Collection Period</td>
+	    <td class="field-item">
+	            @views.KtblHelper.getRecordingPeriod(node)
+	    </td>
+	    </tr>
+	    }	
 
 
 @if(views.KtblHelper.getToscienceObjectArray(node, "ddc")!=null){
@@ -313,26 +323,29 @@
 	</tr>
 	}
 	
-@if(views.KtblHelper.getToscienceLiteralValue(node, "@id")!=null){
-	<tr class="ktbl emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Label</td>
-	<td class="field-item">
-		@views.KtblHelper.getToscienceLiteralValue(node, "@id")
-	</td>
-	</tr>
+	@if(views.KtblHelper.getLabel(node) != null) {
+	    <tr class="ktbl emimin">
+	        <td style="display:none;">"80"</td>
+	        <td class="field-label">Label</td>
+	        <td class="field-item">
+	            <a href="/resource?query[0][term]=%22@views.KtblHelper.getLabel(node).split('/').last%22">
+	                @views.KtblHelper.getLabel(node)
+	            </a>
+	        </td>
+	    </tr>
 	}
 	
 
-@if(views.KtblHelper.getToscienceLiteralValue(node, "doi")!=null){
-	<tr class="ktbl emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">DOI</td>
-	<td class="field-item"><a href="https://doi.org/@views.KtblHelper.getToscienceLiteralValue(node, "doi")" target="_blank">
-		@views.KtblHelper.getToscienceLiteralValue(node, "reference")</a>
-	</td>
-	</tr>
+	@if(views.KtblHelper.getDoi(node)!=null){
+		<tr class="ktbl emimin">
+		<td style="display:none;">"80"</td>
+		<td class="field-label">DOI</td>
+		<td class="field-item"><a href="https://doi.org/@node.getDoi()" target="_blank">
+			@views.KtblHelper.getDoi(node)</a>
+		</td>
+		</tr>
 	}
+
 
 
 @if(views.KtblHelper.getToscienceObjectArray(node, "hasPart")!=null){
