@@ -165,12 +165,14 @@ public class WebgatherUtils {
 				crawlDir = Globals.heritrix.getCurrentCrawlDir(conf.getName());
 				String warcPath = Globals.heritrix.findLatestWarc(crawlDir);
 				String uriPath = Globals.heritrix.getUriPath(warcPath);
+				String warcFilename = new File(warcPath).getName();
+				WebgatherLogger.debug("WARC file name: " + warcFilename);
 
 				localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
 				WebgatherLogger.debug("Path to WARC " + localpath);
 				String versionPid = null;
-				new Create().createWebpageVersion(node, conf, crawlDir, localpath,
-						versionPid);
+				new Create().createWebpageVersion(node, conf, warcFilename, crawlDir,
+						localpath, versionPid);
 			} else if (conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.wpull)) {
 				WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
@@ -242,6 +244,19 @@ public class WebgatherUtils {
 			fileName = "/tmp/lastlyCrawledWebpageId";
 		}
 		return fileName;
+	}
+
+	/**
+	 * Diese Methode ermittelt aus einer URL die Domain.
+	 * 
+	 * @author Ingolf Kuss
+	 * @date 2025-03-13
+	 * @param url eine URL
+	 * @return die Domain der URL
+	 */
+	public static String getDomain(String url) {
+		return url.replaceAll("^http://", "").replaceAll("^https://", "")
+				.replaceAll("/.*$", "");
 	}
 
 }

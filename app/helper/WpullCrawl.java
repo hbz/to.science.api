@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * a class to implement a wpull crawl
  * 
@@ -64,6 +66,8 @@ public class WpullCrawl {
 	private String datetime = null;
 	private File crawlDir = null;
 	private File resultDir = null;
+	private File cdxFile = null;
+	private File cdxFileNew = null;
 	private String localpath = null;
 	private String host = null;
 	private String warcFilename = null;
@@ -117,6 +121,27 @@ public class WpullCrawl {
 	}
 
 	/**
+	 * Die Methode, um die CDX-Datei auszulesen
+	 * 
+	 * @return cdxFile ist eine Datei, die wpull dem Parameter --warc-dedup
+	 *         übergibt. Die Datei enthält eine Liste bereits eingesammelter URLs.
+	 */
+	public File getCdxFile() {
+		return cdxFile;
+	}
+
+	/**
+	 * Die Methode, um die neue CDX-Datei auszulesen
+	 * 
+	 * @return cdxFileNew ist eine CDX-Datei, die wpull beim nächsten Crawl neu
+	 *         schreibt. Als Anfangswert wird die bisherige cdx-Datei, cdxFile
+	 *         (="old"), hier hinein kopiert.
+	 */
+	public File getCdxFileNew() {
+		return cdxFileNew;
+	}
+
+	/**
 	 * Die Methode, um localPath auszulesen
 	 * 
 	 * @return localPath is ein Parameter, den Fedora benötigt. Es ist eine URL
@@ -150,15 +175,16 @@ public class WpullCrawl {
 			WebgatherLogger.debug("URL=" + conf.getUrl());
 			this.urlAscii = WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
 			WebgatherLogger.debug("urlAscii=" + urlAscii);
-			this.host = urlAscii.replaceAll("^http://", "")
-					.replaceAll("^https://", "").replaceAll("/.*$", "");
+			this.host = WebgatherUtils.getDomain(urlAscii);
 			WebgatherLogger.debug("host=" + host);
 			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
 			this.datetime =
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
-			this.warcFilename = "WEB-" + host + "-" + datetime;
+			this.cdxFile =
+					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
+			this.warcFilename = "WEB-" + host + "-" + date;
 			/*
 			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
 			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback
@@ -173,7 +199,7 @@ public class WpullCrawl {
 	}
 
 	/**
-	 * creates a new wpull crawler job
+	 * Erzeugt einen neuen Wpull-Crawler-Job
 	 */
 	public void createJob() {
 		WebgatherLogger.debug("Create new job " + conf.getName());
@@ -192,6 +218,26 @@ public class WpullCrawl {
 				WebgatherLogger.debug("Create Output Directory " + outDir + "/"
 						+ conf.getName() + "/" + datetime);
 				resultDir.mkdirs();
+			}
+			/**
+			 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
+			 * geschaut, ob eine CDX-Datei für diese Webpage existiert. Eine CDX-Datei
+			 * enthält eine Liste bereits gesammelter URLs für diese Webpage. Falls
+			 * eine CDX-Datei existiert, wird sie in das Arbeitsverzeichnis jobDir
+			 * kopiert und entsprechend so umbenannt, dass der neue Crawl sie weiter
+			 * schreiben wird.
+			 * 
+			 * @author Ingolf Kuss
+			 * @date 2025-03-12
+			 */
+			if (cdxFile.exists()) {
+				WebgatherLogger
+						.debug("CDX-Datei gefunden: " + cdxFile.getAbsolutePath());
+				this.cdxFileNew = new File(
+						this.crawlDir.getAbsolutePath() + "/" + this.warcFilename + ".cdx");
+				FileUtils.copyFile(cdxFile, cdxFileNew);
+				WebgatherLogger
+						.debug("Neue CDX-Datei angelegt: " + cdxFileNew.getAbsolutePath());
 			}
 		} catch (Exception e) {
 			msg = "Cannot create jobDir in " + jobDir + "/" + conf.getName();
@@ -214,16 +260,15 @@ public class WpullCrawl {
 			AgentIdSelection agentId = conf.getAgentIdSelection();
 			executeCommand =
 					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
-			executeCommand = executeCommand.concat(" " + conf.getWaitSecBtRequests());
+			executeCommand = executeCommand.concat(" Cookie:");
 			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-				executeCommand = executeCommand
-						.concat(" " + conf.getCookie().replaceAll(" ", "%20"));
+				executeCommand =
+						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
+			}
+			if (cdxFileNew != null) {
+				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
 			}
 			String[] execArr = executeCommand.split(" ");
-			// unmask spaces in exec command
-			for (int i = 0; i < execArr.length; i++) {
-				execArr[i] = execArr[i].replaceAll("%20", " ");
-			}
 			executeCommand = executeCommand.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger
@@ -360,6 +405,8 @@ public class WpullCrawl {
 		// auskommentiert 27.08.2020 für EDOZWO-1026
 		// sb.append(" --warc-tempdir=" + tempJobDir)
 		sb.append(" --warc-move=" + resultDir);
+		sb.append(" --warc-cdx");
+		sb.append(" --warc-dedup=" + warcFilename + ".cdx");
 		play.Logger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
 	}

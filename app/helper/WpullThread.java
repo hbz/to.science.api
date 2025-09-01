@@ -29,7 +29,7 @@ public class WpullThread extends Thread {
 	private File crawlDir = null;
 	private File outDir = null;
 	private String warcFilename = null;
-	private String host = null;
+	private String host = null; /* = domain */
 	private String localpath = null;
 	private String executeCommand = null;
 	/**
@@ -208,8 +208,7 @@ public class WpullThread extends Thread {
 				}
 				for (int i = 0; i < domains.size(); i++) {
 					zusDomain = domains.get(i);
-					zusHost = zusDomain.replaceAll("^http://", "")
-							.replaceAll("^https://", "").replaceAll("/.*$", "");
+					zusHost = WebgatherUtils.getDomain(zusDomain);
 					WebgatherLogger.debug("zusHost=" + zusHost);
 					if (zusHost.equalsIgnoreCase(host)) {
 						WebgatherLogger.debug("Es soll von der gesamten Domain " + host
@@ -262,8 +261,8 @@ public class WpullThread extends Thread {
 				 * TOS-1182 und TOS-1224
 				 */
 				String versionPid = null;
-				new Create().createWebpageVersion(node, conf, outDir, localpath,
-						versionPid);
+				new Create().createWebpageVersion(node, conf, warcFilename, outDir,
+						localpath, versionPid);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
 				return;
