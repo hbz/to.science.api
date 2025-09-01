@@ -317,7 +317,6 @@ public class Create extends RegalAction {
 			File outDir, String localpath, String versionPid) {
 		String label = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
-		String versionPid = null;
 		return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
 				versionPid, label, owDatestamp);
 	}
@@ -545,7 +544,6 @@ public class Create extends RegalAction {
 			return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
 					versionPid, label, owDatestamp);
 
-			return createWebpageVersion(n, conf, outDir, localpath, versionPid);
 		} catch (Exception e) {
 			ApplicationLogger.error(
 					"Anlegen der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
