@@ -406,7 +406,9 @@ public class WpullCrawl {
 		// sb.append(" --warc-tempdir=" + tempJobDir)
 		sb.append(" --warc-move=" + resultDir);
 		sb.append(" --warc-cdx");
-		sb.append(" --warc-dedup=" + warcFilename + ".cdx");
+		if (this.cdxFileNew != null && this.cdxFileNew.exists()) {
+			sb.append(" --warc-dedup=" + warcFilename + ".cdx");
+		}
 		play.Logger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
 	}
