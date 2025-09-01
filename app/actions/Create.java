@@ -29,6 +29,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+
 // import javax.activation.MimetypesFileTypeMap;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -301,6 +304,7 @@ public class Create extends RegalAction {
 	 * 
 	 * @param n Der Knoten der Website
 	 * @param conf Die Gatherconf der Website
+	 * @param warcFilename der Dateiname der WARC-Datei, ohne die Endung .warc.gz
 	 * @param outDir Das Verzeichnis, in dem die endgültige, fertig gecrawlte
 	 *          Version des neuen Webschnitts liegt.
 	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
@@ -309,38 +313,13 @@ public class Create extends RegalAction {
 	 *          PID vom System vergeben.
 	 * @return Der Knoten der neuen Webpage-Version
 	 */
-	public Node createWebpageVersion(Node n, Gatherconf conf, File outDir,
-			String localpath, String versionPid) {
-		try {
-			/* Das Label, das auf dem Link "Zum Webschnitt" angezeigt werden soll */
-			/*
-			 * get basename of outDir = the timestamp for when the crawl has started
-			 */
-			String datetime = outDir.getName();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-			Date startdate = sdf.parse(datetime);
-			String label =
-					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startdate);
-			WebgatherLogger.info("Webschnitt Label=" + label);
-			/*
-			 * Der Zeitstempel, mit dem die Open Wayback (oder Python Wayback)
-			 * einsteigen soll. Es ist standardmäßig in UTC anzugeben.
-			 */
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			LocalDateTime startdateLocal = LocalDateTime.parse(datetime, dtf);
-			ZonedDateTime startdateUTC = startdateLocal.atZone(ZoneId.systemDefault())
-					.withZoneSameInstant(ZoneOffset.UTC);
-			String owDatestamp =
-					DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(startdateUTC);
-			return createWebpageVersion(n, conf, outDir, localpath, versionPid, label,
-					owDatestamp);
-		} catch (Exception e) {
-			WebgatherLogger.warn("Anlage einer Webpage-Version zu PID,URL "
-					+ n.getPid() + "," + conf.getUrl()
-					+ " ist fehlgeschlagen !\n\tGrund: " + e.getMessage());
-			WebgatherLogger.debug("", e);
-			throw new RuntimeException(e);
-		}
+	public Node createWebpageVersion(Node n, Gatherconf conf, String warcFilename,
+			File outDir, String localpath, String versionPid) {
+		String label = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+		String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
+		String versionPid = null;
+		return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
+				versionPid, label, owDatestamp);
 	}
 
 	/**
@@ -349,6 +328,7 @@ public class Create extends RegalAction {
 	 * 
 	 * @param n must be of type webpage: Die Webpage
 	 * @param conf die Gatherconf zu der Webpage
+	 * @param warcFilename der Dateiname der WARC-Datei, ohne die Endung .warc.gz
 	 * @param outDir Das Verzeichnis, in dem die endgültige, fertig gecrawlte
 	 *          Version des neuen Webschnitts liegt.
 	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
@@ -362,8 +342,9 @@ public class Create extends RegalAction {
 	 *          Wayback, z.B. "20200728"
 	 * @return Der Knoten der neuen Webpage-Version
 	 */
-	public Node createWebpageVersion(Node n, Gatherconf conf, File outDir,
-			String localpath, String versionPid, String label, String owDatestamp) {
+	public Node createWebpageVersion(Node n, Gatherconf conf, String warcFilename,
+			File outDir, String localpath, String versionPid, String label,
+			String owDatestamp) {
 		try {
 			// Erzeuge ein Fedora-Objekt mit ungemanagtem Inhalt,
 			// das auf den entsprechenden WARC-Container zeigt.
@@ -412,6 +393,26 @@ public class Create extends RegalAction {
 					.info("waybackCollectionLink=" + conf.getOpenWaybackLink());
 			conf.setId(webpageVersion.getPid());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
+
+			/**
+			 * NEU für inkrementelles Crawlern (= warc-Deduplizierung): Nach
+			 * erfolgreicher Anlage einer WebpageVersion wird die neue CDX-Datei in
+			 * das übergeordenete Verzeichnis kopiert und umbenannt. Beim nächsten
+			 * Crawl wird die CDX-Datei von diesem Ort wieder abgeholt werden.
+			 * 
+			 * @author Ingolf Kuss
+			 * @date 2025-03-13
+			 */
+			File cdxFileNew =
+					new File(outDir.getAbsolutePath() + "/" + warcFilename + ".cdx");
+			if (cdxFileNew.exists()) {
+				File cdxFileSave = new File(Play.application().configuration()
+						.getString("regal-api.wpull.outDir") + "/" + conf.getName()
+						+ "/WEB-" + WebgatherUtils.getDomain(conf.getUrl()) + ".cdx");
+				FileUtils.copyFile(cdxFileNew, cdxFileSave);
+				WebgatherLogger.debug(
+						"Aktuelle CDX-Datei abgelegt in: " + cdxFileSave.getAbsolutePath());
+			}
 
 			/*
 			 * Im Falle von veröffentlichten Websites soll die neue Version sofort
@@ -476,11 +477,13 @@ public class Create extends RegalAction {
 			String warcPath = warcDir.listFiles()[0].getAbsolutePath();
 			ApplicationLogger.debug("Path to WARC " + warcPath);
 			String uriPath = Globals.wget.getUriPath(warcPath);
+			String warcFilename = new File(warcPath).getName();
+			ApplicationLogger.debug("WARC file name: " + warcFilename);
 			String localpath = Globals.wgetData + "/wget-data" + uriPath;
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
 
-			return createWebpageVersion(n, conf, crawlDir, localpath, versionPid,
-					label, crawlDateTimestamp);
+			return createWebpageVersion(n, conf, warcFilename, crawlDir, localpath,
+					versionPid, label, crawlDateTimestamp);
 
 		} catch (Exception e) {
 			ApplicationLogger.error(
@@ -533,6 +536,14 @@ public class Create extends RegalAction {
 			String localpath = Globals.heritrixData + "/wpull-data" + "/"
 					+ conf.getName() + "/" + timestamp + "/" + filename;
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
+			String warcFilename = filename.replaceAll(".warc.gz$", "");
+			ApplicationLogger.debug("WARC file name: " + warcFilename);
+			String label = timestamp.substring(0, 4) + "-" + timestamp.substring(4, 6)
+					+ "-" + timestamp.substring(6, 8);
+			String owDatestamp = timestamp.substring(0, 8);
+
+			return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
+					versionPid, label, owDatestamp);
 
 			return createWebpageVersion(n, conf, outDir, localpath, versionPid);
 		} catch (Exception e) {

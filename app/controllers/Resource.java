@@ -1282,6 +1282,7 @@ public class Resource extends MyController {
 					conf = MyController.mapper.readValue(o.toString(), Gatherconf.class);
 					// hier die neue conf auch im JobDir von Heritrix ablegen
 					conf.setName(pid);
+					// conf.setRobotsPolicy(RobotsPolicy.ignore);
 					play.Logger.debug("conf.toString=" + conf.toString());
 					String result = modify.updateConf(node, conf.toString());
 					// Neue urlHist anlegen, falls es noch keine gibt (nur dann)
