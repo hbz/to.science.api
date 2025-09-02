@@ -119,6 +119,7 @@ GET /api-docs/authors 		@pl.matisoft.swagger.ApiHelpController.getResource(path 
 POST /utils/index/:pid 				controllers.MyUtils.index(pid,index?="")
 POST /utils/indexAll 				controllers.MyUtils.indexAll(index?="")
 POST /utils/reinitOaisets			controllers.MyUtils.reinitOaisets(namespace?="")
+DELETE /utils/removeFromIndex 		controllers.MyUtils.removeFromIndex(pid?="",type?="article",namespace?="")
 DELETE /utils/removeFromIndex/:pid 	controllers.MyUtils.removeFromIndex(pid)
 POST /utils/lobidify/:pid 			controllers.MyUtils.lobidify(pid,alephid?="")
 POST /utils/updateMetadata/:pid 	controllers.MyUtils.updateMetadata(pid,date?="")

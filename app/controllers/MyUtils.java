@@ -38,6 +38,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import actions.Create;
+import actions.Index;
 import authenticate.BasicAuth;
 import authenticate.User;
 import authenticate.UserDB;
@@ -137,6 +138,17 @@ public class MyUtils extends MyController {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
 			String result = index.remove(node);
+			return JsonMessage(new Message(result));
+		});
+	}
+
+	@ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
+	public static Promise<Result> removeFromIndex(@QueryParam("pid") String pid,
+			@QueryParam("type") String contentType,
+			@QueryParam("namespace") String namespace) {
+		return new ModifyAction().call(pid, userId -> {
+			String result =
+					actions.Index.removeFromAllIndexed(pid, contentType, namespace);
 			return JsonMessage(new Message(result));
 		});
 	}
