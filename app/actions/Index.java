@@ -43,7 +43,16 @@ public class Index {
 		return removeFromAllIndexed(pid, type, namespace);
 	}
 
-	private static String removeFromAllIndexed(String pid, String type,
+	/**
+	 * Enternt eine Ressource aus allen Elasticsearch-Indexen
+	 * 
+	 * @param pid die PID der Ressource
+	 * @param type der contentType der Ressource, z.B. "article" oder "monograph"
+	 * @param namespace der Namespace, in dem die Ressource angelegt wurde, z.B.
+	 *          "edoweb" oder "frl"
+	 * @return eine Erfolgsmeldung
+	 */
+	public static String removeFromAllIndexed(String pid, String type,
 			String namespace) {
 		if (type == null)
 			return pid + " not deleted from index. Cause: No type available!";
