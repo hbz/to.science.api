@@ -1,6 +1,7 @@
 package views;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -17,6 +18,7 @@ import actions.Modify;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 public class KtblHelper {
 
@@ -506,10 +508,16 @@ public class KtblHelper {
 	public static String getDoi(Node node) {
 		try {
 			JSONObject jo = new JSONObject(node.getMetadata("toscience"));
-			if (node.hasDoi() && !jo.has("doi")) {
-				jo.put("doi", node.getDoi());
-				node.setMetadata("toscience", jo.toString());
-				new Modify().updateMetadata("toscience", node, jo.toString());
+			if (node.hasDoi()) {
+				if (!jo.has("doi") || !(jo.get("doi") instanceof JSONArray)
+						&& !jo.get("doi").toString().isEmpty()) {
+					List<String> doiList = new ArrayList<String>();
+					doiList.add(node.getDoi());
+					jo.put("doi", doiList);
+					node.setMetadata("toscience", jo.toString());
+
+					new Modify().updateMetadata("toscience", node, jo.toString());
+				}
 			}
 		} catch (Exception e) {
 			play.Logger.debug("Exception in getDoi():" + e);
