@@ -143,8 +143,8 @@ public class MyUtils extends MyController {
 	}
 
 	@ApiOperation(produces = "application/json,application/html", nickname = "removeFromIndex", value = "removeFromIndex", notes = "Removes resource to elasticsearch index", httpMethod = "DELETE")
-	public static Promise<Result> removeFromIndex(@QueryParam("pid") String pid,
-			@QueryParam("type") String contentType,
+	public static Promise<Result> removePidFromIndex(
+			@QueryParam("pid") String pid, @QueryParam("type") String contentType,
 			@QueryParam("namespace") String namespace) {
 		return new ModifyAction().call(pid, userId -> {
 			String result =
