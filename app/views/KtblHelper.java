@@ -472,18 +472,17 @@ public class KtblHelper {
 
 	public static String getRecordingPeriod(Node node) {
 		String output = null;
-		String mdStream = getKtblJson(node);
-		if (mdStream != null) {
-			try {
-				JsonNode jn = new ObjectMapper().readTree(mdStream);
-				output = jn.findValue("recordingPeriod").toString().replace("_", " ")
-						.replace("\"", "");
-
-			} catch (Exception e) {
-				play.Logger.warn(e.getMessage());
+		try {
+			JSONObject jo = new JSONObject(node.getMetadata("toscience"));
+			if (jo.has("recordingPeriod")) {
+				output = jo.get("recordingPeriod").toString();
 			}
+
+		} catch (Exception e) {
+			play.Logger.warn(e.getMessage());
 		}
-		return output;
+
+		return getValueBetweenTwoQuotationMarks(output);
 	}
 
 	public static String getLabel(Node node) {
@@ -524,6 +523,16 @@ public class KtblHelper {
 		}
 
 		return node.getDoi();
+	}
+
+	public static String getValueBetweenTwoQuotationMarks(String s) {
+		int start = s.indexOf("\"") + 1;
+		int end = s.indexOf("\"", start);
+
+		if (start > 0 && end > start) {
+			return s.substring(start, end);
+		}
+		return s;
 	}
 
 }
