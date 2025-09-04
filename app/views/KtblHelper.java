@@ -470,21 +470,6 @@ public class KtblHelper {
 		return value.substring(0, 0).toUpperCase() + value.substring(1);
 	}
 
-	public static String getRecordingPeriod(Node node) {
-		String output = null;
-		try {
-			JSONObject jo = new JSONObject(node.getMetadata("toscience"));
-			if (jo.has("recordingPeriod")) {
-				output = jo.get("recordingPeriod").toString();
-			}
-
-		} catch (Exception e) {
-			play.Logger.warn(e.getMessage());
-		}
-
-		return getValueBetweenTwoQuotationMarks(output);
-	}
-
 	public static String getLabel(Node node) {
 		String label = null;
 		try {
@@ -523,16 +508,6 @@ public class KtblHelper {
 		}
 
 		return node.getDoi();
-	}
-
-	public static String getValueBetweenTwoQuotationMarks(String s) {
-		int start = s.indexOf("\"") + 1;
-		int end = s.indexOf("\"", start);
-
-		if (start > 0 && end > start) {
-			return s.substring(start, end);
-		}
-		return s;
 	}
 
 }

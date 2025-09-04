@@ -272,17 +272,7 @@
 	</tr>
 	}
 
-@if(views.KtblHelper.getToscienceArrayValues(node, "recordingLPeriod")!=null){
-	<tr class="ktbl emimin">
-	<td style="display:none;">"80"</td>
-	<td class="field-label">Collection period</td>
-	<td class="field-item">
-		@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "recordingPeriod")){
-			@rDs <br>
-		}
-	</td>
-	</tr>
-	}
+
 
 @if(views.KtblHelper.getToscienceObjectArray(node, "dataOrigin")!=null){
 	<tr class="ktbl emimin">
@@ -297,15 +287,17 @@
 	</tr>
 	}
 	
-	@if(views.KtblHelper.getRecordingPeriod(node)!=null){
-	    <tr class="ktbl emimin">
-	    <td style="display:none;">"80"</td>
-	    <td class="field-label">Collection Period</td>
-	    <td class="field-item">
-	            @views.KtblHelper.getRecordingPeriod(node)
-	    </td>
-	    </tr>
-	    }	
+	@if(views.KtblHelper.getToscienceArrayValues(node, "recordingPeriod")!=null){
+		<tr class="ktbl emimin">
+		<td style="display:none;">"80"</td>
+		<td class="field-label">Collection period</td>
+		<td class="field-item">
+			@for(rDs <- views.KtblHelper.getToscienceArrayValues(node, "recordingPeriod")){
+				@rDs <br>
+			}
+		</td>
+		</tr>
+	}
 
 
 @if(views.KtblHelper.getToscienceObjectArray(node, "ddc")!=null){
