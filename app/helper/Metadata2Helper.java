@@ -75,7 +75,7 @@ public class Metadata2Helper {
 		LinkedHashMap<String, Object> md2Map = new LinkedHashMap<>();
 		JSONArray jsArr = null;
 		JSONObject jObj = null;
-
+		String currentKey = "";
 		try {
 			AdHocUriProvider ahu = new AdHocUriProvider();
 			JsonMapper jsmapper = new JsonMapper();
@@ -91,11 +91,13 @@ public class Metadata2Helper {
 			}
 
 			if (jo.has("@context")) {
+				currentKey = "@context";
 				String context = jo.getString("@context");
 				rdf.put("@context", context);
 			}
 
 			if (jo.has("language")) {
+				currentKey = "language";
 				List<Map<String, Object>> langList = new ArrayList<>();
 				jsArr = jo.getJSONArray("language");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -109,27 +111,32 @@ public class Metadata2Helper {
 			}
 
 			if (jo.has("title")) {
+				currentKey = "title";
 				Object obj = jo.get("title");
 				String title = getQuotedValues(obj.toString());
 				rdf.put("title", title);
 			}
 
 			if (jo.has("accessScheme")) {
+				currentKey = "accessScheme";
 				String accessScheme = jo.getString("accessScheme");
 				rdf.put("accessScheme", accessScheme);
 
 			}
 			if (jo.has("publishScheme")) {
+				currentKey = "publishScheme";
 				String publishScheme = jo.getString("publishScheme");
 				rdf.put("publishScheme", publishScheme);
 			}
 
 			if (jo.has("contentType")) {
+				currentKey = "contentType";
 				String contentType = jo.getString("contentType");
 				rdf.put("contentType", contentType);
 			}
 
 			if (jo.has("license")) {
+				currentKey = "license";
 				List<Map<String, Object>> licenseList = new ArrayList<>();
 				jsArr = jo.getJSONArray("license");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -143,18 +150,21 @@ public class Metadata2Helper {
 			}
 
 			if (jo.has("description")) {
+				currentKey = "description";
 				Object obj = jo.get("description");
 				String description = getQuotedValues(obj.toString());
 				rdf.put("description", cleanString(description));
 			}
 
 			if (jo.has("usageManual")) {
+				currentKey = "usageManual";
 				Object obj = jo.get("usageManual");
 				String usageManual = cleanString(obj.toString());
 				rdf.put("usageManual", usageManual);
 			}
 
 			if (jo.has("subject")) {
+				currentKey = "subject";
 				List<Map<String, Object>> subjectList = new ArrayList<>();
 				jsArr = jo.getJSONArray("subject");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -171,6 +181,7 @@ public class Metadata2Helper {
 			}
 
 			if (jo.has("medium")) {
+				currentKey = "medium";
 				List<Map<String, Object>> mediumList = new ArrayList<>();
 				jsArr = jo.getJSONArray("medium");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -183,6 +194,7 @@ public class Metadata2Helper {
 				rdf.put("medium", mediumList);
 			}
 			if (jo.has("creator")) {
+				currentKey = "creator";
 				String uri = null;
 				String label = null;
 				List<Map<String, Object>> creatorList = new ArrayList<>();
@@ -202,6 +214,7 @@ public class Metadata2Helper {
 				rdf.put("creator", creatorList);
 			}
 			if (jo.has("contributor")) {
+				currentKey = "contributor";
 				String uri = null;
 				String label = null;
 				List<Map<String, Object>> contributorList = new ArrayList<>();
@@ -221,6 +234,7 @@ public class Metadata2Helper {
 				rdf.put("contributor", contributorList);
 			}
 			if (jo.has("other")) {
+				currentKey = "other";
 				String uri = null;
 				String label = null;
 				List<Map<String, Object>> otherList = new ArrayList<>();
@@ -240,6 +254,7 @@ public class Metadata2Helper {
 				rdf.put("other", otherList);
 			}
 			if (jo.has("dataOrigin")) {
+				currentKey = "dataOrigin";
 				List<Map<String, Object>> dataOriginList = new ArrayList<>();
 				jsArr = jo.getJSONArray("dataOrigin");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -254,6 +269,7 @@ public class Metadata2Helper {
 				rdf.put("dataOrigin", dataOriginList);
 			}
 			if (jo.has("fundingId")) {
+				currentKey = "fundingId";
 				List<Map<String, Object>> fundingIdList = new ArrayList<>();
 				jsArr = jo.getJSONArray("fundingId");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -269,11 +285,13 @@ public class Metadata2Helper {
 				rdf.put("fundingId", fundingIdList);
 			}
 			if (jo.has("fundingProgram")) {
+				currentKey = "fundingProgram";
 				Object obj = jo.get("fundingProgram");
 				String fundingProgram = getQuotedValues(obj.toString());
 				rdf.put("fundingProgram", fundingProgram);
 			}
 			if (jo.has("institution")) {
+				currentKey = "institution";
 				List<Map<String, Object>> institutionList = new ArrayList<>();
 				jsArr = jo.getJSONArray("institution");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -287,6 +305,7 @@ public class Metadata2Helper {
 			}
 
 			if (jo.has("rdftype")) {
+				currentKey = "rdftype";
 				List<Map<String, Object>> rdftypeList = new ArrayList<>();
 				jsArr = jo.getJSONArray("rdftype");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -300,11 +319,13 @@ public class Metadata2Helper {
 			}
 
 			if (jo.has("reference")) {
+				currentKey = "reference";
 				Object obj = jo.get("reference");
 				String reference = getQuotedValues(obj.toString());
 				rdf.put("reference", reference);
 			}
 			if (jo.has("ddc")) {
+				currentKey = "ddc";
 				List<Map<String, Object>> ddcList = new ArrayList<>();
 				jsArr = jo.getJSONArray("ddc");
 				for (int i = 0; i < jsArr.length(); i++) {
@@ -317,34 +338,40 @@ public class Metadata2Helper {
 				rdf.put("ddc", ddcList);
 			}
 			if (jo.has("yearOfCopyright")) {
+				currentKey = "yearOfCopyright";
 				Object obj = jo.get("yearOfCopyright");
 				String yearOfCopyright = getQuotedValues(obj.toString());
 				rdf.put("yearOfCopyright", yearOfCopyright);
 			}
 			if (jo.has("embargoTime")) {
+				currentKey = "embargoTime";
 				Object obj = jo.get("embargoTime");
 				String embargoTime = getQuotedValues(obj.toString());
 				rdf.put("embargoTime", embargoTime);
 			}
 
 			if (jo.has("projectId")) {
+				currentKey = "projectId";
 				Object obj = jo.get("projectId");
 				String projectId = getQuotedValues(obj.toString());
 				rdf.put("projectId", projectId);
 			}
 
 			if (jo.has("issued")) {
+				currentKey = "issued";
 				Object issued = jo.get("issued");
 				rdf.put("issued", issued.toString());
 			}
 
 			if (jo.has("recordingPeriod")) {
+				currentKey = "recordingPeriod";
 				Object obj = jo.get("recordingPeriod");
 				String recordingPeriod = getQuotedValues(obj.toString());
 				rdf.put("recordingPeriod", recordingPeriod);
 			}
 
 			if (jo.has("associatedDataset")) {
+				currentKey = "associatedDataset";
 				JSONArray associatedDatasetArray = jo.getJSONArray("associatedDataset");
 				List<String> associatedDataset = new ArrayList<>();
 				for (int i = 0; i < associatedDatasetArray.length(); i++) {
@@ -359,6 +386,7 @@ public class Metadata2Helper {
 				boolean hasProjectTitle =
 						jo.getJSONObject("info").getJSONObject("ktbl").has("project_title");
 				if (hasProjectTitle) {
+					currentKey = "project_title";
 					String project_title = jo.getJSONObject("info").getJSONObject("ktbl")
 							.getString("project_title");
 					rdf.put("project_title", project_title);
@@ -367,6 +395,7 @@ public class Metadata2Helper {
 				boolean hasTestDesign =
 						jo.getJSONObject("info").getJSONObject("ktbl").has("test_design");
 				if (hasTestDesign) {
+					currentKey = "test_design";
 					String test_design = jo.getJSONObject("info").getJSONObject("ktbl")
 							.getString("test_design");
 					rdf.put("test_design", test_design);
@@ -375,6 +404,7 @@ public class Metadata2Helper {
 				boolean hasLivestock_category = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("livestock_category");
 				if (hasLivestock_category) {
+					currentKey = "livestock_category";
 					String livestock_category = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("livestock_category");
 					rdf.put("livestock_category", livestock_category);
@@ -383,6 +413,7 @@ public class Metadata2Helper {
 				boolean hasLivestock_production = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("livestock_production");
 				if (hasLivestock_production) {
+					currentKey = "livestock_production";
 					String livestock_production = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("livestock_production");
 					rdf.put("livestock_production", livestock_production);
@@ -391,6 +422,7 @@ public class Metadata2Helper {
 				boolean hasVentilation_system = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("ventilation_system");
 				if (hasLivestock_production) {
+					currentKey = "ventilation_system";
 					String ventilation_system = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("ventilation_system");
 					rdf.put("ventilation_system", ventilation_system);
@@ -399,6 +431,7 @@ public class Metadata2Helper {
 				boolean hasHousing_systems = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("housing_systems");
 				if (hasLivestock_production) {
+					currentKey = "housing_systems";
 					String housing_systems = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("housing_systems");
 					rdf.put("housing_systems", housing_systems);
@@ -407,6 +440,7 @@ public class Metadata2Helper {
 				boolean hasAdditionalHousingSystems = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("additional_housing_systems");
 				if (hasAdditionalHousingSystems) {
+					currentKey = "additional_housing_systems";
 					JSONArray additionalHousingSystemsArray = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getJSONArray("additional_housing_systems");
 					List<String> additionalHousingSystems = new ArrayList<>();
@@ -420,6 +454,7 @@ public class Metadata2Helper {
 				boolean hasEmi_measurement_techniques = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("emi_measurement_techniques");
 				if (hasEmi_measurement_techniques) {
+					currentKey = "emi_measurement_techniques";
 					JSONArray emi_measurement_techniquesArray = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getJSONArray("emi_measurement_techniques");
 					List<String> emi_measurement_techniques = new ArrayList<>();
@@ -432,6 +467,7 @@ public class Metadata2Helper {
 				boolean hasEmissions =
 						jo.getJSONObject("info").getJSONObject("ktbl").has("emissions");
 				if (hasEmissions) {
+					currentKey = "emissions";
 					JSONArray emissionsArray = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getJSONArray("emissions");
 					List<String> emissions = new ArrayList<>();
@@ -444,6 +480,7 @@ public class Metadata2Helper {
 				boolean hasEmission_reduction_methods = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("emission_reduction_methods");
 				if (hasEmission_reduction_methods) {
+					currentKey = "emission_reduction_methods";
 					JSONArray ermArray = jo.getJSONObject("info").getJSONObject("ktbl")
 							.getJSONArray("emission_reduction_methods");
 					List<String> emission_reduction_methods = new ArrayList<>();
@@ -457,7 +494,8 @@ public class Metadata2Helper {
 			play.Logger.debug("md2Map" + md2Map.toString());
 
 		} catch (Exception e) {
-			play.Logger.debug("Exception in getRdfFromTos()" + e);
+			play.Logger
+					.debug("Exception in getRdfFromTos(), key=" + currentKey + "," + e);
 		}
 		return md2Map;
 	}
