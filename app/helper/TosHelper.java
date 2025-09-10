@@ -19,7 +19,7 @@ import play.Play;
  *
  */
 
-public class ToscienceHelper {
+public class TosHelper {
 
 	/**
 	 * If a resource is edited via Drupal, the method gets the roles from the old
@@ -69,7 +69,7 @@ public class ToscienceHelper {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			play.Logger.debug("Exception in getRoles()" + e);
 			return null;
 		}
 
@@ -134,8 +134,7 @@ public class ToscienceHelper {
 			}
 
 		} catch (JSONException e) {
-			// Behandlung der JSONException
-			e.printStackTrace();
+			play.Logger.debug("Exception in getPrefLabelsResolved()" + e);
 		}
 
 		return allJsonObjects;
@@ -149,8 +148,7 @@ public class ToscienceHelper {
 	 * @param contentJsFile contains Tos and Ktbl metadata
 	 * @return a string with Toscience metadata
 	 */
-	static public String getToPersistTosMetadata(String contentJsFile,
-			String pid) {
+	static public String getToPersistTosMd(String contentJsFile, String pid) {
 		JSONObject ktblAndTos = null;
 		String[] elementsToRemove = { "livestock_category", "ventilation_system",
 				"livestock_production", "housing_systems", "additional_housing_systems",
@@ -171,7 +169,7 @@ public class ToscienceHelper {
 				}
 			}
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException," + e);
+			play.Logger.debug("Exception in getToPersistTosMd()" + e);
 		}
 
 		return ktblAndTos.toString();
@@ -211,7 +209,7 @@ public class ToscienceHelper {
 			joNew.put("associatedDataset", updatedDatasets);
 			return joNew.toString();
 		} catch (Exception e) {
-			e.printStackTrace();
+			play.Logger.debug("Exception in getAssociatedDatasets()" + e);
 			return null;
 		}
 	}

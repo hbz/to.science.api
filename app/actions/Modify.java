@@ -73,7 +73,7 @@ import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.MyEtikettMaker;
 import helper.RdfHelper;
-import helper.ToscienceHelper;
+import helper.TosHelper;
 import helper.URN;
 import helper.oai.OaiDispatcher;
 import models.DublinCoreData;
@@ -296,14 +296,14 @@ public class Modify extends RegalAction {
 				play.Logger.debug("rdf=" + rdf.toString());
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());
 
-				String toscienceMetadata = ToscienceHelper
-						.getToPersistTosMetadata(allMetadata.toString(), pid);
+				String toscienceMetadata =
+						TosHelper.getToPersistTosMd(allMetadata.toString(), pid);
 
-				toscienceJson = ToscienceHelper
+				toscienceJson = TosHelper
 						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
 				if (Helper.mdStreamExists(pid, "ktbl")) {
-					toscienceJson = ToscienceHelper.getPrefLabelsResolved(new JSONObject(
+					toscienceJson = TosHelper.getPrefLabelsResolved(new JSONObject(
 							new Read().readNode(pid).getMetadata("toscience")));
 				}
 
