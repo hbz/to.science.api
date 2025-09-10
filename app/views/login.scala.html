@@ -3,7 +3,7 @@
 @import authenticate.User
 @(myForm: Form[User])
 
-@main("Regal",null,models.Globals.users.isLoggedIn(ctx()),
+@main("to.science",null,models.Globals.users.isLoggedIn(ctx()),
 						models.Globals.users.getUser(ctx())){
 
 @helper.form(action = routes.LoginController.postLogin()){
@@ -23,7 +23,5 @@
 <input type="submit" value="Send" class="btn btn-success" tabindex="3"/>
 <br/>
 }
-<p>
-New? Please <a href="/register">register here</a>! Forgot password? <a href="/resetPassword">Reset password here</a>!
-</p>
+
 }
