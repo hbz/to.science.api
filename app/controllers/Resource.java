@@ -578,6 +578,7 @@ public class Resource extends MyController {
 	public static Promise<Result> updateKtblAndTos(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
+				Node readNode = readNodeOrNull(pid);
 				String result1 = null, result2 = null, result3 = null;
 				LinkedHashMap<String, Object> rdf = null;
 				MultipartFormData body = request().body().asMultipartFormData();
@@ -600,9 +601,9 @@ public class Resource extends MyController {
 					play.Logger.debug("Starting KTBL Mapping");
 
 					String ktblMd =
-							KTBLMapperHelper.getToPersistKtblMd(content, node.getPid());
+							KTBLMapperHelper.getToPersistKtblMd(content, readNode.getPid());
 
-					result1 = modify.updateMetadata("ktbl", node, ktblMd);
+					result1 = modify.updateMetadata("ktbl", readNode, ktblMd);
 
 					play.Logger.debug("Done KTBL Mapping");
 				}
@@ -612,8 +613,8 @@ public class Resource extends MyController {
 				 */
 				play.Logger.debug("Starting TOSCIENCE Mapping");
 
-				String tosMd = TosHelper.getToPersistTosMd(content, node.getPid());
-				result2 = modify.updateMetadata("toscience", node, tosMd);
+				String tosMd = TosHelper.getToPersistTosMd(content, readNode.getPid());
+				result2 = modify.updateMetadata("toscience", readNode, tosMd);
 
 				play.Logger.debug("Done TOSCIENCE Mapping");
 
@@ -622,15 +623,15 @@ public class Resource extends MyController {
 				 */
 				play.Logger.debug("Starting METADATA2 Mapping");
 
-				rdf = Metadata2Helper.getRdfFromTos(new JSONObject(content), node);
+				rdf = Metadata2Helper.getRdfFromTos(new JSONObject(content), readNode);
 				String rdfContent = modify.rdfToString(
 						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
 
-				result3 = modify.updateMetadata("metadata2", node, rdfContent);
+				result3 = modify.updateMetadata("metadata2", readNode, rdfContent);
 
 				play.Logger.debug("Done METADATA2 Mapping");
 
-				Enrich.enrichMetadata2(node);
+				Enrich.enrichMetadata2(readNode);
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
@@ -1655,6 +1656,7 @@ public class Resource extends MyController {
 			@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
+				Node readNode = readNodeOrNull(pid);
 				JSONObject tosJson = null;
 				String result1 = null, result2 = null, result3 = null, content = null;
 				LinkedHashMap<String, Object> rdf = null;
@@ -1666,36 +1668,38 @@ public class Resource extends MyController {
 				}
 
 				String name = data.getFilename();
-				if (!node.getContentType().contains("file")
-						&& !node.getContentType().contains("part")) {
+				if (!readNode.getContentType().contains("file")
+						&& !readNode.getContentType().contains("part")) {
 					content = KTBLMapperHelper.getFileData(data);
 
 					/**
 					 * toscience
 					 */
-					String tosMd = TosHelper.getToPersistTosMd(content, node.getPid());
+					String tosMd =
+							TosHelper.getToPersistTosMd(content, readNode.getPid());
 					tosJson = new JSONObject(tosMd);
 					tosJson = TosHelper.getPrefLabelsResolved(tosJson);
 					result1 =
-							modify.updateMetadata("toscience", node, tosJson.toString());
+							modify.updateMetadata("toscience", readNode, tosJson.toString());
 
 					/**
 					 * KTBL
 					 */
 					if (KTBLMapperHelper.containsKtblBlock(content)) {
 						String ktblMd =
-								KTBLMapperHelper.getToPersistKtblMd(content, node.getPid());
-						result2 = modify.updateMetadata("ktbl", node, ktblMd);
+								KTBLMapperHelper.getToPersistKtblMd(content, readNode.getPid());
+						result2 = modify.updateMetadata("ktbl", readNode, ktblMd);
 					}
 
 					/**
 					 * Metadata2
 					 */
-					rdf = Metadata2Helper.getRdfFromTos(new JSONObject(content), node);
+					rdf =
+							Metadata2Helper.getRdfFromTos(new JSONObject(content), readNode);
 					String rdfMd = modify.rdfToString(
 							(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
-					result3 = modify.updateMetadata("metadata2", node, rdfMd);
-					Enrich.enrichMetadata2(node);
+					result3 = modify.updateMetadata("metadata2", readNode, rdfMd);
+					Enrich.enrichMetadata2(readNode);
 				}
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
