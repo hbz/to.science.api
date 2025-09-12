@@ -46,6 +46,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import actions.Modify;
 import actions.Read;
 import archive.fedora.RdfUtils;
 import de.hbz.lobid.helper.EtikettMakerInterface;
@@ -1015,6 +1016,13 @@ public class JsonMapper {
 
 			if (new JsonMapperHelper().isDateValid(publicationYear)) {
 				return publicationYear;
+			}
+
+		} else if (jsNode.has("publication")) {
+			JsonNode publication = jsonNode.get("publication");
+			if (publication != null && publication.size() > 0) {
+				String startDate = publication.get(0).get("startDate").asText();
+				return startDate;
 			}
 
 		}
