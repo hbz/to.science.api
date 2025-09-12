@@ -1020,9 +1020,9 @@ public class JsonMapper {
 
 		} else if (jsNode.has("publication")) {
 			JsonNode publication = jsNode.get("publication");
-			if (publication != null && publication.size() > 0) {
-				String startDate = publication.get(0).get("startDate").asText();
-				return startDate;
+			if (publication != null && publication.size() > 0
+					&& publication.get(0).get("startDate") != null) {
+				return publication.get(0).get("startDate").asText();
 			}
 
 		}
