@@ -55,6 +55,10 @@ import models.Globals;
 import models.Link;
 import models.Node;
 import play.Play;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.TreeMap;
+import java.util.Arrays;
 
 /**
  * @author jan schnasse
@@ -895,10 +899,21 @@ public class JsonMapper {
 	 * @return
 	 */
 	public Map<String, Object> getLd2() {
+		play.Logger.debug("getLd2() has been called");
+		Map<String, Object> m2 = null;
+
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m = getDescriptiveMetadata2();
-		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
+		TosHelper.logObjectInfo(m);
+
+		m2 = TosHelper.jsonToMap(node.getMetadata("toscience"));
+		m2.put("@context", profile.getContext().get("@context"));
+		play.Logger.debug("***********************************");
+		TosHelper.logObjectInfo(m2);
+
+		// Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+		Map<String, Object> rdf = m2 == null ? new HashMap<>() : m2;
 		changeDcIsPartOfToRegalIsPartOf(rdf);
 		// rdf.remove("describedby");
 		// rdf.remove("sameAs");
