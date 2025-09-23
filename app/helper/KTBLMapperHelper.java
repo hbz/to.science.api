@@ -29,7 +29,7 @@ public class KTBLMapperHelper {
 	 * @param fp
 	 * @return the content of the file as a string
 	 */
-	static public String getStringContentFromJsonFile(FilePart fp) {
+	static public String getFileData(FilePart fp) {
 		StringBuilder ktblMetadata = null;
 		BufferedReader br = null;
 
@@ -44,9 +44,9 @@ public class KTBLMapperHelper {
 				}
 			}
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			play.Logger.debug("Exception in getFileData(), File not found");
 		} catch (IOException e) {
-			e.printStackTrace();
+			play.Logger.debug("Exception in getFileData()" + e);
 		} finally {
 			if (br != null) {
 				try {
@@ -66,8 +66,7 @@ public class KTBLMapperHelper {
 	 * @param allKtblMetadata
 	 * @return required KTBL metadata, which must be persisted
 	 */
-	static public String getToPersistKtblMetadata(String contentJsFile,
-			String pid) {
+	static public String getToPersistKtblMd(String contentJsFile, String pid) {
 
 		JSONObject ktbl = new JSONObject();
 		JSONObject result = new JSONObject();
@@ -109,7 +108,7 @@ public class KTBLMapperHelper {
 			}
 
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException," + e);
+			play.Logger.debug("Exception in getToPersistKtblMd()," + e);
 		}
 
 		return result.toString();
@@ -135,7 +134,7 @@ public class KTBLMapperHelper {
 			}
 
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException:getMapFromJSONObject()");
+			play.Logger.debug("Exception in getMapFromJSONObject()" + e);
 		}
 
 		return map;
@@ -162,7 +161,7 @@ public class KTBLMapperHelper {
 				}
 			}
 		} catch (JSONException e) {
-			play.Logger.debug("JSONException," + e);
+			play.Logger.debug("Exception in containsKtblBlock()," + e);
 		}
 		return false;
 	}

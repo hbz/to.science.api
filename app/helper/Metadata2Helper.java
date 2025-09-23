@@ -18,13 +18,13 @@ import org.json.JSONObject;
  */
 public class Metadata2Helper {
 
-	public static String getValueBetweenTwoQuotationMarks(String s) {
-		String result = null;
+	public static String getQuotedValues(String s) {
+
 		if (s.contains("")) {
-			result = s.substring(s.toString().indexOf("\"") + 1,
+			return s.substring(s.toString().indexOf("\"") + 1,
 					s.toString().lastIndexOf("\""));
 		}
-		return result;
+		return s;
 
 	}
 
@@ -38,17 +38,12 @@ public class Metadata2Helper {
 	 */
 	public static String cleanString(String input) {
 
-		// "\" wird aus dem String entfernt
 		play.Logger.debug("input-String", input);
 
 		String cleanedString = input.replace("\n", "_n");
 
 		cleanedString = cleanedString.replace("\\", "");
 
-		// "\n\n" wird aus dem String entfernt
-		// cleanedString = cleanedString.replace("\n\n", "");
-
-		// "\n" wird aus dem String entfernt
 		cleanedString = cleanedString.replace("_n", "\r\n");
 
 		if (cleanedString.startsWith("[")) {
@@ -66,38 +61,45 @@ public class Metadata2Helper {
 		return cleanedString;
 	}
 
-	public static LinkedHashMap<String, Object> getRdfFromToscience(
-			JSONObject tosAndKtblContent, Node n) {
-		try {
-			play.Logger.debug(
-					"getRdfFromToscience(), tosAndKtblContent= " + tosAndKtblContent);
+	/**
+	 * Method generates a sorted map from the complete JSON and provides it with
+	 * data to persist the data stream metadata2
+	 * 
+	 * @param jo: contains the complete json(to+ktbl)
+	 * @param n:current node
+	 * @return:a sorted map
+	 */
+	public static LinkedHashMap<String, Object> getRdfFromTos(JSONObject jo,
+			Node n) {
 
+		LinkedHashMap<String, Object> md2Map = new LinkedHashMap<>();
+		JSONArray jsArr = null;
+		JSONObject jObj = null;
+		String currentKey = "";
+		try {
 			AdHocUriProvider ahu = new AdHocUriProvider();
 			JsonMapper jsmapper = new JsonMapper();
+			Map<String, Object> rdf = n.getLd2();
 			jsmapper.node = n;
 
-			Map<String, Object> rdf = n.getLd2();
-			play.Logger.debug("n.getLd2() = " + rdf.toString());
-
-			JSONArray jsArr = null;
-			JSONObject jObj = null;
-			LinkedHashMap<String, Object> metadata2Map = new LinkedHashMap<>();
-
-			if (tosAndKtblContent == null) {
+			if (jo == null || n == null) {
+				play.Logger.debug("getRdfFromTos(), JSONObject or node is null ");
 				return null;
 			}
 			if (n.getPid() != null) {
 				rdf.put("id", n.getPid());
 			}
 
-			if (tosAndKtblContent.has("@context")) {
-				String context = tosAndKtblContent.getString("@context");
+			if (jo.has("@context")) {
+				currentKey = "@context";
+				String context = jo.getString("@context");
 				rdf.put("@context", context);
 			}
 
-			if (tosAndKtblContent.has("language")) {
+			if (jo.has("language")) {
+				currentKey = "language";
 				List<Map<String, Object>> langList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("language");
+				jsArr = jo.getJSONArray("language");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> languageMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -108,30 +110,35 @@ public class Metadata2Helper {
 				rdf.put("language", langList);
 			}
 
-			if (tosAndKtblContent.has("title")) {
-				Object obj = tosAndKtblContent.get("title");
-				String title = getValueBetweenTwoQuotationMarks(obj.toString());
+			if (jo.has("title")) {
+				currentKey = "title";
+				Object obj = jo.get("title");
+				String title = getQuotedValues(obj.toString());
 				rdf.put("title", title);
 			}
 
-			if (tosAndKtblContent.has("accessScheme")) {
-				String accessScheme = tosAndKtblContent.getString("accessScheme");
+			if (jo.has("accessScheme")) {
+				currentKey = "accessScheme";
+				String accessScheme = jo.getString("accessScheme");
 				rdf.put("accessScheme", accessScheme);
 
 			}
-			if (tosAndKtblContent.has("publishScheme")) {
-				String publishScheme = tosAndKtblContent.getString("publishScheme");
+			if (jo.has("publishScheme")) {
+				currentKey = "publishScheme";
+				String publishScheme = jo.getString("publishScheme");
 				rdf.put("publishScheme", publishScheme);
 			}
 
-			if (tosAndKtblContent.has("contentType")) {
-				String contentType = tosAndKtblContent.getString("contentType");
+			if (jo.has("contentType")) {
+				currentKey = "contentType";
+				String contentType = jo.getString("contentType");
 				rdf.put("contentType", contentType);
 			}
 
-			if (tosAndKtblContent.has("license")) {
+			if (jo.has("license")) {
+				currentKey = "license";
 				List<Map<String, Object>> licenseList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("license");
+				jsArr = jo.getJSONArray("license");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> licenseMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -142,27 +149,28 @@ public class Metadata2Helper {
 				rdf.put("license", licenseList);
 			}
 
-			if (tosAndKtblContent.has("description")) {
-				Object obj = tosAndKtblContent.get("description");
-				String description = getValueBetweenTwoQuotationMarks(obj.toString());
-
+			if (jo.has("description")) {
+				currentKey = "description";
+				Object obj = jo.get("description");
+				String description = getQuotedValues(obj.toString());
 				rdf.put("description", cleanString(description));
 			}
 
-			if (tosAndKtblContent.has("usageManual")) {
-				Object obj = tosAndKtblContent.get("usageManual");
+			if (jo.has("usageManual")) {
+				currentKey = "usageManual";
+				Object obj = jo.get("usageManual");
 				String usageManual = cleanString(obj.toString());
 				rdf.put("usageManual", usageManual);
 			}
 
-			if (tosAndKtblContent.has("subject")) {
+			if (jo.has("subject")) {
+				currentKey = "subject";
 				List<Map<String, Object>> subjectList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("subject");
+				jsArr = jo.getJSONArray("subject");
 				for (int i = 0; i < jsArr.length(); i++) {
 					jObj = jsArr.getJSONObject(i);
 					String uri = jObj.getString("@id");
 					String label = jObj.get("prefLabel").toString();
-					play.Logger.debug("uri=" + uri + " ,label=" + label);
 					KtblService.checkAndLoadUri(uri, label);
 					Map<String, Object> subjectMap = new LinkedHashMap<>();
 					subjectMap.put("@id", uri);
@@ -172,9 +180,10 @@ public class Metadata2Helper {
 				rdf.put("subject", subjectList);
 			}
 
-			if (tosAndKtblContent.has("medium")) {
+			if (jo.has("medium")) {
+				currentKey = "medium";
 				List<Map<String, Object>> mediumList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("medium");
+				jsArr = jo.getJSONArray("medium");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> mediumMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -184,11 +193,12 @@ public class Metadata2Helper {
 				}
 				rdf.put("medium", mediumList);
 			}
-			if (tosAndKtblContent.has("creator")) {
+			if (jo.has("creator")) {
+				currentKey = "creator";
 				String uri = null;
 				String label = null;
 				List<Map<String, Object>> creatorList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("creator");
+				jsArr = jo.getJSONArray("creator");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> creatorMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -203,11 +213,12 @@ public class Metadata2Helper {
 				}
 				rdf.put("creator", creatorList);
 			}
-			if (tosAndKtblContent.has("contributor")) {
+			if (jo.has("contributor")) {
+				currentKey = "contributor";
 				String uri = null;
 				String label = null;
 				List<Map<String, Object>> contributorList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("contributor");
+				jsArr = jo.getJSONArray("contributor");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> contributorrMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -222,11 +233,12 @@ public class Metadata2Helper {
 				}
 				rdf.put("contributor", contributorList);
 			}
-			if (tosAndKtblContent.has("other")) {
+			if (jo.has("other")) {
+				currentKey = "other";
 				String uri = null;
 				String label = null;
 				List<Map<String, Object>> otherList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("other");
+				jsArr = jo.getJSONArray("other");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> otherMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -241,9 +253,10 @@ public class Metadata2Helper {
 				}
 				rdf.put("other", otherList);
 			}
-			if (tosAndKtblContent.has("dataOrigin")) {
+			if (jo.has("dataOrigin")) {
+				currentKey = "dataOrigin";
 				List<Map<String, Object>> dataOriginList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("dataOrigin");
+				jsArr = jo.getJSONArray("dataOrigin");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> dataOriginMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -252,14 +265,13 @@ public class Metadata2Helper {
 					dataOriginMap.put("@id",
 							"http://hbz-nrw.de/regal#" + dataOriginPrefLabel);
 					dataOriginList.add(dataOriginMap);
-
 				}
-				play.Logger.debug("dataOriginList=" + dataOriginList.toString());
 				rdf.put("dataOrigin", dataOriginList);
 			}
-			if (tosAndKtblContent.has("fundingId")) {
+			if (jo.has("fundingId")) {
+				currentKey = "fundingId";
 				List<Map<String, Object>> fundingIdList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("fundingId");
+				jsArr = jo.getJSONArray("fundingId");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> languageMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -272,50 +284,50 @@ public class Metadata2Helper {
 				}
 				rdf.put("fundingId", fundingIdList);
 			}
-			if (tosAndKtblContent.has("fundingProgram")) {
-				Object obj = tosAndKtblContent.get("fundingProgram");
-				String fundingProgram =
-						getValueBetweenTwoQuotationMarks(obj.toString());
+			if (jo.has("fundingProgram")) {
+				currentKey = "fundingProgram";
+				Object obj = jo.get("fundingProgram");
+				String fundingProgram = getQuotedValues(obj.toString());
 				rdf.put("fundingProgram", fundingProgram);
 			}
-			if (tosAndKtblContent.has("institution")) {
+			if (jo.has("institution")) {
+				currentKey = "institution";
 				List<Map<String, Object>> institutionList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("institution");
+				jsArr = jo.getJSONArray("institution");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> institutionMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					institutionMap.put("prefLabel", jObj.get("prefLabel").toString());
 					institutionMap.put("@id", jObj.get("@id").toString());
-
 					institutionList.add(institutionMap);
 				}
-				play.Logger.debug("institutionList=" + institutionList.toString());
 				rdf.put("institution", institutionList);
 			}
 
-			if (tosAndKtblContent.has("rdftype")) {
+			if (jo.has("rdftype")) {
+				currentKey = "rdftype";
 				List<Map<String, Object>> rdftypeList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("rdftype");
+				jsArr = jo.getJSONArray("rdftype");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> rdftypeMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
 					rdftypeMap.put("prefLabel", jObj.get("prefLabel").toString());
 					rdftypeMap.put("@id", "http://hbz-nrw.de/regal#ResearchData");
-
 					rdftypeList.add(rdftypeMap);
 				}
-				play.Logger.debug("rdftypeList = " + rdftypeList.toString());
 				rdf.put("rdftype", rdftypeList);
 			}
 
-			if (tosAndKtblContent.has("reference")) {
-				Object obj = tosAndKtblContent.get("reference");
-				String reference = getValueBetweenTwoQuotationMarks(obj.toString());
+			if (jo.has("reference")) {
+				currentKey = "reference";
+				Object obj = jo.get("reference");
+				String reference = getQuotedValues(obj.toString());
 				rdf.put("reference", reference);
 			}
-			if (tosAndKtblContent.has("ddc")) {
+			if (jo.has("ddc")) {
+				currentKey = "ddc";
 				List<Map<String, Object>> ddcList = new ArrayList<>();
-				jsArr = tosAndKtblContent.getJSONArray("ddc");
+				jsArr = jo.getJSONArray("ddc");
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> ddcMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
@@ -325,40 +337,42 @@ public class Metadata2Helper {
 				}
 				rdf.put("ddc", ddcList);
 			}
-			if (tosAndKtblContent.has("yearOfCopyright")) {
-				Object obj = tosAndKtblContent.get("yearOfCopyright");
-				String yearOfCopyright =
-						getValueBetweenTwoQuotationMarks(obj.toString());
+			if (jo.has("yearOfCopyright")) {
+				currentKey = "yearOfCopyright";
+				Object obj = jo.get("yearOfCopyright");
+				String yearOfCopyright = getQuotedValues(obj.toString());
 				rdf.put("yearOfCopyright", yearOfCopyright);
 			}
-			if (tosAndKtblContent.has("embargoTime")) {
-				Object obj = tosAndKtblContent.get("embargoTime");
-				String embargoTime = getValueBetweenTwoQuotationMarks(obj.toString());
+			if (jo.has("embargoTime")) {
+				currentKey = "embargoTime";
+				Object obj = jo.get("embargoTime");
+				String embargoTime = getQuotedValues(obj.toString());
 				rdf.put("embargoTime", embargoTime);
 			}
 
-			if (tosAndKtblContent.has("projectId")) {
-				Object obj = tosAndKtblContent.get("projectId");
-				String projectId = getValueBetweenTwoQuotationMarks(obj.toString());
+			if (jo.has("projectId")) {
+				currentKey = "projectId";
+				Object obj = jo.get("projectId");
+				String projectId = getQuotedValues(obj.toString());
 				rdf.put("projectId", projectId);
 			}
 
-			if (tosAndKtblContent.has("issued")) {
-				Object issued = tosAndKtblContent.get("issued");
-				play.Logger.debug("issued=" + issued.toString());
+			if (jo.has("issued")) {
+				currentKey = "issued";
+				Object issued = jo.get("issued");
 				rdf.put("issued", issued.toString());
 			}
 
-			if (tosAndKtblContent.has("recordingPeriod")) {
-				Object obj = tosAndKtblContent.get("recordingPeriod");
-				String recordingPeriod =
-						getValueBetweenTwoQuotationMarks(obj.toString());
+			if (jo.has("recordingPeriod")) {
+				currentKey = "recordingPeriod";
+				Object obj = jo.get("recordingPeriod");
+				String recordingPeriod = getQuotedValues(obj.toString());
 				rdf.put("recordingPeriod", recordingPeriod);
 			}
 
-			if (tosAndKtblContent.has("associatedDataset")) {
-				JSONArray associatedDatasetArray =
-						tosAndKtblContent.getJSONArray("associatedDataset");
+			if (jo.has("associatedDataset")) {
+				currentKey = "associatedDataset";
+				JSONArray associatedDatasetArray = jo.getJSONArray("associatedDataset");
 				List<String> associatedDataset = new ArrayList<>();
 				for (int i = 0; i < associatedDatasetArray.length(); i++) {
 					associatedDataset.add(associatedDatasetArray.getString(i));
@@ -366,78 +380,69 @@ public class Metadata2Helper {
 				rdf.put("associatedDataset", associatedDataset);
 			}
 
-			// KTBL-Teil
-			if (tosAndKtblContent.has("info")) {
+			// KTBL
+			if (jo.has("info")) {
 				play.Logger.debug("Found info");
-				// project_title
-				boolean hasProjectTitle = tosAndKtblContent.getJSONObject("info")
-						.getJSONObject("ktbl").has("project_title");
-				play.Logger.debug("hasProjectTitle=" + hasProjectTitle);
+				boolean hasProjectTitle =
+						jo.getJSONObject("info").getJSONObject("ktbl").has("project_title");
 				if (hasProjectTitle) {
-					String project_title = tosAndKtblContent.getJSONObject("info")
-							.getJSONObject("ktbl").getString("project_title");
+					currentKey = "project_title";
+					String project_title = jo.getJSONObject("info").getJSONObject("ktbl")
+							.getString("project_title");
 					rdf.put("project_title", project_title);
 				}
 
-				// test_design
-				boolean hasTestDesign = tosAndKtblContent.getJSONObject("info")
-						.getJSONObject("ktbl").has("test_design");
-				play.Logger.debug("hasTestDesign=" + hasTestDesign);
+				boolean hasTestDesign =
+						jo.getJSONObject("info").getJSONObject("ktbl").has("test_design");
 				if (hasTestDesign) {
-					String test_design = tosAndKtblContent.getJSONObject("info")
-							.getJSONObject("ktbl").getString("test_design");
+					currentKey = "test_design";
+					String test_design = jo.getJSONObject("info").getJSONObject("ktbl")
+							.getString("test_design");
 					rdf.put("test_design", test_design);
 				}
 
-				// livestock_category
-				boolean hasLivestock_category = tosAndKtblContent.getJSONObject("info")
+				boolean hasLivestock_category = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("livestock_category");
-				play.Logger.debug("hasLivestock_category=" + hasLivestock_category);
 				if (hasLivestock_category) {
-					String livestock_category = tosAndKtblContent.getJSONObject("info")
+					currentKey = "livestock_category";
+					String livestock_category = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("livestock_category");
 					rdf.put("livestock_category", livestock_category);
 				}
 
-				// livestock_production
-				boolean hasLivestock_production =
-						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
-								.has("livestock_production");
-				play.Logger.debug("hasLivestock_production=" + hasLivestock_production);
+				boolean hasLivestock_production = jo.getJSONObject("info")
+						.getJSONObject("ktbl").has("livestock_production");
 				if (hasLivestock_production) {
-					String livestock_production = tosAndKtblContent.getJSONObject("info")
+					currentKey = "livestock_production";
+					String livestock_production = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("livestock_production");
 					rdf.put("livestock_production", livestock_production);
 				}
 
-				// ventilation_system
-				boolean hasVentilation_system = tosAndKtblContent.getJSONObject("info")
+				boolean hasVentilation_system = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("ventilation_system");
-				play.Logger.debug("hasVentilation_system=" + hasVentilation_system);
 				if (hasLivestock_production) {
-					String ventilation_system = tosAndKtblContent.getJSONObject("info")
+					currentKey = "ventilation_system";
+					String ventilation_system = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("ventilation_system");
 					rdf.put("ventilation_system", ventilation_system);
 				}
 
-				// housing_systems
-				boolean hasHousing_systems = tosAndKtblContent.getJSONObject("info")
+				boolean hasHousing_systems = jo.getJSONObject("info")
 						.getJSONObject("ktbl").has("housing_systems");
-				play.Logger.debug("hasHousing_systems=" + hasHousing_systems);
 				if (hasLivestock_production) {
-					String housing_systems = tosAndKtblContent.getJSONObject("info")
+					currentKey = "housing_systems";
+					String housing_systems = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getString("housing_systems");
 					rdf.put("housing_systems", housing_systems);
 				}
 
-				// additional_housing_systems
-				boolean hasAdditionalHousingSystems =
-						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
-								.has("additional_housing_systems");
+				boolean hasAdditionalHousingSystems = jo.getJSONObject("info")
+						.getJSONObject("ktbl").has("additional_housing_systems");
 				if (hasAdditionalHousingSystems) {
-					JSONArray additionalHousingSystemsArray =
-							tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
-									.getJSONArray("additional_housing_systems");
+					currentKey = "additional_housing_systems";
+					JSONArray additionalHousingSystemsArray = jo.getJSONObject("info")
+							.getJSONObject("ktbl").getJSONArray("additional_housing_systems");
 					List<String> additionalHousingSystems = new ArrayList<>();
 					for (int i = 0; i < additionalHousingSystemsArray.length(); i++) {
 						additionalHousingSystems
@@ -446,14 +451,12 @@ public class Metadata2Helper {
 					rdf.put("additional_housing_systems", additionalHousingSystems);
 				}
 
-				// emi_measurement_techniques
-				boolean hasEmi_measurement_techniques =
-						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
-								.has("emi_measurement_techniques");
+				boolean hasEmi_measurement_techniques = jo.getJSONObject("info")
+						.getJSONObject("ktbl").has("emi_measurement_techniques");
 				if (hasEmi_measurement_techniques) {
-					JSONArray emi_measurement_techniquesArray =
-							tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
-									.getJSONArray("emi_measurement_techniques");
+					currentKey = "emi_measurement_techniques";
+					JSONArray emi_measurement_techniquesArray = jo.getJSONObject("info")
+							.getJSONObject("ktbl").getJSONArray("emi_measurement_techniques");
 					List<String> emi_measurement_techniques = new ArrayList<>();
 					for (int i = 0; i < emi_measurement_techniquesArray.length(); i++) {
 						emi_measurement_techniques
@@ -461,11 +464,11 @@ public class Metadata2Helper {
 					}
 					rdf.put("emi_measurement_techniques", emi_measurement_techniques);
 				}
-				// emissions
-				boolean hasEmissions = tosAndKtblContent.getJSONObject("info")
-						.getJSONObject("ktbl").has("emissions");
+				boolean hasEmissions =
+						jo.getJSONObject("info").getJSONObject("ktbl").has("emissions");
 				if (hasEmissions) {
-					JSONArray emissionsArray = tosAndKtblContent.getJSONObject("info")
+					currentKey = "emissions";
+					JSONArray emissionsArray = jo.getJSONObject("info")
 							.getJSONObject("ktbl").getJSONArray("emissions");
 					List<String> emissions = new ArrayList<>();
 					for (int i = 0; i < emissionsArray.length(); i++) {
@@ -474,13 +477,12 @@ public class Metadata2Helper {
 					rdf.put("emissions", emissions);
 				}
 
-				// emission_reduction_methods
-				boolean hasEmission_reduction_methods =
-						tosAndKtblContent.getJSONObject("info").getJSONObject("ktbl")
-								.has("emission_reduction_methods");
+				boolean hasEmission_reduction_methods = jo.getJSONObject("info")
+						.getJSONObject("ktbl").has("emission_reduction_methods");
 				if (hasEmission_reduction_methods) {
-					JSONArray ermArray = tosAndKtblContent.getJSONObject("info")
-							.getJSONObject("ktbl").getJSONArray("emission_reduction_methods");
+					currentKey = "emission_reduction_methods";
+					JSONArray ermArray = jo.getJSONObject("info").getJSONObject("ktbl")
+							.getJSONArray("emission_reduction_methods");
 					List<String> emission_reduction_methods = new ArrayList<>();
 					for (int i = 0; i < ermArray.length(); i++) {
 						emission_reduction_methods.add(ermArray.getString(i));
@@ -488,15 +490,14 @@ public class Metadata2Helper {
 					rdf.put("emission_reduction_methods", emission_reduction_methods);
 				}
 			}
-			metadata2Map.put("metadata2", rdf);
-			play.Logger.debug(
-					"getRdfFromToscience.metadata2Map()" + metadata2Map.toString());
-			return metadata2Map;
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"ToscienceJson could not be mapped to Metadata2", e);
-		}
+			md2Map.put("metadata2", rdf);
+			play.Logger.debug("md2Map" + md2Map.toString());
 
+		} catch (Exception e) {
+			play.Logger
+					.debug("Exception in getRdfFromTos(), key=" + currentKey + "," + e);
+		}
+		return md2Map;
 	}
 
 }

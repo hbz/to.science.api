@@ -63,7 +63,7 @@ import helper.HttpArchiveException;
 import helper.KTBLMapperHelper;
 import helper.Metadata2Helper;
 import helper.RdfHelper;
-import helper.ToscienceHelper;
+import helper.TosHelper;
 import helper.WebgatherUtils;
 import helper.WebsiteVersionPublisher;
 import helper.oai.OaiDispatcher;
@@ -474,17 +474,13 @@ public class Resource extends MyController {
 				Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode,
 						RDFFormat.NTRIPLES, request().body().asText());
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());
-				tosNew = ToscienceHelper.getToPersistTosMetadata(allMetadata.toString(),
-						pid);
-				tosToPersist =
-						ToscienceHelper.getPrefLabelsResolved(new JSONObject(tosNew));
+				tosNew = TosHelper.getToPersistTosMd(allMetadata.toString(), pid);
+				tosToPersist = TosHelper.getPrefLabelsResolved(new JSONObject(tosNew));
 
 				if (Helper.mdStreamExists(pid, "ktbl")) {
 					tosOld = readNode.getMetadata("toscience");
-					tosWithRoles =
-							ToscienceHelper.getRoles(tosOld, tosToPersist.toString());
-					tosWithRoles =
-							ToscienceHelper.getAssociatedDatasets(tosOld, tosWithRoles);
+					tosWithRoles = TosHelper.getRoles(tosOld, tosToPersist.toString());
+					tosWithRoles = TosHelper.getAssociatedDatasets(tosOld, tosWithRoles);
 
 					// hier sollen die associatedDatasets gerettet werden
 					tosToPersist = new JSONObject(tosWithRoles);
@@ -502,8 +498,8 @@ public class Resource extends MyController {
 						&& Helper.mdStreamExists(pid, "ktbl")) {
 					play.Logger.debug("KTBL will be mapped");
 
-					String ktblMetadata = KTBLMapperHelper.getToPersistKtblMetadata(
-							allMetadata.toString(), readNode.getPid());
+					String ktblMetadata = KTBLMapperHelper
+							.getToPersistKtblMd(allMetadata.toString(), readNode.getPid());
 					modify.updateMetadata("ktbl", readNode, ktblMetadata);
 
 					play.Logger.debug("Done KTBL Mapping");
@@ -582,9 +578,9 @@ public class Resource extends MyController {
 	public static Promise<Result> updateKtblAndTos(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
-
+				Node readNode = readNodeOrNull(pid);
+				String result1 = null, result2 = null, result3 = null;
 				LinkedHashMap<String, Object> rdf = null;
-				Node readNode = new Read().readNode(pid);
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
 
@@ -598,52 +594,40 @@ public class Resource extends MyController {
 				/**
 				 * 1.KTBL(Json)***************************************
 				 */
-				play.Logger.debug("Starting KTBL Mapping");
 
-				String contentOfFile =
-						KTBLMapperHelper.getStringContentFromJsonFile(data);
-				play.Logger.debug("contentOfFile=" + contentOfFile);
+				String content = KTBLMapperHelper.getFileData(data);
 
-				String ktblMetadata = KTBLMapperHelper
-						.getToPersistKtblMetadata(contentOfFile, readNode.getPid());
+				if (KTBLMapperHelper.containsKtblBlock(content)) {
+					play.Logger.debug("Starting KTBL Mapping");
 
-				String result1 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
+					String ktblMd =
+							KTBLMapperHelper.getToPersistKtblMd(content, readNode.getPid());
 
-				play.Logger.debug("Done KTBL Mapping");
+					result1 = modify.updateMetadata("ktbl", readNode, ktblMd);
+
+					play.Logger.debug("Done KTBL Mapping");
+				}
 
 				/**
 				 * 2. TOSCIENCE(Json)***************************************
 				 */
 				play.Logger.debug("Starting TOSCIENCE Mapping");
 
-				String toscienceMetadata = ToscienceHelper
-						.getToPersistTosMetadata(contentOfFile, readNode.getPid());
-
-				play.Logger.debug("toscienceMetadata=" + toscienceMetadata);
-
-				String result2 =
-						modify.updateMetadata("toscience", readNode, toscienceMetadata);
+				String tosMd = TosHelper.getToPersistTosMd(content, readNode.getPid());
+				result2 = modify.updateMetadata("toscience", readNode, tosMd);
 
 				play.Logger.debug("Done TOSCIENCE Mapping");
 
 				/**
 				 * 3. METADATA2(rdf)****************************************
 				 */
-
 				play.Logger.debug("Starting METADATA2 Mapping");
 
-				rdf = Metadata2Helper.getRdfFromToscience(new JSONObject(contentOfFile),
-						readNode);
-
-				play.Logger.debug("updateKtblAndTos,rdf=" + rdf.toString());
-
+				rdf = Metadata2Helper.getRdfFromTos(new JSONObject(content), readNode);
 				String rdfContent = modify.rdfToString(
 						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
 
-				play.Logger.debug("rdfContent=" + rdfContent);
-
-				String result3 =
-						modify.updateMetadata("metadata2", readNode, rdfContent);
+				result3 = modify.updateMetadata("metadata2", readNode, rdfContent);
 
 				play.Logger.debug("Done METADATA2 Mapping");
 
@@ -1672,49 +1656,50 @@ public class Resource extends MyController {
 			@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 			try {
-
-				String result1, result2, result3;
-				result1 = result2 = result3 = null;
-				Node readNode = new Read().readNode(pid);
+				Node readNode = readNodeOrNull(pid);
+				JSONObject tosJson = null;
+				String result1 = null, result2 = null, result3 = null, content = null;
+				LinkedHashMap<String, Object> rdf = null;
 				MultipartFormData body = request().body().asMultipartFormData();
 				FilePart data = body.getFile("data");
+
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
+
 				String name = data.getFilename();
 				if (!readNode.getContentType().contains("file")
 						&& !readNode.getContentType().contains("part")) {
-					String contentOfFile =
-							KTBLMapperHelper.getStringContentFromJsonFile(data);
+					content = KTBLMapperHelper.getFileData(data);
+
 					/**
 					 * toscience
 					 */
-					JSONObject toscienceJson = null;
-					String toscienceMetadata = ToscienceHelper
-							.getToPersistTosMetadata(contentOfFile, readNode.getPid());
-					toscienceJson = new JSONObject(toscienceMetadata);
-					toscienceJson = ToscienceHelper.getPrefLabelsResolved(toscienceJson);
-					result1 = modify.updateMetadata("toscience", readNode,
-							toscienceJson.toString());
+					String tosMd =
+							TosHelper.getToPersistTosMd(content, readNode.getPid());
+					tosJson = new JSONObject(tosMd);
+					tosJson = TosHelper.getPrefLabelsResolved(tosJson);
+					result1 =
+							modify.updateMetadata("toscience", readNode, tosJson.toString());
+
 					/**
 					 * KTBL
 					 */
-					if (KTBLMapperHelper.containsKtblBlock(contentOfFile)) {
-						String ktblMetadata = KTBLMapperHelper
-								.getToPersistKtblMetadata(contentOfFile, readNode.getPid());
-						result2 = modify.updateMetadata("ktbl", readNode, ktblMetadata);
+					if (KTBLMapperHelper.containsKtblBlock(content)) {
+						String ktblMd =
+								KTBLMapperHelper.getToPersistKtblMd(content, readNode.getPid());
+						result2 = modify.updateMetadata("ktbl", readNode, ktblMd);
 					}
+
 					/**
 					 * Metadata2
 					 */
-					/*
-					 * LinkedHashMap<String, Object> metadata2Map = Metadata2Helper
-					 * .getRdfFromToscience(new JSONObject(contentOfFile), readNode);
-					 * String metadata2Content = modify.rdfToString( (Map<String, Object>)
-					 * metadata2Map.get("metadata2"), RDFFormat.NTRIPLES); result3 =
-					 * modify.updateMetadata("metadata2", readNode, metadata2Content);
-					 * Enrich.enrichMetadata2(readNode);
-					 */
+					rdf =
+							Metadata2Helper.getRdfFromTos(new JSONObject(content), readNode);
+					String rdfMd = modify.rdfToString(
+							(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
+					result3 = modify.updateMetadata("metadata2", readNode, rdfMd);
+					Enrich.enrichMetadata2(readNode);
 				}
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
