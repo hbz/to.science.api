@@ -64,7 +64,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum CrawlerSelection {
-		heritrix, wpull
+		heritrix, wpull, browsertrix
 	}
 
 	@SuppressWarnings("javadoc")
