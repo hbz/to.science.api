@@ -1020,11 +1020,14 @@ public class JsonMapper {
 
 		} else if (jsNode.has("publication")) {
 			JsonNode publication = jsNode.get("publication");
-			if (publication != null && publication.size() > 0
-					&& publication.get(0).get("startDate") != null) {
-				return publication.get(0).get("startDate").asText();
+			if (publication != null && publication.size() > 0) {
+				for (int i = 0; i < publication.size(); i++) {
+					JsonNode pubItem = publication.get(i);
+					if (pubItem.has("startDate")) {
+						return pubItem.get("startDate").asText();
+					}
+				}
 			}
-
 		}
 		return null;
 
