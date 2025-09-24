@@ -127,6 +127,7 @@ public class WebgatherUtils {
 	 * 
 	 * @param node must be of type webpage: Die Webpage
 	 */
+	@SuppressWarnings("null")
 	public void startCrawl(Node node) {
 		Gatherconf conf = null;
 		File crawlDir = null;
@@ -189,6 +190,10 @@ public class WebgatherUtils {
 				}
 				WebgatherLogger
 						.debug("Path to WARC (crawldir):" + crawlDir.getAbsolutePath());
+			} else if (conf.getCrawlerSelection()
+					.equals(Gatherconf.CrawlerSelection.browsertrix)) {
+				BrowsertrixWorkflow btrixWorkflow = new BrowsertrixWorkflow(node, conf);
+				btrixWorkflow.runCrawl();
 			} else {
 				throw new RuntimeException(
 						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
