@@ -1264,7 +1264,6 @@ public class Resource extends MyController {
 				if (o != null) {
 					play.Logger.debug("o.toString=" + o.toString());
 					conf = MyController.mapper.readValue(o.toString(), Gatherconf.class);
-					// hier die neue conf auch im JobDir von Heritrix ablegen
 					conf.setName(pid);
 					// conf.setRobotsPolicy(RobotsPolicy.ignore);
 					play.Logger.debug("conf.toString=" + conf.toString());
@@ -1276,7 +1275,6 @@ public class Resource extends MyController {
 								modify.updateUrlHist(node, urlHist.toString());
 						play.Logger.debug("URL-Historie neu angelegt: " + urlHistResult);
 					}
-					Globals.heritrix.createJobDir(conf);
 					return JsonMessage(new Message(result, 200));
 				}
 				throw new HttpArchiveException(409,
