@@ -340,7 +340,7 @@ public class Gatherconf {
 	 * @param urlExcluded an URL or URI that shall be excluded in the crawl
 	 */
 	public void addUrlExcluded(String urlExcluded) {
-		this.urlsExcluded.add(urlExcluded);
+		this.urlsExcluded.add(urlExcluded.trim());
 	}
 
 	/**
