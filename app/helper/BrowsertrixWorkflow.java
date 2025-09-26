@@ -15,6 +15,7 @@
 */
 package helper;
 
+import models.CrawlerModel;
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
 import models.Gatherconf.RobotsPolicy;
@@ -51,8 +52,9 @@ import org.apache.commons.io.FileUtils;
  * @author Ingolf Kuss
  *
  */
-public class BrowsertrixWorkflow {
+public class BrowsertrixWorkflow extends CrawlerModel {
 
+	/* Allgemeine Variablen und Konstanten für das Webcrawling */
 	@SuppressWarnings("javadoc")
 	public enum CrawlControllerState {
 		NEW, RUNNING, PAUSED, ABORTED, CRASHED, FINISHED
@@ -72,6 +74,9 @@ public class BrowsertrixWorkflow {
 	private String warcFilename = null;
 	private String msg = null;
 	private int exitState = 0;
+
+	/* Browsertrix spezifische Variablen */
+	private String bearerToken = null;
 
 	/*
 	 * Authorisierung für Browsertrix
@@ -190,7 +195,7 @@ public class BrowsertrixWorkflow {
 			 * angelegt.
 			 */
 			if (conf.getBtrixWorkflowId() == null) {
-
+				getBearerToken();
 			}
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
