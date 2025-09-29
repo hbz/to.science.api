@@ -97,7 +97,8 @@ regal-api.public.jobDir="/opt/toscience/public-data"
 regal-api.browsertrix.apiUrl="http://localhost:30870/api"
 regal-api.browsertrix.adminUsername="admin@example.com"
 regal-api.browsertrix.adminPassword="PASSW0RD!"
-regal-api.browsertrix.orgName="hbz-nrw"
+regal-api.browsertrix.orgName="toscience"
+regal-api.browsertrix.orgId=""
 regal-api.browsertrix.outDir="/opt/toscience/browsertrix-data"
 
 #-------------CDN Gatherer--------------------------                            

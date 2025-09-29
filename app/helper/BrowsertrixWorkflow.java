@@ -15,6 +15,14 @@
 */
 package helper;
 
+import java.io.Closeable;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
 import models.CrawlerModel;
 import models.Gatherconf;
 
@@ -43,6 +51,8 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			.getString("regal-api.browsertrix.adminPassword");
 	final static String btrix_org_name = Play.application().configuration()
 			.getString("regal-api.browsertrix.orgName");
+	final static String btrix_orgid = Play.application().configuration()
+			.getString("regal-api.browsertrix.orgId");
 	/**
 	 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
 	 * Crawls direkt von Wayback indexiert.
@@ -67,6 +77,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			 */
 			if (conf.getBtrixWorkflowId() == null) {
 				getBearerToken();
+				// create Crawler Config
 			}
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
@@ -75,7 +86,35 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	}
 
 	private void getBearerToken() {
-
+		CloseableHttpClient httpClient = null;
+		HttpResponse response = null;
+		try {
+			httpClient = HttpClients.createDefault();
+			HttpPost httpPost = new HttpPost(btrix_api_url + "/auth/jwt/login");
+			httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
+			httpPost.addHeader("Accept", "application/json");
+			response = httpClient.execute(httpPost);
+			if (response.getStatusLine().getStatusCode() == 200) {
+				// Lese Bearer-Token aus
+				this.bearerToken = "";
+			} else {
+				throw new RuntimeException("Status-Code von /auth/jwt/login: "
+						+ response.getStatusLine().getStatusCode());
+			}
+		} catch (Exception e) {
+			msg = "Bearer-Token für Browsertrix-Workflow für PID" + node.getPid()
+					+ " kann nicht geholt werden!";
+			WebgatherLogger.error(msg, e.toString());
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				httpClient.close();
+				((Closeable) response).close();
+			} catch (Exception e) {
+				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
+						e.toString());
+			}
+		}
 	}
 
 	/**

@@ -61,7 +61,7 @@ public class CrawlerModel {
 	protected String localpath = null;
 	protected String host = null;
 	protected String warcFilename = null;
-	private String msg = null;
+	protected String msg = null;
 	protected int exitState = 0;
 
 	private static String jobDir = null;
