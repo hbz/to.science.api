@@ -17,30 +17,17 @@ package models;
 
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
-import models.Gatherconf.RobotsPolicy;
-import models.Gatherconf.QuotaUnitSelection;
-import models.Globals;
 import models.Node;
 import play.Logger;
 import play.Play;
 
 import java.io.*;
 
-import actions.Modify;
 import helper.CrawlLog;
 import helper.WebgatherUtils;
 import helper.Webgatherer;
 
-import java.net.IDN;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,27 +49,30 @@ public class CrawlerModel {
 		NEW, RUNNING, PAUSED, ABORTED, CRASHED, FINISHED
 	}
 
-	private Node node = null;
-	private Gatherconf conf = null;
-	private String urlAscii = null;
+	protected Node node = null;
+	protected Gatherconf conf = null;
+	protected String urlAscii = null;
 	private String date = null;
-	private String datetime = null;
-	private File crawlDir = null;
-	private File resultDir = null;
+	protected String datetime = null;
+	protected File crawlDir = null;
+	protected File resultDir = null;
 	private File cdxFile = null;
-	private File cdxFileNew = null;
-	private String localpath = null;
-	private String host = null;
-	private String warcFilename = null;
+	protected File cdxFileNew = null;
+	protected String localpath = null;
+	protected String host = null;
+	protected String warcFilename = null;
 	private String msg = null;
-	private int exitState = 0;
+	protected int exitState = 0;
 
 	private static String jobDir = null;
 	private static String outDir = null;
 	final static String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
 
-	private static final Logger.ALogger WebgatherLogger =
+	/**
+	 * ein Logger für das Webgathering
+	 */
+	protected static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
 	/**
@@ -316,8 +306,7 @@ public class CrawlerModel {
 	 * @param node der Knoten einer Webpage
 	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls
 	 */
-	public static CrawlControllerState getCrawlControllerState(Node node)
-			throws IOException {
+	public static CrawlControllerState getCrawlControllerState(Node node) {
 		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
 		File logfile = findLatestLogFile(node);
 		if (logfile == null || !logfile.exists()) {
@@ -358,7 +347,7 @@ public class CrawlerModel {
 		return CrawlControllerState.CRASHED;
 	}
 
-	private static boolean isCrawlRunning(Node node2) {
+	private static boolean isCrawlRunning(Node node) {
 		// TODO Auto-generated method stub
 		return false;
 	}

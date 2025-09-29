@@ -17,34 +17,9 @@ package helper;
 
 import models.CrawlerModel;
 import models.Gatherconf;
-import models.Gatherconf.AgentIdSelection;
-import models.Gatherconf.RobotsPolicy;
-import models.Gatherconf.QuotaUnitSelection;
-import models.Globals;
+
 import models.Node;
-import play.Logger;
 import play.Play;
-
-import java.io.*;
-import java.lang.ProcessBuilder;
-import com.google.common.base.CharMatcher;
-
-import actions.Modify;
-
-import java.net.IDN;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * a class to implement a wpull crawl
@@ -53,27 +28,6 @@ import org.apache.commons.io.FileUtils;
  *
  */
 public class BrowsertrixWorkflow extends CrawlerModel {
-
-	/* Allgemeine Variablen und Konstanten für das Webcrawling */
-	@SuppressWarnings("javadoc")
-	public enum CrawlControllerState {
-		NEW, RUNNING, PAUSED, ABORTED, CRASHED, FINISHED
-	}
-
-	private Node node = null;
-	private Gatherconf conf = null;
-	private String urlAscii = null;
-	private String date = null;
-	private String datetime = null;
-	private File crawlDir = null;
-	private File resultDir = null;
-	private File cdxFile = null;
-	private File cdxFileNew = null;
-	private String localpath = null;
-	private String host = null;
-	private String warcFilename = null;
-	private String msg = null;
-	private int exitState = 0;
 
 	/* Browsertrix spezifische Variablen */
 	private String bearerToken = null;
@@ -96,70 +50,6 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	final static String outDir = Play.application().configuration()
 			.getString("regal-api.browsertrix.outDir");
 
-	private static final Logger.ALogger WebgatherLogger =
-			Logger.of("webgatherer");
-
-	/**
-	 * Die Methode, um das crawlDir auszulesen.
-	 * 
-	 * @return Das Verzeichnis (absolute Pfadangabe), in das wpull seine
-	 *         Ergebnisdateien (z.B. WARC-Archiv) schreibt.
-	 */
-	public File getCrawlDir() {
-		return crawlDir;
-	}
-
-	/**
-	 * Die Methode, um resultDir auszulesen
-	 * 
-	 * @return resultDir ist das Verzeichnis, in das wpull fertige WARC-Dateien
-	 *         verschiebt (wpull Parameter --warc-move)
-	 */
-	public File getResultsDir() {
-		return resultDir;
-	}
-
-	/**
-	 * Die Methode, um die CDX-Datei auszulesen
-	 * 
-	 * @return cdxFile ist eine Datei, die wpull dem Parameter --warc-dedup
-	 *         übergibt. Die Datei enthält eine Liste bereits eingesammelter URLs.
-	 */
-	public File getCdxFile() {
-		return cdxFile;
-	}
-
-	/**
-	 * Die Methode, um die neue CDX-Datei auszulesen
-	 * 
-	 * @return cdxFileNew ist eine CDX-Datei, die wpull beim nächsten Crawl neu
-	 *         schreibt. Als Anfangswert wird die bisherige cdx-Datei, cdxFile
-	 *         (="old"), hier hinein kopiert.
-	 */
-	public File getCdxFileNew() {
-		return cdxFileNew;
-	}
-
-	/**
-	 * Die Methode, um localPath auszulesen
-	 * 
-	 * @return localPath is ein Parameter, den Fedora benötigt. Es ist eine URL
-	 *         zur gecrawlten WARC-Datei.
-	 */
-	public String getLocalpath() {
-		return localpath;
-	}
-
-	/**
-	 * Die Methode, um exitState auszulesen
-	 * 
-	 * @return exitState ist der Return-Status von wpull. Es ist == 0, wenn der
-	 *         Crawl erfolgreich war, sonst > 0.
-	 */
-	public int getExitState() {
-		return exitState;
-	}
-
 	/**
 	 * Konstruktor zu Browsertrix Crawler Workflow
 	 * 
@@ -168,28 +58,9 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	 * @param conf the crawler configuration for the website
 	 */
 	public BrowsertrixWorkflow(Node node, Gatherconf conf) {
-		this.node = node;
-		this.conf = conf;
+		super(node, conf);
+
 		try {
-			WebgatherLogger.debug("URL=" + conf.getUrl());
-			this.urlAscii = WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
-			WebgatherLogger.debug("urlAscii=" + urlAscii);
-			this.host = WebgatherUtils.getDomain(urlAscii);
-			WebgatherLogger.debug("host=" + host);
-			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-			this.datetime =
-					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
-			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
-			this.cdxFile =
-					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
-			this.warcFilename = "WEB-" + host + "-" + date;
-			/*
-			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
-			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback
-			 * erzeugt.
-			 */
-			this.localpath = Globals.heritrixData + "/browsertrix-data" + "/"
-					+ conf.getName() + "/" + datetime + "/" + warcFilename + ".warc.gz";
 			/*
 			 * Wenn es noch keine Worfkflow ID in der conf gibt, wird jetzt eine
 			 * angelegt.
@@ -203,371 +74,27 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 		}
 	}
 
-	/**
-	 * Erzeugt einen neuen Wpull-Crawler-Job
-	 */
-	public void runCrawl() {
-		WebgatherLogger.debug("Create new job " + conf.getName());
-		try {
-			if (conf.getName() == null) {
-				throw new RuntimeException("The configuration has no name !");
-			}
-			if (!crawlDir.exists()) {
-				// create job directory
-				WebgatherLogger.debug("Create job Directory " + jobDir + "/"
-						+ conf.getName() + "/" + datetime);
-				crawlDir.mkdirs();
-			}
-			if (!resultDir.exists()) {
-				// create output directory
-				WebgatherLogger.debug("Create Output Directory " + outDir + "/"
-						+ conf.getName() + "/" + datetime);
-				resultDir.mkdirs();
-			}
-			/**
-			 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
-			 * geschaut, ob eine CDX-Datei für diese Webpage existiert. Eine CDX-Datei
-			 * enthält eine Liste bereits gesammelter URLs für diese Webpage. Falls
-			 * eine CDX-Datei existiert, wird sie in das Arbeitsverzeichnis jobDir
-			 * kopiert und entsprechend so umbenannt, dass der neue Crawl sie weiter
-			 * schreiben wird.
-			 * 
-			 * @author Ingolf Kuss
-			 * @date 2025-03-12
-			 */
-			if (cdxFile.exists()) {
-				WebgatherLogger
-						.debug("CDX-Datei gefunden: " + cdxFile.getAbsolutePath());
-				this.cdxFileNew = new File(
-						this.crawlDir.getAbsolutePath() + "/" + this.warcFilename + ".cdx");
-				FileUtils.copyFile(cdxFile, cdxFileNew);
-				WebgatherLogger
-						.debug("Neue CDX-Datei angelegt: " + cdxFileNew.getAbsolutePath());
-			}
-		} catch (Exception e) {
-			msg = "Cannot create jobDir in " + jobDir + "/" + conf.getName();
-			msg.concat("Cannot create outDir in " + outDir + "/" + conf.getName());
-			WebgatherLogger.error(msg);
-			throw new RuntimeException(msg);
-		}
+	private void getBearerToken() {
+
 	}
 
 	/**
-	 * Ruft den CDN-Gatherer für diese Website auf, anschließend wpull für den
-	 * Hauptcrawl
+	 * Ruft den CDN-Gatherer für diese Website auf, anschließend Browsertrix für
+	 * den Hauptcrawl
 	 */
+	@Override
 	public void startJob() {
-		WebgatherLogger.info(
-				"Rufe CDN-Gatherer mit warcFilename=" + this.warcFilename + " auf.");
+		super.startJob();
+
 		try {
-			String executeCommand =
-					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
-			AgentIdSelection agentId = conf.getAgentIdSelection();
-			executeCommand =
-					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
-			executeCommand = executeCommand.concat(" Cookie:");
-			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-				executeCommand =
-						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
-			}
-			if (cdxFileNew != null) {
-				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
-			}
-			String[] execArr = executeCommand.split(" ");
-			executeCommand = executeCommand.replaceAll("%20", " ");
-			WebgatherLogger.info("Executing command " + executeCommand);
-			WebgatherLogger
-					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
-			ProcessBuilder pb = new ProcessBuilder(execArr);
-			assert crawlDir.isDirectory();
-			pb.directory(crawlDir);
-			File log = new File(crawlDir.toString() + "/cdncrawl.log");
-			log.createNewFile();
-			pb.redirectErrorStream(true);
-			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+
 			// Bereite Kommando für den Hauptcrawl vor
-			executeCommand = buildExecCommand();
-			WpullThread wpullThread = new WpullThread(pb, 1);
-			wpullThread.setNode(node);
-			wpullThread.setConf(conf);
-			wpullThread.setCrawlDir(crawlDir);
-			wpullThread.setOutDir(resultDir);
-			wpullThread.setWarcFilename(warcFilename);
-			wpullThread.setHost(host);
-			wpullThread.setLocalPath(localpath);
-			wpullThread.setExecuteCommand(executeCommand);
-			wpullThread.setLogFileCDN(log);
-			wpullThread.start();
-			exitState = wpullThread.getExitState();
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
-			throw new RuntimeException("wpull crawl not successfully started!", e);
+			throw new RuntimeException("Browsertrix crawl not successfully started!",
+					e);
 		}
-	}
-
-	/**
-	 * Builds a shell executable command which starts a wpull crawl
-	 * 
-	 * For wpull parameters in use see:
-	 * http://wpull.readthedocs.io/en/master/options.html If marked as mandatory,
-	 * parameter is needed for running smoothly in edoweb context. So only remove
-	 * them if reasonable.
-	 * 
-	 * @return the ExecCommand for wpull
-	 */
-	private String buildExecCommand() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(crawler + " " + urlAscii);
-
-		if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-			sb.append(
-					" --header=Cookie:%20" + conf.getCookie().replaceAll(" ", "%20"));
-		}
-
-		sb.append(" --recursive");
-		ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
-		if (urlsExcluded.size() > 0) {
-			sb.append(" --reject-regex=.*" + urlsExcluded.get(0));
-			for (int i = 1; i < urlsExcluded.size(); i++) {
-				sb.append("|" + urlsExcluded.get(i));
-			}
-			sb.append(".*");
-		}
-
-		int level = conf.getDeepness();
-		if (level > 0) {
-			sb.append(" --level=" + Integer.toString(level)); // number of recursions
-		}
-
-		long maxByte = conf.getMaxCrawlSize();
-		if (maxByte > 0) {
-			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
-			Hashtable<QuotaUnitSelection, Integer> sizeFactor = new Hashtable<>();
-			sizeFactor.put(QuotaUnitSelection.KB, 1024);
-			sizeFactor.put(QuotaUnitSelection.MB, 1048576);
-			sizeFactor.put(QuotaUnitSelection.GB, 1073741824);
-
-			long size = maxByte * sizeFactor.get(qFactor).longValue();
-			sb.append(" --quota=" + Long.toString(size));
-		}
-
-		int waitSec = conf.getWaitSecBtRequests();
-		if (waitSec != 0) {
-			sb.append(" --wait=" + Integer.toString(waitSec)); // number of second
-																													// wpull waits between
-																													// requests
-		} else {
-			boolean random = conf.isRandomWait();
-			if (random == true) {
-				sb.append(" --random-wait"); // randomize wait times
-			}
-		}
-
-		int tries = conf.getTries();
-		if (tries != 0) {
-			sb.append(" --tries=" + Integer.toString(tries)); // number of requests
-																												// wpull performs on
-																												// transient errors
-		}
-
-		int waitRetry = conf.getWaitRetry();
-		if (waitRetry != 0) {
-			sb.append(" --waitretry=" + Integer.toString(waitRetry)); // wait between
-																																// re-tries
-		}
-
-		// select agent-string for http-request
-		AgentIdSelection agentId = conf.getAgentIdSelection();
-		sb.append(" --user-agent=" + Gatherconf.agentTable.get(agentId));
-
-		sb.append(" --link-extractors=javascript,html,css");
-		sb.append(" --warc-file=" + warcFilename);
-		if (conf.getRobotsPolicy().equals(RobotsPolicy.classic)
-				|| conf.getRobotsPolicy().equals(RobotsPolicy.ignore)) {
-			sb.append(" --no-robots");
-		}
-		/* Benutze Internet-Protokoll Version 4 */
-		sb.append(" -4");
-		// sb.append(" --http-proxy=externer-web-proxy.hbz-nrw.de:3128");
-		// kommt "Misconfigured redirect"
-		sb.append(" --escaped-fragment --strip-session-id");
-		sb.append(" --no-host-directories --page-requisites");
-		sb.append(" --database=" + warcFilename + ".db");
-		sb.append(" --no-check-certificate");
-		sb.append(" --no-directories"); // mandatory to prevent runtime errors
-		sb.append(" --delete-after"); // mandatory for reducing required disc space
-		sb.append(" --convert-links"); // mandatory to rewrite relative urls
-		/**
-		 * ohne diesen Parameter wird www.facebook.com, www.youtoube.com uvm.
-		 * eingesammelt (aktiviert 12.05.2020)
-		 */
-		sb.append(" --no-strong-redirects");
-		/**
-		 * um CDN-Crawls und Haupt-Crawl im gleichen Archiv zu bündeln
-		 */
-		sb.append(" --warc-append");
-		// auskommentiert 27.08.2020 für EDOZWO-1026
-		// sb.append(" --warc-tempdir=" + tempJobDir)
-		sb.append(" --warc-move=" + resultDir);
-		sb.append(" --warc-cdx");
-		if (this.cdxFileNew != null && this.cdxFileNew.exists()) {
-			sb.append(" --warc-dedup=" + warcFilename + ".cdx");
-		}
-		play.Logger.debug("Built Crawl command: " + sb.toString());
-		return sb.toString();
-	}
-
-	/**
-	 * Suche neuestes Crawler-Logfile. Guckt zuerst in crawlDir
-	 * (Arbeitsverzeichnis). Falls dort nichts gefunden, guckt in outDir
-	 * (Ergebnisverzeichnis).
-	 * 
-	 * @param node der Knoten einer Webpage
-	 */
-	private static File findLatestLogFile(Node node) {
-		File logfile = null;
-		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
-				Play.application().configuration().getString("regal-api.wpull.jobDir"),
-				node.getPid());
-		File latestOutDir = Webgatherer.getLatestCrawlDir(
-				Play.application().configuration().getString("regal-api.wpull.outDir"),
-				node.getPid());
-		if (latestCrawlDir != null) {
-			logfile = new File(latestCrawlDir.toString() + "/crawl.log");
-		}
-		if (logfile == null || !logfile.exists()) {
-			if (latestOutDir != null) {
-				logfile = new File(latestOutDir.toString() + "/crawl.log");
-			}
-		}
-		return logfile;
-	}
-
-	/**
-	 * Ermittelt Crawler Exit Status des letzten Crawls. Der Exit-Status ist eine
-	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
-	 * verfügbar.
-	 * 
-	 * @param node der Knoten einer Webpage
-	 * @return Crawler Exit Status des letzten wpull-Crawls
-	 */
-	public static int getCrawlExitStatus(Node node) {
-		File logfile = findLatestLogFile(node);
-		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.warn(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
-			return -2;
-		}
-		CrawlLog crawlLog = new CrawlLog(logfile);
-		crawlLog.parse();
-		return crawlLog.getExitStatus();
-	}
-
-	/**
-	 * Ermittelt den aktuellen Status des zuletzt gestarteten Crawls. Mögliche
-	 * Werte sind : NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
-	 * Operator) - CRASHED - FINISHED
-	 * 
-	 * @param node der Knoten einer Webpage
-	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls
-	 */
-	public static CrawlControllerState getCrawlControllerState(Node node) {
-		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
-		File logfile = findLatestLogFile(node);
-		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.info(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
-			return CrawlControllerState.NEW;
-		}
-		// 2. Läuft noch => Status = RUNNING
-		if (isWpullCrawlRunning(node)) {
-			return CrawlControllerState.RUNNING;
-		}
-		// 3. Läuft nicht mehr.
-		/* das Log wird geparst */
-		BufferedReader buf = null;
-		String regExp = "^INFO FINISHED.";
-		Pattern pattern = Pattern.compile(regExp);
-		try {
-			buf = new BufferedReader(new FileReader(logfile));
-			String line = null;
-			while ((line = buf.readLine()) != null) {
-				Matcher matcher = pattern.matcher(line);
-				if (matcher.find()) {
-					return CrawlControllerState.FINISHED;
-				}
-			}
-		} catch (IOException e) {
-			WebgatherLogger.warn(
-					"Crawl Controller State cannot be defered from crawlLog "
-							+ logfile.getAbsolutePath() + "! Assuming CRASHED.",
-					e.toString());
-		} finally {
-			try {
-				if (buf != null) {
-					buf.close();
-				}
-			} catch (IOException e) {
-				WebgatherLogger.warn("Read Buffer cannot be closed!");
-			}
-		}
-		return CrawlControllerState.CRASHED;
-	}
-
-	/**
-	 * Prüfung, ob ein Crawl zu einer gegebenen URL aktuell läuft
-	 * 
-	 * @param node der Knoten zu der Webpage mit der URL
-	 * @return boolean Crawl läuft
-	 */
-	public static boolean isWpullCrawlRunning(Node node) {
-		BufferedReader buf = null;
-		String cmd = "ps -eaf";
-		String regExp1 =
-				Play.application().configuration().getString("regal-api.wpull.crawler");
-		Pattern pattern1 = Pattern.compile(regExp1);
-		Matcher matcher1 = null;
-		try {
-			String urlAscii = WebgatherUtils
-					.convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
-			String regExp2 = urlAscii;
-			// Maskiere Sonderzeichen des Regulären Ausdrucks mit Pattern.quote
-			Pattern pattern2 = Pattern.compile(Pattern.quote(regExp2));
-			Matcher matcher2 = null;
-			WebgatherLogger.debug("Setze Systemkommando ab: " + cmd);
-			WebgatherLogger.debug("Suche nach wpull-Aufrufen mit url " + regExp2);
-			String line;
-			Process proc = Runtime.getRuntime().exec(cmd);
-			buf = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			while ((line = buf.readLine()) != null) {
-				// WebgatherLogger.debug("found line: " + line);
-				matcher1 = pattern1.matcher(line);
-				if (matcher1.find()) {
-					// WebgatherLogger.debug("wpull3 found in line");
-					matcher2 = pattern2.matcher(line);
-					if (matcher2.find()) {
-						WebgatherLogger
-								.debug("Found wpull Crawl process for this url=" + line);
-						return true;
-					}
-				}
-			}
-		} catch (Exception e) {
-			WebgatherLogger.warn("Fehler beim Aufruf des Systenkommandos: " + cmd,
-					e.toString());
-			throw new RuntimeException(
-					"Crawl Job Zustand kann nicht bestimmt werden !", e);
-		} finally {
-			try {
-				if (buf != null) {
-					buf.close();
-				}
-			} catch (IOException e) {
-				WebgatherLogger.warn("Read Buffer cannot be closed!");
-			}
-		}
-		return false;
 	}
 
 }
