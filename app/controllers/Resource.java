@@ -203,6 +203,23 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> listResource(@PathParam("pid") String pid,
 			@QueryParam("design") String design) {
+
+		JSONObject allMd = null;
+		Node node = readNodeOrNull(pid);
+		// persist Toscience Data Stream if not exist
+		try {
+			if (!Helper.mdStreamExists(pid, "toscience")
+					|| node.getMetadata("toscience").length() < 5) {
+				Map<String, Object> rdf = RdfHelper.getRdfAsMap(node,
+						RDFFormat.NTRIPLES, node.getMetadata("metadata2"));
+				allMd = new JSONObject(rdf);
+				allMd = TosHelper.getPrefLabelsResolved(allMd);
+				modify.updateMetadata("toscience", node, allMd.toString());
+			}
+		} catch (Exception e) {
+			play.Logger.debug("Exception at the Endpoint listResource " + e);
+		}
+
 		if (request().accepts("text/html"))
 			return asHtml(pid, design);
 		if (request().accepts("application/rdf+xml"))
