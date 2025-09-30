@@ -97,10 +97,19 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 		try {
 			httpClient = HttpClients.createDefault();
 			HttpPost tokenRequest = new HttpPost(btrix_api_url + "/auth/jwt/login");
+			WebgatherLogger.debug("btrix_api_url" + btrix_api_url);
+			WebgatherLogger.debug("btrix_admin_username" + btrix_admin_username);
+			WebgatherLogger.debug("btrix_admin_password" + btrix_admin_password);
 			tokenRequest.addHeader("Content-Type",
 					"application/x-www-form-urlencoded");
-			tokenRequest.setEntity(new StringEntity("username=" + btrix_admin_username
-					+ "&password=" + btrix_admin_password + "&grant_type=password"));
+			// tokenRequest.setEntity(new StringEntity("username=" +
+			// btrix_admin_username + "&password=" + btrix_admin_password +
+			// "&grant_type=password"));
+			tokenRequest
+					.setEntity(new StringEntity("username=" + btrix_admin_username));
+			tokenRequest
+					.setEntity(new StringEntity("password=" + btrix_admin_password));
+			tokenRequest.setEntity(new StringEntity("grant_type=password"));
 			tokenRequest.addHeader("Accept", "application/json");
 			tokenResponse = httpClient.execute(tokenRequest);
 			if (tokenResponse.getStatusLine().getStatusCode() == 200) {
@@ -114,7 +123,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 						+ tokenResponse.getStatusLine().getStatusCode());
 			}
 		} catch (Exception e) {
-			msg = "Bearer-Token für Browsertrix-Workflow für PID" + node.getPid()
+			msg = "Bearer-Token für Browsertrix-Workflow für PID " + node.getPid()
 					+ " kann nicht geholt werden!";
 			WebgatherLogger.error(msg, e.toString());
 			throw new RuntimeException(e);
