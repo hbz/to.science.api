@@ -51,7 +51,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	final static String btrix_api_url = Play.application().configuration()
 			.getString("regal-api.browsertrix.apiUrl");
 	final static String btrix_admin_username = Play.application().configuration()
-			.getString("regal-api.bowsertrix.adminUsername");
+			.getString("regal-api.browsertrix.adminUsername");
 	final static String btrix_admin_password = Play.application().configuration()
 			.getString("regal-api.browsertrix.adminPassword");
 	final static String btrix_org_name = Play.application().configuration()
@@ -97,9 +97,9 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 		try {
 			httpClient = HttpClients.createDefault();
 			HttpPost tokenRequest = new HttpPost(btrix_api_url + "/auth/jwt/login");
-			WebgatherLogger.debug("btrix_api_url" + btrix_api_url);
-			WebgatherLogger.debug("btrix_admin_username" + btrix_admin_username);
-			WebgatherLogger.debug("btrix_admin_password" + btrix_admin_password);
+			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
+			WebgatherLogger.debug("btrix_admin_username " + btrix_admin_username);
+			WebgatherLogger.debug("btrix_admin_password " + btrix_admin_password);
 			tokenRequest.addHeader("Content-Type",
 					"application/x-www-form-urlencoded");
 			// tokenRequest.setEntity(new StringEntity("username=" +
