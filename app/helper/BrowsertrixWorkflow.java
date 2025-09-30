@@ -24,6 +24,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +45,10 @@ import play.Play;
 public class BrowsertrixWorkflow extends CrawlerModel {
 
 	/* Browsertrix spezifische Variablen */
+	private CloseableHttpClient httpClient = null;
+	private HttpPost request = null;
+	private HttpResponse response = null;
+	private ObjectMapper objectMapper = new ObjectMapper();
 	private String bearerToken = null;
 
 	/*
@@ -74,7 +80,6 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	 */
 	public BrowsertrixWorkflow(Node node, Gatherconf conf) {
 		super(node, conf);
-
 		try {
 			/*
 			 * Wenn es noch keine Worfkflow ID in der conf gibt, wird jetzt eine
@@ -82,44 +87,35 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			 */
 			if (conf.getBtrixWorkflowId() == null) {
 				getBearerToken();
-				// create Crawler Config
+				postCrawlerConfig();
 			}
 		} catch (Exception e) {
-			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
+			WebgatherLogger.error("Browsertrix-Workflow für PID " + conf.getId()
+					+ " URL " + conf.getUrl() + " kann nicht angelegt werden !");
 			throw new RuntimeException(e);
 		}
 	}
 
 	private void getBearerToken() {
-		CloseableHttpClient httpClient = null;
-		HttpResponse tokenResponse = null;
-		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			httpClient = HttpClients.createDefault();
-			HttpPost tokenRequest = new HttpPost(btrix_api_url + "/auth/jwt/login");
+			request = new HttpPost(btrix_api_url + "/auth/jwt/login");
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_admin_username " + btrix_admin_username);
 			WebgatherLogger.debug("btrix_admin_password " + btrix_admin_password);
-			tokenRequest.addHeader("Content-Type",
-					"application/x-www-form-urlencoded");
-			tokenRequest.setEntity(new StringEntity("username=" + btrix_admin_username
+			request.addHeader("Content-Type", "application/x-www-form-urlencoded");
+			request.setEntity(new StringEntity("username=" + btrix_admin_username
 					+ "&password=" + btrix_admin_password + "&grant_type=password"));
-			// tokenRequest.setEntity(new StringEntity("username=" +
-			// btrix_admin_username));
-			// tokenRequest.setEntity(new StringEntity("password=" +
-			// btrix_admin_password));
-			// tokenRequest.setEntity(new StringEntity("grant_type=password"));
-			tokenRequest.addHeader("Accept", "application/json");
-			tokenResponse = httpClient.execute(tokenRequest);
-			if (tokenResponse.getStatusLine().getStatusCode() == 200) {
-				String tokenResponseJson =
-						EntityUtils.toString(tokenResponse.getEntity());
+			request.addHeader("Accept", "application/json");
+			response = httpClient.execute(request);
+			if (response.getStatusLine().getStatusCode() == 200) {
+				String tokenResponseJson = EntityUtils.toString(response.getEntity());
 				JsonNode tokenJsonNode = objectMapper.readTree(tokenResponseJson);
 				this.bearerToken = tokenJsonNode.get("access_token").asText();
 				WebgatherLogger.debug("Got bearer Token " + this.bearerToken);
 			} else {
 				throw new RuntimeException("Status-Code von /auth/jwt/login: "
-						+ tokenResponse.getStatusLine().getStatusCode());
+						+ response.getStatusLine().getStatusCode());
 			}
 		} catch (Exception e) {
 			msg = "Bearer-Token für Browsertrix-Workflow für PID " + node.getPid()
@@ -129,7 +125,61 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 		} finally {
 			try {
 				httpClient.close();
-				((Closeable) tokenResponse).close();
+				((Closeable) response).close();
+			} catch (Exception e) {
+				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
+						e.toString());
+			}
+		}
+	}
+
+	private void postCrawlerConfig() {
+		try {
+			httpClient = HttpClients.createDefault();
+			request = new HttpPost(
+					btrix_api_url + "/orgs/" + btrix_orgid + "/crawlconfigs");
+			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
+			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
+			request.addHeader("Authorization", "Bearer " + this.bearerToken);
+			request.addHeader("Content-Type", "application/json");
+			// stringEntity.set("name", "Bergischer Verein für Familienkunde");
+			// stringEntity.set("config", (irgendeine JSON-Struktur)
+			JSONObject data = new JSONObject();
+			data.put("name", "Bergischer Verein für Familienkunde");
+			data.put("inactive", false);
+			data.put("description", "");
+			// Und jetzt eine Config aufbauen:
+			JSONObject config = new JSONObject();
+			JSONObject seed = new JSONObject();
+			seed.put("url", "https://www.bvff.de/");
+			JSONArray seeds = new JSONArray();
+			seeds.put(seed);
+			config.put("seeds", seeds);
+			config.put("depth", -1);
+			data.put("config", config);
+			request.setEntity(new StringEntity(data.toString()));
+			request.addHeader("Accept", "application/json");
+			response = httpClient.execute(request);
+			if (response.getStatusLine().getStatusCode() == 200) {
+				String responseJson = EntityUtils.toString(response.getEntity());
+				WebgatherLogger.debug("received response: " + responseJson);
+				// JSON ausparsen
+				JsonNode responseJsonNode = objectMapper.readTree(responseJson);
+				// this.bearerToken = responseJsonNode.get("access_token").asText();
+				WebgatherLogger.debug("Crawler Config gesendet");
+			} else {
+				throw new RuntimeException("Status-Code von /orgs/" + btrix_orgid
+						+ "/crawlconfigs : " + response.getStatusLine().getStatusCode());
+			}
+		} catch (Exception e) {
+			msg = "Browsertrix Crawler Config für PID " + node.getPid()
+					+ " kann nicht gesendet werden!";
+			WebgatherLogger.error(msg, e.toString());
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				httpClient.close();
+				((Closeable) response).close();
 			} catch (Exception e) {
 				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
 						e.toString());
