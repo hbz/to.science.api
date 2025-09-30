@@ -20,8 +20,13 @@ import java.io.Closeable;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import models.CrawlerModel;
 import models.Gatherconf;
@@ -87,19 +92,26 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 
 	private void getBearerToken() {
 		CloseableHttpClient httpClient = null;
-		HttpResponse response = null;
+		HttpResponse tokenResponse = null;
+		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			httpClient = HttpClients.createDefault();
-			HttpPost httpPost = new HttpPost(btrix_api_url + "/auth/jwt/login");
-			httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
-			httpPost.addHeader("Accept", "application/json");
-			response = httpClient.execute(httpPost);
-			if (response.getStatusLine().getStatusCode() == 200) {
-				// Lese Bearer-Token aus
-				this.bearerToken = "";
+			HttpPost tokenRequest = new HttpPost(btrix_api_url + "/auth/jwt/login");
+			tokenRequest.addHeader("Content-Type",
+					"application/x-www-form-urlencoded");
+			tokenRequest.setEntity(new StringEntity("username=" + btrix_admin_username
+					+ "&password=" + btrix_admin_password + "&grant_type=password"));
+			tokenRequest.addHeader("Accept", "application/json");
+			tokenResponse = httpClient.execute(tokenRequest);
+			if (tokenResponse.getStatusLine().getStatusCode() == 200) {
+				String tokenResponseJson =
+						EntityUtils.toString(tokenResponse.getEntity());
+				JsonNode tokenJsonNode = objectMapper.readTree(tokenResponseJson);
+				this.bearerToken = tokenJsonNode.get("access_token").asText();
+				WebgatherLogger.debug("Got bearer Token " + this.bearerToken);
 			} else {
 				throw new RuntimeException("Status-Code von /auth/jwt/login: "
-						+ response.getStatusLine().getStatusCode());
+						+ tokenResponse.getStatusLine().getStatusCode());
 			}
 		} catch (Exception e) {
 			msg = "Bearer-Token für Browsertrix-Workflow für PID" + node.getPid()
@@ -109,7 +121,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 		} finally {
 			try {
 				httpClient.close();
-				((Closeable) response).close();
+				((Closeable) tokenResponse).close();
 			} catch (Exception e) {
 				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
 						e.toString());
