@@ -102,14 +102,13 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			WebgatherLogger.debug("btrix_admin_password " + btrix_admin_password);
 			tokenRequest.addHeader("Content-Type",
 					"application/x-www-form-urlencoded");
+			tokenRequest.setEntity(new StringEntity("username=" + btrix_admin_username
+					+ "&password=" + btrix_admin_password + "&grant_type=password"));
 			// tokenRequest.setEntity(new StringEntity("username=" +
-			// btrix_admin_username + "&password=" + btrix_admin_password +
-			// "&grant_type=password"));
-			tokenRequest
-					.setEntity(new StringEntity("username=" + btrix_admin_username));
-			tokenRequest
-					.setEntity(new StringEntity("password=" + btrix_admin_password));
-			tokenRequest.setEntity(new StringEntity("grant_type=password"));
+			// btrix_admin_username));
+			// tokenRequest.setEntity(new StringEntity("password=" +
+			// btrix_admin_password));
+			// tokenRequest.setEntity(new StringEntity("grant_type=password"));
 			tokenRequest.addHeader("Accept", "application/json");
 			tokenResponse = httpClient.execute(tokenRequest);
 			if (tokenResponse.getStatusLine().getStatusCode() == 200) {
