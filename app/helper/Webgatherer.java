@@ -41,7 +41,7 @@ import models.Link;
 import models.Node;
 import actions.Modify;
 import actions.Create.WebgathererTooBusyException;
-import helper.WpullCrawl.CrawlControllerState;
+import models.CrawlerModel.CrawlControllerState;
 import actions.Read;
 
 /**
