@@ -18,6 +18,7 @@ package helper;
 import java.io.Closeable;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -50,6 +51,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	private HttpResponse response = null;
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private String bearerToken = null;
+	private String btrixWorkflowId = null;
 
 	/*
 	 * Authorisierung für Browsertrix
@@ -90,7 +92,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 				postCrawlerConfig();
 			}
 		} catch (Exception e) {
-			WebgatherLogger.error("Browsertrix-Workflow für PID " + conf.getId()
+			WebgatherLogger.error("Browsertrix-Workflow für PID " + node.getPid()
 					+ " URL " + conf.getUrl() + " kann nicht angelegt werden !");
 			throw new RuntimeException(e);
 		}
@@ -142,8 +144,6 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
 			request.addHeader("Content-Type", "application/json");
-			// stringEntity.set("name", "Bergischer Verein für Familienkunde");
-			// stringEntity.set("config", (irgendeine JSON-Struktur)
 			JSONObject data = new JSONObject();
 			data.put("name", "Bergischer Verein für Familienkunde");
 			data.put("inactive", false);
@@ -165,8 +165,11 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 				WebgatherLogger.debug("received response: " + responseJson);
 				// JSON ausparsen
 				JsonNode responseJsonNode = objectMapper.readTree(responseJson);
-				// this.bearerToken = responseJsonNode.get("access_token").asText();
-				WebgatherLogger.debug("Crawler Config gesendet");
+				this.btrixWorkflowId = responseJsonNode.get("id").asText();
+				WebgatherLogger.debug("Crawler Config angelegt mit btrix_workflow_id: "
+						+ btrixWorkflowId);
+				conf.setBtrixWorkflowId(btrixWorkflowId);
+				// hier: Update (Modify) der Gatherconf wie beim "Save"-Button
 			} else {
 				throw new RuntimeException("Status-Code von /orgs/" + btrix_orgid
 						+ "/crawlconfigs : " + response.getStatusLine().getStatusCode());
