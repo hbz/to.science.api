@@ -23,7 +23,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -137,13 +140,13 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 
 	private void postCrawlerConfig() {
 		try {
-			httpClient = HttpClients.createDefault();
+			httpClient = HttpClientBuilder.create().build();
 			request = new HttpPost(
 					btrix_api_url + "/orgs/" + btrix_orgid + "/crawlconfigs");
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
-			request.addHeader("Content-Type", "application/json");
+			// request.addHeader("Content-Type", "application/json");
 			JSONObject data = new JSONObject();
 			data.put("name", "Bergischer Verein für Familienkunde");
 			data.put("inactive", false);
@@ -157,7 +160,9 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			config.put("seeds", seeds);
 			config.put("depth", -1);
 			data.put("config", config);
-			request.setEntity(new StringEntity(data.toString()));
+			StringEntity se = new StringEntity(data.toString());
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+			request.setEntity(se);
 			request.addHeader("Accept", "application/json");
 			response = httpClient.execute(request);
 			if (response.getStatusLine().getStatusCode() == 200) {
