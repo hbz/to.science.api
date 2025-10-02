@@ -146,7 +146,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
-			// request.addHeader("Content-Type", "application/json");
+			request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 			JSONObject data = new JSONObject();
 			data.put("name", "Bergischer Verein für Familienkunde");
 			data.put("inactive", false);
