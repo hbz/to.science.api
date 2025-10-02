@@ -160,7 +160,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			config.put("seeds", seeds);
 			config.put("depth", -1);
 			data.put("config", config);
-			StringEntity se = new StringEntity(data.toString());
+			StringEntity se = new StringEntity("data=" + data.toString());
 			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 			request.setEntity(se);
 			request.addHeader("Accept", "application/json");
