@@ -146,7 +146,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
-			request.addHeader("Content-Type", "application/x-www-form-urlencoded");
+			request.addHeader("Content-Type", "application/json");
 			JSONObject data = new JSONObject();
 			data.put("name", "Bergischer Verein für Familienkunde");
 			data.put("inactive", false);
@@ -160,7 +160,8 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			config.put("seeds", seeds);
 			config.put("depth", -1);
 			data.put("config", config);
-			StringEntity se = new StringEntity("data=" + data.toString());
+			WebgatherLogger.debug("data.toString()=" + data.toString());
+			StringEntity se = new StringEntity(data.toString());
 			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 			request.setEntity(se);
 			request.addHeader("Accept", "application/json");
