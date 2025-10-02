@@ -93,6 +93,14 @@ regal-api.wpull.dataUrl="http://localhost"
 regal-api.wpull.staticOptions=" --recursive --link-extractors=javascript,html,css --escaped-fragment --strip-session-id --no-host-directories --page-requisites --no-parent --no-check-certificate --no-directories --delete-after"
 regal-api.public.jobDir="/opt/toscience/public-data"
 
+#-------------Browsertrix (Webrecorder)-------------                            
+regal-api.browsertrix.apiUrl="http://localhost:30870/api"
+regal-api.browsertrix.adminUsername="admin@example.com"
+regal-api.browsertrix.adminPassword="PASSW0RD!"
+regal-api.browsertrix.orgName="toscience"
+regal-api.browsertrix.orgId=""
+regal-api.browsertrix.outDir="/opt/toscience/browsertrix-data"
+
 #-------------CDN Gatherer--------------------------                            
 regal-api.cdntools.cdn="/opt/toscience/bin/cdn"
 

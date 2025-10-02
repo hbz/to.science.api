@@ -16,35 +16,24 @@
  */
 package helper;
 
+import models.CrawlerModel;
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
 import models.Gatherconf.RobotsPolicy;
 import models.Gatherconf.QuotaUnitSelection;
 import models.Globals;
 import models.Node;
-import play.Logger;
 import play.Play;
 
 import java.io.*;
 import java.lang.ProcessBuilder;
-import com.google.common.base.CharMatcher;
 
-import actions.Modify;
-
-import java.net.IDN;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+
 import java.util.Hashtable;
-import java.util.List;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * a class to implement a wpull crawl
@@ -52,28 +41,7 @@ import org.apache.commons.io.FileUtils;
  * @author Ingolf Kuss
  *
  */
-public class WpullCrawl {
-
-	@SuppressWarnings("javadoc")
-	public enum CrawlControllerState {
-		NEW, RUNNING, PAUSED, ABORTED, CRASHED, FINISHED
-	}
-
-	private Node node = null;
-	private Gatherconf conf = null;
-	private String urlAscii = null;
-	private String date = null;
-	private String datetime = null;
-	private File crawlDir = null;
-	private File resultDir = null;
-	private File cdxFile = null;
-	private File cdxFileNew = null;
-	private String localpath = null;
-	private String host = null;
-	private String warcFilename = null;
-	private String msg = null;
-	private int exitState = 0;
-	private int CDNGathererExitState = 0;
+public class WpullCrawl extends CrawlerModel {
 
 	/**
 	 * Die Schreibzugriffe von wpull (Downloads) erfolgen in das Verzeichnis
@@ -94,72 +62,6 @@ public class WpullCrawl {
 			Play.application().configuration().getString("regal-api.wpull.outDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
-	final static String cdn =
-			Play.application().configuration().getString("regal-api.cdntools.cdn");
-
-	private static final Logger.ALogger WebgatherLogger =
-			Logger.of("webgatherer");
-
-	/**
-	 * Die Methode, um das crawlDir auszulesen.
-	 * 
-	 * @return Das Verzeichnis (absolute Pfadangabe), in das wpull seine
-	 *         Ergebnisdateien (z.B. WARC-Archiv) schreibt.
-	 */
-	public File getCrawlDir() {
-		return crawlDir;
-	}
-
-	/**
-	 * Die Methode, um resultDir auszulesen
-	 * 
-	 * @return resultDir ist das Verzeichnis, in das wpull fertige WARC-Dateien
-	 *         verschiebt (wpull Parameter --warc-move)
-	 */
-	public File getResultsDir() {
-		return resultDir;
-	}
-
-	/**
-	 * Die Methode, um die CDX-Datei auszulesen
-	 * 
-	 * @return cdxFile ist eine Datei, die wpull dem Parameter --warc-dedup
-	 *         übergibt. Die Datei enthält eine Liste bereits eingesammelter URLs.
-	 */
-	public File getCdxFile() {
-		return cdxFile;
-	}
-
-	/**
-	 * Die Methode, um die neue CDX-Datei auszulesen
-	 * 
-	 * @return cdxFileNew ist eine CDX-Datei, die wpull beim nächsten Crawl neu
-	 *         schreibt. Als Anfangswert wird die bisherige cdx-Datei, cdxFile
-	 *         (="old"), hier hinein kopiert.
-	 */
-	public File getCdxFileNew() {
-		return cdxFileNew;
-	}
-
-	/**
-	 * Die Methode, um localPath auszulesen
-	 * 
-	 * @return localPath is ein Parameter, den Fedora benötigt. Es ist eine URL
-	 *         zur gecrawlten WARC-Datei.
-	 */
-	public String getLocalpath() {
-		return localpath;
-	}
-
-	/**
-	 * Die Methode, um exitState auszulesen
-	 * 
-	 * @return exitState ist der Return-Status von wpull. Es ist == 0, wenn der
-	 *         Crawl erfolgreich war, sonst > 0.
-	 */
-	public int getExitState() {
-		return exitState;
-	}
 
 	/**
 	 * Konstruktor zu WpullCrawl
@@ -169,22 +71,8 @@ public class WpullCrawl {
 	 * @param conf the crawler configuration for the website
 	 */
 	public WpullCrawl(Node node, Gatherconf conf) {
-		this.node = node;
-		this.conf = conf;
+		super(node, conf);
 		try {
-			WebgatherLogger.debug("URL=" + conf.getUrl());
-			this.urlAscii = WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
-			WebgatherLogger.debug("urlAscii=" + urlAscii);
-			this.host = WebgatherUtils.getDomain(urlAscii);
-			WebgatherLogger.debug("host=" + host);
-			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-			this.datetime =
-					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
-			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
-			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
-			this.cdxFile =
-					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
-			this.warcFilename = "WEB-" + host + "-" + date;
 			/*
 			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
 			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback
@@ -202,86 +90,26 @@ public class WpullCrawl {
 	 * Erzeugt einen neuen Wpull-Crawler-Job
 	 */
 	public void createJob() {
-		WebgatherLogger.debug("Create new job " + conf.getName());
-		try {
-			if (conf.getName() == null) {
-				throw new RuntimeException("The configuration has no name !");
-			}
-			if (!crawlDir.exists()) {
-				// create job directory
-				WebgatherLogger.debug("Create job Directory " + jobDir + "/"
-						+ conf.getName() + "/" + datetime);
-				crawlDir.mkdirs();
-			}
-			if (!resultDir.exists()) {
-				// create output directory
-				WebgatherLogger.debug("Create Output Directory " + outDir + "/"
-						+ conf.getName() + "/" + datetime);
-				resultDir.mkdirs();
-			}
-			/**
-			 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
-			 * geschaut, ob eine CDX-Datei für diese Webpage existiert. Eine CDX-Datei
-			 * enthält eine Liste bereits gesammelter URLs für diese Webpage. Falls
-			 * eine CDX-Datei existiert, wird sie in das Arbeitsverzeichnis jobDir
-			 * kopiert und entsprechend so umbenannt, dass der neue Crawl sie weiter
-			 * schreiben wird.
-			 * 
-			 * @author Ingolf Kuss
-			 * @date 2025-03-12
-			 */
-			if (cdxFile.exists()) {
-				WebgatherLogger
-						.debug("CDX-Datei gefunden: " + cdxFile.getAbsolutePath());
-				this.cdxFileNew = new File(
-						this.crawlDir.getAbsolutePath() + "/" + this.warcFilename + ".cdx");
-				FileUtils.copyFile(cdxFile, cdxFileNew);
-				WebgatherLogger
-						.debug("Neue CDX-Datei angelegt: " + cdxFileNew.getAbsolutePath());
-			}
-		} catch (Exception e) {
-			msg = "Cannot create jobDir in " + jobDir + "/" + conf.getName();
-			msg.concat("Cannot create outDir in " + outDir + "/" + conf.getName());
-			WebgatherLogger.error(msg);
-			throw new RuntimeException(msg);
-		}
+		super.runCrawl();
 	}
 
 	/**
 	 * Ruft den CDN-Gatherer für diese Website auf, anschließend wpull für den
 	 * Hauptcrawl
 	 */
+	@Override
 	public void startJob() {
-		WebgatherLogger.info(
-				"Rufe CDN-Gatherer mit warcFilename=" + this.warcFilename + " auf.");
+		super.startJob();
 		try {
-			String executeCommand =
-					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
-			AgentIdSelection agentId = conf.getAgentIdSelection();
-			executeCommand =
-					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
-			executeCommand = executeCommand.concat(" Cookie:");
-			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-				executeCommand =
-						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
-			}
-			if (cdxFileNew != null) {
-				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
-			}
-			String[] execArr = executeCommand.split(" ");
-			executeCommand = executeCommand.replaceAll("%20", " ");
-			WebgatherLogger.info("Executing command " + executeCommand);
-			WebgatherLogger
-					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
-			ProcessBuilder pb = new ProcessBuilder(execArr);
+			// Bereite Kommando für den Hauptcrawl vor
+			String executeCommand = buildExecCommand();
+			ProcessBuilder pb = new ProcessBuilder();
 			assert crawlDir.isDirectory();
 			pb.directory(crawlDir);
 			File log = new File(crawlDir.toString() + "/cdncrawl.log");
 			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-			// Bereite Kommando für den Hauptcrawl vor
-			executeCommand = buildExecCommand();
 			WpullThread wpullThread = new WpullThread(pb, 1);
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
@@ -411,103 +239,6 @@ public class WpullCrawl {
 		}
 		play.Logger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
-	}
-
-	/**
-	 * Suche neuestes Crawler-Logfile. Guckt zuerst in crawlDir
-	 * (Arbeitsverzeichnis). Falls dort nichts gefunden, guckt in outDir
-	 * (Ergebnisverzeichnis).
-	 * 
-	 * @param node der Knoten einer Webpage
-	 */
-	private static File findLatestLogFile(Node node) {
-		File logfile = null;
-		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
-				Play.application().configuration().getString("regal-api.wpull.jobDir"),
-				node.getPid());
-		File latestOutDir = Webgatherer.getLatestCrawlDir(
-				Play.application().configuration().getString("regal-api.wpull.outDir"),
-				node.getPid());
-		if (latestCrawlDir != null) {
-			logfile = new File(latestCrawlDir.toString() + "/crawl.log");
-		}
-		if (logfile == null || !logfile.exists()) {
-			if (latestOutDir != null) {
-				logfile = new File(latestOutDir.toString() + "/crawl.log");
-			}
-		}
-		return logfile;
-	}
-
-	/**
-	 * Ermittelt Crawler Exit Status des letzten Crawls. Der Exit-Status ist eine
-	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
-	 * verfügbar.
-	 * 
-	 * @param node der Knoten einer Webpage
-	 * @return Crawler Exit Status des letzten wpull-Crawls
-	 */
-	public static int getCrawlExitStatus(Node node) {
-		File logfile = findLatestLogFile(node);
-		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.warn(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
-			return -2;
-		}
-		CrawlLog crawlLog = new CrawlLog(logfile);
-		crawlLog.parse();
-		return crawlLog.getExitStatus();
-	}
-
-	/**
-	 * Ermittelt den aktuellen Status des zuletzt gestarteten Crawls. Mögliche
-	 * Werte sind : NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
-	 * Operator) - CRASHED - FINISHED
-	 * 
-	 * @param node der Knoten einer Webpage
-	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls
-	 */
-	public static CrawlControllerState getCrawlControllerState(Node node) {
-		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
-		File logfile = findLatestLogFile(node);
-		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.info(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
-			return CrawlControllerState.NEW;
-		}
-		// 2. Läuft noch => Status = RUNNING
-		if (isWpullCrawlRunning(node)) {
-			return CrawlControllerState.RUNNING;
-		}
-		// 3. Läuft nicht mehr.
-		/* das Log wird geparst */
-		BufferedReader buf = null;
-		String regExp = "^INFO FINISHED.";
-		Pattern pattern = Pattern.compile(regExp);
-		try {
-			buf = new BufferedReader(new FileReader(logfile));
-			String line = null;
-			while ((line = buf.readLine()) != null) {
-				Matcher matcher = pattern.matcher(line);
-				if (matcher.find()) {
-					return CrawlControllerState.FINISHED;
-				}
-			}
-		} catch (IOException e) {
-			WebgatherLogger.warn(
-					"Crawl Controller State cannot be defered from crawlLog "
-							+ logfile.getAbsolutePath() + "! Assuming CRASHED.",
-					e.toString());
-		} finally {
-			try {
-				if (buf != null) {
-					buf.close();
-				}
-			} catch (IOException e) {
-				WebgatherLogger.warn("Read Buffer cannot be closed!");
-			}
-		}
-		return CrawlControllerState.CRASHED;
 	}
 
 	/**

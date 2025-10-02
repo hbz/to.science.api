@@ -64,7 +64,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum CrawlerSelection {
-		heritrix, wpull
+		heritrix, wpull, browsertrix
 	}
 
 	@SuppressWarnings("javadoc")
@@ -113,6 +113,7 @@ public class Gatherconf {
 	Interval interval;
 	String notices;
 	CrawlerSelection crawlerSelection;
+	String btrixWorkflowId;
 	QuotaUnitSelection quotaUnitSelection;
 	AgentIdSelection agentIdSelection;
 	ArrayList<String> urlsExcluded;
@@ -143,6 +144,7 @@ public class Gatherconf {
 		interval = null;
 		notices = null;
 		crawlerSelection = CrawlerSelection.wpull;
+		btrixWorkflowId = null;
 		quotaUnitSelection = null;
 		agentIdSelection = AgentIdSelection.Chrome;
 		urlsExcluded = new ArrayList<String>();
@@ -306,6 +308,20 @@ public class Gatherconf {
 	 */
 	public void setCrawlerSelection(CrawlerSelection crawlerSelection) {
 		this.crawlerSelection = crawlerSelection;
+	}
+
+	/**
+	 * @return a browsertrix workflow id
+	 */
+	public String getBtrixWorkflowId() {
+		return btrixWorkflowId;
+	}
+
+	/**
+	 * @param btrixWorkflowId a browsertrix workflow id
+	 */
+	public void setBtrixWorkflowId(String btrixWorkflowId) {
+		this.btrixWorkflowId = btrixWorkflowId;
 	}
 
 	/**
