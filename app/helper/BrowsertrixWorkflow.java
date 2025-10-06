@@ -29,6 +29,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -147,8 +148,50 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
 			request.addHeader("Content-Type", "application/json");
-			JSONObject data = new JSONObject();
+			String jsonBody = createJsonBody();
+			WebgatherLogger.debug("jsonBody=" + jsonBody);
+			request.setEntity(new StringEntity(jsonBody, "UTF-8"));
+			request.addHeader("Accept", "application/json");
+			response = httpClient.execute(request);
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == 200) {
+				String responseJson = EntityUtils.toString(response.getEntity());
+				WebgatherLogger.debug("received response: " + responseJson);
+				// JSON ausparsen
+				JSONObject responseJsonObject = new JSONObject(responseJson);
+				this.btrixWorkflowId = responseJsonObject.getString("id");
+				// JsonNode responseJsonNode = objectMapper.readTree(responseJson);
+				// this.btrixWorkflowId = responseJsonNode.get("id").asText();
+				WebgatherLogger.debug("Crawler Config angelegt mit btrix_workflow_id: "
+						+ btrixWorkflowId);
+				conf.setBtrixWorkflowId(btrixWorkflowId);
+				// hier: Update (Modify) der Gatherconf wie beim "Save"-Button
+			} else {
+				String errorBody = EntityUtils.toString(response.getEntity());
+				throw new RuntimeException("Status-Code von /orgs/" + btrix_orgid
+						+ "/crawlconfigs : " + statusCode + ". Fehler-Body: " + errorBody);
+			}
+		} catch (Exception e) {
+			msg = "Browsertrix Crawler Config für PID " + node.getPid()
+					+ " kann nicht gesendet werden!";
+			WebgatherLogger.error(msg, e.getMessage());
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				httpClient.close();
+				((Closeable) response).close();
+			} catch (Exception e) {
+				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
+						e.toString());
+			}
+		}
+	}
+
+	private String createJsonBody() {
+		JSONObject data = new JSONObject();
+		try {
 			data.put("name", "Bergischer Verein für Familienkunde");
+
 			data.put("inactive", false);
 			data.put("description", "");
 			// Und jetzt eine Config aufbauen:
@@ -160,40 +203,12 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			config.put("seeds", seeds);
 			config.put("depth", -1);
 			data.put("config", config);
-			WebgatherLogger.debug("data.toString()=" + data.toString());
-			StringEntity se = new StringEntity(data.toString());
-			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-			request.setEntity(se);
-			request.addHeader("Accept", "application/json");
-			response = httpClient.execute(request);
-			if (response.getStatusLine().getStatusCode() == 200) {
-				String responseJson = EntityUtils.toString(response.getEntity());
-				WebgatherLogger.debug("received response: " + responseJson);
-				// JSON ausparsen
-				JsonNode responseJsonNode = objectMapper.readTree(responseJson);
-				this.btrixWorkflowId = responseJsonNode.get("id").asText();
-				WebgatherLogger.debug("Crawler Config angelegt mit btrix_workflow_id: "
-						+ btrixWorkflowId);
-				conf.setBtrixWorkflowId(btrixWorkflowId);
-				// hier: Update (Modify) der Gatherconf wie beim "Save"-Button
-			} else {
-				throw new RuntimeException("Status-Code von /orgs/" + btrix_orgid
-						+ "/crawlconfigs : " + response.getStatusLine().getStatusCode());
-			}
-		} catch (Exception e) {
-			msg = "Browsertrix Crawler Config für PID " + node.getPid()
-					+ " kann nicht gesendet werden!";
-			WebgatherLogger.error(msg, e.toString());
-			throw new RuntimeException(e);
-		} finally {
-			try {
-				httpClient.close();
-				((Closeable) response).close();
-			} catch (Exception e) {
-				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
-						e.toString());
-			}
+		} catch (JSONException e) {
+			msg = "Crawlerconf JSON (JsonBody) für PID " + node.getPid()
+					+ " kann nicht gebaut werden!";
+			WebgatherLogger.error(msg, e.getMessage());
 		}
+		return data.toString();
 	}
 
 	/**
