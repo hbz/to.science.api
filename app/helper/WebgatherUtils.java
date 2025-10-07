@@ -148,9 +148,11 @@ public class WebgatherUtils {
 					throw new HttpArchiveException(403,
 							"Webgatherer is too busy! Please try again later.");
 				}
-				if (!Globals.heritrix.jobExists(conf.getName())) {
-					Globals.heritrix.createJob(conf);
-				}
+				// if (!Globals.heritrix.jobExists(conf.getName())) {
+				// nicht nur bei Neuanlage, sondern auch, falls crawlerConf im JobDir
+				// erneuert werden muss (refresh)
+				Globals.heritrix.createJob(conf);
+				// }
 				boolean success = Globals.heritrix.teardown(conf.getName());
 				WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
 
