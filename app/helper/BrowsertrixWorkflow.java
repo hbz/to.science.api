@@ -140,7 +140,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 		try {
 			httpClient = HttpClientBuilder.create().build();
 			request = new HttpPost(
-					btrix_api_url + "/orgs/" + btrix_orgid + "/crawlconfigs");
+					btrix_api_url + "/orgs/" + btrix_orgid + "/crawlconfigs/");
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
