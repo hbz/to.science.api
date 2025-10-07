@@ -17,16 +17,13 @@ package helper;
 
 import java.io.Closeable;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,7 +49,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	/* Browsertrix spezifische Variablen */
 	private CloseableHttpClient httpClient = null;
 	private HttpPost request = null;
-	private HttpResponse response = null;
+	private CloseableHttpResponse response = null;
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private String bearerToken = null;
 	private String btrixWorkflowId = null;
@@ -191,7 +188,6 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 		JSONObject data = new JSONObject();
 		try {
 			data.put("name", "Bergischer Verein für Familienkunde");
-
 			data.put("inactive", false);
 			data.put("description", "");
 			// Und jetzt eine Config aufbauen:
