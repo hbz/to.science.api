@@ -491,6 +491,7 @@ public class KtblHelper {
 
 	public static String getDoi(Node node) {
 		try {
+			// persist Doi in tosMd, if not exists
 			JSONObject jo = new JSONObject(node.getMetadata("toscience"));
 			if (node.hasDoi()) {
 				if (!jo.has("doi") || !(jo.get("doi") instanceof JSONArray)
@@ -503,11 +504,16 @@ public class KtblHelper {
 					new Modify().updateMetadata("toscience", node, jo.toString());
 				}
 			}
+			// if Doi in tosMD exists, return it.
+			if (jo.has("doi") && jo.get("doi") instanceof JSONArray) {
+				return jo.getJSONArray("doi").get(0).toString();
+			}
+
 		} catch (Exception e) {
 			play.Logger.debug("Exception in getDoi():" + e);
 		}
 
-		return node.getDoi();
+		return null;
 	}
 
 }
