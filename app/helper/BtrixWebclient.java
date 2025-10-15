@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import actions.Modify;
 import models.CrawlerModel;
 import models.Gatherconf;
 
@@ -44,7 +45,7 @@ import play.Play;
  * @author Ingolf Kuss
  *
  */
-public class BrowsertrixWorkflow extends CrawlerModel {
+public class BtrixWebclient extends CrawlerModel {
 
 	/* Browsertrix spezifische Variablen */
 	private CloseableHttpClient httpClient = null;
@@ -81,7 +82,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	 *          soll.
 	 * @param conf the crawler configuration for the website
 	 */
-	public BrowsertrixWorkflow(Node node, Gatherconf conf) {
+	public BtrixWebclient(Node node, Gatherconf conf) {
 		super(node, conf);
 		try {
 			/*
@@ -105,7 +106,7 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 			request = new HttpPost(btrix_api_url + "/auth/jwt/login");
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_admin_username " + btrix_admin_username);
-			WebgatherLogger.debug("btrix_admin_password " + btrix_admin_password);
+			// WebgatherLogger.debug("btrix_admin_password " + btrix_admin_password);
 			request.addHeader("Content-Type", "application/x-www-form-urlencoded");
 			request.setEntity(new StringEntity("username=" + btrix_admin_username
 					+ "&password=" + btrix_admin_password + "&grant_type=password"));
@@ -162,7 +163,8 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 				WebgatherLogger.debug("Crawler Config angelegt mit btrix_workflow_id: "
 						+ btrixWorkflowId);
 				conf.setBtrixWorkflowId(btrixWorkflowId);
-				// hier: Update (Modify) der Gatherconf wie beim "Save"-Button
+				msg = new Modify().updateConf(node, conf.toString());
+				WebgatherLogger.info(msg);
 			} else {
 				String errorBody = EntityUtils.toString(response.getEntity());
 				throw new RuntimeException("Status-Code von /orgs/" + btrix_orgid
@@ -187,17 +189,31 @@ public class BrowsertrixWorkflow extends CrawlerModel {
 	private String createJsonBody() {
 		JSONObject data = new JSONObject();
 		try {
-			data.put("name", "Bergischer Verein für Familienkunde");
-			data.put("inactive", false);
-			data.put("description", "");
+			data.put("name", conf.getName());
+			data.put("inactive", !conf.isActive());
+			data.put("description", conf.getNotices());
 			// Und jetzt eine Config aufbauen:
 			JSONObject config = new JSONObject();
 			JSONObject seed = new JSONObject();
-			seed.put("url", "https://www.bvff.de/");
+			seed.put("url", this.urlAscii);
+			/*
+			 * zu inkludierende (zusätzliche) Domains. Evtl. werden diese besser als
+			 * zusätzl. Seeds eingegeben -- ausprobieren
+			 */
+			JSONArray include = new JSONArray();
+			for (String domain : conf.getDomains()) {
+				include.put(domain);
+			}
+			seed.put("include", include);
+			seed.put("extraHops",
+					1); /* one hop out -- the crawler will visit pages one link away. */
+			switch conf.getCrawlSubdomains()
+			case hostnames seed.put("scopeType", "host");
+			case domains  seed.put("scopeType", "domain");
 			JSONArray seeds = new JSONArray();
 			seeds.put(seed);
 			config.put("seeds", seeds);
-			config.put("depth", -1);
+			config.put("depth", conf.getDeepness());
 			data.put("config", config);
 		} catch (JSONException e) {
 			msg = "Crawlerconf JSON (JsonBody) für PID " + node.getPid()
