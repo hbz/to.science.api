@@ -32,9 +32,12 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static archive.fedora.Vocabulary.*;
 import actions.Modify;
 import models.CrawlerModel;
 import models.Gatherconf;
+import models.Gatherconf.CrawlSubdomains;
+import models.Gatherconf.QuotaUnitSelection;
 
 import models.Node;
 import play.Play;
@@ -189,31 +192,90 @@ public class BtrixWebclient extends CrawlerModel {
 	private String createJsonBody() {
 		JSONObject data = new JSONObject();
 		try {
+			// Name oder Titel der Site
 			data.put("name", conf.getName());
+			String md = node.getMetadata(toscience);
+			if (md != null) {
+				JSONObject jo = new JSONObject(md);
+				if (jo.has("title")) {
+					// Hole Titel aus den toscience-Metadaten
+					data.put("name", jo.getJSONArray("title").get(0).toString());
+				}
+			}
 			data.put("inactive", !conf.isActive());
 			data.put("description", conf.getNotices());
+			// maximale Crawlgröße in Byte
+			data.put("maxCrawlSize", conf.getMaxCrawlSize());
+			if (conf.getMaxCrawlSize() > 0) {
+				switch (conf.getQuotaUnitSelection()) {
+				case KB:
+					data.put("maxCrawlSize", conf.getMaxCrawlSize() * 1000);
+					break;
+				case MB:
+					data.put("maxCrawlSize", conf.getMaxCrawlSize() * 1000000);
+					break;
+				case GB:
+					data.put("maxCrawlSize", conf.getMaxCrawlSize() * 1000000000);
+					break;
+				default:
+					// standardmäßig wird Kilobyte angenommen
+					data.put("maxCrawlSize", conf.getMaxCrawlSize() * 1000);
+					break;
+				}
+			}
 			// Und jetzt eine Config aufbauen:
 			JSONObject config = new JSONObject();
 			JSONObject seed = new JSONObject();
 			seed.put("url", this.urlAscii);
+			switch (conf.getCrawlSubdomains()) {
+			case hostnames:
+				seed.put("scopeType", "host");
+				break;
+			case domains:
+				seed.put("scopeType", "domain");
+				break;
+			default:
+				// standardmäßig wird die Domain ohne Subdomains eingesammelt
+				seed.put("scopeType", "host");
+				break;
+			}
 			/*
 			 * zu inkludierende (zusätzliche) Domains. Evtl. werden diese besser als
-			 * zusätzl. Seeds eingegeben -- ausprobieren
+			 * zusätzl. Seeds eingegeben -- ausprobieren.Als 3. Möglichkeit kann man
+			 * "include" auch auf config-Ebene angeben.
 			 */
 			JSONArray include = new JSONArray();
 			for (String domain : conf.getDomains()) {
 				include.put(domain);
 			}
 			seed.put("include", include);
+			/*
+			 * Excludes kann man auch auf config-Ebene anlegen, nicht nur auf
+			 * seed-Ebene -- ausprobieren
+			 */
+			JSONArray exclude = new JSONArray();
+			for (String urlExcluded : conf.getUrlsExcluded()) {
+				exclude.put(urlExcluded);
+			}
+			seed.put("exclude", exclude);
+			seed.put("depth", conf.getDeepness());
 			seed.put("extraHops",
 					1); /* one hop out -- the crawler will visit pages one link away. */
-			switch conf.getCrawlSubdomains()
-			case hostnames seed.put("scopeType", "host");
-			case domains  seed.put("scopeType", "domain");
 			JSONArray seeds = new JSONArray();
 			seeds.put(seed);
 			config.put("seeds", seeds);
 			config.put("depth", conf.getDeepness());
+			config.put("extraHops", 1);
+			config.put("lang", "de");
+			config.put("blockAds", true);
+			// Limits amount of time to wait for a page to load; in Sekunden
+			// nimm default Wert
+			// config.put("pageLoadTimeout", 120);
+			// Delay Before Next Page; in Sekunden
+			config.put("pageExtraDelay", conf.getWaitSecBtRequests());
+			config.put("useSitemap", true);
+			config.put("userAgent",
+					Gatherconf.agentTable.get(conf.getAgentIdSelection()));
 			data.put("config", config);
 		} catch (JSONException e) {
 			msg = "Crawlerconf JSON (JsonBody) für PID " + node.getPid()
