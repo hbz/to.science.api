@@ -276,6 +276,8 @@ public class BtrixWebclient extends CrawlerModel {
 				config.put("scopeType", "host");
 				break;
 			}
+			config.put("include", include);
+			config.put("exclude", exclude);
 			config.put("depth", conf.getDeepness());
 			config.put("extraHops", 1);
 			config.put("lang", "de");
