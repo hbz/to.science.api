@@ -124,8 +124,6 @@ public class Heritrix {
 	}
 
 	public File createJobDir(Gatherconf conf) {
-		// nicht nur bei Neuanlage, sondern auch, falls crawlerConf im JobDir
-		// erneuert werden muss (refresh)
 		try {
 			if (conf.getName() == null) {
 				throw new RuntimeException("The configuration has no name !");
