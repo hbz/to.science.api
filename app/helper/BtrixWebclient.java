@@ -264,6 +264,18 @@ public class BtrixWebclient extends CrawlerModel {
 			JSONArray seeds = new JSONArray();
 			seeds.put(seed);
 			config.put("seeds", seeds);
+			switch (conf.getCrawlSubdomains()) {
+			case hostnames:
+				config.put("scopeType", "host");
+				break;
+			case domains:
+				config.put("scopeType", "domain");
+				break;
+			default:
+				// standardmäßig wird die Domain ohne Subdomains eingesammelt
+				config.put("scopeType", "host");
+				break;
+			}
 			config.put("depth", conf.getDeepness());
 			config.put("extraHops", 1);
 			config.put("lang", "de");
