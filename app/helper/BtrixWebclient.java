@@ -249,7 +249,7 @@ public class BtrixWebclient extends CrawlerModel {
 			JSONArray include = new JSONArray();
 			for (String domain : conf.getDomains()) {
 				include.put(domain);
-				seeds.put(createSeed(domain, "host", conf.getDeepness()));
+				seeds.put(createSeed(domain, this.scopeType, conf.getDeepness()));
 			}
 			config.put("seeds", seeds);
 			config.put("scopeType", this.scopeType);
