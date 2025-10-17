@@ -56,6 +56,7 @@ public class BtrixWebclient extends CrawlerModel {
 	private CloseableHttpResponse response = null;
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private String bearerToken = null;
+	private String scopeType = null;
 	private String btrixWorkflowId = null;
 
 	/*
@@ -225,58 +226,41 @@ public class BtrixWebclient extends CrawlerModel {
 			}
 			// Und jetzt eine Config aufbauen:
 			JSONObject config = new JSONObject();
-			JSONObject seed = new JSONObject();
-			seed.put("url", this.urlAscii);
 			switch (conf.getCrawlSubdomains()) {
 			case hostnames:
-				seed.put("scopeType", "host");
+				this.scopeType = "host";
 				break;
 			case domains:
-				seed.put("scopeType", "domain");
+				this.scopeType = "domain";
 				break;
 			default:
 				// standardmäßig wird die Domain ohne Subdomains eingesammelt
-				seed.put("scopeType", "host");
+				this.scopeType = "host";
 				break;
 			}
+			JSONArray seeds = new JSONArray();
+			JSONObject seed =
+					createSeed(this.urlAscii, this.scopeType, conf.getDeepness());
+			seeds.put(seed);
 			/*
-			 * zu inkludierende (zusätzliche) Domains. Evtl. werden diese besser als
-			 * zusätzl. Seeds eingegeben -- ausprobieren.Als 3. Möglichkeit kann man
-			 * "include" auch auf config-Ebene angeben.
+			 * zu inkludierende (zusätzliche) Domains. Diese erhalten jeweils ein
+			 * eigenes "Seed" und zusätzlich einen Eintrag im Array "include".
 			 */
 			JSONArray include = new JSONArray();
 			for (String domain : conf.getDomains()) {
 				include.put(domain);
+				seeds.put(createSeed(domain, "host", conf.getDeepness()));
 			}
-			seed.put("include", include);
+			config.put("seeds", seeds);
+			config.put("scopeType", this.scopeType);
+			config.put("include", include);
 			/*
-			 * Excludes kann man auch auf config-Ebene anlegen, nicht nur auf
-			 * seed-Ebene -- ausprobieren
+			 * Exclusions = auszuschließende Bereiche
 			 */
 			JSONArray exclude = new JSONArray();
 			for (String urlExcluded : conf.getUrlsExcluded()) {
 				exclude.put(urlExcluded);
 			}
-			seed.put("exclude", exclude);
-			seed.put("depth", conf.getDeepness());
-			seed.put("extraHops",
-					1); /* one hop out -- the crawler will visit pages one link away. */
-			JSONArray seeds = new JSONArray();
-			seeds.put(seed);
-			config.put("seeds", seeds);
-			switch (conf.getCrawlSubdomains()) {
-			case hostnames:
-				config.put("scopeType", "host");
-				break;
-			case domains:
-				config.put("scopeType", "domain");
-				break;
-			default:
-				// standardmäßig wird die Domain ohne Subdomains eingesammelt
-				config.put("scopeType", "host");
-				break;
-			}
-			config.put("include", include);
 			config.put("exclude", exclude);
 			config.put("depth", conf.getDeepness());
 			config.put("extraHops", 1);
@@ -297,6 +281,21 @@ public class BtrixWebclient extends CrawlerModel {
 			WebgatherLogger.error(msg, e.getMessage());
 		}
 		return data.toString();
+	}
+
+	private JSONObject createSeed(String url, String seedScopeType, int depth) {
+		JSONObject seed = new JSONObject();
+		try {
+			seed.put("url", url);
+			seed.put("scopeType", seedScopeType);
+			seed.put("depth", depth);
+			/* one hop out -- the crawler will visit pages one link away. */
+			seed.put("extraHops", 1);
+		} catch (JSONException e) {
+			msg = "Seed with url " + url + " could not be created!";
+			WebgatherLogger.warn(msg, e.getMessage());
+		}
+		return seed;
 	}
 
 	/**
