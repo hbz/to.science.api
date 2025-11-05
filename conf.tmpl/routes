@@ -34,6 +34,8 @@ GET /resource/:pid.wgl			    	controllers.Resource.asWgl(pid, validate : Boolean
 GET /resource/:pid.openaire			controllers.Resource.asOpenAire(pid, validate : Boolean ?= false)
 GET /resource/:pid.json				controllers.Resource.asJson(pid)	
 GET /resource/:pid.json2			controllers.Resource.asJson2(pid)	
+GET /resource/:pid.ktbl             controllers.Resource.asKtbl(pid)
+GET /resource/:pid.tos              controllers.Resource.asToscience(pid)
 GET /resource/:pid.regal			controllers.Resource.asJson(pid)	
 GET /resource/:pid.rdf				controllers.Resource.asRdf(pid)	
 GET /resource/:pid.epicur			controllers.Resource.asEpicur(pid)	
@@ -57,8 +59,7 @@ GET /resource/:pid/status			controllers.Resource.getStatus(pid)
 GET /resource/:pid/conf			    controllers.Resource.listConf(pid)
 GET /resource/:pid/urlHist			controllers.Resource.listUrlHist(pid)
 GET /resource/:pid/title		    controllers.Resource.listTitle(pid)
-GET /resource/:pid.ktbl             controllers.Resource.asKtbl(pid)
-GET /resource/:pid.tos              controllers.Resource.asToscience(pid)
+
 
 PUT /resource/:pid/parts			controllers.Resource.updateSeq(pid)
 PUT /resource/:pid/metadata			controllers.Resource.updateMetadata(pid)
