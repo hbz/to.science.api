@@ -1706,4 +1706,35 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "asKtbl", value = "asKtbl", notes = "Returns ktbl data stream", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asKtbl(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			try {
+				Node readNode = readNodeOrNull(pid);
+				String mdKtbl = Helper.getKtblJson(readNode);
+				JSONObject jo = new JSONObject(mdKtbl);
+				return ok(jo.toString()).as("application/json");
+			} catch (Exception e) {
+				play.Logger.debug("Exception in asKtbl()" + e);
+				return internalServerError("Error processing request");
+			}
+		});
+
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "asToscience", value = "asToscience", notes = "Returns toscience data stream", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asToscience(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			try {
+				Node readNode = readNodeOrNull(pid);
+				String mdTos = Helper.getTosJson(readNode);
+				JSONObject jo = new JSONObject(mdTos);
+				return ok(jo.toString()).as("application/json");
+			} catch (Exception e) {
+				play.Logger.debug("Exception in asToscience() " + e);
+				return internalServerError("Error processing request");
+			}
+		});
+	}
+
 }
