@@ -115,13 +115,20 @@ public class Heritrix {
 		WebgatherLogger.debug("Create new job " + conf.getName());
 		this.conf = conf;
 		File dir = createJobDir(conf);
-		/**
-		 * try { teardown(conf.getName()); } catch (RuntimeException e) {
-		 * WebgatherLogger.debug("", e); } try { WebgatherLogger.debug(
-		 * " addJobDirToHeritrix(dir) " + dir); addJobDirToHeritrix(dir); } catch
-		 * (Exception e) { if (dir.exists()) dir.delete(); teardown(conf.getName());
-		 * }
-		 */
+		try {
+			teardown(conf.getName());
+		} catch (RuntimeException e) {
+			WebgatherLogger.debug("", e);
+		}
+		try {
+			WebgatherLogger.debug(" addJobDirToHeritrix(dir) " + dir);
+			addJobDirToHeritrix(dir);
+		} catch (Exception e) {
+			if (dir.exists())
+				dir.delete();
+			teardown(conf.getName());
+		}
+
 	}
 
 	public File createJobDir(Gatherconf conf) {
@@ -194,7 +201,8 @@ public class Heritrix {
 					new FileWriter(dir.getAbsolutePath() + "/cookies.txt"));
 			String[] cookies = conf.getCookie().replaceAll(" ", "").split(";");
 			for (int i = 0; i < cookies.length; i++) {
-				String[] cookieParts = cookies[i].split("=");
+				// split only at first occurence of "="
+				String[] cookieParts = cookies[i].split("=", 2);
 				writer
 						.write(url_no_https.replaceAll("/$", "") + "\tTRUE\t/\tFALSE\t-1\t"
 								+ cookieParts[0] + "\t" + cookieParts[1]);
