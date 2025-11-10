@@ -192,8 +192,14 @@ public class Heritrix {
 		try {
 			writer = new BufferedWriter(
 					new FileWriter(dir.getAbsolutePath() + "/cookies.txt"));
-			writer.write(url_no_https.replaceAll("/$", "") + "\tTRUE\t/\tFALSE\t-1");
-			writer.newLine();
+			String[] cookies = conf.getCookie().replaceAll(" ", "").split(";");
+			for (int i = 0; i < cookies.length; i++) {
+				String[] cookieParts = cookies[i].split("=");
+				writer
+						.write(url_no_https.replaceAll("/$", "") + "\tTRUE\t/\tFALSE\t-1\t"
+								+ cookieParts[0] + "\t" + cookieParts[1]);
+				writer.newLine();
+			}
 			writer.close();
 		} catch (Exception e) {
 			play.Logger
