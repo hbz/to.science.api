@@ -49,6 +49,7 @@ public class Heritrix {
 	private Gatherconf conf = null;
 	private File dir = null;
 	private BufferedWriter writer;
+	private String url_no_https = null;
 
 	public static String openwaybackLink = Play.application().configuration()
 			.getString("regal-api.heritrix.openwaybackLink");
@@ -156,9 +157,9 @@ public class Heritrix {
 			content = content.replaceAll("\\$\\{DESCRIPTION\\}",
 					"Edoweb crawl of" + conf.getUrl());
 			content = content.replaceAll("\\$\\{URL\\}", conf.getUrl());
-			content =
-					content.replaceAll("\\$\\{URL_NO_WWW\\}", "http://" + conf.getUrl()
-							.replaceAll("^http://|https://", "").replaceAll("^www\\.", ""));
+			url_no_https = conf.getUrl().replaceAll("^http://|https://", "");
+			content = content.replaceAll("\\$\\{URL_NO_WWW\\}",
+					"http://" + url_no_https.replaceAll("^www\\.", ""));
 			content = content.replaceAll("\\$\\{URL_SURT_FORM\\}",
 					urlSurtForm(conf.getUrl()));
 			ArrayList<String> domains = conf.getDomains();
@@ -190,9 +191,8 @@ public class Heritrix {
 	private void createCookiesTxt() {
 		try {
 			writer = new BufferedWriter(
-					new FileWriter(dir.getAbsolutePath() + "/cookies.txt", true));
-			writer.write(conf.getUrl().replaceAll("^http://|https://", "")
-					+ "\tTRUE\t/\tFALSE\t-1");
+					new FileWriter(dir.getAbsolutePath() + "/cookies.txt"));
+			writer.write(url_no_https.replaceAll("/$", "") + "\tTRUE\t/\tFALSE\t-1");
 			writer.newLine();
 			writer.close();
 		} catch (Exception e) {
