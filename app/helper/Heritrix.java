@@ -17,8 +17,10 @@
 package helper;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -43,6 +45,10 @@ import play.Play;
  *
  */
 public class Heritrix {
+
+	private Gatherconf conf = null;
+	private File dir = null;
+	private BufferedWriter writer;
 
 	public static String openwaybackLink = Play.application().configuration()
 			.getString("regal-api.heritrix.openwaybackLink");
@@ -70,7 +76,7 @@ public class Heritrix {
 			Logger.of("webgatherer");
 
 	/**
-	 * @param name
+	 * @param name Name des Jobs
 	 * @return true if teardown did work
 	 */
 	public boolean teardown(String name) {
@@ -102,25 +108,19 @@ public class Heritrix {
 	 * --anyauth --location -H \"Accept:application/xml\"
 	 * https://localhost:8443/engine"
 	 * 
-	 * @param conf
+	 * @param conf Gatherconf
 	 */
 	public void createJob(Gatherconf conf) {
 		WebgatherLogger.debug("Create new job " + conf.getName());
+		this.conf = conf;
 		File dir = createJobDir(conf);
-		try {
-			teardown(conf.getName());
-		} catch (RuntimeException e) {
-			WebgatherLogger.debug("", e);
-		}
-		try {
-			WebgatherLogger.debug(" addJobDirToHeritrix(dir) " + dir);
-			addJobDirToHeritrix(dir);
-		} catch (Exception e) {
-			if (dir.exists())
-				dir.delete();
-			teardown(conf.getName());
-		}
-
+		/**
+		 * try { teardown(conf.getName()); } catch (RuntimeException e) {
+		 * WebgatherLogger.debug("", e); } try { WebgatherLogger.debug(
+		 * " addJobDirToHeritrix(dir) " + dir); addJobDirToHeritrix(dir); } catch
+		 * (Exception e) { if (dir.exists()) dir.delete(); teardown(conf.getName());
+		 * }
+		 */
 	}
 
 	public File createJobDir(Gatherconf conf) {
@@ -129,6 +129,7 @@ public class Heritrix {
 				throw new RuntimeException("The configuration has no name !");
 			}
 			File dir = new File(jobDir + "/" + conf.getName());
+			this.dir = dir;
 			if (!dir.exists()) {
 				// Create Job Directory
 				WebgatherLogger
@@ -172,11 +173,31 @@ public class Heritrix {
 			// WebgatherLogger.debug("Print-----\n" + content + "\n to \n" +
 			// dir.getAbsolutePath() + "/crawler-beans.cxml");
 
+			// Neuanlage der crawler-beans im Crawl-Verzeichnis
 			Files.write(Paths.get(dir.getAbsolutePath() + "/crawler-beans.cxml"),
 					content.getBytes(charset));
+
+			// Anlage einer Datei cookies.txt im Crawl-Verzeichnis
+			createCookiesTxt();
+
 			return dir;
 		} catch (Exception e) {
 
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void createCookiesTxt() {
+		try {
+			writer = new BufferedWriter(
+					new FileWriter(dir.getAbsolutePath() + "/cookies.txt", true));
+			writer.write(conf.getUrl().replaceAll("^http://|https://", "")
+					+ "\tTRUE\t/\tFALSE\t-1");
+			writer.newLine();
+			writer.close();
+		} catch (Exception e) {
+			play.Logger
+					.error(conf.getName() + ": cookies.txt kann nicht angelegt werden !");
 			throw new RuntimeException(e);
 		}
 	}

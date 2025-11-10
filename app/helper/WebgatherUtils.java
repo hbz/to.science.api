@@ -153,6 +153,7 @@ public class WebgatherUtils {
 				// erneuert werden muss (refresh)
 				Globals.heritrix.createJob(conf);
 				// }
+			} else if (conf.getCrawlerSelection().equals("zabel")) {
 				boolean success = Globals.heritrix.teardown(conf.getName());
 				WebgatherLogger.debug("Teardown " + conf.getName() + " " + success);
 
