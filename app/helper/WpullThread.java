@@ -10,6 +10,7 @@ import java.util.List;
 
 import actions.Create;
 import models.Gatherconf;
+import models.Globals;
 import models.Node;
 import models.Gatherconf.RobotsPolicy;
 import models.Gatherconf.CrawlSubdomains;
@@ -42,6 +43,7 @@ public class WpullThread extends Thread {
 	private File logFile = null;
 	private int exitState = 0;
 	private int CDNGathererExitState = 0;
+	private String msg = "";
 	/**
 	 * Der wievielte Versuch ist es, diesen Crawl zu starten ?
 	 */
@@ -265,6 +267,21 @@ public class WpullThread extends Thread {
 						localpath, versionPid);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
+				/**
+				 * Hier eine Mail schicken, falls nichts eingesammelt wurde. Für
+				 * TOS-1326
+				 */
+				if (WpullCrawl.isWpullCrawlEmpty(node)) {
+					msg = "Für die Website " + conf.getName()
+							+ " wurde zwar ein Crawl formell erfolgreich beendet und es wurde ein neuer Webschnitt angelegt.\n";
+					msg +=
+							"Jedoch wurde lt. Logdatei im Hauptcrawl nichts eingesammelt: \"INFO Downloaded: 0 files, 0.0 Byte.\"\n";
+					msg += "Bitte überprüfen Sie den neuesten Webschnitt dieser Website: "
+							+ Globals.urnbase + node.getAggregationUri();
+					WebgatherUtils.sendEmail(node, conf,
+							"Keine Inhalte eingesammelt für Website " + conf.getName() + " !",
+							msg);
+				}
 				return;
 			}
 
