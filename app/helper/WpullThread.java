@@ -27,6 +27,7 @@ public class WpullThread extends Thread {
 
 	private Node node = null;
 	private Gatherconf conf = null;
+	private List<String> title = null;
 	private File crawlDir = null;
 	private File outDir = null;
 	private String warcFilename = null;
@@ -272,14 +273,18 @@ public class WpullThread extends Thread {
 				 * TOS-1326
 				 */
 				if (WpullCrawl.isWpullCrawlEmpty(node)) {
-					msg = "Für die Website " + conf.getName()
-							+ " wurde zwar ein Crawl formell erfolgreich beendet und es wurde ein neuer Webschnitt angelegt.\n";
+					title = node.getDublinCoreData().getTitle();
+					msg =
+							"Für die Website " + conf.getName() + ", Titel: " + title + "\n";
+					msg +=
+							"Es wurde zwar ein Crawl formell erfolgreich beendet und es wurde ein neuer Webschnitt angelegt.\n";
 					msg +=
 							"Jedoch wurde lt. Logdatei im Hauptcrawl nichts eingesammelt: \"INFO Downloaded: 0 files, 0.0 Byte.\"\n";
 					msg += "Bitte überprüfen Sie den neuesten Webschnitt dieser Website: "
 							+ Globals.urnbase + node.getAggregationUri();
 					WebgatherUtils.sendEmail(node, conf,
-							"Keine Inhalte eingesammelt für Website " + conf.getName() + " !",
+							"Keine Inhalte eingesammelt! Für Website " + conf.getName()
+									+ ", Titel: " + title,
 							msg);
 				}
 				return;
