@@ -48,6 +48,8 @@ public class WebsiteVersionPublisher {
 	// "File"
 	private static File publicCrawlDir = null;
 	private static String subDir = null;
+	/* Die Konfiguration des Webschnittes */
+	private Gatherconf conf = null;
 	private static String msg = null;
 
 	/**
@@ -130,7 +132,7 @@ public class WebsiteVersionPublisher {
 		WebgatherLogger.info("Jetzt wird ein Webschnitt veröffentlicht.");
 		try {
 			getConfFromFedora(node.getPid(), node);
-			Gatherconf conf = Gatherconf.create(node.getConf());
+			conf = Gatherconf.create(node.getConf());
 			WebgatherLogger.debug("conf=" + conf.toString());
 			PublishWebArchive(node, conf);
 		} catch (Exception e) {
@@ -154,7 +156,7 @@ public class WebsiteVersionPublisher {
 				.info("Ein Webschnitt wird von der Veröffentlichung zurückgezogen.");
 		try {
 			getConfFromFedora(node.getPid(), node);
-			Gatherconf conf = Gatherconf.create(node.getConf());
+			conf = Gatherconf.create(node.getConf());
 			WebgatherLogger.debug("conf=" + conf.toString());
 			dePublishWebArchive(node, conf);
 		} catch (Exception e) {
@@ -268,8 +270,6 @@ public class WebsiteVersionPublisher {
 				localDir = Play.application().configuration().getString(
 						"regal-api.wget.dataDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
-				msg = new Modify().updateConf(node, conf.toString());
-				WebgatherLogger.info(msg);
 				subDir = subDir.concat("/warcs");
 				localDir = localDir.concat("/warcs");
 				break;
@@ -277,8 +277,6 @@ public class WebsiteVersionPublisher {
 				localDir = Play.application().configuration().getString(
 						"regal-api.heritrix.jobDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
-				msg = new Modify().updateConf(node, conf.toString());
-				WebgatherLogger.info(msg);
 				subDir = subDir.concat("/warcs");
 				localDir = localDir.concat("/warcs");
 				break;
@@ -286,16 +284,12 @@ public class WebsiteVersionPublisher {
 				localDir = Play.application().configuration().getString(
 						"regal-api.wpull.outDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
-				msg = new Modify().updateConf(node, conf.toString());
-				WebgatherLogger.info(msg);
 				break;
 			case btrix:
 				localDir = Play.application().configuration()
 						.getString("regal-api.browsertrix.outDir") + "/" + conf.getName()
 						+ "/" + subDir;
 				conf.setLocalDir(localDir);
-				msg = new Modify().updateConf(node, conf.toString());
-				WebgatherLogger.info(msg);
 				subDir = subDir.concat("/archive");
 				localDir = localDir.concat("/archive");
 				break;
