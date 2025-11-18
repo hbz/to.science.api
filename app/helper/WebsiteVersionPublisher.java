@@ -765,7 +765,8 @@ public class WebsiteVersionPublisher {
 		try {
 			String publicJobDir = Play.application().configuration()
 					.getString("regal-api.public.jobDir");
-			publicCrawlDir = new File(publicJobDir + "/" + conf.getName() + subDir);
+			publicCrawlDir =
+					new File(publicJobDir + "/" + conf.getName() + "/" + subDir);
 			if (!publicCrawlDir.exists()) {
 				WebgatherLogger.debug("Das Datenverzeichnis " + publicCrawlDir.getPath()
 						+ " gibt es nicht.");
