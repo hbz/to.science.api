@@ -24,7 +24,6 @@ import actions.Modify.UpdateNodeException;
 import archive.fedora.CopyUtils;
 import models.Gatherconf;
 import models.Globals;
-import models.Gatherconf.CrawlerSelection;
 import models.Node;
 import models.ToScienceObject;
 import play.Logger;
@@ -48,7 +47,7 @@ public class WebsiteVersionPublisher {
 	// Das Unterverzeichnis in public-data/ (volle Pfadangabe) als Java-Klasse
 	// "File"
 	private static File publicCrawlDir = null;
-	private static String jobDir = null;
+	private static String subDir = null;
 	private static String msg = null;
 
 	/**
@@ -90,7 +89,7 @@ public class WebsiteVersionPublisher {
 
 	/**
 	 * Diese Methode realisiert sowohl das Veröffentlichen als auch das
-	 * De-Publizieren eines Webschnitss anhand des Zugriffsrechts "accessScheme".
+	 * De-Publizieren eines Webschnitts anhand des Zugriffsrechts "accessScheme".
 	 * Diese Methode wird über den Endpoint /resource/:pid/publishVersion
 	 * aufgerufen.
 	 * 
@@ -224,54 +223,92 @@ public class WebsiteVersionPublisher {
 	}
 
 	/**
-	 * Ermittelt jobDir und ergänzt ggfs. localDir. jobDir ist das
-	 * Basisverzeichnis, unter dem das WARC-Archiv dieses Webschnitts liegt. Das
-	 * jobDir wird aus dem gewählten Crawler ermittelt. Bei heritrix- und
-	 * wget-Crawls muss das localDir um das Unterverzeichnis warcs/ ergänzt
-	 * werdem, um die WARC-Datei zu finden.
+	 * Ermittelt subDir und ergänzt ggfs. localDir. sudDir sind die
+	 * Unterverzeichnisse, unter denen das WARC-Archiv dieses Webschnitts liegt.
+	 * Das localDir wird aus dem gewählten Crawler ermittelt. Bei heritrix- und
+	 * wget-Crawls muss das subDir um das Unterverzeichnis warcs/ ergänzt werdem,
+	 * um die WARC-Datei zu finden.
 	 * 
 	 * @param node der Knoten des Webschnitts
 	 * @param conf die Gatherconf des Webschnitts
 	 * @return localDir
 	 */
-	private static String findJobDirLocalDir(Node node, Gatherconf conf) {
+	private static String findSubDirLocalDir(Node node, Gatherconf conf) {
 		String localDir = conf.getLocalDir();
 		WebgatherLogger.debug("localDir=" + localDir);
-		CrawlerSelection crawlerSelection = conf.getCrawlerSelection();
-		jobDir =
-				Play.application().configuration().getString("regal-api.wget.dataDir");
-		if (localDir.startsWith(jobDir)) {
-			WebgatherLogger.debug("jobDir=" + jobDir);
-			localDir = localDir.concat("/warcs");
-			return localDir;
-		}
-		jobDir = Play.application().configuration()
-				.getString("regal-api.heritrix.jobDir");
-		if (localDir.startsWith(jobDir)) {
-			WebgatherLogger.debug("jobDir=" + jobDir);
-			localDir = localDir.concat("/warcs");
-			return localDir;
-		}
-		jobDir =
-				Play.application().configuration().getString("regal-api.wpull.jobDir");
-		if (localDir.startsWith(jobDir)) {
-			WebgatherLogger.debug("jobDir=" + jobDir);
-			/* Achtung, jobDir ist temporär <=> wpull-data-crawldir */
-			return localDir;
-		}
-		jobDir =
-				Play.application().configuration().getString("regal-api.wpull.outDir");
-		if (localDir.startsWith(jobDir)) {
-			WebgatherLogger.debug("jobDir=" + jobDir);
-			/*
-			 * outDir ist der permanente Speicherort des Webschnitts, <=> wpull-data
+		try {
+			/**
+			 * Ermittle subDir = die Verzeichnisnamen unterhalb des
+			 * Hauptverzeichnisses für Webarchive dieser Webpage, also unterhalb des
+			 * Verzeichnisses, das so heißt wie die PID der Webpage, in dem die
+			 * WARC-Archive für diesen Crawl stehen.
+			 * 
+			 * Man erhält subDir aus dem Feld "localDir" in der Gatherconf, wobei für
+			 * Heritrix- und wget-Crawls ein Unterverzeichnisname "/warcs" an den Wert
+			 * von "localDir" angehänt werden muss.
 			 */
-			return localDir;
+			int indexOfName = localDir.indexOf(conf.getName());
+			if (indexOfName < 0) {
+				throw new RuntimeException("Webpage name \"" + conf.getName()
+						+ "\" not found in localDir \"" + localDir + "\"");
+			}
+			subDir = localDir.substring(indexOfName + conf.getName().length() + 1);
+			WebgatherLogger.debug(
+					"Unterverzeichnis für Webarchive (ohne den Zusatz \"/warcs\" oder \"/archive\"): "
+							+ subDir);
+			/**
+			 * Füge nun das richtige Wurzelverzeichnis hinzu, unter dem die Webarchive
+			 * stehen. Die Angabe in "localDir" muss nicht stimmen, da sie für alte WS
+			 * z.B. noch "/opt/regal" enthält. Hole daher die Angaben aus der
+			 * aktuellen application.conf. Schreibe das korrigierte localDir zurück in
+			 * die conf:
+			 */
+			switch (conf.getCrawlerSelection()) {
+			case wget:
+				localDir = Play.application().configuration().getString(
+						"regal-api.wget.dataDir") + "/" + conf.getName() + "/" + subDir;
+				conf.setLocalDir(localDir);
+				msg = new Modify().updateConf(node, conf.toString());
+				WebgatherLogger.info(msg);
+				subDir = subDir.concat("/warcs");
+				localDir = localDir.concat("/warcs");
+				break;
+			case heritrix:
+				localDir = Play.application().configuration().getString(
+						"regal-api.heritrix.jobDir") + "/" + conf.getName() + "/" + subDir;
+				conf.setLocalDir(localDir);
+				msg = new Modify().updateConf(node, conf.toString());
+				WebgatherLogger.info(msg);
+				subDir = subDir.concat("/warcs");
+				localDir = localDir.concat("/warcs");
+				break;
+			case wpull:
+				localDir = Play.application().configuration().getString(
+						"regal-api.wpull.outDir") + "/" + conf.getName() + "/" + subDir;
+				conf.setLocalDir(localDir);
+				msg = new Modify().updateConf(node, conf.toString());
+				WebgatherLogger.info(msg);
+				break;
+			case btrix:
+				localDir = Play.application().configuration()
+						.getString("regal-api.browsertrix.outDir") + "/" + conf.getName()
+						+ "/" + subDir;
+				conf.setLocalDir(localDir);
+				msg = new Modify().updateConf(node, conf.toString());
+				WebgatherLogger.info(msg);
+				subDir = subDir.concat("/archive");
+				localDir = localDir.concat("/archive");
+				break;
+			default:
+				throw new RuntimeException(
+						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
+			}
+		} catch (Exception e) {
+			WebgatherLogger.error("localDir und subDir für Webschnitt "
+					+ node.getPid() + " konnten nicht ermittelt werden!");
+			throw new RuntimeException(e);
 		}
-		jobDir = null;
-		throw new RuntimeException("Crawl-Verzeichnis " + localDir
-				+ " beginnt nicht mit einem bekannten Crawler-Verzeichnis! Crawler-Auswahl ist "
-				+ crawlerSelection + ". PID=" + node.getPid());
+		return localDir;
 	}
 
 	/**
@@ -287,11 +324,9 @@ public class WebsiteVersionPublisher {
 	 */
 	public static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
 		try {
-			String localDir = findJobDirLocalDir(node, conf);
-			WebgatherLogger.debug("localDir: " + localDir);
-			String subDir = localDir.substring(jobDir.length() + 1);
-			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
-			File publicCrawlDirL = createPublicDataSubDir(subDir);
+			String localDir = findSubDirLocalDir(node, conf);
+			File publicCrawlDirL = createPublicDataSubDir();
+			// setzte uploadFile im Node:
 			getDataFromFedora(node, localDir);
 			String DSLocation = node.getUploadFile();
 			WebgatherLogger.debug("uploadFile=" + DSLocation);
@@ -316,11 +351,9 @@ public class WebsiteVersionPublisher {
 	 */
 	private static void chkRemoveSoftlinkInPublicData(Node node,
 			Gatherconf conf) {
-		String localDir = findJobDirLocalDir(node, conf);
+		String localDir = findSubDirLocalDir(node, conf);
 		try {
-			String subDir = localDir.substring(jobDir.length() + 1);
-			WebgatherLogger.debug("Unterverzeichnis für Webcrawl: " + subDir);
-			if (!chkExistsPublicDataSubDir(subDir)) {
+			if (!chkExistsPublicDataSubDir()) {
 				WebgatherLogger.debug("Nichts zu tun.");
 				return;
 			}
@@ -497,7 +530,7 @@ public class WebsiteVersionPublisher {
 					publicOpenWaybackLink.replace("/lesesaal/", "/weltweit/");
 			conf.setOpenWaybackLink(publicOpenWaybackLink);
 			play.Logger.debug("publicOpenWaybackLink=" + publicOpenWaybackLink);
-			String msg = new Modify().updateConf(node, conf.toString());
+			msg = new Modify().updateConf(node, conf.toString());
 			WebgatherLogger.info(
 					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
 							+ node.getPid() + ". Modify-Message: " + msg);
@@ -591,7 +624,7 @@ public class WebsiteVersionPublisher {
 					Globals.webharvestsDataUrl + "/" + versionDir + "/webschnitt.xml";
 			WebgatherLogger.info("Neuer Openwayback-Link: " + publicOpenWaybackLink);
 			conf.setOpenWaybackLink(publicOpenWaybackLink);
-			String msg = new Modify().updateConf(node, conf.toString());
+			msg = new Modify().updateConf(node, conf.toString());
 			WebgatherLogger.info(
 					"localDir und Openwayback-Link wurde auf öffentlich gesetzt für Webschnitt "
 							+ node.getPid() + ". Modify-Message: " + msg);
@@ -624,7 +657,7 @@ public class WebsiteVersionPublisher {
 			WebgatherLogger
 					.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
 			conf.setOpenWaybackLink(restrictedOpenWaybackLink);
-			String msg = new Modify().updateConf(node, conf.toString());
+			msg = new Modify().updateConf(node, conf.toString());
 			WebgatherLogger.info(
 					"localDir und Openwayback-Link wurde auf zugriffbeschränkt gesetzt für Webschnitt "
 							+ node.getPid() + ". Modify-Message: " + msg);
@@ -709,7 +742,7 @@ public class WebsiteVersionPublisher {
 	 * @param subDir die Verzeichnisstruktur unterhalb von public-data/.
 	 *          Unterverzeichnisse sind durch "/" getrennt.
 	 */
-	private static File createPublicDataSubDir(String subDir) {
+	private static File createPublicDataSubDir() {
 		try {
 			String publicJobDir = Play.application().configuration()
 					.getString("regal-api.public.jobDir");
@@ -732,7 +765,7 @@ public class WebsiteVersionPublisher {
 	 *          Unterverzeichnisse sind durch "/" getrennt.
 	 * @return Ja oder Nein : Verzeichnis existiert
 	 */
-	private static boolean chkExistsPublicDataSubDir(String subDir) {
+	private static boolean chkExistsPublicDataSubDir() {
 		publicCrawlDir = null;
 		try {
 			String publicJobDir = Play.application().configuration()
@@ -785,7 +818,7 @@ public class WebsiteVersionPublisher {
 			GetDatastreamResponse response =
 					new GetDatastream(node.getPid(), "data").execute();
 			String dsLocation = response.getDatastreamProfile().getDsLocation();
-			WebgatherLogger.debug("datastream location: " + dsLocation);
+			WebgatherLogger.info("datastream location: " + dsLocation);
 			// Bastle upload file zusammen
 			File fileLocation = new File(dsLocation);
 			String uploadFile = localDir + "/" + fileLocation.getName();
