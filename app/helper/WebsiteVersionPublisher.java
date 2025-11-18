@@ -319,7 +319,7 @@ public class WebsiteVersionPublisher {
 	public static void createSoftlinkInPublicData(Node node, Gatherconf conf) {
 		try {
 			String localDir = findSubDirLocalDir(node, conf);
-			File publicCrawlDirL = createPublicDataSubDir();
+			File publicCrawlDirL = createPublicDataSubDir(conf);
 			// setzte uploadFile im Node:
 			getDataFromFedora(node, localDir);
 			String DSLocation = node.getUploadFile();
@@ -347,7 +347,7 @@ public class WebsiteVersionPublisher {
 			Gatherconf conf) {
 		String localDir = findSubDirLocalDir(node, conf);
 		try {
-			if (!chkExistsPublicDataSubDir()) {
+			if (!chkExistsPublicDataSubDir(conf)) {
 				WebgatherLogger.debug("Nichts zu tun.");
 				return;
 			}
@@ -736,11 +736,12 @@ public class WebsiteVersionPublisher {
 	 * @param subDir die Verzeichnisstruktur unterhalb von public-data/.
 	 *          Unterverzeichnisse sind durch "/" getrennt.
 	 */
-	private static File createPublicDataSubDir() {
+	private static File createPublicDataSubDir(Gatherconf conf) {
 		try {
 			String publicJobDir = Play.application().configuration()
 					.getString("regal-api.public.jobDir");
-			File publicCrawlDirL = new File(publicJobDir + "/" + subDir);
+			File publicCrawlDirL =
+					new File(publicJobDir + "/" + conf.getName() + "/" + subDir);
 			if (!publicCrawlDirL.exists()) {
 				publicCrawlDirL.mkdirs();
 			}
@@ -759,12 +760,12 @@ public class WebsiteVersionPublisher {
 	 *          Unterverzeichnisse sind durch "/" getrennt.
 	 * @return Ja oder Nein : Verzeichnis existiert
 	 */
-	private static boolean chkExistsPublicDataSubDir() {
+	private static boolean chkExistsPublicDataSubDir(Gatherconf conf) {
 		publicCrawlDir = null;
 		try {
 			String publicJobDir = Play.application().configuration()
 					.getString("regal-api.public.jobDir");
-			publicCrawlDir = new File(publicJobDir + "/" + subDir);
+			publicCrawlDir = new File(publicJobDir + "/" + conf.getName() + subDir);
 			if (!publicCrawlDir.exists()) {
 				WebgatherLogger.debug("Das Datenverzeichnis " + publicCrawlDir.getPath()
 						+ " gibt es nicht.");
