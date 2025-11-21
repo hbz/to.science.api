@@ -315,10 +315,36 @@ public class Create extends RegalAction {
 	 */
 	public Node createWebpageVersion(Node n, Gatherconf conf, String warcFilename,
 			File outDir, String localpath, String versionPid) {
-		String label = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-		String owDatestamp = new SimpleDateFormat("yyyyMMdd").format(new Date());
-		return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
-				versionPid, label, owDatestamp);
+		try {
+			/* Das Label, das auf dem Link "Zum Webschnitt" angezeigt werden soll */
+			/*
+			 * get basename of outDir = the timestamp for when the crawl has started
+			 */
+			String datetime = outDir.getName();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date startdate = sdf.parse(datetime);
+			String label =
+					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startdate);
+			WebgatherLogger.info("Webschnitt Label=" + label);
+			/*
+			 * Der Zeitstempel, mit dem die Open Wayback (oder Python Wayback)
+			 * einsteigen soll. Es ist standardmäßig in UTC anzugeben.
+			 */
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+			LocalDateTime startdateLocal = LocalDateTime.parse(datetime, dtf);
+			ZonedDateTime startdateUTC = startdateLocal.atZone(ZoneId.systemDefault())
+					.withZoneSameInstant(ZoneOffset.UTC);
+			String owDatestamp =
+					DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(startdateUTC);
+			return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
+					versionPid, label, owDatestamp);
+		} catch (Exception e) {
+			WebgatherLogger.warn("Anlage einer Webpage-Version zu PID,URL "
+					+ n.getPid() + "," + conf.getUrl()
+					+ " ist fehlgeschlagen !\n\tGrund: " + e.getMessage());
+			WebgatherLogger.debug("", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -537,12 +563,9 @@ public class Create extends RegalAction {
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
 			String warcFilename = filename.replaceAll(".warc.gz$", "");
 			ApplicationLogger.debug("WARC file name: " + warcFilename);
-			String label = timestamp.substring(0, 4) + "-" + timestamp.substring(4, 6)
-					+ "-" + timestamp.substring(6, 8);
-			String owDatestamp = timestamp.substring(0, 8);
 
 			return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
-					versionPid, label, owDatestamp);
+					versionPid);
 
 		} catch (Exception e) {
 			ApplicationLogger.error(
