@@ -511,6 +511,55 @@ public class WpullCrawl {
 	}
 
 	/**
+	 * Ermittelt, ob ein Crawl nichts eingesammelt hat. Das wird anhand einer
+	 * Meldung im Logfile ermittelt.
+	 * 
+	 * @param node der Node einer Webpage
+	 * @return wahr (leer bzw. nichts eingesammelt) oder falsch (nicht leer)
+	 */
+	public static boolean isWpullCrawlEmpty(Node node) {
+		File logfile = findLatestLogFile(node);
+		/**
+		 * Kein Crawl-Verzeichnis mit crawl.log vorhanden => wird wie "leer"
+		 * behandelt
+		 */
+		if (logfile == null || !logfile.exists()) {
+			WebgatherLogger.warn(
+					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
+			return true;
+		}
+		/* Das Log wird geparst */
+		BufferedReader buf = null;
+		String regExp = "^INFO Downloaded: 0 files, 0.0 B.";
+		Pattern pattern = Pattern.compile(regExp);
+		boolean isEmpty = false;
+		try {
+			buf = new BufferedReader(new FileReader(logfile));
+			String line = null;
+			while ((line = buf.readLine()) != null) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					isEmpty = true;
+					break;
+				}
+			}
+		} catch (IOException e) {
+			WebgatherLogger.warn("Logfile " + logfile.getAbsolutePath()
+					+ " can not be parsed or read. Assuming empty.", e.toString());
+			isEmpty = true;
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return isEmpty;
+	}
+
+	/**
 	 * Prüfung, ob ein Crawl zu einer gegebenen URL aktuell läuft
 	 * 
 	 * @param node der Knoten zu der Webpage mit der URL
