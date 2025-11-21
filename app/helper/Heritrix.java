@@ -17,8 +17,10 @@
 package helper;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -43,6 +45,11 @@ import play.Play;
  *
  */
 public class Heritrix {
+
+	private Gatherconf conf = null;
+	private File dir = null;
+	private BufferedWriter writer;
+	private String url_no_https = null;
 
 	public static String openwaybackLink = Play.application().configuration()
 			.getString("regal-api.heritrix.openwaybackLink");
@@ -70,7 +77,7 @@ public class Heritrix {
 			Logger.of("webgatherer");
 
 	/**
-	 * @param name
+	 * @param name Name des Jobs
 	 * @return true if teardown did work
 	 */
 	public boolean teardown(String name) {
@@ -102,10 +109,11 @@ public class Heritrix {
 	 * --anyauth --location -H \"Accept:application/xml\"
 	 * https://localhost:8443/engine"
 	 * 
-	 * @param conf
+	 * @param conf Gatherconf
 	 */
 	public void createJob(Gatherconf conf) {
 		WebgatherLogger.debug("Create new job " + conf.getName());
+		this.conf = conf;
 		File dir = createJobDir(conf);
 		try {
 			teardown(conf.getName());
@@ -129,6 +137,7 @@ public class Heritrix {
 				throw new RuntimeException("The configuration has no name !");
 			}
 			File dir = new File(jobDir + "/" + conf.getName());
+			this.dir = dir;
 			if (!dir.exists()) {
 				// Create Job Directory
 				WebgatherLogger
@@ -155,9 +164,9 @@ public class Heritrix {
 			content = content.replaceAll("\\$\\{DESCRIPTION\\}",
 					"Edoweb crawl of" + conf.getUrl());
 			content = content.replaceAll("\\$\\{URL\\}", conf.getUrl());
-			content =
-					content.replaceAll("\\$\\{URL_NO_WWW\\}", "http://" + conf.getUrl()
-							.replaceAll("^http://|https://", "").replaceAll("^www\\.", ""));
+			url_no_https = conf.getUrl().replaceAll("^http://|https://", "");
+			content = content.replaceAll("\\$\\{URL_NO_WWW\\}",
+					"http://" + url_no_https.replaceAll("^www\\.", ""));
 			content = content.replaceAll("\\$\\{URL_SURT_FORM\\}",
 					urlSurtForm(conf.getUrl()));
 			ArrayList<String> domains = conf.getDomains();
@@ -172,11 +181,37 @@ public class Heritrix {
 			// WebgatherLogger.debug("Print-----\n" + content + "\n to \n" +
 			// dir.getAbsolutePath() + "/crawler-beans.cxml");
 
+			// Neuanlage der crawler-beans im Crawl-Verzeichnis
 			Files.write(Paths.get(dir.getAbsolutePath() + "/crawler-beans.cxml"),
 					content.getBytes(charset));
+
+			// Anlage einer Datei cookies.txt im Crawl-Verzeichnis
+			createCookiesTxt();
+
 			return dir;
 		} catch (Exception e) {
 
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void createCookiesTxt() {
+		try {
+			writer = new BufferedWriter(
+					new FileWriter(dir.getAbsolutePath() + "/cookies.txt"));
+			String[] cookies = conf.getCookie().replaceAll(" ", "").split(";");
+			for (int i = 0; i < cookies.length; i++) {
+				// split only at first occurence of "="
+				String[] cookieParts = cookies[i].split("=", 2);
+				writer
+						.write(url_no_https.replaceAll("/$", "") + "\tTRUE\t/\tFALSE\t-1\t"
+								+ cookieParts[0] + "\t" + cookieParts[1]);
+				writer.newLine();
+			}
+			writer.close();
+		} catch (Exception e) {
+			play.Logger
+					.error(conf.getName() + ": cookies.txt kann nicht angelegt werden !");
 			throw new RuntimeException(e);
 		}
 	}

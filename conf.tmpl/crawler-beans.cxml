@@ -678,7 +678,11 @@ ${URL}
  <!-- BDBCOOKIESTORAGE: disk-based cookie storage for FetchHTTP -->
  <bean id="cookieStorage" 
    class="org.archive.modules.fetcher.BdbCookieStore">
-  <!-- <property name="cookiesLoadFile"><null/></property> -->
+    <property name="cookiesLoadFile">
+      <bean class="org.archive.spring.ConfigFile">
+        <property name="path" value="cookies.txt" />
+      </bean>
+    </property>
   <!-- <property name="cookiesSaveFile"><null/></property> -->
   <!-- <property name="bdb">
         <ref bean="bdb"/>
