@@ -1511,6 +1511,18 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "exportWS", value = "exportWS", notes = "exportiert einen erfolgreich gecrwalten Webschnitt vom Test- ins Produktivsystem", response = String.class, httpMethod = "POST")
+	public static Promise<Result> exportWS(@PathParam("pid") String pid,
+			@QueryParam("zielserverPid") String zielserverPid) {
+		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Ein Webschnitt wird exportiert.");
+			Node node = readNodeOrNull(pid);
+			// als erstes die Zielpid verifizieren
+			// die Zielpid soll in der Gatherconf gespeichert werden
+			return JsonMessage(new Message(json("ein Webschnitt wird exportiert.")));
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "edit", value = "edit", notes = "get a form to edit the resources metadata", response = String.class, httpMethod = "POST")
 	public static Promise<Result> edit(@PathParam("pid") String pid,
 			@QueryParam("format") String format,
