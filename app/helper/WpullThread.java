@@ -50,7 +50,7 @@ public class WpullThread extends Thread {
 	 */
 	int attempt = 1;
 
-	private static int maxNumberAttempts = 10;
+	private static int maxNumberAttempts = 3;
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 

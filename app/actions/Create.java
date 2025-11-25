@@ -519,6 +519,75 @@ public class Create extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode legt eine WebpageVersion (Objekt-Typ "Node") für eine
+	 * bestehende WARC-Datei an. Es wird angenommen, dass diese WARC-Datei in
+	 * einem angemounteten Datenverzeichnis eines anderen toscience-Servers
+	 * (Quellserver) liegt. Auf diese Weise können Webschnitte von einem auf den
+	 * anderen Server übernommen werden.
+	 * 
+	 * @param n Node, must be of type webpage. The local Node to which a
+	 *          WebpageVersion should be added.
+	 * @param versionPid die gewünschte Pid für die Version (7-stellig numerisch)
+	 *          oder leer (Pid wird generiert)
+	 * @param quellserverWebpagePid The PID of the source webpage on the source
+	 *          server
+	 * @param quellserverWebschnittPid The PID of the source WebpageVersion
+	 *          (Webschnitt) on the source server
+	 * @return a new WebpageVersion (Webschnitt) pointing to an imported crawl.
+	 */
+	public Node importWebpageVersion(Node n, String versionPid,
+			String quellserverWebpagePid, String quellserverWebschnittPid) {
+
+		Gatherconf conf = null;
+		/*
+		 * die Quellserver Webpage PID soll in der Gatherconf gespeichert werden,
+		 * evtl. auch die Quellserver Webschnitt PID
+		 */
+
+		try {
+			// Hole Gatherconf des Quellwebschnittes vom Quellserver
+			conf = new Read().readRemoteConf(quellserverWebschnittPid);
+			// hier weiter
+			if (!"webpage".equals(n.getContentType())) {
+				throw new HttpArchiveException(400, n.getContentType()
+						+ " is not supported. Operation works only on regalType:\"webpage\"");
+			}
+			ApplicationLogger.debug("Import webpageVersion for PID" + n.getPid());
+			conf = Gatherconf.create(n.getConf());
+			ApplicationLogger.debug("Import webpageVersion Conf" + conf.toString());
+			conf.setName(n.getPid());
+			// conf.setId(versionPid);
+			Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+					.parse(quellserverWebschnittPid + " 12:00:00");
+			conf.setStartDate(startDate);
+
+			// hier auf ein bestehendes WARC in dataDir verweisen
+			String crawlDateTimestamp = "";
+			String label = "";
+			File crawlDir = new File(Globals.wget.dataDir + "/" + conf.getName() + "/"
+					+ crawlDateTimestamp);
+			ApplicationLogger.debug("crawlDir=" + crawlDir.toString());
+			File warcDir = new File(crawlDir.getAbsolutePath() + "/warcs");
+			String warcPath = warcDir.listFiles()[0].getAbsolutePath();
+			ApplicationLogger.debug("Path to WARC " + warcPath);
+			String uriPath = Globals.wget.getUriPath(warcPath);
+			String warcFilename = new File(warcPath).getName();
+			ApplicationLogger.debug("WARC file name: " + warcFilename);
+			String localpath = Globals.wgetData + "/wget-data" + uriPath;
+			ApplicationLogger.debug("URI-Path to WARC " + localpath);
+
+			return createWebpageVersion(n, conf, warcFilename, crawlDir, localpath,
+					versionPid, label, crawlDateTimestamp);
+
+		} catch (Exception e) {
+			ApplicationLogger.error(
+					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
+					versionPid, n.getPid());
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
 	 * Diese Methode legt eine WebpageVersion für eine bestehende WARC-Datei an.
 	 * Es wird angenommen, dass diese WARC-Datei unterhalb des Verzechnisses
 	 * dataDir liegt.

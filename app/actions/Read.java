@@ -627,6 +627,32 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * Liest eine Gatherconf (Crawler-Konfiguration) von einem anderen
+	 * toscience-Server
+	 * 
+	 * @param quellserverWebschnittPid die PID des Webschnitts auf dem anderen
+	 *          Server
+	 * 
+	 * @return conf Die Gatherconf des anderen Servers
+	 */
+	public Gatherconf readRemoteConf(String quellserverWebschnittPid) {
+		Gatherconf conf = null;
+		try {
+			URL url = new URL(
+					Globals.oaiMabXmlAddress + quellserverWebschnittPid + "/conf");
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			HttpURLConnection.setFollowRedirects(true);
+			con.connect();
+			con.getResponseCode();
+			con.getInputStream();
+		} catch (Exception e) {
+			play.Logger.error(e.getMessage());
+			throw new RuntimeException(e);
+		}
+		return conf;
+	}
+
+	/**
 	 * read a webpage's url history
 	 * 
 	 * @param node the node of the webpage
@@ -800,9 +826,8 @@ public class Read extends RegalAction {
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					entries.put("crawlControllerState",
 							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus",
-							WpullCrawl.getCrawlExitStatus(node) < 0 ? ""
-									: WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
+							? "" : WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -

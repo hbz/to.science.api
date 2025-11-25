@@ -1511,15 +1511,17 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "application/json", nickname = "exportWS", value = "exportWS", notes = "exportiert einen erfolgreich gecrwalten Webschnitt vom Test- ins Produktivsystem", response = String.class, httpMethod = "POST")
-	public static Promise<Result> exportWS(@PathParam("pid") String pid,
-			@QueryParam("zielserverPid") String zielserverPid) {
+	@ApiOperation(produces = "application/json", nickname = "importWS", value = "importtWS", notes = "importiert einen erfolgreich gecrwalten Webschnitt vom Test- ins Produktivsystem", response = String.class, httpMethod = "POST")
+	public static Promise<Result> importWS(@PathParam("pid") String pid,
+			@QueryParam("quellserverWebpagePid") String quellserverWebpagePid,
+			@QueryParam("quellserverWebschnittPid") String quellserverWebschnittPid) {
 		return new ModifyAction().call(pid, userId -> {
-			play.Logger.debug("Ein Webschnitt wird exportiert.");
+			play.Logger.debug("Ein Webschnitt wird importiert.");
 			Node node = readNodeOrNull(pid);
-			// als erstes die Zielpid verifizieren
-			// die Zielpid soll in der Gatherconf gespeichert werden
-			return JsonMessage(new Message(json("ein Webschnitt wird exportiert.")));
+			String versionPid = null;
+			Node result = create.importWebpageVersion(node, versionPid,
+					quellserverWebpagePid, quellserverWebschnittPid);
+			return getJsonResult(result);
 		});
 	}
 
