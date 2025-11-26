@@ -20,6 +20,9 @@ import static archive.fedora.Vocabulary.TYPE_OBJECT;
 
 import java.io.File;
 import java.math.BigInteger;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -542,13 +545,87 @@ public class Create extends RegalAction {
 		try {
 			// Hole Gatherconf des Quellwebschnittes vom Quellserver
 			conf = new Read().readRemoteConf(quellserverWebschnittPid);
-			// hier weiter
-			throw new RuntimeException("Kontrollierter Abbruch");
+
+			// Parse localdir der Gatherconf vom Quellserver
+			String localdir = conf.getLocalDir();
+			ApplicationLogger.debug("remote localdir: " + localdir);
+			int indexOfPid = localdir.indexOf(quellserverWebpagePid);
+			if (indexOfPid < 0) {
+				throw new RuntimeException("localdir " + localdir
+						+ " does not contain Webpage-ID " + quellserverWebpagePid);
+			}
+			String datetime =
+					localdir.substring(indexOfPid + quellserverWebpagePid.length() + 1);
+			ApplicationLogger.debug("datetime: " + datetime);
+
+			// Überschreibe nun mit der Pid der lokalen Webpage
+			conf.setName(n.getPid());
+
+			// Erzeuge lokale Datenverzeichnisse localpath und remotepath für die
+			// Webcrawls
+			File localpath = null;
+			File remotepath = null;
+			switch (conf.getCrawlerSelection()) {
+			case heritrix:
+				localpath = new File(Globals.heritrxJobDir + "/" + conf.getName());
+				remotepath = new File(
+						Globals.heritrxImportHome + "/" + conf.getName() + "/" + datetime);
+				break;
+			case wpull:
+				localpath = new File(Globals.wpullOutDir + "/" + conf.getName());
+				remotepath = new File(
+						Globals.wpullImportHome + "/" + conf.getName() + "/" + datetime);
+				break;
+			case wget:
+				localpath = new File(Globals.wgetDataDir + "/" + conf.getName());
+				remotepath = new File(
+						Globals.wgetImportHome + "/" + conf.getName() + "/" + datetime);
+				break;
+			case btrix:
+				localpath = new File(Globals.btrixOutDir + "/" + conf.getName());
+				remotepath = new File(
+						Globals.btrixImportHome + "/" + conf.getName() + "/" + datetime);
+				break;
+			default:
+				throw new RuntimeException(
+						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
+			}
+			if (!localpath.exists()) {
+				ApplicationLogger
+						.debug("Create Output Directory " + localpath.getAbsolutePath());
+				localpath.mkdirs();
+			}
 
 			/*
-			 * die Quellserver Webpage PID soll in der Gatherconf gespeichert werden,
-			 * evtl. auch die Quellserver Webschnitt PID
+			 * Kopieren vom remotepath (gleiche Endung wie localdir) in lokales
+			 * Datenverzeichnis localpath; alle Inhalte; cp -pr <angmountetes
+			 * Verzeichnis>/quellserverWebpagePid/datetime/ localpath
+			 * 
 			 */
+			CopyOption[] copyOptions =
+					new CopyOption[] { StandardCopyOption.REPLACE_EXISTING,
+							StandardCopyOption.COPY_ATTRIBUTES };
+			ApplicationLogger.info("Kopiere: cp -pr " + remotepath.getAbsolutePath()
+					+ " " + localpath.getAbsolutePath());
+			Files.copy(remotepath.toPath(), localpath.toPath(), copyOptions);
+			ApplicationLogger.info("Fertig kopiert!");
+
+			/*
+			 * die Quellserver Webpage PID soll in der lokalen Gatherconf gespeichert
+			 * werden, evtl. auch die Quellserver Webschnitt PID
+			 */
+
+			// Anlegen einer lokalen WebpageVersion
+			// gleicher Aufruf für alle Crawler
+			/*
+			 * return createWebpageVersion(n, conf, warcFilename, crawlDir,
+			 * localpath.getAbsolutePath() + "/" + datetime, versionPid, label,
+			 * crawlDateTimestamp);
+			 */
+
+			// fertig
+
+			throw new RuntimeException("Kontrollierter Abbruch");
 
 			/**
 			 * if (!"webpage".equals(n.getContentType())) { throw new
@@ -574,11 +651,10 @@ public class Create extends RegalAction {
 			 * File(warcPath).getName(); ApplicationLogger.debug("WARC file name: " +
 			 * warcFilename); String localpath = Globals.wgetData + "/wget-data" +
 			 * uriPath; ApplicationLogger.debug("URI-Path to WARC " + localpath);
-			 * 
-			 * return createWebpageVersion(n, conf, warcFilename, crawlDir, localpath,
-			 * versionPid, label, crawlDateTimestamp);
 			 */
+
 		} catch (Exception e) {
+			ApplicationLogger.debug(e.getMessage());
 			ApplicationLogger.error(
 					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
 					versionPid, n.getPid());

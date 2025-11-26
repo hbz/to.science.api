@@ -212,6 +212,18 @@ public class Globals {
 					.getString("toscience-api.webgatherer.lastlyCrawledWebpageIdFile");
 
 	/**
+	 * Heritrix job directory
+	 */
+	public static String heritrxJobDir =
+			Play.application().configuration().getString("regal-api.heritrix.jobDir");
+
+	/**
+	 * Heritrix import home directory
+	 */
+	public static String heritrxImportHome = Play.application().configuration()
+			.getString("regal-api.heritrix.importHome");
+
+	/**
 	 * Url to heritrix data directory
 	 */
 	public static String heritrixData = Play.application().configuration()
@@ -222,6 +234,42 @@ public class Globals {
 	 */
 	public static String wgetData =
 			Play.application().configuration().getString("regal-api.wget.dataUrl");
+
+	/**
+	 * wget data directory
+	 */
+	public static String wgetDataDir =
+			Play.application().configuration().getString("regal-api.wget.dataDir");
+
+	/**
+	 * wget import home directory
+	 */
+	public static String wgetImportHome =
+			Play.application().configuration().getString("regal-api.wget.importHome");
+
+	/**
+	 * wpull out dir
+	 */
+	public static String wpullOutDir =
+			Play.application().configuration().getString("regal-api.wpull.outDir");
+
+	/**
+	 * wpull import home directory
+	 */
+	public static String wpullImportHome = Play.application().configuration()
+			.getString("regal-api.wpull.importHome");
+
+	/**
+	 * Browsertrix out dir
+	 */
+	public static String btrixOutDir = Play.application().configuration()
+			.getString("regal-api.browsertrix.outDir");
+
+	/**
+	 * Browsertrix import home directory
+	 */
+	public static String btrixImportHome = Play.application().configuration()
+			.getString("regal-api.browsertrix.importHome");
 
 	/**
 	 * Datacite provides a service for minting Dois. Configure your user here.
