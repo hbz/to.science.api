@@ -640,9 +640,10 @@ public class Read extends RegalAction {
 	 * @return conf Die Gatherconf des anderen Servers
 	 */
 	public Gatherconf readRemoteConf(String quellserverWebschnittPid) {
-		Gatherconf conf = null;
 		HttpURLConnection con = null;
 		BufferedReader br = null;
+		String responseMultiLine = null;
+		Gatherconf conf = null;
 		try {
 			URL url = new URL(Globals.protocol + "api." + Globals.importServerName
 					+ "/resource/" + quellserverWebschnittPid + "/conf");
@@ -668,9 +669,10 @@ public class Read extends RegalAction {
 			while ((responseSingle = br.readLine()) != null) {
 				response.append(responseSingle);
 			}
-			String responseMultiLine = response.toString();
+			responseMultiLine = response.toString();
 			play.Logger.debug("Conf for quellserverWebschnittPid "
 					+ quellserverWebschnittPid + " : " + responseMultiLine);
+			conf = Gatherconf.create(responseMultiLine);
 		} catch (Exception e) {
 			play.Logger.error(e.toString());
 			throw new RuntimeException(e);
@@ -679,7 +681,7 @@ public class Read extends RegalAction {
 			try {
 				br.close();
 			} catch (IOException e) {
-				play.Logger.warn(e.getMessage());
+				play.Logger.error(e.getMessage());
 			}
 		}
 		return conf;
