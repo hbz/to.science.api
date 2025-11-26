@@ -539,15 +539,17 @@ public class Create extends RegalAction {
 			String quellserverWebpagePid, String quellserverWebschnittPid) {
 
 		Gatherconf conf = null;
-		/*
-		 * die Quellserver Webpage PID soll in der Gatherconf gespeichert werden,
-		 * evtl. auch die Quellserver Webschnitt PID
-		 */
-
 		try {
 			// Hole Gatherconf des Quellwebschnittes vom Quellserver
 			conf = new Read().readRemoteConf(quellserverWebschnittPid);
 			// hier weiter
+			throw new RuntimeException("Kontrollierter Abbruch");
+
+			/*
+			 * die Quellserver Webpage PID soll in der Gatherconf gespeichert werden,
+			 * evtl. auch die Quellserver Webschnitt PID
+			 */
+
 			if (!"webpage".equals(n.getContentType())) {
 				throw new HttpArchiveException(400, n.getContentType()
 						+ " is not supported. Operation works only on regalType:\"webpage\"");

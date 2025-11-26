@@ -363,6 +363,12 @@ public class Globals {
 			.getString("regal-api.restrictedweb.dataDir");
 	public static String restrictedwebDataUrl = Play.application().configuration()
 			.getString("regal-api.restrictedweb.dataUrl");
+	public static String importServerName = Play.application().configuration()
+			.getString("regal-api.importServer.name");
+	public static String importServerBackendUser = Play.application()
+			.configuration().getString("regal-api.importServer.backendUser");
+	public static String importServerBackendUserPassword = Play.application()
+			.configuration().getString("regal-api.importServer.backendUser.password");
 
 	public static String lobidHbz01 =
 			Play.application().configuration().getString("regal-api.hbz01");

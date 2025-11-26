@@ -24,10 +24,13 @@ import helper.JsonMapper;
 import helper.Webgatherer;
 import helper.WpullCrawl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +51,7 @@ import models.UrlHist;
 import models.Urn;
 import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 
+import org.apache.commons.codec.binary.Base64;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -637,17 +641,44 @@ public class Read extends RegalAction {
 	 */
 	public Gatherconf readRemoteConf(String quellserverWebschnittPid) {
 		Gatherconf conf = null;
+		HttpURLConnection con = null;
+		BufferedReader br = null;
 		try {
-			URL url = new URL(
-					Globals.oaiMabXmlAddress + quellserverWebschnittPid + "/conf");
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			URL url = new URL(Globals.protocol + "api." + Globals.importServerName
+					+ "/resource/" + quellserverWebschnittPid + "/conf");
+			play.Logger.debug("URL for remote Conf: " + url.toString());
+			con = (HttpURLConnection) url.openConnection();
+			con.setRequestMethod("GET");
 			HttpURLConnection.setFollowRedirects(true);
+			String auth = Globals.importServerBackendUser + ":"
+					+ Globals.importServerBackendUserPassword;
+			byte[] encodedAuth =
+					Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
+			String authHeaderValue = "Basic " + new String(encodedAuth);
+			con.setRequestProperty("Authorization", authHeaderValue);
 			con.connect();
-			con.getResponseCode();
-			con.getInputStream();
+			play.Logger.debug(
+					"response code for GET remote Conf: " + conf.getHttpResponseCode());
+			InputStream ip = con.getInputStream();
+			br = new BufferedReader(new InputStreamReader(ip));
+			StringBuilder response = new StringBuilder();
+			String responseSingle = null;
+			while ((responseSingle = br.readLine()) != null) {
+				response.append(responseSingle);
+			}
+			String responseMultiLine = response.toString();
+			play.Logger.debug("Conf for quellserverWebschnittPid "
+					+ quellserverWebschnittPid + " : " + responseMultiLine);
 		} catch (Exception e) {
 			play.Logger.error(e.getMessage());
 			throw new RuntimeException(e);
+		} finally {
+			con.disconnect();
+			try {
+				br.close();
+			} catch (IOException e) {
+				play.Logger.warn(e.getMessage());
+			}
 		}
 		return conf;
 	}
