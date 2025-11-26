@@ -550,37 +550,34 @@ public class Create extends RegalAction {
 			 * evtl. auch die Quellserver Webschnitt PID
 			 */
 
-			if (!"webpage".equals(n.getContentType())) {
-				throw new HttpArchiveException(400, n.getContentType()
-						+ " is not supported. Operation works only on regalType:\"webpage\"");
-			}
-			ApplicationLogger.debug("Import webpageVersion for PID" + n.getPid());
-			conf = Gatherconf.create(n.getConf());
-			ApplicationLogger.debug("Import webpageVersion Conf" + conf.toString());
-			conf.setName(n.getPid());
-			// conf.setId(versionPid);
-			Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-					.parse(quellserverWebschnittPid + " 12:00:00");
-			conf.setStartDate(startDate);
-
-			// hier auf ein bestehendes WARC in dataDir verweisen
-			String crawlDateTimestamp = "";
-			String label = "";
-			File crawlDir = new File(Globals.wget.dataDir + "/" + conf.getName() + "/"
-					+ crawlDateTimestamp);
-			ApplicationLogger.debug("crawlDir=" + crawlDir.toString());
-			File warcDir = new File(crawlDir.getAbsolutePath() + "/warcs");
-			String warcPath = warcDir.listFiles()[0].getAbsolutePath();
-			ApplicationLogger.debug("Path to WARC " + warcPath);
-			String uriPath = Globals.wget.getUriPath(warcPath);
-			String warcFilename = new File(warcPath).getName();
-			ApplicationLogger.debug("WARC file name: " + warcFilename);
-			String localpath = Globals.wgetData + "/wget-data" + uriPath;
-			ApplicationLogger.debug("URI-Path to WARC " + localpath);
-
-			return createWebpageVersion(n, conf, warcFilename, crawlDir, localpath,
-					versionPid, label, crawlDateTimestamp);
-
+			/**
+			 * if (!"webpage".equals(n.getContentType())) { throw new
+			 * HttpArchiveException(400, n.getContentType() +
+			 * " is not supported. Operation works only on regalType:\"webpage\""); }
+			 * ApplicationLogger.debug("Import webpageVersion for PID" + n.getPid());
+			 * conf = Gatherconf.create(n.getConf()); ApplicationLogger.debug(
+			 * "Import webpageVersion Conf" + conf.toString());
+			 * conf.setName(n.getPid()); // conf.setId(versionPid); Date startDate =
+			 * new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+			 * .parse(quellserverWebschnittPid + " 12:00:00");
+			 * conf.setStartDate(startDate);
+			 * 
+			 * // hier auf ein bestehendes WARC in dataDir verweisen String
+			 * crawlDateTimestamp = ""; String label = ""; File crawlDir = new
+			 * File(Globals.wget.dataDir + "/" + conf.getName() + "/" +
+			 * crawlDateTimestamp); ApplicationLogger.debug("crawlDir=" +
+			 * crawlDir.toString()); File warcDir = new
+			 * File(crawlDir.getAbsolutePath() + "/warcs"); String warcPath =
+			 * warcDir.listFiles()[0].getAbsolutePath(); ApplicationLogger.debug(
+			 * "Path to WARC " + warcPath); String uriPath =
+			 * Globals.wget.getUriPath(warcPath); String warcFilename = new
+			 * File(warcPath).getName(); ApplicationLogger.debug("WARC file name: " +
+			 * warcFilename); String localpath = Globals.wgetData + "/wget-data" +
+			 * uriPath; ApplicationLogger.debug("URI-Path to WARC " + localpath);
+			 * 
+			 * return createWebpageVersion(n, conf, warcFilename, crawlDir, localpath,
+			 * versionPid, label, crawlDateTimestamp);
+			 */
 		} catch (Exception e) {
 			ApplicationLogger.error(
 					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",

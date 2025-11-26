@@ -648,6 +648,7 @@ public class Read extends RegalAction {
 					+ "/resource/" + quellserverWebschnittPid + "/conf");
 			play.Logger.debug("URL for remote Conf: " + url.toString());
 			con = (HttpURLConnection) url.openConnection();
+			play.Logger.debug("opened connection");
 			con.setRequestMethod("GET");
 			HttpURLConnection.setFollowRedirects(true);
 			String auth = Globals.importServerBackendUser + ":"
@@ -655,10 +656,11 @@ public class Read extends RegalAction {
 			byte[] encodedAuth =
 					Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
 			String authHeaderValue = "Basic " + new String(encodedAuth);
+			play.Logger.debug("auth: " + authHeaderValue);
 			con.setRequestProperty("Authorization", authHeaderValue);
 			con.connect();
-			play.Logger.debug(
-					"response code for GET remote Conf: " + conf.getHttpResponseCode());
+			play.Logger
+					.debug("response code for GET remote Conf: " + con.getResponseCode());
 			InputStream ip = con.getInputStream();
 			br = new BufferedReader(new InputStreamReader(ip));
 			StringBuilder response = new StringBuilder();
@@ -670,7 +672,7 @@ public class Read extends RegalAction {
 			play.Logger.debug("Conf for quellserverWebschnittPid "
 					+ quellserverWebschnittPid + " : " + responseMultiLine);
 		} catch (Exception e) {
-			play.Logger.error(e.getMessage());
+			play.Logger.error(e.toString());
 			throw new RuntimeException(e);
 		} finally {
 			con.disconnect();
