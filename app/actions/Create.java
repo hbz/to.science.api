@@ -567,22 +567,26 @@ public class Create extends RegalAction {
 			File remotepath = null;
 			switch (conf.getCrawlerSelection()) {
 			case heritrix:
-				localpath = new File(Globals.heritrxJobDir + "/" + conf.getName());
+				localpath = new File(
+						Globals.heritrxJobDir + "/" + conf.getName() + "/" + datetime);
 				remotepath = new File(Globals.heritrxImportHome + "/"
 						+ quellserverWebpagePid + "/" + datetime);
 				break;
 			case wpull:
-				localpath = new File(Globals.wpullOutDir + "/" + conf.getName());
+				localpath = new File(
+						Globals.wpullOutDir + "/" + conf.getName() + "/" + datetime);
 				remotepath = new File(Globals.wpullImportHome + "/"
 						+ quellserverWebpagePid + "/" + datetime);
 				break;
 			case wget:
-				localpath = new File(Globals.wgetDataDir + "/" + conf.getName());
+				localpath = new File(
+						Globals.wgetDataDir + "/" + conf.getName() + "/" + datetime);
 				remotepath = new File(Globals.wgetImportHome + "/"
 						+ quellserverWebpagePid + "/" + datetime);
 				break;
 			case btrix:
-				localpath = new File(Globals.btrixOutDir + "/" + conf.getName());
+				localpath = new File(
+						Globals.btrixOutDir + "/" + conf.getName() + "/" + datetime);
 				remotepath = new File(Globals.btrixImportHome + "/"
 						+ quellserverWebpagePid + "/" + datetime);
 				break;
@@ -611,16 +615,17 @@ public class Create extends RegalAction {
 			ApplicationLogger.info("Fertig kopiert!");
 
 			/*
-			 * die Quellserver Webpage PID soll in der lokalen Gatherconf gespeichert
-			 * werden, evtl. auch die Quellserver Webschnitt PID
+			 * die Quellserver Webpage PID wird in der lokalen Gatherconf gespeichert,
+			 * auch die Quellserver Webschnitt PID.
 			 */
+			conf.setQuellserverWebpagePid(quellserverWebpagePid);
+			conf.setQuellserverWebschnittPid(quellserverWebschnittPid);
 
-			// Anlegen einer lokalen WebpageVersion
+			// Anlegen einer lokalen WebpageVersion (FedoraObjekt)
 			// gleicher Aufruf für alle Crawler
 			/*
 			 * return createWebpageVersion(n, conf, warcFilename, crawlDir,
-			 * localpath.getAbsolutePath() + "/" + datetime, versionPid, label,
-			 * crawlDateTimestamp);
+			 * localpath.getAbsolutePath(), versionPid, label, crawlDateTimestamp);
 			 */
 
 			// fertig

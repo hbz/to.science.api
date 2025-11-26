@@ -99,7 +99,9 @@ public class Gatherconf {
 				}
 			};
 
+	// name= die PID der Webpage
 	String name;
+	String quellserverWebpagePid;
 	boolean active;
 	String url;
 	int httpResponseCode;
@@ -119,7 +121,9 @@ public class Gatherconf {
 	Date startDate;
 	String localDir;
 	String openWaybackLink;
+	// id = die PID des Webschnittes (= WebpageVersion)
 	String id;
+	String quellserverWebschnittPid;
 	long maxCrawlSize;
 	int waitSecBtRequests;
 	boolean randomWait;
@@ -149,8 +153,10 @@ public class Gatherconf {
 		startDate = null;
 		localDir = null;
 		name = null;
+		quellserverWebpagePid = null;
 		openWaybackLink = null;
 		id = null;
+		quellserverWebschnittPid = null;
 		maxCrawlSize = 0;
 		waitSecBtRequests = 0;
 		randomWait = true;
@@ -393,6 +399,22 @@ public class Gatherconf {
 	}
 
 	/**
+	 * @return the PID of the Webpage on a remote server (a server from which
+	 *         webarchives can be imported)
+	 */
+	public String getQuellserverWebpagePid() {
+		return quellserverWebpagePid;
+	}
+
+	/**
+	 * @param pid the PID of the Webpage on a remote server (a server from which
+	 *          webarchives can be imported)
+	 */
+	public void setQuellserverWebpagePid(String pid) {
+		this.quellserverWebpagePid = pid;
+	}
+
+	/**
 	 * @return a localDir with information stored by heritrix
 	 */
 	public String getLocalDir() {
@@ -503,17 +525,33 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @return an internal id
+	 * @return an internal id for a WebpageVersion
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
-	 * @param id an internal id
+	 * @param id an internal id for a WebpageVersion
 	 */
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return a PID for a webpage version (Webschnitt) on a remote server (of a
+	 *         Webschnitt that one wants to import)
+	 */
+	public String getQuellserverWebschnittPid() {
+		return quellserverWebschnittPid;
+	}
+
+	/**
+	 * @param pid a PID for a webpage version (Webschnitt) on a remote server (of
+	 *          a Webschnitt that one wants to import)
+	 */
+	public void setQuellserverWebschnittPid(String pid) {
+		this.quellserverWebschnittPid = pid;
 	}
 
 	/**
