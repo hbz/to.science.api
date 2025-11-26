@@ -568,23 +568,23 @@ public class Create extends RegalAction {
 			switch (conf.getCrawlerSelection()) {
 			case heritrix:
 				localpath = new File(Globals.heritrxJobDir + "/" + conf.getName());
-				remotepath = new File(
-						Globals.heritrxImportHome + "/" + conf.getName() + "/" + datetime);
+				remotepath = new File(Globals.heritrxImportHome + "/"
+						+ quellserverWebpagePid + "/" + datetime);
 				break;
 			case wpull:
 				localpath = new File(Globals.wpullOutDir + "/" + conf.getName());
-				remotepath = new File(
-						Globals.wpullImportHome + "/" + conf.getName() + "/" + datetime);
+				remotepath = new File(Globals.wpullImportHome + "/"
+						+ quellserverWebpagePid + "/" + datetime);
 				break;
 			case wget:
 				localpath = new File(Globals.wgetDataDir + "/" + conf.getName());
-				remotepath = new File(
-						Globals.wgetImportHome + "/" + conf.getName() + "/" + datetime);
+				remotepath = new File(Globals.wgetImportHome + "/"
+						+ quellserverWebpagePid + "/" + datetime);
 				break;
 			case btrix:
 				localpath = new File(Globals.btrixOutDir + "/" + conf.getName());
-				remotepath = new File(
-						Globals.btrixImportHome + "/" + conf.getName() + "/" + datetime);
+				remotepath = new File(Globals.btrixImportHome + "/"
+						+ quellserverWebpagePid + "/" + datetime);
 				break;
 			default:
 				throw new RuntimeException(
@@ -654,7 +654,7 @@ public class Create extends RegalAction {
 			 */
 
 		} catch (Exception e) {
-			ApplicationLogger.debug(e.getMessage());
+			ApplicationLogger.debug(e.toString());
 			ApplicationLogger.error(
 					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
 					versionPid, n.getPid());
