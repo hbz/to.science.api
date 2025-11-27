@@ -601,7 +601,7 @@ public class Create extends RegalAction {
 			WebpageVersionImporter importThread = new WebpageVersionImporter();
 			importThread.setLocalpath(localpath);
 			importThread.setRenotepath(remotepath);
-			importThread.run();
+			importThread.start();
 
 			/*
 			 * die Quellserver Webpage PID wird in der lokalen Gatherconf gespeichert,

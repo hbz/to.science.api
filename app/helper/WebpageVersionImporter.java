@@ -82,12 +82,9 @@ public class WebpageVersionImporter extends Thread {
 			 * Inhalte; cp -pr <angmountetes
 			 * Verzeichnis>/quellserverWebpagePid/datetime/* localpath
 			 */
-
 			WebgatherLogger.info("Kopiere: cp -pr " + remotepath + " " + localpath);
-
 			File localfile = new File(localpath);
 			File remotefile = new File(remotepath);
-			// copy(remotefile.toPath(), localfile.toPath());
 			copyFolder(remotefile.toPath(), localfile.toPath());
 			WebgatherLogger.info("Fertig kopiert!");
 
@@ -100,7 +97,7 @@ public class WebpageVersionImporter extends Thread {
 
 	/**
 	 * Kopiert rekursiv (also mit Inhalten und Unteverzeichissen) ein Verzeichnis
-	 * auf ein anderes Vezeichnis. Überschreibt, falls schon exsitiert.
+	 * auf ein anderes Vezeichnis.
 	 * 
 	 * @param src Quellverzeichnus
 	 * @param dest Zielverzeichnis
@@ -113,8 +110,16 @@ public class WebpageVersionImporter extends Thread {
 		}
 	}
 
-	private void copy(Path source, Path dest) {
+	/**
+	 * Kopiert EINE Datei oder legt ein Verzeichnis (ohne Inhalte) an.
+	 * 
+	 * @param source Quelldatei oder -verzeichnisname
+	 * @param dest Zieldatei oder -verzeichnisname
+	 */
+	public void copy(Path source, Path dest) {
 		try {
+			WebgatherLogger
+					.debug("Copying " + source.toString() + " to " + dest.toString());
 			Files.copy(source, dest, copyOptions);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
