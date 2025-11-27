@@ -538,7 +538,7 @@ public class Create extends RegalAction {
 	 *          server
 	 * @param quellserverWebschnittPid The PID of the source WebpageVersion
 	 *          (Webschnitt) on the source server
-	 * @return a new WebpageVersion (Webschnitt) pointing to an imported crawl.
+	 * @throws RuntimeException eine Ausnahmebehandlung
 	 */
 	public void importWebpageVersion(Node n, String versionPid,
 			String quellserverWebpagePid, String quellserverWebschnittPid)
@@ -546,6 +546,14 @@ public class Create extends RegalAction {
 
 		Gatherconf conf = null;
 		try {
+
+			if (!"webpage".equals(n.getContentType())) {
+				throw new HttpArchiveException(400, n.getContentType()
+						+ " is not supported. Operation works only on regalType:\"webpage\"");
+			}
+			ApplicationLogger
+					.debug("Import webpageVersion for lokale Webpage" + n.getPid());
+
 			// Hole Gatherconf des Quellwebschnittes vom Quellserver
 			conf = new Read().readRemoteConf(quellserverWebschnittPid);
 
@@ -561,8 +569,18 @@ public class Create extends RegalAction {
 					localdir.substring(indexOfPid + quellserverWebpagePid.length() + 1);
 			ApplicationLogger.debug("datetime: " + datetime);
 
-			// Überschreibe nun mit der Pid der lokalen Webpage
+			// Überschreibe Felder der remote Conf mit lokalen Werten
 			conf.setName(n.getPid());
+			conf.setId(versionPid); // kann hier noch null sein
+			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(datetime);
+			conf.setStartDate(startDate);
+
+			/*
+			 * die Quellserver Webpage PID wird in der lokalen Gatherconf gespeichert,
+			 * auch die Quellserver Webschnitt PID.
+			 */
+			conf.setQuellserverWebpagePid(quellserverWebpagePid);
+			conf.setQuellserverWebschnittPid(quellserverWebschnittPid);
 
 			// Erzeuge lokales Datenverzeichnis localpath und
 			// hole angemountetes Datenverzeichnis remotepath
@@ -599,53 +617,14 @@ public class Create extends RegalAction {
 			 * large files)
 			 */
 			WebpageVersionImporter importThread = new WebpageVersionImporter();
+			importThread.setNode(n);
+			importThread.setConf(conf);
+			importThread.setDatetime(datetime);
 			importThread.setLocalpath(localpath);
 			importThread.setRenotepath(remotepath);
+			importThread.setVersionPid(versionPid);
 			importThread.start();
-
-			/*
-			 * die Quellserver Webpage PID wird in der lokalen Gatherconf gespeichert,
-			 * auch die Quellserver Webschnitt PID.
-			 */
-			conf.setQuellserverWebpagePid(quellserverWebpagePid);
-			conf.setQuellserverWebschnittPid(quellserverWebschnittPid);
-
-			// Anlegen einer lokalen WebpageVersion (FedoraObjekt)
-			// gleicher Aufruf für alle Crawler
-			/*
-			 * return createWebpageVersion(n, conf, warcFilename, crawlDir,
-			 * localpath.getAbsolutePath(), versionPid, label, crawlDateTimestamp);
-			 */
-
 			// fertig
-
-			throw new RuntimeException("Kontrollierter Abbruch");
-
-			/**
-			 * if (!"webpage".equals(n.getContentType())) { throw new
-			 * HttpArchiveException(400, n.getContentType() +
-			 * " is not supported. Operation works only on regalType:\"webpage\""); }
-			 * ApplicationLogger.debug("Import webpageVersion for PID" + n.getPid());
-			 * conf = Gatherconf.create(n.getConf()); ApplicationLogger.debug(
-			 * "Import webpageVersion Conf" + conf.toString());
-			 * conf.setName(n.getPid()); // conf.setId(versionPid); Date startDate =
-			 * new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-			 * .parse(quellserverWebschnittPid + " 12:00:00");
-			 * conf.setStartDate(startDate);
-			 * 
-			 * // hier auf ein bestehendes WARC in dataDir verweisen String
-			 * crawlDateTimestamp = ""; String label = ""; File crawlDir = new
-			 * File(Globals.wget.dataDir + "/" + conf.getName() + "/" +
-			 * crawlDateTimestamp); ApplicationLogger.debug("crawlDir=" +
-			 * crawlDir.toString()); File warcDir = new
-			 * File(crawlDir.getAbsolutePath() + "/warcs"); String warcPath =
-			 * warcDir.listFiles()[0].getAbsolutePath(); ApplicationLogger.debug(
-			 * "Path to WARC " + warcPath); String uriPath =
-			 * Globals.wget.getUriPath(warcPath); String warcFilename = new
-			 * File(warcPath).getName(); ApplicationLogger.debug("WARC file name: " +
-			 * warcFilename); String localpath = Globals.wgetData + "/wget-data" +
-			 * uriPath; ApplicationLogger.debug("URI-Path to WARC " + localpath);
-			 */
 
 		} catch (Exception e) {
 			ApplicationLogger.debug(e.toString());

@@ -11,6 +11,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
+import actions.Create;
+import models.Gatherconf;
+import models.Globals;
+import models.Node;
 import play.Logger;
 
 /**
@@ -23,11 +27,17 @@ import play.Logger;
  */
 public class WebpageVersionImporter extends Thread {
 
+	private Node node = null;
+	private Gatherconf conf = null;
+	private String datetime = null;
 	private String localpath = null;
 	private String remotepath = null;
 	private CopyOption[] copyOptions = new CopyOption[] {
 			StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES };
+	private String warcFilename = null;
+	private String versionPid = null;
 
+	static Create create = new Create();
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -36,6 +46,34 @@ public class WebpageVersionImporter extends Thread {
 	 */
 	public WebpageVersionImporter() {
 
+	}
+
+	/**
+	 * Setze Node der Webpage
+	 * 
+	 * @param node der Node der lokalen Webpage
+	 */
+	public void setNode(Node node) {
+		this.node = node;
+	}
+
+	/**
+	 * Setze Gatherconf des Webschnittes
+	 * 
+	 * @param conf die Gatherconf des lokalen Webschnittes
+	 */
+	public void setConf(Gatherconf conf) {
+		this.conf = conf;
+	}
+
+	/**
+	 * Setze Zeitstempel des Webschnittes
+	 * 
+	 * @param datetime der Zeitstempel, an dem dieser Webschnitt erstellt wurde.
+	 *          Format YYYYMMddHHmmss.
+	 */
+	public void setDatetime(String datetime) {
+		this.datetime = datetime;
 	}
 
 	/**
@@ -74,6 +112,15 @@ public class WebpageVersionImporter extends Thread {
 		return this.remotepath;
 	}
 
+	/**
+	 * Setze die PID des lokalen Webschnittes (oder null)
+	 * 
+	 * @param versionPid die PID des lokalen Webschnittes (oder null)
+	 */
+	public void setVersionPid(String versionPid) {
+		this.versionPid = versionPid;
+	}
+
 	@Override
 	public void run() {
 		try {
@@ -87,6 +134,22 @@ public class WebpageVersionImporter extends Thread {
 			File remotefile = new File(remotepath);
 			copyFolder(remotefile.toPath(), localfile.toPath());
 			WebgatherLogger.info("Fertig kopiert!");
+
+			/*
+			 * die DataUrl beginnt mit http:// und beschreibt eine URL, unter der man
+			 * das WARC-Archiv über HTTP herunterladen kann
+			 */
+			String localDataUrl = Globals.heritrixData + "/"
+					+ conf.getCrawlerSelection() + "-data/" + conf.getName() + "/"
+					+ this.datetime + "/" + this.warcFilename + ".warc.gz";
+			WebgatherLogger.info("localDataUrl = " + localDataUrl);
+
+			/*
+			 * Anlegen einer lokalen WebpageVersion (FedoraObjekt); gleicher Aufruf
+			 * für alle Crawler
+			 */
+			create.createWebpageVersion(node, conf, warcFilename, localfile,
+					localDataUrl, versionPid);
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
@@ -103,7 +166,7 @@ public class WebpageVersionImporter extends Thread {
 	 * @param dest Zielverzeichnis
 	 * @throws IOException InputOutout-Ausnahmebehandlung
 	 */
-	public void copyFolder(Path src, Path dest) throws IOException {
+	private void copyFolder(Path src, Path dest) throws IOException {
 		try (Stream<Path> stream = Files.walk(src)) {
 			stream.forEach(
 					source -> copy(source, dest.resolve(src.relativize(source))));
@@ -116,10 +179,15 @@ public class WebpageVersionImporter extends Thread {
 	 * @param source Quelldatei oder -verzeichnisname
 	 * @param dest Zieldatei oder -verzeichnisname
 	 */
-	public void copy(Path source, Path dest) {
+	private void copy(Path source, Path dest) {
 		try {
 			WebgatherLogger
 					.debug("Copying " + source.toString() + " to " + dest.toString());
+			if (source.getFileName().toString().endsWith(".warc.gz")) {
+				this.warcFilename =
+						source.getFileName().toString().replaceAll(".warc.gz$", "");
+				WebgatherLogger.info("warcFilename = " + this.warcFilename);
+			}
 			Files.copy(source, dest, copyOptions);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);

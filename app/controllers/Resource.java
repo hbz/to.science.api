@@ -1522,13 +1522,14 @@ public class Resource extends MyController {
 				String versionPid = null;
 				create.importWebpageVersion(node, versionPid, quellserverWebpagePid,
 						quellserverWebschnittPid);
-				return JsonMessage(new Message("Der Import des Webschnittes "
-						+ quellserverWebschnittPid + " wird im Hintergrund verarbeitet."));
+				return HtmlMessage(new Message("Der Import des Webschnittes "
+						+ quellserverWebschnittPid + " wird im Hintergrund verarbeitet.",
+						200));
 			} catch (Exception e) {
 				play.Logger.error(e.toString());
 				play.Logger.error("Webschnitt " + quellserverWebschnittPid
 						+ " kann nicht importiet werden!");
-				return JsonMessage(new Message(json(e)));
+				return HtmlMessage(new Message(e, e.hashCode()));
 			}
 		});
 	}
