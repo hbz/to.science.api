@@ -423,6 +423,20 @@ public class Create extends RegalAction {
 					.info("waybackCollectionLink=" + conf.getOpenWaybackLink());
 			conf.setId(webpageVersion.getPid());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
+			WebgatherLogger.debug(msg);
+			/**
+			 * KS 27.11.2025: Aus Konsistenzgünden wird auch die Conf am Elternobjekt
+			 * (Webpage) aktualisiert. Bei neuen Crawls ist das nicht notwendig, da
+			 * der neueste Crawl immer mit der aktuellen Conf ausgeführt wird, so dass
+			 * die Confs sowieso schon gleich sind. Seit Implementierung des
+			 * WebpageVersionImporters können hier jedoch auch Crawls aus anderen
+			 * Systemen übernommen werden. Die Conf des Elternobjektes sollte nach
+			 * einer solchen Übernahme mit der Conf des importierten Webschnittes
+			 * übereinstimmen, danit zukünftige Crawls die richtigen Cawl-Parameter,
+			 * nämlich die von dem importierten Crawl, erben.
+			 */
+			msg = new Modify().updateConf(n, conf.toString());
+			WebgatherLogger.debug(msg);
 
 			/**
 			 * NEU für inkrementelles Crawlern (= warc-Deduplizierung): Nach
@@ -453,7 +467,6 @@ public class Create extends RegalAction {
 						conf);
 			}
 
-			WebgatherLogger.debug(msg);
 			WebgatherLogger.info("Version " + webpageVersion.getPid()
 					+ " zur Website " + n.getPid() + " erfolgreich angelegt!");
 
