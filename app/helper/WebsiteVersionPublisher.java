@@ -286,9 +286,8 @@ public class WebsiteVersionPublisher {
 				conf.setLocalDir(localDir);
 				break;
 			case btrix:
-				localDir = Play.application().configuration()
-						.getString("regal-api.browsertrix.outDir") + "/" + conf.getName()
-						+ "/" + subDir;
+				localDir = Play.application().configuration().getString(
+						"regal-api.btrix.outDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
 				subDir = subDir.concat("/archive");
 				localDir = localDir.concat("/archive");

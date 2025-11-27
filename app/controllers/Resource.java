@@ -1517,11 +1517,19 @@ public class Resource extends MyController {
 			@QueryParam("quellserverWebschnittPid") String quellserverWebschnittPid) {
 		return new ModifyAction().call(pid, userId -> {
 			play.Logger.debug("Ein Webschnitt wird importiert.");
-			Node node = readNodeOrNull(pid);
-			String versionPid = null;
-			Node result = create.importWebpageVersion(node, versionPid,
-					quellserverWebpagePid, quellserverWebschnittPid);
-			return getJsonResult(result);
+			try {
+				Node node = readNodeOrNull(pid);
+				String versionPid = null;
+				create.importWebpageVersion(node, versionPid, quellserverWebpagePid,
+						quellserverWebschnittPid);
+				return JsonMessage(new Message("Der Import des Webschnittes "
+						+ quellserverWebschnittPid + " wird im Hintergrund verarbeitet."));
+			} catch (Exception e) {
+				play.Logger.error(e.toString());
+				play.Logger.error("Webschnitt " + quellserverWebschnittPid
+						+ " kann nicht importiet werden!");
+				return JsonMessage(new Message(json(e)));
+			}
 		});
 	}
 

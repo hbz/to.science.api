@@ -41,7 +41,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.MyController;
 import helper.HttpArchiveException;
 import helper.WebgatherUtils;
+import helper.WebpageVersionImporter;
 import helper.WebsiteVersionPublisher;
+import helper.WpullThread;
 import helper.oai.OaiDispatcher;
 import models.Gatherconf;
 import models.Globals;
@@ -538,8 +540,9 @@ public class Create extends RegalAction {
 	 *          (Webschnitt) on the source server
 	 * @return a new WebpageVersion (Webschnitt) pointing to an imported crawl.
 	 */
-	public Node importWebpageVersion(Node n, String versionPid,
-			String quellserverWebpagePid, String quellserverWebschnittPid) {
+	public void importWebpageVersion(Node n, String versionPid,
+			String quellserverWebpagePid, String quellserverWebschnittPid)
+			throws RuntimeException {
 
 		Gatherconf conf = null;
 		try {
@@ -561,58 +564,44 @@ public class Create extends RegalAction {
 			// Überschreibe nun mit der Pid der lokalen Webpage
 			conf.setName(n.getPid());
 
-			// Erzeuge lokale Datenverzeichnisse localpath und remotepath für die
-			// Webcrawls
-			File localpath = null;
-			File remotepath = null;
-			switch (conf.getCrawlerSelection()) {
-			case heritrix:
-				localpath = new File(
-						Globals.heritrxJobDir + "/" + conf.getName() + "/" + datetime);
-				remotepath = new File(Globals.heritrxImportHome + "/"
-						+ quellserverWebpagePid + "/" + datetime);
-				break;
-			case wpull:
-				localpath = new File(
-						Globals.wpullOutDir + "/" + conf.getName() + "/" + datetime);
-				remotepath = new File(Globals.wpullImportHome + "/"
-						+ quellserverWebpagePid + "/" + datetime);
-				break;
-			case wget:
-				localpath = new File(
-						Globals.wgetDataDir + "/" + conf.getName() + "/" + datetime);
-				remotepath = new File(Globals.wgetImportHome + "/"
-						+ quellserverWebpagePid + "/" + datetime);
-				break;
-			case btrix:
-				localpath = new File(
-						Globals.btrixOutDir + "/" + conf.getName() + "/" + datetime);
-				remotepath = new File(Globals.btrixImportHome + "/"
-						+ quellserverWebpagePid + "/" + datetime);
-				break;
-			default:
+			// Erzeuge lokales Datenverzeichnis localpath und
+			// hole angemountetes Datenverzeichnis remotepath
+			String localpath = null;
+			String outdir = Play.application().configuration()
+					.getString("regal-api." + conf.getCrawlerSelection() + ".outDir");
+			if (outdir == null || outdir.isEmpty()) {
 				throw new RuntimeException(
-						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
+						"Unknown local path \"outDir\" ! application env var \"regal-api."
+								+ conf.getCrawlerSelection() + ".ourDir not found!");
 			}
-			if (!localpath.exists()) {
-				ApplicationLogger
-						.debug("Create Output Directory " + localpath.getAbsolutePath());
-				localpath.mkdirs();
+			localpath = outdir + "/" + conf.getName() + "/" + datetime;
+			ApplicationLogger.debug("localpath = " + localpath);
+
+			String remotepath = null;
+			String importHome = Play.application().configuration()
+					.getString("regal-api." + conf.getCrawlerSelection() + ".importHome");
+			if (importHome == null || importHome.isEmpty()) {
+				throw new RuntimeException(
+						"Unknown locally mountet path \"importHome\" ! application env var \"regal-api."
+								+ conf.getCrawlerSelection() + ".impotHome not found!");
+			}
+			remotepath = importHome + "/" + quellserverWebpagePid + "/" + datetime;
+			ApplicationLogger.debug("remotepath = " + remotepath);
+
+			File localfile = new File(localpath);
+			if (!localfile.exists()) {
+				ApplicationLogger.debug("Create local directory " + localpath);
+				localfile.mkdirs();
 			}
 
 			/*
-			 * Kopieren vom remotepath (gleiche Endung wie localdir) in lokales
-			 * Datenverzeichnis localpath; alle Inhalte; cp -pr <angmountetes
-			 * Verzeichnis>/quellserverWebpagePid/datetime/ localpath
-			 * 
+			 * Jetzt in einen Thread verzweigen zwecks paralleler Verabeitung (copies
+			 * large files)
 			 */
-			CopyOption[] copyOptions =
-					new CopyOption[] { StandardCopyOption.REPLACE_EXISTING,
-							StandardCopyOption.COPY_ATTRIBUTES };
-			ApplicationLogger.info("Kopiere: cp -pr " + remotepath.getAbsolutePath()
-					+ " " + localpath.getAbsolutePath());
-			Files.copy(remotepath.toPath(), localpath.toPath(), copyOptions);
-			ApplicationLogger.info("Fertig kopiert!");
+			WebpageVersionImporter importThread = new WebpageVersionImporter();
+			importThread.setLocalpath(localpath);
+			importThread.setRenotepath(remotepath);
+			importThread.run();
 
 			/*
 			 * die Quellserver Webpage PID wird in der lokalen Gatherconf gespeichert,

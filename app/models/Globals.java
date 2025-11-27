@@ -262,14 +262,14 @@ public class Globals {
 	/**
 	 * Browsertrix out dir
 	 */
-	public static String btrixOutDir = Play.application().configuration()
-			.getString("regal-api.browsertrix.outDir");
+	public static String btrixOutDir =
+			Play.application().configuration().getString("regal-api.btrix.outDir");
 
 	/**
 	 * Browsertrix import home directory
 	 */
 	public static String btrixImportHome = Play.application().configuration()
-			.getString("regal-api.browsertrix.importHome");
+			.getString("regal-api.btrix.importHome");
 
 	/**
 	 * Datacite provides a service for minting Dois. Configure your user here.

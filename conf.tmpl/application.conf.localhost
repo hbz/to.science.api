@@ -74,6 +74,7 @@ regal-api.heritrix.user="admin"
 regal-api.heritrix.pwd=""
 regal-api.heritrix.home="/opt/toscience/heritrix"
 regal-api.heritrix.jobDir="/opt/toscience/heritrix-data"
+regal-api.heritrix.outDir="/opt/toscience/heritrix-data"
 #--- importHome: von hier können Webarchive importiert werden.
 #--- importHome: diese Variable i.d.R. nur auf Produktionssystemen setzen!
 #--- importHome: diese Variable auf den angemounteten heritrix.home Pfad eines Testsystems setzen.
@@ -86,6 +87,8 @@ regal-api.heritrix.crawlsPerNight=10
 #--- importierte Webschnitte aus Edoweb1.0, 2.0 ---
 #--------------------------------------------------
 regal-api.wget.dataDir="/opt/toscience/wget-data"
+regal-api.wget.outDir="/opt/toscience/wget-data"
+regal-api.wget.importHome="/data-test/wget-data"
 # URL, unter der das Datenverzeichnis /wget-data liegt, also so: dataUrl/wget-data/
 regal-api.wget.dataUrl="https://localhost/wget-data"
 regal-api.webharvests.dataDir="/data/webharvests"
@@ -106,16 +109,16 @@ regal-api.wpull.staticOptions=" --recursive --link-extractors=javascript,html,cs
 regal-api.public.jobDir="/opt/toscience/public-data"
 
 #-------------Browsertrix (Webrecorder)-------------                            
-regal-api.browsertrix.apiUrl="http://localhost:30870/api"
-regal-api.browsertrix.adminUsername="admin@example.com"
-regal-api.browsertrix.adminPassword="PASSW0RD!"
-regal-api.browsertrix.orgName="toscience"
-regal-api.browsertrix.orgId=""
-regal-api.browsertrix.outDir="/opt/toscience/btrix-data"
+regal-api.btrix.apiUrl="http://localhost:30870/api"
+regal-api.btrix.adminUsername="admin@example.com"
+regal-api.btrix.adminPassword="PASSW0RD!"
+regal-api.btrix.orgName="toscience"
+regal-api.btrix.orgId=""
+regal-api.btrix.outDir="/opt/toscience/btrix-data"
 #--- importHome: von hier können Webarchive importiert werden.
 #--- importHome: diese Variable i.d.R. nur auf Produktionssystemen setzen!
-#--- importHome: diese Variable auf den angemounteten browsertrix.outDir Pfad eines Testsystems setzen.
-regal-api.browsertrix.importHome="/data-test/btrix-data"
+#--- importHome: diese Variable auf den angemounteten btrix.outDir Pfad eines Testsystems setzen.
+regal-api.btrix.importHome="/data-test/btrix-data"
 
 #-------------CDN Gatherer--------------------------                            
 regal-api.cdntools.cdn="/opt/toscience/bin/cdn"
