@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 import actions.Create;
+import actions.Modify;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
@@ -36,6 +37,7 @@ public class WebpageVersionImporter extends Thread {
 			StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES };
 	private String warcFilename = null;
 	private String versionPid = null;
+	private String msg = null;
 
 	static Create create = new Create();
 	private static final Logger.ALogger WebgatherLogger =
@@ -150,6 +152,26 @@ public class WebpageVersionImporter extends Thread {
 			 */
 			create.createWebpageVersion(node, conf, warcFilename, localfile,
 					localDataUrl, versionPid);
+
+			/**
+			 * KS 27.11.2025: Aus Konsistenzgünden wird auch die Conf am Elternobjekt
+			 * (Webpage) aktualisiert. Bei neuen Crawls ist das nicht notwendig, da
+			 * der neueste Crawl immer mit der aktuellen Conf ausgeführt wird, so dass
+			 * die Confs sowieso schon gleich sind. Seit Implementierung des
+			 * WebpageVersionImporters können hier jedoch auch Crawls aus anderen
+			 * Systemen übernommen werden. Die Conf des Elternobjektes sollte nach
+			 * einer solchen Übernahme mit der Conf des importierten Webschnittes
+			 * übereinstimmen, danit zukünftige Crawls die richtigen Cawl-Parameter,
+			 * nämlich die von dem importierten Crawl, erben.
+			 */
+			msg = new Modify().updateConf(node, conf.toString());
+			WebgatherLogger.debug(msg);
+			/*
+			 * KS 27.11.2025: Aus irgendeinem Grunde bewirkt dieser Update leider
+			 * auch, dass RELS-EXT der Webpage nicht aktualisiert wird. Dadurch wird
+			 * der importierte Webschnitt gar nicht eingehängt. :-( Diesen Update
+			 * daher erstmal wieder auskommentiert
+			 */
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
