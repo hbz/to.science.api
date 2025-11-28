@@ -18,6 +18,7 @@ package actions;
 
 import helper.HttpArchiveError;
 import helper.HttpArchiveException;
+import helper.WebpageVersionRemover;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
@@ -75,6 +76,21 @@ public class Delete extends RegalAction {
 		message.append(new Index().remove(n));
 		removeNodeFromCache(n.getPid());
 		Globals.fedora.deleteNode(n.getPid());
+		if (n.getContentType().equals("version")) {
+			/*
+			 * für WebpageVersions (Webschnitte) werden auch die Webarchive auf der
+			 * Festplatte gelöscht; d.h. das Crawl-Verzeichnis für diesen Webschnitt
+			 * samt Inhalten.
+			 */
+			/*
+			 * für große Crawls könnte das Löschen eine Weile dauern, daher lieber
+			 * nebenläufig, als Thread, programmiert.
+			 */
+			WebpageVersionRemover websiteVersionRemoveThread =
+					new WebpageVersionRemover();
+			websiteVersionRemoveThread.setNode(n);
+			websiteVersionRemoveThread.start();
+		}
 		return message.toString() + "\n" + n.getPid() + " deleted!";
 	}
 

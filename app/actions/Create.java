@@ -623,12 +623,6 @@ public class Create extends RegalAction {
 			 * übereinstimmen, danit zukünftige Crawls die richtigen Cawl-Parameter,
 			 * nämlich die von dem importierten Crawl, erben.
 			 */
-			/*
-			 * KS 27.11.2025: Aus irgendeinem Grunde bewirkt dieser Update leider
-			 * auch, dass RELS-EXT der Webpage nicht aktualisiert wird. Dadurch wird
-			 * der importierte Webschnitt gar nicht eingehängt. :-( Diesen Update
-			 * daher erstmal wieder auskommentiert
-			 */
 			String msg = new Modify().updateConf(n, conf.toString());
 			WebgatherLogger.debug(msg);
 
