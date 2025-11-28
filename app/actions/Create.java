@@ -612,6 +612,26 @@ public class Create extends RegalAction {
 				localfile.mkdirs();
 			}
 
+			/**
+			 * KS 27.11.2025: Aus Konsistenzgünden wird auch die Conf am Elternobjekt
+			 * (Webpage) aktualisiert. Bei neuen Crawls ist das nicht notwendig, da
+			 * der neueste Crawl immer mit der aktuellen Conf ausgeführt wird, so dass
+			 * die Confs sowieso schon gleich sind. Seit Implementierung des
+			 * WebpageVersionImporters können hier jedoch auch Crawls aus anderen
+			 * Systemen übernommen werden. Die Conf des Elternobjektes sollte nach
+			 * einer solchen Übernahme mit der Conf des importierten Webschnittes
+			 * übereinstimmen, danit zukünftige Crawls die richtigen Cawl-Parameter,
+			 * nämlich die von dem importierten Crawl, erben.
+			 */
+			/*
+			 * KS 27.11.2025: Aus irgendeinem Grunde bewirkt dieser Update leider
+			 * auch, dass RELS-EXT der Webpage nicht aktualisiert wird. Dadurch wird
+			 * der importierte Webschnitt gar nicht eingehängt. :-( Diesen Update
+			 * daher erstmal wieder auskommentiert
+			 */
+			String msg = new Modify().updateConf(n, conf.toString());
+			WebgatherLogger.debug(msg);
+
 			/*
 			 * Jetzt in einen Thread verzweigen zwecks paralleler Verabeitung (copies
 			 * large files)
