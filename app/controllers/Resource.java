@@ -1514,14 +1514,15 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "importWS", value = "importtWS", notes = "importiert einen erfolgreich gecrwalten Webschnitt vom Test- ins Produktivsystem", response = String.class, httpMethod = "POST")
 	public static Promise<Result> importWS(@PathParam("pid") String pid,
 			@QueryParam("quellserverWebpagePid") String quellserverWebpagePid,
-			@QueryParam("quellserverWebschnittPid") String quellserverWebschnittPid) {
+			@QueryParam("quellserverWebschnittPid") String quellserverWebschnittPid,
+			@QueryParam("deleteQuellserverWebschnitt") Boolean deleteQuellserverWebschnitt) {
 		return new ModifyAction().call(pid, userId -> {
 			play.Logger.debug("Ein Webschnitt wird importiert.");
 			try {
 				Node node = readNodeOrNull(pid);
 				String versionPid = null;
 				create.importWebpageVersion(node, versionPid, quellserverWebpagePid,
-						quellserverWebschnittPid);
+						quellserverWebschnittPid, deleteQuellserverWebschnitt);
 				return HtmlMessage(new Message("Der Import des Webschnittes "
 						+ quellserverWebschnittPid + " wird im Hintergrund verarbeitet.",
 						200));

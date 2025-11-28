@@ -541,8 +541,8 @@ public class Create extends RegalAction {
 	 * @throws RuntimeException eine Ausnahmebehandlung
 	 */
 	public void importWebpageVersion(Node n, String versionPid,
-			String quellserverWebpagePid, String quellserverWebschnittPid)
-			throws RuntimeException {
+			String quellserverWebpagePid, String quellserverWebschnittPid,
+			Boolean deleteQuellserverWebschnitt) throws RuntimeException {
 
 		Gatherconf conf = null;
 		try {
@@ -637,6 +637,7 @@ public class Create extends RegalAction {
 			importThread.setLocalpath(localpath);
 			importThread.setRenotepath(remotepath);
 			importThread.setVersionPid(versionPid);
+			importThread.setDeleteQuellserverWebschnitt(deleteQuellserverWebschnitt);
 			importThread.start();
 			// fertig
 

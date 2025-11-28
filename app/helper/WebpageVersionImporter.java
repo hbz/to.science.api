@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import actions.Create;
 import actions.Modify;
+import controllers.MyController;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
@@ -50,6 +51,7 @@ public class WebpageVersionImporter extends Thread {
 			StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES };
 	private String warcFilename = null;
 	private String versionPid = null;
+	private Boolean deleteQuellserverWebschnitt = false;
 	private String msg = null;
 
 	static Create create = new Create();
@@ -136,6 +138,17 @@ public class WebpageVersionImporter extends Thread {
 		this.versionPid = versionPid;
 	}
 
+	/**
+	 * Setze Flag, ob nach erfolgreichem Import der Webschnitt auf dem Quellserver
+	 * gelöscht werden soll
+	 * 
+	 * @param flag Flag, ob nach erfolgreichem Import der Webschnitt auf dem
+	 *          Quellserver gelöscht werden soll
+	 */
+	public void setDeleteQuellserverWebschnitt(Boolean flag) {
+		this.deleteQuellserverWebschnitt = flag;
+	}
+
 	@Override
 	public void run() {
 		try {
@@ -165,6 +178,18 @@ public class WebpageVersionImporter extends Thread {
 			 */
 			create.createWebpageVersion(node, conf, warcFilename, localfile,
 					localDataUrl, versionPid);
+
+			if (this.deleteQuellserverWebschnitt == true) {
+				/*
+				 * Schließlich wird auch noch der original Webschnitt (auf dem
+				 * Quellserver) entfernt
+				 */
+				WebgatherLogger
+						.info("der Webschnitt auf dem Quellserver wird gelöscht.");
+				// return delete.deleteRemoteImported(quellserverWebschnittPid);
+			}
+			WebgatherLogger
+					.info("der Webschnitt auf dem Quellserver bleibt erhalten.");
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
