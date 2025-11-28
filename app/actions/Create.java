@@ -554,7 +554,7 @@ public class Create extends RegalAction {
 						+ " is not supported. Operation works only on regalType:\"webpage\"");
 			}
 			ApplicationLogger
-					.debug("Import webpageVersion for lokale Webpage" + n.getPid());
+					.debug("Import webpageVersion for lokale Webpage " + n.getPid());
 
 			// Hole Gatherconf des Quellwebschnittes vom Quellserver
 			conf = new Read().readRemoteConf(quellserverWebschnittPid);
