@@ -124,6 +124,7 @@ public class Gatherconf {
 	// id = die PID des Webschnittes (= WebpageVersion)
 	String id;
 	String quellserverWebschnittPid;
+	boolean deleteQuellserverWebschnitt;
 	long maxCrawlSize;
 	int waitSecBtRequests;
 	boolean randomWait;
@@ -157,6 +158,7 @@ public class Gatherconf {
 		openWaybackLink = null;
 		id = null;
 		quellserverWebschnittPid = null;
+		deleteQuellserverWebschnitt = false;
 		maxCrawlSize = 0;
 		waitSecBtRequests = 0;
 		randomWait = true;
@@ -412,6 +414,24 @@ public class Gatherconf {
 	 */
 	public void setQuellserverWebpagePid(String pid) {
 		this.quellserverWebpagePid = pid;
+	}
+
+	/**
+	 * @return a flag (true or false) which indicates whether the original
+	 *         WebpageVersion on the server from which it had been imported will
+	 *         be deleted
+	 */
+	public boolean getDeleteQuellserverWebschnitt() {
+		return deleteQuellserverWebschnitt;
+	}
+
+	/**
+	 * @param flag a flag (true or false) which indicates whether the original
+	 *          WebpageVersion on the server from which it had been imported will
+	 *          be deleted
+	 */
+	public void setDeleteQuellserverWebschnitt(boolean flag) {
+		this.deleteQuellserverWebschnitt = flag;
 	}
 
 	/**

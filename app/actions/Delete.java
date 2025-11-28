@@ -20,16 +20,26 @@ import helper.HttpArchiveError;
 import helper.HttpArchiveException;
 import helper.WebpageVersionRemover;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Base64;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import archive.fedora.RdfUtils;
 import static archive.fedora.Vocabulary.*;
+
+import models.Gatherconf;
 import models.Globals;
 import models.Node;
 import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
@@ -194,5 +204,61 @@ public class Delete extends RegalAction {
 				RdfUtils.deletePredicateFromRepo(rdfRepo, pred);
 		return new Modify().updateMetadata(metadata2, node,
 				RdfUtils.graphToString(myGraph, RDFFormat.NTRIPLES));
+	}
+
+	/**
+	 * Diese Methode löscht einen Webschnitt (WebpageVersion) von einem entfernten
+	 * Server. Dieser entfernte Server ist der Import-Server, dessen Servername
+	 * und Backend-Credentials in der application.conf angegeben sind.
+	 * 
+	 * @param quellserverWebschnittPid die PID des Webschnitts auf dem anderen
+	 *          Server
+	 * 
+	 * @return Eine Nachricht (Typ String)
+	 */
+	public String deleteRemoteImported(String quellserverWebschnittPid) {
+		HttpURLConnection con = null;
+		BufferedReader br = null;
+		String responseMultiLine = null;
+		Gatherconf conf = null;
+		try {
+			URL url = new URL(Globals.protocol + "api." + Globals.importServerName
+					+ "/resource/" + quellserverWebschnittPid);
+			play.Logger.debug("URL for remote WebpageVersion: " + url.toString());
+			con = (HttpURLConnection) url.openConnection();
+			play.Logger.debug("opened connection");
+			con.setRequestMethod("DELETE");
+			HttpURLConnection.setFollowRedirects(true);
+			String auth = Globals.importServerBackendUser + ":"
+					+ Globals.importServerBackendUserPassword;
+			byte[] encodedAuth =
+					Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
+			String authHeaderValue = "Basic " + new String(encodedAuth);
+			play.Logger.debug("auth: " + authHeaderValue);
+			con.setRequestProperty("Authorization", authHeaderValue);
+			con.connect();
+			play.Logger.debug("response code for DELETE remote WebpageVersion: "
+					+ con.getResponseCode());
+			InputStream ip = con.getInputStream();
+			br = new BufferedReader(new InputStreamReader(ip));
+			StringBuilder response = new StringBuilder();
+			String responseSingle = null;
+			while ((responseSingle = br.readLine()) != null) {
+				response.append(responseSingle);
+			}
+			responseMultiLine = response.toString();
+			play.Logger.debug("response: " + responseMultiLine);
+		} catch (Exception e) {
+			play.Logger.error(e.toString());
+			throw new RuntimeException(e);
+		} finally {
+			con.disconnect();
+			try {
+				br.close();
+			} catch (IOException e) {
+				play.Logger.error(e.getMessage());
+			}
+		}
+		return responseMultiLine;
 	}
 }

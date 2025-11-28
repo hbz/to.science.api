@@ -576,13 +576,13 @@ public class Create extends RegalAction {
 			conf.setId(versionPid); // kann hier noch null sein
 			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(datetime);
 			conf.setStartDate(startDate);
-
 			/*
 			 * die Quellserver Webpage PID wird in der lokalen Gatherconf gespeichert,
 			 * auch die Quellserver Webschnitt PID.
 			 */
 			conf.setQuellserverWebpagePid(quellserverWebpagePid);
 			conf.setQuellserverWebschnittPid(quellserverWebschnittPid);
+			conf.setDeleteQuellserverWebschnitt(deleteQuellserverWebschnitt);
 
 			// Erzeuge lokales Datenverzeichnis localpath und
 			// hole angemountetes Datenverzeichnis remotepath
@@ -639,6 +639,7 @@ public class Create extends RegalAction {
 			importThread.setLocalpath(localpath);
 			importThread.setRenotepath(remotepath);
 			importThread.setVersionPid(versionPid);
+			importThread.setQuellserverWebschnittPid(quellserverWebschnittPid);
 			importThread.setDeleteQuellserverWebschnitt(deleteQuellserverWebschnitt);
 			importThread.start();
 			// fertig

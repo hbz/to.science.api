@@ -25,8 +25,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 import actions.Create;
-import actions.Modify;
-import controllers.MyController;
+import actions.Delete;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
@@ -51,10 +50,12 @@ public class WebpageVersionImporter extends Thread {
 			StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES };
 	private String warcFilename = null;
 	private String versionPid = null;
+	private String quellserverWebschnittPid = null;
 	private boolean deleteQuellserverWebschnitt = false;
 	private String msg = null;
 
 	static Create create = new Create();
+	static Delete delete = new Delete();
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -139,6 +140,16 @@ public class WebpageVersionImporter extends Thread {
 	}
 
 	/**
+	 * Setze die PID des Webschnittes auf dem Quellserver, von dem importiert wird
+	 * 
+	 * @param pid die PID des Webschnittes auf dem Quellserver, von dem importiert
+	 *          wird
+	 */
+	public void setQuellserverWebschnittPid(String pid) {
+		this.quellserverWebschnittPid = pid;
+	}
+
+	/**
 	 * Setze Flag, ob nach erfolgreichem Import der Webschnitt auf dem Quellserver
 	 * gelöscht werden soll
 	 * 
@@ -186,10 +197,12 @@ public class WebpageVersionImporter extends Thread {
 				 */
 				WebgatherLogger
 						.info("der Webschnitt auf dem Quellserver wird gelöscht.");
-				// return delete.deleteRemoteImported(quellserverWebschnittPid);
+				msg = delete.deleteRemoteImported(quellserverWebschnittPid);
+				WebgatherLogger.info(msg);
+			} else {
+				WebgatherLogger
+						.info("der Webschnitt auf dem Quellserver bleibt erhalten.");
 			}
-			WebgatherLogger
-					.info("der Webschnitt auf dem Quellserver bleibt erhalten.");
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
