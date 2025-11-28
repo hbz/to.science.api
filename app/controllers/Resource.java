@@ -1515,7 +1515,7 @@ public class Resource extends MyController {
 	public static Promise<Result> importWS(@PathParam("pid") String pid,
 			@QueryParam("quellserverWebpagePid") String quellserverWebpagePid,
 			@QueryParam("quellserverWebschnittPid") String quellserverWebschnittPid,
-			@QueryParam("deleteQuellserverWebschnitt") Boolean deleteQuellserverWebschnitt) {
+			@QueryParam("deleteQuellserverWebschnitt") boolean deleteQuellserverWebschnitt) {
 		return new ModifyAction().call(pid, userId -> {
 			play.Logger.debug("Ein Webschnitt wird importiert.");
 			try {

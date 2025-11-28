@@ -51,7 +51,7 @@ public class WebpageVersionImporter extends Thread {
 			StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES };
 	private String warcFilename = null;
 	private String versionPid = null;
-	private Boolean deleteQuellserverWebschnitt = false;
+	private boolean deleteQuellserverWebschnitt = false;
 	private String msg = null;
 
 	static Create create = new Create();

@@ -95,7 +95,7 @@ POST /resource/:pid/doi             controllers.Resource.addDoi(pid)
 POST /resource/:pid/doi/update      controllers.Resource.updateDoi(pid)
 POST /resource/:pid/doi/replace    controllers.Resource.replaceDoi(pid)
 POST /resource/:pid/confirmNewUrl   controllers.Resource.confirmNewUrl(pid)
-POST /resource/:pid/importWS    controllers.Resource.importWS(pid,quellserverWebpagePid?="",quellserverWebschnittPid?="",deleteQuellserverWebschnitt?="false")
+POST /resource/:pid/importWS    controllers.Resource.importWS(pid,quellserverWebpagePid?="",quellserverWebschnittPid?="",deleteQuellserverWebschnitt : Boolean ?= false)
 
 DELETE /resource/:pid/seq		    controllers.Resource.deleteSeq(pid)
 DELETE /resource/:pid/metadata		controllers.Resource.deleteMetadata(pid,field)

@@ -538,11 +538,13 @@ public class Create extends RegalAction {
 	 *          server
 	 * @param quellserverWebschnittPid The PID of the source WebpageVersion
 	 *          (Webschnitt) on the source server
+	 * @param deleteQuellserverWebschnitt Flag, ob Webschnitt auf dem Quellserver
+	 *          am Ende gelöscht werden soll
 	 * @throws RuntimeException eine Ausnahmebehandlung
 	 */
 	public void importWebpageVersion(Node n, String versionPid,
 			String quellserverWebpagePid, String quellserverWebschnittPid,
-			Boolean deleteQuellserverWebschnitt) throws RuntimeException {
+			boolean deleteQuellserverWebschnitt) throws RuntimeException {
 
 		Gatherconf conf = null;
 		try {
