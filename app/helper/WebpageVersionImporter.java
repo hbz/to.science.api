@@ -47,7 +47,9 @@ public class WebpageVersionImporter extends Thread {
 	private String localpath = null;
 	private String remotepath = null;
 	private CopyOption[] copyOptions = new CopyOption[] {
-			StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES };
+			// StandardCopyOption.REPLACE_EXISTING, bei nicht-leeren Ordnern führt
+			// dies auf Fehler
+			StandardCopyOption.COPY_ATTRIBUTES };
 	private String warcFilename = null;
 	private String versionPid = null;
 	private String quellserverWebschnittPid = null;
