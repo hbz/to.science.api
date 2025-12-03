@@ -688,12 +688,16 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
 	public static Promise<Result> deleteResource(@PathParam("pid") String pid,
-			@QueryParam("purge") String purge) {
+			@QueryParam("keepWebarchives") boolean keepWebarchives,
+			@QueryParam("purge") boolean purge) {
 		return new BulkActionAccessor().call((userId) -> {
 			List<Node> list = Globals.fedora.listComplexObject(pid);
+			for (Node n : list) {
+				n.setKeepWebarchives(keepWebarchives);
+			}
 			BulkAction bulk = new BulkAction();
 			bulk.executeOnNodes(list, userId, nodes -> {
-				if ("true".equals(purge)) {
+				if (purge == true) {
 					return delete.purge(nodes);
 				}
 				return delete.delete(nodes);

@@ -72,6 +72,7 @@ public class Delete extends RegalAction {
 			}
 		}
 		Globals.fedora.purgeNode(n.getPid());
+		removeWebpageVersion(n);
 		return message.toString() + "\n" + n.getPid() + " purged!";
 	}
 
@@ -86,7 +87,12 @@ public class Delete extends RegalAction {
 		message.append(new Index().remove(n));
 		removeNodeFromCache(n.getPid());
 		Globals.fedora.deleteNode(n.getPid());
-		if (n.getContentType().equals("version")) {
+		removeWebpageVersion(n);
+		return message.toString() + "\n" + n.getPid() + " deleted!";
+	}
+
+	private static void removeWebpageVersion(Node n) {
+		if (n.getContentType().equals("version") && !n.getKeepWebarchives()) {
 			/*
 			 * für WebpageVersions (Webschnitte) werden auch die Webarchive auf der
 			 * Festplatte gelöscht; d.h. das Crawl-Verzeichnis für diesen Webschnitt
@@ -101,7 +107,6 @@ public class Delete extends RegalAction {
 			websiteVersionRemoveThread.setNode(n);
 			websiteVersionRemoveThread.start();
 		}
-		return message.toString() + "\n" + n.getPid() + " deleted!";
 	}
 
 	/**
