@@ -19,9 +19,11 @@ package actions;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -32,6 +34,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -690,16 +693,32 @@ public class Create extends RegalAction {
 			conf.setName(n.getPid());
 			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(timestamp);
 			conf.setStartDate(startDate);
+			ApplicationLogger.debug("Crawl Startdate: " + startDate);
 
+			if (dataDir == null || dataDir.isEmpty()) {
+				dataDir = Play.application().configuration()
+						.getString("regal-api." + conf.getCrawlerSelection() + ".outDir");
+			}
+			ApplicationLogger.debug("dataDir: " + dataDir);
 			// hier auf ein bestehendes WARC in dataDir verweisen
 			File outDir = new File(dataDir + "/" + conf.getName() + "/" + timestamp);
-			String localpath = Globals.heritrixData + "/wpull-data" + "/"
-					+ conf.getName() + "/" + timestamp + "/" + filename;
-			ApplicationLogger.debug("URI-Path to WARC " + localpath);
+			ApplicationLogger.debug("outDir (localpath): " + outDir);
+			if (filename == null || filename.isEmpty()) {
+				ApplicationLogger.debug(
+						"WARC filename will be determined from the contents of directory "
+								+ outDir);
+				filename = findWarcFilename(outDir.toPath());
+				ApplicationLogger.debug("filename: " + filename);
+			}
+			String localDataUrl =
+					Globals.heritrixData + "/" + conf.getCrawlerSelection() + "-data/"
+							+ conf.getName() + "/" + timestamp + "/" + filename;
+
+			ApplicationLogger.debug("URI-Path to WARC " + localDataUrl);
 			String warcFilename = filename.replaceAll(".warc.gz$", "");
 			ApplicationLogger.debug("WARC file name: " + warcFilename);
 
-			return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
+			return createWebpageVersion(n, conf, warcFilename, outDir, localDataUrl,
 					versionPid);
 
 		} catch (Exception e) {
@@ -708,6 +727,24 @@ public class Create extends RegalAction {
 					timestamp, n.getPid());
 			throw new RuntimeException(e);
 		}
+	}
+
+	private String findWarcFilename(Path localpath) throws IOException {
+		String filename = localpath.getFileName().toString();
+		if (filename.endsWith(".warc.gz")) {
+			ApplicationLogger.info("Found warc Filename = " + filename);
+			return filename;
+		}
+		try (Stream<Path> stream = Files.walk(localpath)) {
+			stream.forEach(source -> {
+				try {
+					findWarcFilename(source);
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			});
+		}
+		return filename;
 	}
 
 	/**
