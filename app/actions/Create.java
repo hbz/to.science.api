@@ -666,8 +666,8 @@ public class Create extends RegalAction {
 	 * @param n Der Knoten der Webpage
 	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch) oder
 	 *          leer (Pid wird generiert)
-	 * @param dataDir Datenhauptverzeichnis, unter dem die WARC-Datei liegt. Z.B.
-	 *          /opt/regal/wpull-data
+	 * @param crawlerSelection der Name des für diesen Crawl verwendeten
+	 *          Webcrawlers gem. Aufzählung in der Klasse Gatherconf
 	 * @param timestamp Der Zeitstempel des Crawl. Ist auch Name des
 	 *          Unterverzeichnisses für den Crawl. Aus dem Datum wird der
 	 *          Bezeichner (Label auf der UI) für den Webschnitt generiert.
@@ -675,8 +675,8 @@ public class Create extends RegalAction {
 	 *          Dateiendung) (WARC-Archiv).
 	 * @return a new website version pointing to the posted crawl.
 	 */
-	public Node postWebpageVersion(Node n, String versionPid, String dataDir,
-			String timestamp, String filename) {
+	public Node postWebpageVersion(Node n, String versionPid,
+			String crawlerSelection, String timestamp, String filename) {
 		Gatherconf conf = null;
 		try {
 			if (!"webpage".equals(n.getContentType())) {
@@ -695,10 +695,8 @@ public class Create extends RegalAction {
 			conf.setStartDate(startDate);
 			ApplicationLogger.debug("Crawl Startdate: " + startDate);
 
-			if (dataDir == null || dataDir.isEmpty()) {
-				dataDir = Play.application().configuration()
-						.getString("regal-api." + conf.getCrawlerSelection() + ".outDir");
-			}
+			String dataDir = Play.application().configuration()
+					.getString("regal-api." + crawlerSelection + ".outDir");
 			ApplicationLogger.debug("dataDir: " + dataDir);
 			// hier auf ein bestehendes WARC in dataDir verweisen
 			File outDir = new File(dataDir + "/" + conf.getName() + "/" + timestamp);

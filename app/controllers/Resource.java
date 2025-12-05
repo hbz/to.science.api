@@ -1343,13 +1343,13 @@ public class Resource extends MyController {
 
 	public static Promise<Result> postVersion(@PathParam("pid") String pid,
 			@QueryParam("versionPid") String versionPid,
-			@QueryParam("dataDir") String dataDir,
+			@QueryParam("dataDir") String crawlerSelection,
 			@QueryParam("timestamp") String timestamp,
 			@QueryParam("filename") String filename) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			Node result = create.postWebpageVersion(node, versionPid, dataDir,
-					timestamp, filename);
+			Node result = create.postWebpageVersion(node, versionPid,
+					crawlerSelection, timestamp, filename);
 			return getJsonResult(result);
 		});
 	}
