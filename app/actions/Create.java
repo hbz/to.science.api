@@ -701,19 +701,22 @@ public class Create extends RegalAction {
 			// hier auf ein bestehendes WARC in dataDir verweisen
 			File outDir = new File(dataDir + "/" + conf.getName() + "/" + timestamp);
 			ApplicationLogger.debug("outDir (localpath): " + outDir);
+			String filenameFound = null;
 			if (filename == null || filename.isEmpty()) {
 				ApplicationLogger.debug(
 						"WARC filename will be determined from the contents of directory "
 								+ outDir);
-				filename = findWarcFilename(outDir.toPath());
-				ApplicationLogger.debug("filename: " + filename);
+				filenameFound = findWarcFilename(outDir.toPath());
+			} else {
+				filenameFound = filename;
 			}
+			ApplicationLogger.debug("filenameFound: " + filenameFound);
 			String localDataUrl =
 					Globals.heritrixData + "/" + conf.getCrawlerSelection() + "-data/"
-							+ conf.getName() + "/" + timestamp + "/" + filename;
+							+ conf.getName() + "/" + timestamp + "/" + filenameFound;
 
 			ApplicationLogger.debug("URI-Path to WARC " + localDataUrl);
-			String warcFilename = filename.replaceAll(".warc.gz$", "");
+			String warcFilename = filenameFound.replaceAll(".warc.gz$", "");
 			ApplicationLogger.debug("WARC file name: " + warcFilename);
 
 			return createWebpageVersion(n, conf, warcFilename, outDir, localDataUrl,
@@ -729,6 +732,7 @@ public class Create extends RegalAction {
 
 	private String findWarcFilename(Path localpath) throws IOException {
 		String filename = localpath.getFileName().toString();
+		ApplicationLogger.info("found filename = " + filename);
 		if (filename.endsWith(".warc.gz")) {
 			ApplicationLogger.info("Found warc Filename = " + filename);
 			return filename;
