@@ -82,6 +82,7 @@ public class Create extends RegalAction {
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 	private static final BigInteger bigInt1024 = new BigInteger("1024");
+	private String warcFilename;
 
 	@SuppressWarnings({ "javadoc", "serial" })
 	public class WebgathererTooBusyException extends HttpArchiveException {
@@ -706,7 +707,8 @@ public class Create extends RegalAction {
 				ApplicationLogger.debug(
 						"WARC filename will be determined from the contents of directory "
 								+ outDir);
-				filenameFound = findWarcFilename(outDir.toPath());
+				findWarcFilename(outDir.toPath());
+				filenameFound = this.warcFilename;
 			} else {
 				filenameFound = filename;
 			}
@@ -716,11 +718,11 @@ public class Create extends RegalAction {
 							+ conf.getName() + "/" + timestamp + "/" + filenameFound;
 
 			ApplicationLogger.debug("URI-Path to WARC " + localDataUrl);
-			String warcFilename = filenameFound.replaceAll(".warc.gz$", "");
-			ApplicationLogger.debug("WARC file name: " + warcFilename);
+			String warcFilenameBase = filenameFound.replaceAll(".warc.gz$", "");
+			ApplicationLogger.debug("WARC file name base: " + warcFilenameBase);
 
-			return createWebpageVersion(n, conf, warcFilename, outDir, localDataUrl,
-					versionPid);
+			return createWebpageVersion(n, conf, warcFilenameBase, outDir,
+					localDataUrl, versionPid);
 
 		} catch (Exception e) {
 			ApplicationLogger.error(
@@ -730,23 +732,22 @@ public class Create extends RegalAction {
 		}
 	}
 
-	private String findWarcFilename(Path localpath) throws IOException {
-		String filename = localpath.getFileName().toString();
-		ApplicationLogger.info("found filename = " + filename);
-		if (filename.endsWith(".warc.gz")) {
-			ApplicationLogger.info("Found warc Filename = " + filename);
-			return filename;
-		}
+	private void findWarcFilename(Path localpath) throws IOException {
+		this.warcFilename = null;
 		try (Stream<Path> stream = Files.walk(localpath)) {
 			stream.forEach(source -> {
 				try {
-					findWarcFilename(source);
-				} catch (IOException e) {
+					String filename = source.getFileName().toString();
+					ApplicationLogger.info("found filename = " + filename);
+					if (filename.endsWith(".warc.gz")) {
+						ApplicationLogger.info("Found warc Filename = " + filename);
+						this.warcFilename = filename;
+					}
+				} catch (Exception e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}
 			});
 		}
-		return filename;
 	}
 
 	/**
