@@ -123,6 +123,7 @@ public class Node implements java.io.Serializable {
 
 	private String embargoTime = null;
 	private boolean isManaged = true;
+	private boolean keepWebarchives = false;
 
 	/**
 	 * Creates a new Node.
@@ -1152,6 +1153,25 @@ public class Node implements java.io.Serializable {
 	 */
 	public boolean isManaged() {
 		return isManaged;
+	}
+
+	/**
+	 * Mit diesem Setter kann man festlegen, ob bei Löschung des Nodes die
+	 * zugehörigen Webarchive auf der Festplatte behalten werden sollen.
+	 * 
+	 * @param keepWebarchives set to true if webarchives of this Node are to be
+	 *          kept upon deletion of the Node
+	 */
+	public void setKeepWebarchives(boolean keepWebarchives) {
+		this.keepWebarchives = keepWebarchives;
+	}
+
+	/**
+	 * @return A Boolean value which indicates if webarchives of this Node are to
+	 *         be kept upon deletion of the Node
+	 */
+	public boolean getKeepWebarchives() {
+		return keepWebarchives;
 	}
 
 	/**

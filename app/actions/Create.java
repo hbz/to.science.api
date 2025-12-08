@@ -19,7 +19,12 @@ package actions;
 import static archive.fedora.Vocabulary.TYPE_OBJECT;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +34,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -38,7 +44,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.MyController;
 import helper.HttpArchiveException;
 import helper.WebgatherUtils;
+import helper.WebpageVersionImporter;
 import helper.WebsiteVersionPublisher;
+import helper.WpullThread;
 import helper.oai.OaiDispatcher;
 import models.Gatherconf;
 import models.Globals;
@@ -74,6 +82,7 @@ public class Create extends RegalAction {
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 	private static final BigInteger bigInt1024 = new BigInteger("1024");
+	private String warcFilename;
 
 	@SuppressWarnings({ "javadoc", "serial" })
 	public class WebgathererTooBusyException extends HttpArchiveException {
@@ -418,6 +427,7 @@ public class Create extends RegalAction {
 					.info("waybackCollectionLink=" + conf.getOpenWaybackLink());
 			conf.setId(webpageVersion.getPid());
 			String msg = new Modify().updateConf(webpageVersion, conf.toString());
+			WebgatherLogger.debug(msg);
 
 			/**
 			 * NEU für inkrementelles Crawlern (= warc-Deduplizierung): Nach
@@ -448,7 +458,6 @@ public class Create extends RegalAction {
 						conf);
 			}
 
-			WebgatherLogger.debug(msg);
 			WebgatherLogger.info("Version " + webpageVersion.getPid()
 					+ " zur Website " + n.getPid() + " erfolgreich angelegt!");
 
@@ -519,6 +528,136 @@ public class Create extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode legt eine WebpageVersion (Objekt-Typ "Node") für eine
+	 * bestehende WARC-Datei an. Es wird angenommen, dass diese WARC-Datei in
+	 * einem angemounteten Datenverzeichnis eines anderen toscience-Servers
+	 * (Quellserver) liegt. Auf diese Weise können Webschnitte von einem auf den
+	 * anderen Server übernommen werden.
+	 * 
+	 * @param n Node, must be of type webpage. The local Node to which a
+	 *          WebpageVersion should be added.
+	 * @param versionPid die gewünschte Pid für die Version (7-stellig numerisch)
+	 *          oder leer (Pid wird generiert)
+	 * @param quellserverWebpagePid The PID of the source webpage on the source
+	 *          server
+	 * @param quellserverWebschnittPid The PID of the source WebpageVersion
+	 *          (Webschnitt) on the source server
+	 * @param deleteQuellserverWebschnitt Flag, ob Webschnitt auf dem Quellserver
+	 *          am Ende gelöscht werden soll
+	 * @throws RuntimeException eine Ausnahmebehandlung
+	 */
+	public void importWebpageVersion(Node n, String versionPid,
+			String quellserverWebpagePid, String quellserverWebschnittPid,
+			boolean deleteQuellserverWebschnitt) throws RuntimeException {
+
+		Gatherconf conf = null;
+		try {
+
+			if (!"webpage".equals(n.getContentType())) {
+				throw new HttpArchiveException(400, n.getContentType()
+						+ " is not supported. Operation works only on regalType:\"webpage\"");
+			}
+			ApplicationLogger
+					.debug("Import webpageVersion for lokale Webpage " + n.getPid());
+
+			// Hole Gatherconf des Quellwebschnittes vom Quellserver
+			conf = new Read().readRemoteConf(quellserverWebschnittPid);
+
+			// Parse localdir der Gatherconf vom Quellserver
+			String localdir = conf.getLocalDir();
+			ApplicationLogger.debug("remote localdir: " + localdir);
+			int indexOfPid = localdir.indexOf(quellserverWebpagePid);
+			if (indexOfPid < 0) {
+				throw new RuntimeException("localdir " + localdir
+						+ " does not contain Webpage-ID " + quellserverWebpagePid);
+			}
+			String datetime =
+					localdir.substring(indexOfPid + quellserverWebpagePid.length() + 1);
+			ApplicationLogger.debug("datetime: " + datetime);
+
+			// Überschreibe Felder der remote Conf mit lokalen Werten
+			conf.setName(n.getPid());
+			conf.setId(versionPid); // kann hier noch null sein
+			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(datetime);
+			conf.setStartDate(startDate);
+			/*
+			 * die Quellserver Webpage PID wird in der lokalen Gatherconf gespeichert,
+			 * auch die Quellserver Webschnitt PID.
+			 */
+			conf.setQuellserverWebpagePid(quellserverWebpagePid);
+			conf.setQuellserverWebschnittPid(quellserverWebschnittPid);
+			conf.setDeleteQuellserverWebschnitt(deleteQuellserverWebschnitt);
+
+			// Erzeuge lokales Datenverzeichnis localpath und
+			// hole angemountetes Datenverzeichnis remotepath
+			String localpath = null;
+			String outdir = Play.application().configuration()
+					.getString("regal-api." + conf.getCrawlerSelection() + ".outDir");
+			if (outdir == null || outdir.isEmpty()) {
+				throw new RuntimeException(
+						"Unknown local path \"outDir\" ! application env var \"regal-api."
+								+ conf.getCrawlerSelection() + ".ourDir not found!");
+			}
+			localpath = outdir + "/" + conf.getName() + "/" + datetime;
+			ApplicationLogger.debug("localpath = " + localpath);
+
+			String remotepath = null;
+			String importHome = Play.application().configuration()
+					.getString("regal-api." + conf.getCrawlerSelection() + ".importHome");
+			if (importHome == null || importHome.isEmpty()) {
+				throw new RuntimeException(
+						"Unknown locally mountet path \"importHome\" ! application env var \"regal-api."
+								+ conf.getCrawlerSelection() + ".impotHome not found!");
+			}
+			remotepath = importHome + "/" + quellserverWebpagePid + "/" + datetime;
+			ApplicationLogger.debug("remotepath = " + remotepath);
+
+			File localfile = new File(localpath);
+			if (!localfile.exists()) {
+				ApplicationLogger.debug("Create local directory " + localpath);
+				localfile.mkdirs();
+			}
+
+			/**
+			 * KS 27.11.2025: Aus Konsistenzgünden wird auch die Conf am Elternobjekt
+			 * (Webpage) aktualisiert. Bei neuen Crawls ist das nicht notwendig, da
+			 * der neueste Crawl immer mit der aktuellen Conf ausgeführt wird, so dass
+			 * die Confs sowieso schon gleich sind. Seit Implementierung des
+			 * WebpageVersionImporters können hier jedoch auch Crawls aus anderen
+			 * Systemen übernommen werden. Die Conf des Elternobjektes sollte nach
+			 * einer solchen Übernahme mit der Conf des importierten Webschnittes
+			 * übereinstimmen, danit zukünftige Crawls die richtigen Cawl-Parameter,
+			 * nämlich die von dem importierten Crawl, erben.
+			 */
+			String msg = new Modify().updateConf(n, conf.toString());
+			WebgatherLogger.debug(msg);
+
+			/*
+			 * Jetzt in einen Thread verzweigen zwecks paralleler Verabeitung (copies
+			 * large files)
+			 */
+			WebpageVersionImporter importThread = new WebpageVersionImporter();
+			importThread.setNode(n);
+			importThread.setConf(conf);
+			importThread.setDatetime(datetime);
+			importThread.setLocalpath(localpath);
+			importThread.setRenotepath(remotepath);
+			importThread.setVersionPid(versionPid);
+			importThread.setQuellserverWebschnittPid(quellserverWebschnittPid);
+			importThread.setDeleteQuellserverWebschnitt(deleteQuellserverWebschnitt);
+			importThread.start();
+			// fertig
+
+		} catch (Exception e) {
+			ApplicationLogger.debug(e.toString());
+			ApplicationLogger.error(
+					"Import der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
+					versionPid, n.getPid());
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
 	 * Diese Methode legt eine WebpageVersion für eine bestehende WARC-Datei an.
 	 * Es wird angenommen, dass diese WARC-Datei unterhalb des Verzechnisses
 	 * dataDir liegt.
@@ -528,8 +667,8 @@ public class Create extends RegalAction {
 	 * @param n Der Knoten der Webpage
 	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch) oder
 	 *          leer (Pid wird generiert)
-	 * @param dataDir Datenhauptverzeichnis, unter dem die WARC-Datei liegt. Z.B.
-	 *          /opt/regal/wpull-data
+	 * @param crawlerSelection der Name des für diesen Crawl verwendeten
+	 *          Webcrawlers gem. Aufzählung in der Klasse Gatherconf
 	 * @param timestamp Der Zeitstempel des Crawl. Ist auch Name des
 	 *          Unterverzeichnisses für den Crawl. Aus dem Datum wird der
 	 *          Bezeichner (Label auf der UI) für den Webschnitt generiert.
@@ -537,8 +676,8 @@ public class Create extends RegalAction {
 	 *          Dateiendung) (WARC-Archiv).
 	 * @return a new website version pointing to the posted crawl.
 	 */
-	public Node postWebpageVersion(Node n, String versionPid, String dataDir,
-			String timestamp, String filename) {
+	public Node postWebpageVersion(Node n, String versionPid,
+			String crawlerSelection, String timestamp, String filename) {
 		Gatherconf conf = null;
 		try {
 			if (!"webpage".equals(n.getContentType())) {
@@ -555,23 +694,59 @@ public class Create extends RegalAction {
 			conf.setName(n.getPid());
 			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(timestamp);
 			conf.setStartDate(startDate);
+			ApplicationLogger.debug("Crawl Startdate: " + startDate);
 
+			String dataDir = Play.application().configuration()
+					.getString("regal-api." + crawlerSelection + ".outDir");
+			ApplicationLogger.debug("dataDir: " + dataDir);
 			// hier auf ein bestehendes WARC in dataDir verweisen
 			File outDir = new File(dataDir + "/" + conf.getName() + "/" + timestamp);
-			String localpath = Globals.heritrixData + "/wpull-data" + "/"
-					+ conf.getName() + "/" + timestamp + "/" + filename;
-			ApplicationLogger.debug("URI-Path to WARC " + localpath);
-			String warcFilename = filename.replaceAll(".warc.gz$", "");
-			ApplicationLogger.debug("WARC file name: " + warcFilename);
+			ApplicationLogger.debug("outDir (localpath): " + outDir);
+			String filenameFound = null;
+			if (filename == null || filename.isEmpty()) {
+				ApplicationLogger.debug(
+						"WARC filename will be determined from the contents of directory "
+								+ outDir);
+				findWarcFilename(outDir.toPath());
+				filenameFound = this.warcFilename;
+			} else {
+				filenameFound = filename;
+			}
+			ApplicationLogger.debug("filenameFound: " + filenameFound);
+			String localDataUrl =
+					Globals.heritrixData + "/" + conf.getCrawlerSelection() + "-data/"
+							+ conf.getName() + "/" + timestamp + "/" + filenameFound;
 
-			return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
-					versionPid);
+			ApplicationLogger.debug("URI-Path to WARC " + localDataUrl);
+			String warcFilenameBase = filenameFound.replaceAll(".warc.gz$", "");
+			ApplicationLogger.debug("WARC file name base: " + warcFilenameBase);
+
+			return createWebpageVersion(n, conf, warcFilenameBase, outDir,
+					localDataUrl, versionPid);
 
 		} catch (Exception e) {
 			ApplicationLogger.error(
 					"Anlegen der WebsiteVersion {} zu Webpage {} ist fehlgeschlagen !",
 					timestamp, n.getPid());
 			throw new RuntimeException(e);
+		}
+	}
+
+	private void findWarcFilename(Path localpath) throws IOException {
+		this.warcFilename = null;
+		try (Stream<Path> stream = Files.walk(localpath)) {
+			stream.forEach(source -> {
+				try {
+					String filename = source.getFileName().toString();
+					ApplicationLogger.info("found filename = " + filename);
+					if (filename.endsWith(".warc.gz")) {
+						ApplicationLogger.info("Found warc Filename = " + filename);
+						this.warcFilename = filename;
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			});
 		}
 	}
 
