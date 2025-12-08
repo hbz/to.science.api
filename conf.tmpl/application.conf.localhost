@@ -147,7 +147,7 @@ play.http.parser.maxDiskBuffer = 20MB
 parsers.anyContent.maxLength = 20MB
 
 logger.com.jolbox=WARN // for EBean
-db.default.driver=com.mysql.jdbc.Driver
+db.default.driver=com.mysql.cj.jdbc.Driver
 db.default.url="jdbc:mysql://localhost/regal_api?characterEncoding=UTF-8"
 db.default.username=regal_api
 db.default.password=""
