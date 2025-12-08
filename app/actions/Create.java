@@ -692,7 +692,11 @@ public class Create extends RegalAction {
 			conf = Gatherconf.create(n.getConf());
 			ApplicationLogger.debug("POST webpageVersion Conf" + conf.toString());
 			conf.setName(n.getPid());
+			ApplicationLogger.debug("dataDir: " + dataDir);
+			ApplicationLogger.debug("filename: " + filename);
+			ApplicationLogger.debug("timestamp: " + timestamp);
 			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(timestamp);
+			ApplicationLogger.debug("dataDir: " + dataDir);
 			conf.setStartDate(startDate);
 			ApplicationLogger.debug("Crawl Startdate: " + startDate);
 

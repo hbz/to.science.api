@@ -136,6 +136,7 @@ public class Search {
 			refresh();
 			return response;
 		} catch (Exception e) {
+			play.Logger.debug(e.toString(), e);
 			throw new SearchException(
 					"Failed to index " + index + "," + type + "," + id, e);
 		}
