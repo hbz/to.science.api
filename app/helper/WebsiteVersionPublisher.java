@@ -61,10 +61,14 @@ public class WebsiteVersionPublisher {
 	 */
 	public String handleWebpagePublishing(Node node, ToScienceObject object) {
 		try {
+			if (! node.getContentType().equals("version")) {
+			  	play.Logger.debug("No action from WebsiteVersionPublisher for ID " + node.getPid() + " of content type " + node.getContentType());
+				return node.getContentType();
+			}
 			if ((object == null) || (object.getAccessScheme() == null)) {
 				play.Logger.warn("Zugriffsrecht für ID " + node.getPid()
 						+ " kann nicht ermittelt werden!");
-				return "";
+				return node.getContentType();
 			}
 			if (object.getAccessScheme().equals("public")) {
 				if (node.getContentType().equals("version")) {
@@ -82,7 +86,7 @@ public class WebsiteVersionPublisher {
 			} else if (node.getContentType().equals("webpage")) {
 				return "Webpage ist nur im Lesesaal zugänglich.";
 			}
-			return "";
+			return node.getContentType();
 		} catch (Exception e) {
 			play.Logger.error("", e);
 			return e.toString();
