@@ -208,11 +208,15 @@ public class Heritrix {
 								+ cookieParts[0] + "\t" + cookieParts[1]);
 				writer.newLine();
 			}
-			writer.close();
 		} catch (Exception e) {
+			play.Logger.error(e.getMessage(), e);
 			play.Logger
 					.error(conf.getName() + ": cookies.txt kann nicht angelegt werden !");
-			throw new RuntimeException(e);
+		}
+		try {
+			writer.close();
+		} catch (IOException e) {
+			play.Logger.error(e.getMessage(), e);
 		}
 	}
 
