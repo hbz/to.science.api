@@ -255,6 +255,21 @@ public class WpullCrawl {
 		WebgatherLogger.info(
 				"Rufe CDN-Gatherer mit warcFilename=" + this.warcFilename + " auf.");
 		try {
+			String waitParam = null;
+			int waitSec = conf.getWaitSecBtRequests();
+			if (waitSec != 0) {
+				// number of second wpull will wait between two requests
+				waitParam = "wait=" + Integer.toString(waitSec);
+			} else {
+				boolean random = conf.isRandomWait();
+				if (random == true) {
+					// randomize wait times
+					waitParam = "random-wait";
+				} else {
+					// don't wait
+					waitParam = "wait=0";
+				}
+			}
 			String executeCommand =
 					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
 			AgentIdSelection agentId = conf.getAgentIdSelection();
@@ -265,6 +280,7 @@ public class WpullCrawl {
 				executeCommand =
 						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
 			}
+			executeCommand = executeCommand.concat(" " + waitParam);
 			if (cdxFileNew != null) {
 				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
 			}
