@@ -199,20 +199,26 @@ public class Heritrix {
 		try {
 			writer = new BufferedWriter(
 					new FileWriter(dir.getAbsolutePath() + "/cookies.txt"));
-			String[] cookies = conf.getCookie().replaceAll(" ", "").split(";");
-			for (int i = 0; i < cookies.length; i++) {
-				// split only at first occurence of "="
-				String[] cookieParts = cookies[i].split("=", 2);
-				writer
-						.write(url_no_https.replaceAll("/$", "") + "\tTRUE\t/\tFALSE\t-1\t"
-								+ cookieParts[0] + "\t" + cookieParts[1]);
-				writer.newLine();
+			if (conf.getCookie() != null) {
+				String[] cookies = conf.getCookie().replaceAll(" ", "").split(";");
+				for (int i = 0; i < cookies.length; i++) {
+					// split only at first occurence of "="
+					String[] cookieParts = cookies[i].split("=", 2);
+					writer.write(
+							url_no_https.replaceAll("/$", "") + "\tTRUE\t/\tFALSE\t-1\t"
+									+ cookieParts[0] + "\t" + cookieParts[1]);
+					writer.newLine();
+				}
 			}
-			writer.close();
 		} catch (Exception e) {
+			play.Logger.error(e.getMessage(), e);
 			play.Logger
 					.error(conf.getName() + ": cookies.txt kann nicht angelegt werden !");
-			throw new RuntimeException(e);
+		}
+		try {
+			writer.close();
+		} catch (IOException e) {
+			play.Logger.error(e.getMessage(), e);
 		}
 	}
 
