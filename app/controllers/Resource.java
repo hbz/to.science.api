@@ -16,7 +16,7 @@
  */
 package controllers;
 
-import static archive.fedora.FedoraVocabulary.IS_PART_OF;
+import static archive.fedora.FedoraVocabulary.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -782,6 +782,38 @@ public class Resource extends MyController {
 			});
 			response().setHeader("Transfer-Encoding", "Chunked");
 			return ok(bulk.getChunks());
+		});
+	}
+
+	/**
+	 * This method removes a relation of an object. This relation will be removed
+	 * from the datastream RelsExt of the object specified by a pid. The relation
+	 * of predicate \"predicate\" in the namespace FEDORA_RELS_NAMESPACE, as
+	 * specified in archive.fedora.FedoraVocabulary.java, and object \"object\"
+	 * will be removed from the RelsExt datastream.
+	 * 
+	 * @author Ingolf Kuss, hbz
+	 * @date 2025-12-18
+	 * @param pid the persistent identifier of the fedora object, specifying the
+	 *          subject of the relation triple
+	 * @param predicate predicate in namespace FEDORA_RELS_NAMESPACE in RelsExt
+	 *          relation triple
+	 * @param object object in RelsExt relation triple
+	 * @return a chunked result
+	 */
+	@ApiOperation(produces = "application/json", nickname = "deleteRelation", value = "deleteRelation", notes = "Removes a relation", response = Message.class, httpMethod = "DELETE")
+	public static Promise<Result> deleteRelation(@PathParam("pid") String pid,
+			@QueryParam("predicate") String predicate,
+			@QueryParam("object") String object) {
+		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug(
+					"Removing relation " + predicate + ":" + object + " for Pid: " + pid);
+			Node node = readNodeOrNull(pid);
+			node.removeRelation(FEDORA_RELS_NAMESPACE + "#" + predicate, object);
+			Globals.fedora.updateNode(node);
+			String result = "Removed relation " + predicate + ":" + object
+					+ " for pid " + pid + ". Pid " + pid + "updated!";
+			return JsonMessage(new Message(result));
 		});
 	}
 

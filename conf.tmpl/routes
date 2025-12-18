@@ -103,6 +103,7 @@ DELETE /resource/:pid/metadata2		controllers.Resource.deleteMetadata2(pid,field)
 DELETE /resource/:pid/data			controllers.Resource.deleteData(pid)
 DELETE /resource/:pid/dc			controllers.Resource.deleteDc(pid)
 DELETE /resource/:pid/all			controllers.Resource.deleteDescendent(pid,contentType?="")
+DELETE /resource/:pid/removeRelation		controllers.Resource.deleteRelation(pid,predicate?="isMemberOf",object?="")
 DELETE /resource/:pid				controllers.Resource.deleteResource(pid,keepWebarchives : Boolean ?= false,purge : Boolean ?= false)
 DELETE /resource 					controllers.Resource.deleteResources(namespace?="",purge?="false")
 
