@@ -812,7 +812,7 @@ public class Resource extends MyController {
 			node.removeRelation(FEDORA_RELS_NAMESPACE + "#" + predicate, object);
 			Globals.fedora.updateNode(node);
 			String result = "Removed relation " + predicate + ":" + object
-					+ " for pid " + pid + ". Pid " + pid + "updated!";
+					+ " for pid " + pid + ". Pid " + pid + " updated!";
 			return JsonMessage(new Message(result));
 		});
 	}
