@@ -144,12 +144,12 @@ public class Gatherconf {
 		cookie = null;
 		active = true;
 		deepness = -1;
-		robotsPolicy = RobotsPolicy.ignore;
-		interval = null;
+		robotsPolicy = RobotsPolicy.obey;
+		interval = Interval.halfYearly;
 		notices = null;
 		crawlerSelection = CrawlerSelection.wpull;
-		quotaUnitSelection = null;
-		agentIdSelection = AgentIdSelection.Chrome;
+		quotaUnitSelection = QuotaUnitSelection.GB;
+		agentIdSelection = AgentIdSelection.Toscience;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		localDir = null;
@@ -159,8 +159,8 @@ public class Gatherconf {
 		id = null;
 		quellserverWebschnittPid = null;
 		deleteQuellserverWebschnitt = false;
-		maxCrawlSize = 0;
-		waitSecBtRequests = 0;
+		maxCrawlSize = 100;
+		waitSecBtRequests = 1;
 		randomWait = true;
 		tries = 5;
 		waitRetry = 20;
