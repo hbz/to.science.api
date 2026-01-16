@@ -987,7 +987,6 @@ public class Create extends RegalAction {
 			Gatherconf conf = new Gatherconf();
 			conf.setUrl(WebgatherUtils.convertUnicodeURLToAscii(url));
 			conf.setName(node.getPid());
-			conf.setDeepness(-1);
 			if (intervall == null || intervall.length() == 0) {
 				conf.setInterval(Interval.halfYearly);
 			} else if (intervall.equals("halbjährlich")) {
@@ -1000,7 +999,6 @@ public class Create extends RegalAction {
 			} else {
 				conf.setInterval(Interval.halfYearly);
 			}
-			conf.setRobotsPolicy(RobotsPolicy.ignore);
 			conf.setStartDate(new Date());
 			// node.setConf(conf.toString()); braucht man das ?
 			new actions.Modify().updateConf(node, conf.toString());
