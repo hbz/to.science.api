@@ -1383,11 +1383,12 @@ public class Resource extends MyController {
 	public static Promise<Result> createWebpage(
 			@PathParam("namespace") String namespace, @QueryParam("url") String url,
 			@QueryParam("title") String title,
-			@QueryParam("interval") String intervall, @QueryParam("pid") String pid) {
+			@QueryParam("interval") String intervall, @QueryParam("pid") String pid,
+			@QueryParam("crawlSubdomains") boolean crawlSubdomains) {
 		return new CreateAction().call(userId -> {
 			ToScienceObject object = getRegalObject(request().body().asJson());
-			Node result =
-					create.createWebpage(namespace, url, title, intervall, pid, object);
+			Node result = create.createWebpage(namespace, url, title, intervall, pid,
+					object, crawlSubdomains);
 			response().setHeader("Location", read.getHttpUriOfResource(result));
 			return getJsonResult(result);
 		});
