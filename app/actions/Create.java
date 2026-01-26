@@ -53,6 +53,7 @@ import models.Globals;
 import models.Node;
 import models.ResearchDataResource;
 import models.ToScienceObject;
+import models.Gatherconf.CrawlSubdomains;
 import models.Gatherconf.Interval;
 import models.Gatherconf.RobotsPolicy;
 import models.ToScienceObject.Provenience;
@@ -960,7 +961,8 @@ public class Create extends RegalAction {
 	 * @return Der modifizierte Node vom contentType webpage
 	 */
 	public Node createWebpage(String namespace, String url, String title,
-			String intervall, String pid, ToScienceObject object) {
+			String intervall, String pid, ToScienceObject object,
+			boolean crawlSubdomains) {
 		try {
 			ApplicationLogger.debug("Create Webpage for url: " + url + ", title: "
 					+ title + ", intervall: " + intervall + ", pid: " + pid);
@@ -1000,6 +1002,9 @@ public class Create extends RegalAction {
 				conf.setInterval(Interval.halfYearly);
 			}
 			conf.setStartDate(new Date());
+			if (crawlSubdomains) {
+				conf.setCrawlSubdomains(CrawlSubdomains.domains);
+			}
 			// node.setConf(conf.toString()); braucht man das ?
 			new actions.Modify().updateConf(node, conf.toString());
 			// node = updateResource(node); braucht man das ?
