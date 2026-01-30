@@ -271,27 +271,27 @@ public class WebsiteVersionPublisher {
 			 * die conf:
 			 */
 			/**
-			 * Die Angaben in conf.getCrawlerSelection() stimmen nicht, es steht
-			 * generell "wpull" darin, auch wenn es z.B. "wget" ist. Hole daher die
-			 * crawlerSelecion ebenfalls aus localDir.
+			 * Die Angaben in conf.getCrawlerSelection() stimmen nicht, es steht für
+			 * ältere Webschnitte generell "wpull" darin, auch wenn es z.B. "wget"
+			 * ist. Hole daher die crawlerSelecion ebenfalls aus localDir.
 			 */
-			if (localDir.matches("/wget-data/")) {
+			if (localDir.matches("(.*)/wget-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.wget.dataDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
 				subDir = subDir.concat("/warcs");
 				localDir = localDir.concat("/warcs");
-			} else if (localDir.matches("/heritrix-data/")) {
+			} else if (localDir.matches("(.*)/heritrix-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.heritrix.jobDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
 				subDir = subDir.concat("/warcs");
 				localDir = localDir.concat("/warcs");
-			} else if (localDir.matches("/wpull-data/")) {
+			} else if (localDir.matches("(.*)/wpull-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.wpull.outDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
-			} else if (localDir.matches("/btrix-data/")) {
+			} else if (localDir.matches("(.*)/btrix-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.btrix.outDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
