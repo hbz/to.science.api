@@ -529,9 +529,9 @@ public class WebsiteVersionPublisher {
 			conf.setOpenWaybackLink(publicOpenWaybackLink);
 			play.Logger.debug("publicOpenWaybackLink=" + publicOpenWaybackLink);
 			msg = new Modify().updateConf(node, conf.toString());
-			WebgatherLogger.info(
-					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
-							+ node.getPid() + ". Modify-Message: " + msg);
+			WebgatherLogger.info("Openwayback-Link wurde auf " + publicOpenWaybackLink
+					+ " gesetzt für Webschnitt " + node.getPid() + ". Modify-Message: "
+					+ msg);
 		} catch (Exception e) {
 			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
 					+ " kann nicht auf \"öffentlich\" gesetzt werden!");
@@ -597,6 +597,7 @@ public class WebsiteVersionPublisher {
 		} catch (UpdateNodeException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
+			e.printStackTrace();
 			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
 					+ " kann nicht auf \"lesesaal|wayback\" gesetzt werden!");
 			throw new RuntimeException(e);
