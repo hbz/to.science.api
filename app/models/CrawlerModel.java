@@ -52,11 +52,11 @@ public class CrawlerModel {
 	protected Node node = null;
 	protected Gatherconf conf = null;
 	protected String urlAscii = null;
-	private String date = null;
+	protected String date = null;
 	protected String datetime = null;
 	protected File crawlDir = null;
 	protected File resultDir = null;
-	private File cdxFile = null;
+	protected File cdxFile = null;
 	protected File cdxFileNew = null;
 	protected String localpath = null;
 	protected String host = null;
