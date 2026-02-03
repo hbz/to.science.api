@@ -95,6 +95,28 @@ public class WebgatherUtils {
 	}
 
 	/**
+	 * Schickt eine E-Mail an die Leute in der "mail.properties" - Datei.
+	 * 
+	 * @param node der Node der Website
+	 * @param conf die Gatherconf der umgezogenen Website
+	 * @param message der Text der Nachricht, die verschickt werden soll
+	 * @param subject die Betreffzeile
+	 */
+	public static void sendEmail(Node node, Gatherconf conf, String subject,
+			String message) {
+		WebgatherLogger.info("Schicke E-Mail mit Betreff: " + subject);
+		try {
+			try {
+				Mail.sendMail(message, subject);
+			} catch (Exception e) {
+				throw new RuntimeException("Email could not be sent successfully!");
+			}
+		} catch (Exception e) {
+			WebgatherLogger.warn(e.toString());
+		}
+	}
+
+	/**
 	 * Schickt E-Mail mit einer Umzugsnotiz und Aufforderung, die neue URL zu
 	 * bestätigen.
 	 * 
@@ -104,7 +126,6 @@ public class WebgatherUtils {
 	public static void sendInvalidUrlEmail(Node node, Gatherconf conf) {
 		WebgatherLogger.info("Schicke E-Mail mit Umzugsnotiz.");
 		try {
-
 			String siteName =
 					conf.getName() == null ? node.getAggregationUri() : conf.getName();
 			String mailMsg = "Die Website " + siteName + " ist umgezogen.\n";
@@ -112,11 +133,8 @@ public class WebgatherUtils {
 					"Bitte geben Sie auf diesem Webformular eine neue, gültige URL ein und bestätigen Sie die neue URL\n.";
 			mailMsg += "Solange wird diese Website nicht erneut eingesammelt: ";
 			mailMsg += Globals.urnbase + node.getAggregationUri() + "/crawler .";
-			try {
-				Mail.sendMail(mailMsg, "Die Website " + siteName + " ist umgezogen ! ");
-			} catch (Exception e) {
-				throw new RuntimeException("Email could not be sent successfully!");
-			}
+			sendEmail(node, conf, "Die Website " + siteName + " ist umgezogen ! ",
+					mailMsg);
 		} catch (Exception e) {
 			WebgatherLogger.warn(e.toString());
 		}

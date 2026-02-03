@@ -64,7 +64,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum CrawlerSelection {
-		heritrix, wpull, browsertrix
+		heritrix, wpull, wget, btrix
 	}
 
 	@SuppressWarnings("javadoc")
@@ -99,7 +99,9 @@ public class Gatherconf {
 				}
 			};
 
+	// name= die PID der Webpage
 	String name;
+	String quellserverWebpagePid;
 	boolean active;
 	String url;
 	int httpResponseCode;
@@ -120,7 +122,10 @@ public class Gatherconf {
 	Date startDate;
 	String localDir;
 	String openWaybackLink;
+	// id = die PID des Webschnittes (= WebpageVersion)
 	String id;
+	String quellserverWebschnittPid;
+	boolean deleteQuellserverWebschnitt;
 	long maxCrawlSize;
 	int waitSecBtRequests;
 	boolean randomWait;
@@ -140,21 +145,24 @@ public class Gatherconf {
 		cookie = null;
 		active = true;
 		deepness = -1;
-		robotsPolicy = RobotsPolicy.ignore;
-		interval = null;
+		robotsPolicy = RobotsPolicy.obey;
+		interval = Interval.halfYearly;
 		notices = null;
 		crawlerSelection = CrawlerSelection.wpull;
 		btrixWorkflowId = null;
-		quotaUnitSelection = null;
-		agentIdSelection = AgentIdSelection.Chrome;
+		quotaUnitSelection = QuotaUnitSelection.GB;
+		agentIdSelection = AgentIdSelection.Toscience;
 		urlsExcluded = new ArrayList<String>();
 		startDate = null;
 		localDir = null;
 		name = null;
+		quellserverWebpagePid = null;
 		openWaybackLink = null;
 		id = null;
-		maxCrawlSize = 0;
-		waitSecBtRequests = 0;
+		quellserverWebschnittPid = null;
+		deleteQuellserverWebschnitt = false;
+		maxCrawlSize = 100;
+		waitSecBtRequests = 1;
 		randomWait = true;
 		tries = 5;
 		waitRetry = 20;
@@ -409,6 +417,40 @@ public class Gatherconf {
 	}
 
 	/**
+	 * @return the PID of the Webpage on a remote server (a server from which
+	 *         webarchives can be imported)
+	 */
+	public String getQuellserverWebpagePid() {
+		return quellserverWebpagePid;
+	}
+
+	/**
+	 * @param pid the PID of the Webpage on a remote server (a server from which
+	 *          webarchives can be imported)
+	 */
+	public void setQuellserverWebpagePid(String pid) {
+		this.quellserverWebpagePid = pid;
+	}
+
+	/**
+	 * @return a flag (true or false) which indicates whether the original
+	 *         WebpageVersion on the server from which it had been imported will
+	 *         be deleted
+	 */
+	public boolean getDeleteQuellserverWebschnitt() {
+		return deleteQuellserverWebschnitt;
+	}
+
+	/**
+	 * @param flag a flag (true or false) which indicates whether the original
+	 *          WebpageVersion on the server from which it had been imported will
+	 *          be deleted
+	 */
+	public void setDeleteQuellserverWebschnitt(boolean flag) {
+		this.deleteQuellserverWebschnitt = flag;
+	}
+
+	/**
 	 * @return a localDir with information stored by heritrix
 	 */
 	public String getLocalDir() {
@@ -519,17 +561,33 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @return an internal id
+	 * @return an internal id for a WebpageVersion
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
-	 * @param id an internal id
+	 * @param id an internal id for a WebpageVersion
 	 */
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return a PID for a webpage version (Webschnitt) on a remote server (of a
+	 *         Webschnitt that one wants to import)
+	 */
+	public String getQuellserverWebschnittPid() {
+		return quellserverWebschnittPid;
+	}
+
+	/**
+	 * @param pid a PID for a webpage version (Webschnitt) on a remote server (of
+	 *          a Webschnitt that one wants to import)
+	 */
+	public void setQuellserverWebschnittPid(String pid) {
+		this.quellserverWebschnittPid = pid;
 	}
 
 	/**

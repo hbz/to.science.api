@@ -688,12 +688,16 @@ public class Resource extends MyController {
 
 	@ApiOperation(produces = "application/json", nickname = "deleteResource", value = "deleteResource", notes = "Deletes a resource", response = Message.class, httpMethod = "DELETE")
 	public static Promise<Result> deleteResource(@PathParam("pid") String pid,
-			@QueryParam("purge") String purge) {
+			@QueryParam("keepWebarchives") boolean keepWebarchives,
+			@QueryParam("purge") boolean purge) {
 		return new BulkActionAccessor().call((userId) -> {
 			List<Node> list = Globals.fedora.listComplexObject(pid);
+			for (Node n : list) {
+				n.setKeepWebarchives(keepWebarchives);
+			}
 			BulkAction bulk = new BulkAction();
 			bulk.executeOnNodes(list, userId, nodes -> {
-				if ("true".equals(purge)) {
+				if (purge == true) {
 					return delete.purge(nodes);
 				}
 				return delete.delete(nodes);
@@ -1339,13 +1343,13 @@ public class Resource extends MyController {
 
 	public static Promise<Result> postVersion(@PathParam("pid") String pid,
 			@QueryParam("versionPid") String versionPid,
-			@QueryParam("dataDir") String dataDir,
+			@QueryParam("dataDir") String crawlerSelection,
 			@QueryParam("timestamp") String timestamp,
 			@QueryParam("filename") String filename) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			Node result = create.postWebpageVersion(node, versionPid, dataDir,
-					timestamp, filename);
+			Node result = create.postWebpageVersion(node, versionPid,
+					crawlerSelection, timestamp, filename);
 			return getJsonResult(result);
 		});
 	}
@@ -1379,11 +1383,12 @@ public class Resource extends MyController {
 	public static Promise<Result> createWebpage(
 			@PathParam("namespace") String namespace, @QueryParam("url") String url,
 			@QueryParam("title") String title,
-			@QueryParam("interval") String intervall, @QueryParam("pid") String pid) {
+			@QueryParam("interval") String intervall, @QueryParam("pid") String pid,
+			@QueryParam("crawlSubdomains") boolean crawlSubdomains) {
 		return new CreateAction().call(userId -> {
 			ToScienceObject object = getRegalObject(request().body().asJson());
-			Node result =
-					create.createWebpage(namespace, url, title, intervall, pid, object);
+			Node result = create.createWebpage(namespace, url, title, intervall, pid,
+					object, crawlSubdomains);
 			response().setHeader("Location", read.getHttpUriOfResource(result));
 			return getJsonResult(result);
 		});
@@ -1508,6 +1513,30 @@ public class Resource extends MyController {
 			Map<String, Object> result = modify.replaceDoi(node);
 			play.Logger.debug("Resource.replaceDoi()" + result.toString());
 			return JsonMessage(new Message(json(result)));
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "importWS", value = "importtWS", notes = "importiert einen erfolgreich gecrwalten Webschnitt vom Test- ins Produktivsystem", response = String.class, httpMethod = "POST")
+	public static Promise<Result> importWS(@PathParam("pid") String pid,
+			@QueryParam("quellserverWebpagePid") String quellserverWebpagePid,
+			@QueryParam("quellserverWebschnittPid") String quellserverWebschnittPid,
+			@QueryParam("deleteQuellserverWebschnitt") boolean deleteQuellserverWebschnitt) {
+		return new ModifyAction().call(pid, userId -> {
+			play.Logger.debug("Ein Webschnitt wird importiert.");
+			try {
+				Node node = readNodeOrNull(pid);
+				String versionPid = null;
+				create.importWebpageVersion(node, versionPid, quellserverWebpagePid,
+						quellserverWebschnittPid, deleteQuellserverWebschnitt);
+				return HtmlMessage(new Message("Der Import des Webschnittes "
+						+ quellserverWebschnittPid + " wird im Hintergrund verarbeitet.",
+						200));
+			} catch (Exception e) {
+				play.Logger.error(e.toString());
+				play.Logger.error("Webschnitt " + quellserverWebschnittPid
+						+ " kann nicht importiet werden!");
+				return HtmlMessage(new Message(e, e.hashCode()));
+			}
 		});
 	}
 
@@ -1702,6 +1731,37 @@ public class Resource extends MyController {
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
+			}
+		});
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "asKtbl", value = "asKtbl", notes = "Returns ktbl data stream", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asKtbl(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			try {
+				Node readNode = readNodeOrNull(pid);
+				String mdKtbl = Helper.getKtblJson(readNode);
+				JSONObject jo = new JSONObject(mdKtbl);
+				return ok(jo.toString()).as("application/json");
+			} catch (Exception e) {
+				play.Logger.debug("Exception in asKtbl()" + e);
+				return internalServerError("Error processing request");
+			}
+		});
+
+	}
+
+	@ApiOperation(produces = "application/json", nickname = "asToscience", value = "asToscience", notes = "Returns toscience data stream", response = Message.class, httpMethod = "GET")
+	public static Promise<Result> asToscience(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			try {
+				Node readNode = readNodeOrNull(pid);
+				String mdTos = Helper.getTosJson(readNode);
+				JSONObject jo = new JSONObject(mdTos);
+				return ok(jo.toString()).as("application/json");
+			} catch (Exception e) {
+				play.Logger.debug("Exception in asToscience() " + e);
+				return internalServerError("Error processing request");
 			}
 		});
 	}

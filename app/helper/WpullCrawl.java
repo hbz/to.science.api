@@ -73,6 +73,19 @@ public class WpullCrawl extends CrawlerModel {
 	public WpullCrawl(Node node, Gatherconf conf) {
 		super(node, conf);
 		try {
+			WebgatherLogger.debug("URL=" + conf.getUrl());
+			this.urlAscii = WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
+			WebgatherLogger.debug("urlAscii=" + urlAscii);
+			this.host = WebgatherUtils.getDomain(urlAscii);
+			WebgatherLogger.debug("host=" + host);
+			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+			this.datetime =
+					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
+			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
+			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
+			this.cdxFile =
+					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
+			this.warcFilename = "WEB-" + host + "-" + datetime;
 			/*
 			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
 			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback
@@ -101,9 +114,41 @@ public class WpullCrawl extends CrawlerModel {
 	public void startJob() {
 		super.startJob();
 		try {
-			// Bereite Kommando für den Hauptcrawl vor
-			String executeCommand = buildExecCommand();
-			ProcessBuilder pb = new ProcessBuilder();
+			String waitParam = null;
+			int waitSec = conf.getWaitSecBtRequests();
+			if (waitSec != 0) {
+				// number of second wpull will wait between two requests
+				waitParam = "wait=" + Integer.toString(waitSec);
+			} else {
+				boolean random = conf.isRandomWait();
+				if (random == true) {
+					// randomize wait times
+					waitParam = "random-wait";
+				} else {
+					// don't wait
+					waitParam = "wait=0";
+				}
+			}
+			String executeCommand =
+					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
+			AgentIdSelection agentId = conf.getAgentIdSelection();
+			executeCommand =
+					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
+			executeCommand = executeCommand.concat(" Cookie:");
+			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
+				executeCommand =
+						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
+			}
+			executeCommand = executeCommand.concat(" " + waitParam);
+			if (cdxFileNew != null) {
+				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
+			}
+			String[] execArr = executeCommand.split(" ");
+			executeCommand = executeCommand.replaceAll("%20", " ");
+			WebgatherLogger.info("Executing command " + executeCommand);
+			WebgatherLogger
+					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
+			ProcessBuilder pb = new ProcessBuilder(execArr);
 			assert crawlDir.isDirectory();
 			pb.directory(crawlDir);
 			File log = new File(crawlDir.toString() + "/cdncrawl.log");
@@ -239,6 +284,152 @@ public class WpullCrawl extends CrawlerModel {
 		}
 		play.Logger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
+	}
+
+	/**
+	 * Suche neuestes Crawler-Logfile. Guckt zuerst in crawlDir
+	 * (Arbeitsverzeichnis). Falls dort nichts gefunden, guckt in outDir
+	 * (Ergebnisverzeichnis).
+	 * 
+	 * @param node der Knoten einer Webpage
+	 */
+	private static File findLatestLogFile(Node node) {
+		File logfile = null;
+		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.jobDir"),
+				node.getPid());
+		File latestOutDir = Webgatherer.getLatestCrawlDir(
+				Play.application().configuration().getString("regal-api.wpull.outDir"),
+				node.getPid());
+		if (latestCrawlDir != null) {
+			logfile = new File(latestCrawlDir.toString() + "/crawl.log");
+		}
+		if (logfile == null || !logfile.exists()) {
+			if (latestOutDir != null) {
+				logfile = new File(latestOutDir.toString() + "/crawl.log");
+			}
+		}
+		return logfile;
+	}
+
+	/**
+	 * Ermittelt Crawler Exit Status des letzten Crawls. Der Exit-Status ist eine
+	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
+	 * verfügbar.
+	 * 
+	 * @param node der Knoten einer Webpage
+	 * @return Crawler Exit Status des letzten wpull-Crawls
+	 */
+	public static int getCrawlExitStatus(Node node) {
+		File logfile = findLatestLogFile(node);
+		if (logfile == null || !logfile.exists()) {
+			WebgatherLogger.warn(
+					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
+			return -2;
+		}
+		CrawlLog crawlLog = new CrawlLog(logfile);
+		crawlLog.parse();
+		return crawlLog.getExitStatus();
+	}
+
+	/**
+	 * Ermittelt den aktuellen Status des zuletzt gestarteten Crawls. Mögliche
+	 * Werte sind : NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
+	 * Operator) - CRASHED - FINISHED
+	 * 
+	 * @param node der Knoten einer Webpage
+	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls
+	 */
+	public static CrawlControllerState getCrawlControllerState(Node node) {
+		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
+		File logfile = findLatestLogFile(node);
+		if (logfile == null || !logfile.exists()) {
+			WebgatherLogger.info(
+					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
+			return CrawlControllerState.NEW;
+		}
+		// 2. Läuft noch => Status = RUNNING
+		if (isWpullCrawlRunning(node)) {
+			return CrawlControllerState.RUNNING;
+		}
+		// 3. Läuft nicht mehr.
+		/* das Log wird geparst */
+		BufferedReader buf = null;
+		String regExp = "^INFO FINISHED.";
+		Pattern pattern = Pattern.compile(regExp);
+		try {
+			buf = new BufferedReader(new FileReader(logfile));
+			String line = null;
+			while ((line = buf.readLine()) != null) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					return CrawlControllerState.FINISHED;
+				}
+			}
+		} catch (IOException e) {
+			WebgatherLogger.warn(
+					"Crawl Controller State cannot be defered from crawlLog "
+							+ logfile.getAbsolutePath() + "! Assuming CRASHED.",
+					e.toString());
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return CrawlControllerState.CRASHED;
+	}
+
+	/**
+	 * Ermittelt, ob ein Crawl nichts eingesammelt hat. Das wird anhand einer
+	 * Meldung im Logfile ermittelt.
+	 * 
+	 * @param node der Node einer Webpage
+	 * @return wahr (leer bzw. nichts eingesammelt) oder falsch (nicht leer)
+	 */
+	public static boolean isWpullCrawlEmpty(Node node) {
+		File logfile = findLatestLogFile(node);
+		/**
+		 * Kein Crawl-Verzeichnis mit crawl.log vorhanden => wird wie "leer"
+		 * behandelt
+		 */
+		if (logfile == null || !logfile.exists()) {
+			WebgatherLogger.warn(
+					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
+			return true;
+		}
+		/* Das Log wird geparst */
+		BufferedReader buf = null;
+		String regExp = "^INFO Downloaded: 0 files, 0.0 B.";
+		Pattern pattern = Pattern.compile(regExp);
+		boolean isEmpty = false;
+		try {
+			buf = new BufferedReader(new FileReader(logfile));
+			String line = null;
+			while ((line = buf.readLine()) != null) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					isEmpty = true;
+					break;
+				}
+			}
+		} catch (IOException e) {
+			WebgatherLogger.warn("Logfile " + logfile.getAbsolutePath()
+					+ " can not be parsed or read. Assuming empty.", e.toString());
+			isEmpty = true;
+		} finally {
+			try {
+				if (buf != null) {
+					buf.close();
+				}
+			} catch (IOException e) {
+				WebgatherLogger.warn("Read Buffer cannot be closed!");
+			}
+		}
+		return isEmpty;
 	}
 
 	/**

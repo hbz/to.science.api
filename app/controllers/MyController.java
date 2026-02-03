@@ -295,7 +295,7 @@ public class MyController extends Controller {
 	public static Result HtmlMessage(Message msg) {
 		play.Logger.debug("\nResponse: " + msg.toString());
 		response().setContentType("text/html");
-		return status(msg.getCode(), message.render(msg.toString()));
+		return status(msg.getCode(), msg.toString());
 	}
 
 	/**

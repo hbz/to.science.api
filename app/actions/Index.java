@@ -303,6 +303,7 @@ public class Index {
 			String namespace, Node data) {
 		StringBuffer msg = new StringBuffer();
 		try {
+			play.Logger.debug("pid:"+pid+ "type: "+type+" namespace:"+namespace+" data:"+data.toString2());
 			Globals.search.index(namespace + "2", type, pid, data.toString2());
 			msg.append(pid + " indexed in " + namespace + "2\n");
 		} catch (Exception e) {

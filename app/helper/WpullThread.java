@@ -10,6 +10,7 @@ import java.util.List;
 
 import actions.Create;
 import models.Gatherconf;
+import models.Globals;
 import models.Node;
 import models.Gatherconf.RobotsPolicy;
 import models.Gatherconf.CrawlSubdomains;
@@ -26,6 +27,7 @@ public class WpullThread extends Thread {
 
 	private Node node = null;
 	private Gatherconf conf = null;
+	private List<String> title = null;
 	private File crawlDir = null;
 	private File outDir = null;
 	private String warcFilename = null;
@@ -42,12 +44,13 @@ public class WpullThread extends Thread {
 	private File logFile = null;
 	private int exitState = 0;
 	private int CDNGathererExitState = 0;
+	private String msg = "";
 	/**
 	 * Der wievielte Versuch ist es, diesen Crawl zu starten ?
 	 */
 	int attempt = 1;
 
-	private static int maxNumberAttempts = 10;
+	private static int maxNumberAttempts = 3;
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -199,10 +202,14 @@ public class WpullThread extends Thread {
 			boolean noParent = true;
 			String zusDomain = null;
 			String zusHost = null;
-			if (domains.size() > 0) {
+			if (domains.size() > 0
+					|| conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
 				executeCommand += " --span-hosts";
 				if (conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
-					executeCommand += " --domains=" + host;
+					executeCommand += " --domains=" + host.replaceAll("^www.", "");
+					if (domains.size() == 0) {
+						noParent = false;
+					}
 				} else {
 					executeCommand += " --hostnames=" + host;
 				}
@@ -210,7 +217,7 @@ public class WpullThread extends Thread {
 					zusDomain = domains.get(i);
 					zusHost = WebgatherUtils.getDomain(zusDomain);
 					WebgatherLogger.debug("zusHost=" + zusHost);
-					if (zusHost.equalsIgnoreCase(host)) {
+					if (zusHost.equalsIgnoreCase(host.replaceAll("^www.", ""))) {
 						WebgatherLogger.debug("Es soll von der gesamten Domain " + host
 								+ " eingesammelt werden, die Option --no-parent wird entfernt.");
 						noParent = false;
@@ -265,6 +272,25 @@ public class WpullThread extends Thread {
 						localpath, versionPid);
 				WebgatherLogger
 						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
+				/**
+				 * Hier eine Mail schicken, falls nichts eingesammelt wurde. Für
+				 * TOS-1326
+				 */
+				if (WpullCrawl.isWpullCrawlEmpty(node)) {
+					title = node.getDublinCoreData().getTitle();
+					msg =
+							"Für die Website " + conf.getName() + ", Titel: " + title + "\n";
+					msg +=
+							"Es wurde zwar ein Crawl formell erfolgreich beendet und es wurde ein neuer Webschnitt angelegt.\n";
+					msg +=
+							"Jedoch wurde lt. Logdatei im Hauptcrawl nichts eingesammelt: \"INFO Downloaded: 0 files, 0.0 Byte.\"\n";
+					msg += "Bitte überprüfen Sie den neuesten Webschnitt dieser Website: "
+							+ Globals.urnbase + node.getAggregationUri();
+					WebgatherUtils.sendEmail(node, conf,
+							"Keine Inhalte eingesammelt! Für Website " + conf.getName()
+									+ ", Titel: " + title,
+							msg);
+				}
 				return;
 			}
 

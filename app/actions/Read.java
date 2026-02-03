@@ -24,10 +24,13 @@ import helper.JsonMapper;
 import helper.Webgatherer;
 import helper.WpullCrawl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +51,7 @@ import models.UrlHist;
 import models.Urn;
 import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 
+import org.apache.commons.codec.binary.Base64;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -627,6 +631,63 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * Liest eine Gatherconf (Crawler-Konfiguration) von einem anderen
+	 * toscience-Server
+	 * 
+	 * @param quellserverWebschnittPid die PID des Webschnitts auf dem anderen
+	 *          Server
+	 * 
+	 * @return conf Die Gatherconf des anderen Servers
+	 */
+	public Gatherconf readRemoteConf(String quellserverWebschnittPid) {
+		HttpURLConnection con = null;
+		BufferedReader br = null;
+		String responseMultiLine = null;
+		Gatherconf conf = null;
+		try {
+			URL url = new URL(Globals.protocol + "api." + Globals.importServerName
+					+ "/resource/" + quellserverWebschnittPid + "/conf");
+			play.Logger.debug("URL for remote Conf: " + url.toString());
+			con = (HttpURLConnection) url.openConnection();
+			play.Logger.debug("opened connection");
+			con.setRequestMethod("GET");
+			HttpURLConnection.setFollowRedirects(true);
+			String auth = Globals.importServerBackendUser + ":"
+					+ Globals.importServerBackendUserPassword;
+			byte[] encodedAuth =
+					Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
+			String authHeaderValue = "Basic " + new String(encodedAuth);
+			play.Logger.debug("auth: " + authHeaderValue);
+			con.setRequestProperty("Authorization", authHeaderValue);
+			con.connect();
+			play.Logger
+					.debug("response code for GET remote Conf: " + con.getResponseCode());
+			InputStream ip = con.getInputStream();
+			br = new BufferedReader(new InputStreamReader(ip));
+			StringBuilder response = new StringBuilder();
+			String responseSingle = null;
+			while ((responseSingle = br.readLine()) != null) {
+				response.append(responseSingle);
+			}
+			responseMultiLine = response.toString();
+			play.Logger.debug("Conf for quellserverWebschnittPid "
+					+ quellserverWebschnittPid + " : " + responseMultiLine);
+			conf = Gatherconf.create(responseMultiLine);
+		} catch (Exception e) {
+			play.Logger.error(e.toString());
+			throw new RuntimeException(e);
+		} finally {
+			con.disconnect();
+			try {
+				br.close();
+			} catch (IOException e) {
+				play.Logger.error(e.getMessage());
+			}
+		}
+		return conf;
+	}
+
+	/**
 	 * read a webpage's url history
 	 * 
 	 * @param node the node of the webpage
@@ -800,9 +861,8 @@ public class Read extends RegalAction {
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
 					entries.put("crawlControllerState",
 							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus",
-							WpullCrawl.getCrawlExitStatus(node) < 0 ? ""
-									: WpullCrawl.getCrawlExitStatus(node));
+					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
+							? "" : WpullCrawl.getCrawlExitStatus(node));
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -

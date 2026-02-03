@@ -128,7 +128,7 @@ public class JsonConverter {
 		node.dublinCoreData.setTitle(new Vector<>());
 		collect(g);
 		Map<String, Object> result = createMap(g);
-		play.Logger.debug("result=" + result.toString());
+		// play.Logger.debug("result=" + result.toString());
 		result.put("@context", context);
 		return result;
 	}
