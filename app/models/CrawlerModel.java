@@ -66,7 +66,7 @@ public class CrawlerModel {
 
 	private static String jobDir = null;
 	private static String outDir = null;
-	final static String cdn =
+	final static public String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
 
 	/**

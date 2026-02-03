@@ -211,7 +211,7 @@ public class WebgatherUtils {
 				WebgatherLogger
 						.debug("Path to WARC (crawldir):" + crawlDir.getAbsolutePath());
 			} else if (conf.getCrawlerSelection()
-					.equals(Gatherconf.CrawlerSelection.browsertrix)) {
+					.equals(Gatherconf.CrawlerSelection.btrix)) {
 				BtrixWebclient btrixWorkflow = new BtrixWebclient(node, conf);
 				btrixWorkflow.runCrawl();
 			} else {
