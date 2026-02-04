@@ -318,6 +318,9 @@ public class BtrixWebclient extends CrawlerModel {
 
 			// Rufe Hauptcrawl in Browsertrix auf
 
+			// berücksichtige cdxFile (von evtl. vorhergehenden Crawls)
+			// berücksichtige domains (aus hostnames.txt, vom CDN-Precrawl ermittelt)
+
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("Browsertrix crawl not successfully started!",
