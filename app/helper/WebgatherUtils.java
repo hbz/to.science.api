@@ -197,11 +197,11 @@ public class WebgatherUtils {
 			} else if (conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.wpull)) {
 				WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
-				wpullCrawl.createJob();
+				wpullCrawl.createCrawl();
 				/**
 				 * Startet Job in neuem Thread, einschließlich CDN-Precrawl
 				 */
-				wpullCrawl.startJob();
+				wpullCrawl.startCrawl();
 				crawlDir = wpullCrawl.getCrawlDir();
 				// localpath = wpullCrawl.getLocalpath();
 				if (wpullCrawl.getExitState() != 0) {
@@ -213,7 +213,8 @@ public class WebgatherUtils {
 			} else if (conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.btrix)) {
 				BtrixWebclient btrixWorkflow = new BtrixWebclient(node, conf);
-				btrixWorkflow.runCrawl();
+				btrixWorkflow.createCrawl();
+				btrixWorkflow.startCrawl();
 			} else {
 				throw new RuntimeException(
 						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");

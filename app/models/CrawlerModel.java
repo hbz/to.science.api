@@ -22,12 +22,15 @@ import play.Logger;
 import play.Play;
 
 import java.io.*;
+import java.nio.file.Files;
 
 import helper.CrawlLog;
 import helper.WebgatherUtils;
 import helper.Webgatherer;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,6 +64,8 @@ public class CrawlerModel {
 	protected String localpath = null;
 	protected String host = null;
 	protected String warcFilename = null;
+	protected int CDNGathererExitState = 0;
+	protected ArrayList<String> domains = null;
 	protected String msg = null;
 	protected int exitState = 0;
 
@@ -171,7 +176,7 @@ public class CrawlerModel {
 	/**
 	 * Erzeugt einen neuen Crawler-Job
 	 */
-	public void runCrawl() {
+	public void createCrawl() {
 		WebgatherLogger.debug("Create new job " + conf.getName());
 		try {
 			if (conf.getName() == null) {
@@ -218,12 +223,28 @@ public class CrawlerModel {
 	}
 
 	/**
-	 * Ruft den CDN-Gatherer für diese Website auf
+	 * Ruft den CDN-Gatherer für diese Website auf.
 	 */
-	public void startJob() {
-		WebgatherLogger.info(
-				"Rufe CDN-Gatherer mit warcFilename=" + this.warcFilename + " auf.");
+	public void startCrawl() {
+		WebgatherLogger.info("Bereite Aufruf des CDN-Gatherer vor. warcFilename="
+				+ this.warcFilename + ".");
 		try {
+			// 1. Vorbereiten des CDN-Precrawls
+			String waitParam = null;
+			int waitSec = conf.getWaitSecBtRequests();
+			if (waitSec != 0) {
+				// number of second wpull will wait between two requests
+				waitParam = "wait=" + Integer.toString(waitSec);
+			} else {
+				boolean random = conf.isRandomWait();
+				if (random == true) {
+					// randomize wait times
+					waitParam = "random-wait";
+				} else {
+					// don't wait
+					waitParam = "wait=0";
+				}
+			}
 			String executeCommand =
 					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
 			AgentIdSelection agentId = conf.getAgentIdSelection();
@@ -234,6 +255,7 @@ public class CrawlerModel {
 				executeCommand =
 						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
 			}
+			executeCommand = executeCommand.concat(" " + waitParam);
 			if (cdxFileNew != null) {
 				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
 			}
@@ -249,12 +271,38 @@ public class CrawlerModel {
 			log.createNewFile();
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+			// 2. Ausführung des CDN-Precrawls (1. und 2. Schritt)
+			Process proc = pb.start();
+			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
+			assert pb.redirectOutput().file() == log;
+			assert proc.getInputStream().read() == -1;
+			CDNGathererExitState = proc.waitFor();
+			/**
+			 * Exit-Status: 0 = Crawl erfolgreich beendet
+			 */
+			WebgatherLogger.info("CDN-Crawl für " + conf.getName()
+					+ " wurde beendet mit Exit-Status " + CDNGathererExitState);
 
+			// 3. Auslesen der vom cdnparse angelegten Datei hostnames.txt
+			// cdnparse ist der 1. Schritt des CDN-Precrawls und ein Python-Programm
+			domains = conf.getDomains();
+			// Add hostnames from cdn precrawl textfile
+			List<String> hostnames = new ArrayList<>();
+			WebgatherLogger.info("Adding hostnames from file " + crawlDir.toString()
+					+ "/hostnames.txt");
+			try {
+				hostnames = Files.readAllLines(
+						new File(crawlDir.toString() + "/hostnames.txt").toPath());
+			} catch (IOException e) {
+				WebgatherLogger.warn("File hostnames.txt can not be opened!",
+						e.toString());
+			}
+			domains.addAll(hostnames);
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("cdn crawl not successfully started!", e);
 		}
-	}
+	} // Ende startCrawl()
 
 	/**
 	 * Suche neuestes Crawler-Logfile. Guckt zuerst in crawlDir

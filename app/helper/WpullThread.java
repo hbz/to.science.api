@@ -38,12 +38,10 @@ public class WpullThread extends Thread {
 	 * "%20" durch Leerzeichen ersetzt für Ausgabe ins Log
 	 */
 	private String executeCommandRepl = null;
-	private ProcessBuilder pbCDN = null;
+	private ArrayList<String> domains = null;
 	private ProcessBuilder pb = null;
-	private File logFileCDN = null;
 	private File logFile = null;
 	private int exitState = 0;
-	private int CDNGathererExitState = 0;
 	private String msg = "";
 	/**
 	 * Der wievielte Versuch ist es, diesen Crawl zu starten ?
@@ -57,12 +55,9 @@ public class WpullThread extends Thread {
 	/**
 	 * Der Konstruktor für diese Klasse.
 	 * 
-	 * @param pbCDN Ein Objekt der Klasse ProcessBuilder mit Aufrufinformationen
-	 *          für den CDN-Crawl.
 	 * @param attempt Der wievielte Versuch es ist, diesen Webschnitt zu sammeln.
 	 */
-	public WpullThread(ProcessBuilder pbCDN, int attempt) {
-		this.pbCDN = pbCDN;
+	public WpullThread(int attempt) {
 		this.attempt = attempt;
 		exitState = 0;
 	}
@@ -140,21 +135,23 @@ public class WpullThread extends Thread {
 	}
 
 	/**
+	 * Die Methode, um die Liste "domains" zu setzen. Die Liste "domains" stammt
+	 * aus der Gatherconf, kann aber durch den Precrawl angereichert worden sein.
+	 * 
+	 * @param domains die Liste "domains" mit zusätzlichen Domains, die auch
+	 *          gecrwalt werden sollen.
+	 */
+	public void setDomains(ArrayList<String> domains) {
+		this.domains = domains;
+	}
+
+	/**
 	 * Die Methode, um das Aufrufkommando (wpull) für den Hauptcrawl zu setzen
 	 * 
 	 * @param executeCommand das Aufrufkommando für den Hauptcrawl
 	 */
 	public void setExecuteCommand(String executeCommand) {
 		this.executeCommand = executeCommand;
-	}
-
-	/**
-	 * Die Methode, um den Parameter logFileCDN zu setzen.
-	 * 
-	 * @param logFileCDN Die Logdatei für den CDN-Crawl; Objekttyp 'File'
-	 */
-	public void setLogFileCDN(File logFileCDN) {
-		this.logFileCDN = logFileCDN;
 	}
 
 	/**
@@ -172,33 +169,6 @@ public class WpullThread extends Thread {
 	@Override
 	public void run() {
 		try {
-			// 1. Ausführung des CDN-Precrawls
-			Process proc = pbCDN.start();
-			assert pbCDN.redirectInput() == ProcessBuilder.Redirect.PIPE;
-			assert pbCDN.redirectOutput().file() == logFileCDN;
-			assert proc.getInputStream().read() == -1;
-			CDNGathererExitState = proc.waitFor();
-			/**
-			 * Exit-Status: 0 = Crawl erfolgreich beendet
-			 */
-			WebgatherLogger.info("CDN-Crawl für " + conf.getName()
-					+ " wurde beendet mit Exit-Status " + CDNGathererExitState);
-
-			// 2. Auslesen der vom cdnparse angelegten Datei hostnames.txt
-			// cdnparse ist der 1. Schritt des CDN-Precrawls und ein Python-Programm
-			ArrayList<String> domains = conf.getDomains();
-			// Add hostnames from cdn precrawl textfile
-			List<String> hostnames = new ArrayList<>();
-			WebgatherLogger.info("Adding hostnames from file " + crawlDir.toString()
-					+ "/hostnames.txt");
-			try {
-				hostnames = Files.readAllLines(
-						new File(crawlDir.toString() + "/hostnames.txt").toPath());
-			} catch (IOException e) {
-				WebgatherLogger.warn("File hostnames.txt can not be opened!",
-						e.toString());
-			}
-			domains.addAll(hostnames);
 			boolean noParent = true;
 			String zusDomain = null;
 			String zusHost = null;
@@ -239,7 +209,7 @@ public class WpullThread extends Thread {
 			executeCommandRepl = new String(executeCommand);
 			executeCommandRepl = executeCommandRepl.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommandRepl);
-			// andere Logdatei für den Hauptcrawl anlegen
+			// Logdatei für den Hauptcrawl anlegen
 			logFile = new File(crawlDir.toString() + "/crawl.log");
 			logFile.createNewFile();
 			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
@@ -249,7 +219,7 @@ public class WpullThread extends Thread {
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
 
-			proc = pb.start();
+			Process proc = pb.start();
 			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
 			assert pb.redirectOutput().file() == logFile;
 			assert proc.getInputStream().read() == -1;
@@ -316,9 +286,9 @@ public class WpullThread extends Thread {
 			}
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
-			pbCDN.directory(crawlDir);
-			pbCDN.redirectErrorStream(true);
-			WpullThread wpullThread = new WpullThread(pbCDN, attempt);
+			pb.directory(crawlDir);
+			pb.redirectErrorStream(true);
+			WpullThread wpullThread = new WpullThread(attempt);
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);
@@ -326,7 +296,6 @@ public class WpullThread extends Thread {
 			wpullThread.setWarcFilename(warcFilename);
 			wpullThread.setLocalPath(localpath);
 			wpullThread.setExecuteCommand(executeCommand);
-			wpullThread.setLogFileCDN(logFileCDN);
 			wpullThread.start(); // rekursiver Aufruf
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());

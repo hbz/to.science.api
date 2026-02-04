@@ -26,7 +26,6 @@ import models.Node;
 import play.Play;
 
 import java.io.*;
-import java.lang.ProcessBuilder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -102,8 +101,9 @@ public class WpullCrawl extends CrawlerModel {
 	/**
 	 * Erzeugt einen neuen Wpull-Crawler-Job
 	 */
-	public void createJob() {
-		super.runCrawl();
+	@Override
+	public void createCrawl() {
+		super.createCrawl();
 	}
 
 	/**
@@ -111,51 +111,10 @@ public class WpullCrawl extends CrawlerModel {
 	 * Hauptcrawl
 	 */
 	@Override
-	public void startJob() {
-		super.startJob();
+	public void startCrawl() {
+		super.startCrawl();
 		try {
-			String waitParam = null;
-			int waitSec = conf.getWaitSecBtRequests();
-			if (waitSec != 0) {
-				// number of second wpull will wait between two requests
-				waitParam = "wait=" + Integer.toString(waitSec);
-			} else {
-				boolean random = conf.isRandomWait();
-				if (random == true) {
-					// randomize wait times
-					waitParam = "random-wait";
-				} else {
-					// don't wait
-					waitParam = "wait=0";
-				}
-			}
-			String executeCommand =
-					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
-			AgentIdSelection agentId = conf.getAgentIdSelection();
-			executeCommand =
-					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
-			executeCommand = executeCommand.concat(" Cookie:");
-			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-				executeCommand =
-						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
-			}
-			executeCommand = executeCommand.concat(" " + waitParam);
-			if (cdxFileNew != null) {
-				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
-			}
-			String[] execArr = executeCommand.split(" ");
-			executeCommand = executeCommand.replaceAll("%20", " ");
-			WebgatherLogger.info("Executing command " + executeCommand);
-			WebgatherLogger
-					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
-			ProcessBuilder pb = new ProcessBuilder(execArr);
-			assert crawlDir.isDirectory();
-			pb.directory(crawlDir);
-			File log = new File(crawlDir.toString() + "/cdncrawl.log");
-			log.createNewFile();
-			pb.redirectErrorStream(true);
-			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-			WpullThread wpullThread = new WpullThread(pb, 1);
+			WpullThread wpullThread = new WpullThread(1);
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);
@@ -163,8 +122,8 @@ public class WpullCrawl extends CrawlerModel {
 			wpullThread.setWarcFilename(warcFilename);
 			wpullThread.setHost(host);
 			wpullThread.setLocalPath(localpath);
-			wpullThread.setExecuteCommand(executeCommand);
-			wpullThread.setLogFileCDN(log);
+			wpullThread.setExecuteCommand(buildExecCommand());
+			wpullThread.setDomains(domains);
 			wpullThread.start();
 			exitState = wpullThread.getExitState();
 
@@ -175,7 +134,7 @@ public class WpullCrawl extends CrawlerModel {
 	}
 
 	/**
-	 * Builds a shell executable command which starts a wpull crawl
+	 * Builds a shell executable command which starts a wpull crawl (Hauptcrawl)
 	 * 
 	 * For wpull parameters in use see:
 	 * http://wpull.readthedocs.io/en/master/options.html If marked as mandatory,

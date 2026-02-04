@@ -281,7 +281,7 @@ public class BtrixWebclient extends CrawlerModel {
 			WebgatherLogger.error(msg, e.getMessage());
 		}
 		return data.toString();
-	}
+	} // ENDE createJsonBody()
 
 	private JSONObject createSeed(String url, String seedScopeType, int depth) {
 		JSONObject seed = new JSONObject();
@@ -299,16 +299,24 @@ public class BtrixWebclient extends CrawlerModel {
 	}
 
 	/**
+	 * Erzeugt einen neuen Browsertrix-Crawler-Job
+	 */
+	@Override
+	public void createCrawl() {
+		super.createCrawl();
+	}
+
+	/**
 	 * Ruft den CDN-Gatherer für diese Website auf, anschließend Browsertrix für
 	 * den Hauptcrawl
 	 */
 	@Override
-	public void startJob() {
-		super.startJob();
+	public void startCrawl() {
+		super.startCrawl();
 
 		try {
 
-			// Bereite Kommando für den Hauptcrawl vor
+			// Rufe Hauptcrawl in Browsertrix auf
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
