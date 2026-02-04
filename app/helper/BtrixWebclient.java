@@ -62,22 +62,22 @@ public class BtrixWebclient extends CrawlerModel {
 	/*
 	 * Authorisierung für Browsertrix
 	 */
-	final static String btrix_api_url = Play.application().configuration()
-			.getString("regal-api.browsertrix.apiUrl");
+	final static String btrix_api_url =
+			Play.application().configuration().getString("regal-api.btrix.apiUrl");
 	final static String btrix_admin_username = Play.application().configuration()
-			.getString("regal-api.browsertrix.adminUsername");
+			.getString("regal-api.btrix.adminUsername");
 	final static String btrix_admin_password = Play.application().configuration()
-			.getString("regal-api.browsertrix.adminPassword");
-	final static String btrix_org_name = Play.application().configuration()
-			.getString("regal-api.browsertrix.orgName");
-	final static String btrix_orgid = Play.application().configuration()
-			.getString("regal-api.browsertrix.orgId");
+			.getString("regal-api.btrix.adminPassword");
+	final static String btrix_org_name =
+			Play.application().configuration().getString("regal-api.btrix.orgName");
+	final static String btrix_orgid =
+			Play.application().configuration().getString("regal-api.btrix.orgId");
 	/**
 	 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
 	 * Crawls direkt von Wayback indexiert.
 	 */
-	final static String outDir = Play.application().configuration()
-			.getString("regal-api.browsertrix.outDir");
+	final static String outDir =
+			Play.application().configuration().getString("regal-api.btrix.outDir");
 
 	/**
 	 * Konstruktor zu Browsertrix Crawler Workflow
