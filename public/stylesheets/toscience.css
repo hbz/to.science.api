@@ -1,0 +1,18 @@
+body.pdfjs {
+    height: 100%
+}
+#pdfContainer {
+  width: 100%;
+  height: 100%;
+}
+
+#pdfContainer iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
+}
+@media print {
+  div {
+      display: none;
+    }
+}
