@@ -208,7 +208,7 @@ public class WpullThread extends Thread {
 				if (conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
 					executeCommand += " --domains=" + host.replaceAll("^www.", "");
 					if (domains.size() == 0) {
-						noParent = false;
+						noParent = false; // wirklich ?
 					}
 				} else {
 					executeCommand += " --hostnames=" + host;
@@ -217,7 +217,7 @@ public class WpullThread extends Thread {
 					zusDomain = domains.get(i);
 					zusHost = WebgatherUtils.getDomain(zusDomain);
 					WebgatherLogger.debug("zusHost=" + zusHost);
-					if (zusHost.equalsIgnoreCase(host.replaceAll("^www.", ""))) {
+					if (zusHost.equalsIgnoreCase(host)) {
 						WebgatherLogger.debug("Es soll von der gesamten Domain " + host
 								+ " eingesammelt werden, die Option --no-parent wird entfernt.");
 						noParent = false;

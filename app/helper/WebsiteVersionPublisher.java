@@ -61,8 +61,9 @@ public class WebsiteVersionPublisher {
 	 */
 	public String handleWebpagePublishing(Node node, ToScienceObject object) {
 		try {
-			if (! node.getContentType().equals("version")) {
-			  	play.Logger.debug("No action from WebsiteVersionPublisher for ID " + node.getPid() + " of content type " + node.getContentType());
+			if (!node.getContentType().equals("version")) {
+				play.Logger.debug("No action from WebsiteVersionPublisher for ID "
+						+ node.getPid() + " of content type " + node.getContentType());
 				return node.getContentType();
 			}
 			if ((object == null) || (object.getAccessScheme() == null)) {
@@ -269,34 +270,34 @@ public class WebsiteVersionPublisher {
 			 * aktuellen application.conf. Schreibe das korrigierte localDir zurück in
 			 * die conf:
 			 */
-			switch (conf.getCrawlerSelection()) {
-			case wget:
+			/**
+			 * Die Angaben in conf.getCrawlerSelection() stimmen nicht, es steht für
+			 * ältere Webschnitte generell "wpull" darin, auch wenn es z.B. "wget"
+			 * ist. Hole daher die crawlerSelecion ebenfalls aus localDir.
+			 */
+			if (localDir.matches("(.*)/wget-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.wget.dataDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
 				subDir = subDir.concat("/warcs");
 				localDir = localDir.concat("/warcs");
-				break;
-			case heritrix:
+			} else if (localDir.matches("(.*)/heritrix-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.heritrix.jobDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
 				subDir = subDir.concat("/warcs");
 				localDir = localDir.concat("/warcs");
-				break;
-			case wpull:
+			} else if (localDir.matches("(.*)/wpull-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.wpull.outDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
-				break;
-			case btrix:
+			} else if (localDir.matches("(.*)/btrix-data/(.*)")) {
 				localDir = Play.application().configuration().getString(
 						"regal-api.btrix.outDir") + "/" + conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
 				subDir = subDir.concat("/archive");
 				localDir = localDir.concat("/archive");
-				break;
-			default:
+			} else {
 				throw new RuntimeException(
 						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
 			}
@@ -528,9 +529,9 @@ public class WebsiteVersionPublisher {
 			conf.setOpenWaybackLink(publicOpenWaybackLink);
 			play.Logger.debug("publicOpenWaybackLink=" + publicOpenWaybackLink);
 			msg = new Modify().updateConf(node, conf.toString());
-			WebgatherLogger.info(
-					"Openwayback-Link wurde auf \"weltweit\" gesetzt für Webschnitt "
-							+ node.getPid() + ". Modify-Message: " + msg);
+			WebgatherLogger.info("Openwayback-Link wurde auf " + publicOpenWaybackLink
+					+ " gesetzt für Webschnitt " + node.getPid() + ". Modify-Message: "
+					+ msg);
 		} catch (Exception e) {
 			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
 					+ " kann nicht auf \"öffentlich\" gesetzt werden!");
@@ -596,6 +597,7 @@ public class WebsiteVersionPublisher {
 		} catch (UpdateNodeException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
+			e.printStackTrace();
 			WebgatherLogger.error("Openwayback-Link für Webschnitt " + node.getPid()
 					+ " kann nicht auf \"lesesaal|wayback\" gesetzt werden!");
 			throw new RuntimeException(e);
