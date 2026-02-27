@@ -203,6 +203,54 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> listResource(@PathParam("pid") String pid,
 			@QueryParam("design") String design) {
+		JSONObject allMd = null;
+		Map<String, Object> rdf = null;
+		Node node = readNodeOrNull(pid);
+
+		// persist Toscience Data Stream if not exist
+		try {
+			if (!Helper.mdStreamExists(pid, "toscience")
+					|| node.getMetadata("toscience").length() < 5) {
+
+				if (Helper.mdStreamExists(pid, "metadata2")) {
+					rdf = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
+							node.getMetadata("metadata2"));
+
+				} else if (!Helper.mdStreamExists(pid, "metadata2")
+						&& Helper.mdStreamExists(pid, "metadata")) {
+					rdf = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
+							node.getMetadata("metadata"));
+				}
+
+				if (rdf != null) {
+					allMd = new JSONObject(rdf);
+					allMd = TosHelper.getPrefLabelsResolved(allMd);
+					modify.updateMetadata("toscience", node, allMd.toString());
+				} else {
+					play.Logger
+							.debug("No metadata2/metadata stream found for pid=" + pid);
+				}
+
+				// The Toscience data stream exists, but may contain some elements with
+				// an
+				// invalid structure.
+			} else if (TosHelper.isValidJson(node.getMetadata("toscience"))) {
+
+				allMd = new JSONObject(node.getMetadata("toscience"));
+				JSONObject original = new JSONObject(allMd.toString());
+				allMd = TosHelper.validateJsonStructure(allMd);
+
+				if (!original.toString().equals(allMd.toString())) {
+					modify.updateMetadata("toscience", node, allMd.toString());
+					// metadata2 should also be updated here?
+					node.getLd2();
+				}
+
+			}
+
+		} catch (Exception e) {
+			play.Logger.debug("Exception in the Endpoint listResource " + e);
+		}
 		if (request().accepts("text/html"))
 			return asHtml(pid, design);
 		if (request().accepts("application/rdf+xml"))
@@ -455,6 +503,7 @@ public class Resource extends MyController {
 	public static Promise<Result> updateMetadata(@PathParam("pid") String pid) {
 
 		return new ModifyAction().call(pid, node -> {
+			play.Logger.debug("*****updateMetadata has been called*****");
 			try {
 
 				/**
@@ -577,6 +626,8 @@ public class Resource extends MyController {
 
 	public static Promise<Result> updateKtblAndTos(@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
+
+			play.Logger.debug("***updateKtblAndTos has been called***");
 			try {
 				Node readNode = readNodeOrNull(pid);
 				String result1 = null, result2 = null, result3 = null;
@@ -1682,6 +1733,8 @@ public class Resource extends MyController {
 	public static Promise<Result> uploadUpdateMetadata(
 			@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
+
+			play.Logger.debug("*****uploadUpdateMetadata has been called*****");
 			try {
 				Node readNode = readNodeOrNull(pid);
 				JSONObject tosJson = null;
@@ -1698,6 +1751,18 @@ public class Resource extends MyController {
 				if (!readNode.getContentType().contains("file")
 						&& !readNode.getContentType().contains("part")) {
 					content = KTBLMapperHelper.getFileData(data);
+
+					// play.Logger.debug("uploadUpdateMetadata received content=" +
+					// content);
+
+					if (TosHelper.isValidJson(content) == false) {
+						play.Logger.debug("Invalid JSON structure or no content provided.");
+					}
+
+					content = TosHelper.updateConent(content);
+					if (content == null || TosHelper.isValidJson(content) == false) {
+						play.Logger.debug("Invalid JSON structure or no content provided");
+					}
 
 					/**
 					 * toscience
@@ -1721,12 +1786,14 @@ public class Resource extends MyController {
 					/**
 					 * Metadata2
 					 */
+
 					rdf =
 							Metadata2Helper.getRdfFromTos(new JSONObject(content), readNode);
 					String rdfMd = modify.rdfToString(
 							(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
 					result3 = modify.updateMetadata("metadata2", readNode, rdfMd);
 					Enrich.enrichMetadata2(readNode);
+
 				}
 				return JsonMessage(new Message(result1 + result2 + result3));
 			} catch (Exception e) {

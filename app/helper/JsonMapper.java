@@ -467,91 +467,104 @@ public class JsonMapper {
 	}
 
 	private static void createJoinedFunding(Map<String, Object> rdf) {
+		play.Logger.debug("createJoinedFunding has been called");
 
-		Object myObj = rdf.get("fundingId");
-		if (myObj instanceof java.util.HashSet) {
-			HashSet<Map<String, Object>> fundingId =
-					(HashSet<Map<String, Object>>) rdf.get("fundingId");
-			if (fundingId == null) {
-				fundingId = new HashSet<>();
-			}
-			List<String> fundings = (List<String>) rdf.get("funding");
-			if (fundings != null) {
-				for (String funding : fundings) {
-					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
-					fundingJoinedMap.put(PREF_LABEL, funding);
-					fundingId.add(fundingJoinedMap);
+		if (!rdf.containsKey("joinedFunding")) {
+
+			Object myObj = rdf.get("fundingId");
+			if (myObj instanceof java.util.HashSet) {
+				HashSet<Map<String, Object>> fundingId =
+						(HashSet<Map<String, Object>>) rdf.get("fundingId");
+				if (fundingId == null) {
+					fundingId = new HashSet<>();
 				}
-				rdf.remove("funding");
-			}
-			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
-			List<String> projectId = (List<String>) rdf.get("projectId");
+				List<String> fundings = (List<String>) rdf.get("funding");
+				if (fundings != null) {
+					for (String funding : fundings) {
+						Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+						fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
 
-			List<Map<String, Object>> joinedFundings = new ArrayList<>();
-			if (fundingId.isEmpty())
-				return;
+						play.Logger.debug("ID2=" + ID2 + ", " + Globals.server
+								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
 
-			Iterator<Map<String, Object>> fit = fundingId.iterator();
-			int i = 0;
-			while (fit.hasNext()) {
-				Map<String, Object> m = fit.next();
-				Map<String, Object> f = new LinkedHashMap<>();
-				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-				fundingJoinedMap.put(ID2, m.get(ID2));
-				fundingJoinedMap.put(PREF_LABEL, m.get(PREF_LABEL));
-				f.put("fundingJoined", fundingJoinedMap);
-				f.put("fundingProgramJoined", fundingProgram.get(i));
-				f.put("projectIdJoined", projectId.get(i));
-				joinedFundings.add(f);
-				i++;
-			}
-
-			rdf.put("joinedFunding", joinedFundings);
-			rdf.put("fundingId", fundingId);
-		} else if (myObj instanceof java.util.List) {
-			List<Map<String, Object>> fundingId =
-					(List<Map<String, Object>>) rdf.get("fundingId");
-			if (fundingId == null) {
-				fundingId = new ArrayList<>();
-			}
-			List<String> fundings = (List<String>) rdf.get("funding");
-			if (fundings != null) {
-				for (String funding : fundings) {
-					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-					fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-							+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
-					fundingJoinedMap.put(PREF_LABEL, funding);
-					fundingId.add(fundingJoinedMap);
+						fundingJoinedMap.put(PREF_LABEL, funding);
+						play.Logger.debug("PREF_LABEL" + PREF_LABEL);
+						fundingId.add(fundingJoinedMap);
+					}
+					rdf.remove("funding");
 				}
-				rdf.remove("funding");
-			}
-			List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
-			/*
-			 * in case of casting problems: List<String> fundingProgram = new
-			 * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
-			 */
-			List<String> projectId = (List<String>) rdf.get("projectId");
+				List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+				List<String> projectId = (List<String>) rdf.get("projectId");
 
-			List<Map<String, Object>> joinedFundings = new ArrayList<>();
-			if (fundingId.isEmpty())
-				return;
-			for (int i = 0; i < fundingId.size(); i++) {
-				// play.Logger.info(fundingId.get(i));
-				Map<String, Object> f = new LinkedHashMap<>();
-				Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
-				fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
-				fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
-				f.put("fundingJoined", fundingJoinedMap);
-				f.put("fundingProgramJoined", fundingProgram.get(i));
-				f.put("projectIdJoined", projectId.get(i));
-				joinedFundings.add(f);
+				List<Map<String, Object>> joinedFundings = new ArrayList<>();
+				if (fundingId.isEmpty())
+					return;
+
+				Iterator<Map<String, Object>> fit = fundingId.iterator();
+				int i = 0;
+				while (fit.hasNext()) {
+					Map<String, Object> m = fit.next();
+					Map<String, Object> f = new LinkedHashMap<>();
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, m.get(ID2));
+					fundingJoinedMap.put(PREF_LABEL, m.get(PREF_LABEL));
+					f.put("fundingJoined", fundingJoinedMap);
+					f.put("fundingProgramJoined", fundingProgram.get(i));
+					f.put("projectIdJoined", projectId.get(i));
+					joinedFundings.add(f);
+					i++;
+				}
+
+				rdf.put("joinedFunding", joinedFundings);
+				rdf.put("fundingId", fundingId);
+			} else if (myObj instanceof java.util.List) {
+				List<Map<String, Object>> fundingId =
+						(List<Map<String, Object>>) rdf.get("fundingId");
+				if (fundingId == null) {
+					fundingId = new ArrayList<>();
+				}
+				List<String> fundings = (List<String>) rdf.get("funding");
+				if (fundings != null) {
+					for (String funding : fundings) {
+						Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+						fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
+								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+						play.Logger.debug("ID2=" + ID2 + ", " + Globals.server
+								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
+
+						fundingJoinedMap.put(PREF_LABEL, funding);
+						play.Logger.debug("PREF_LABEL" + PREF_LABEL);
+						fundingId.add(fundingJoinedMap);
+					}
+					rdf.remove("funding");
+				}
+				List<String> fundingProgram = (List<String>) rdf.get("fundingProgram");
+				/*
+				 * in case of casting problems: List<String> fundingProgram = new
+				 * ArrayList<String>((java.util.HashSet) rdf.get("fundingProgram"));
+				 */
+				List<String> projectId = (List<String>) rdf.get("projectId");
+
+				List<Map<String, Object>> joinedFundings = new ArrayList<>();
+				if (fundingId.isEmpty())
+					return;
+				for (int i = 0; i < fundingId.size(); i++) {
+					// play.Logger.info(fundingId.get(i));
+					Map<String, Object> f = new LinkedHashMap<>();
+					Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
+					fundingJoinedMap.put(ID2, fundingId.get(i).get(ID2));
+					fundingJoinedMap.put(PREF_LABEL, fundingId.get(i).get(PREF_LABEL));
+					f.put("fundingJoined", fundingJoinedMap);
+					f.put("fundingProgramJoined", fundingProgram.get(i));
+					f.put("projectIdJoined", projectId.get(i));
+					joinedFundings.add(f);
+				}
+				rdf.put("joinedFunding", joinedFundings);
+				rdf.put("fundingId", fundingId);
 			}
-			rdf.put("joinedFunding", joinedFundings);
-			rdf.put("fundingId", fundingId);
+
 		}
-
 	}
 
 	private static void addParts(Map<String, Object> rdf) {
@@ -896,9 +909,22 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd2() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata2();
-		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+		Map<String, Object> m2 = null;
 
+		// Map<String, Object> m = getDescriptiveMetadata2();
+
+		// play.Logger.debug("*******************m****************");
+		// TosHelper.logObjectInfo(m);
+
+		m2 = TosHelper.jsonToMap(node.getMetadata("toscience"));
+		if (m2 != null) {
+			m2.put("@context", profile.getContext().get("@context"));
+			play.Logger.debug("********************m2***************");
+			TosHelper.logObjectInfo(m2);
+		}
+
+		// Map<String, Object> rdf = m == null ? new HashMap<>() : m;
+		Map<String, Object> rdf = m2 == null ? new HashMap<>() : m2;
 		changeDcIsPartOfToRegalIsPartOf(rdf);
 		// rdf.remove("describedby");
 		// rdf.remove("sameAs");

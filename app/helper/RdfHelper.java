@@ -78,9 +78,16 @@ public class RdfHelper {
 			play.Logger.debug("rdf without key @Context=" + rdf.toString());
 
 		} catch (Exception e) {
-			play.Logger.error("Lobid(RDF) Content could not be convert to Map", e);
+			play.Logger.error("Exception in getRdfAsMap()", e);
 		}
 		return rdf;
 	}
+
+	/*
+	 * public static Map<String, Object> convertIssuedToString(Map<String, Object>
+	 * rdf) { if (rdf.containsKey("issued")) { rdf.put("issued",
+	 * Metadata2Helper.getQuotedValues(rdf.get("issued").toString())); } return
+	 * rdf; }
+	 */
 
 }

@@ -45,8 +45,10 @@ public class KTBLMapperHelper {
 			}
 		} catch (FileNotFoundException e) {
 			play.Logger.debug("Exception in getFileData(), File not found");
+			return null;
 		} catch (IOException e) {
 			play.Logger.debug("Exception in getFileData()" + e);
+			return null;
 		} finally {
 			if (br != null) {
 				try {

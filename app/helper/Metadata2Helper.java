@@ -142,8 +142,14 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> licenseMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					licenseMap.put("@id", jObj.getString("@id"));
-					licenseMap.put("prefLabel", jObj.get("prefLabel"));
+
+					// If @id available, fill in the value; otherwise, the complete jObj
+					licenseMap.put("@id",
+							jObj.has("@id") ? jObj.getString("@id") : jObj.toString());
+					licenseMap.put("prefLabel",
+							jObj.has("prefLabel") ? jObj.getString("prefLabel")
+									: jObj.toString());
+
 					licenseList.add(licenseMap);
 				}
 				rdf.put("license", licenseList);
@@ -490,6 +496,7 @@ public class Metadata2Helper {
 					rdf.put("emission_reduction_methods", emission_reduction_methods);
 				}
 			}
+
 			md2Map.put("metadata2", rdf);
 			play.Logger.debug("md2Map" + md2Map.toString());
 
