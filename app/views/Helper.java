@@ -1,6 +1,7 @@
 package views;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,6 +34,7 @@ import helper.JsonMdLoader;
 import models.Link;
 import models.Node;
 import play.Logger;
+import play.Play;
 
 public class Helper {
 
@@ -125,6 +127,15 @@ public class Helper {
 		}
 	}
 
+	/**
+	 * Diese Methode erzeugt für ein Version-Objekt den Link unter
+	 * "Zum Webschnitt". Dieser führt zu dem zugehörigen Objekt in der
+	 * Wayback-Machine (Replay-Engine).
+	 * 
+	 * @autor Kuss
+	 * @param pid toscience PID of a version object
+	 * @return a Link to an object in Wayback
+	 */
 	public static String getWaybackLink(String pid) {
 		try {
 			play.Logger.debug("Get Waybacklinkg for " + pid);
@@ -137,17 +148,41 @@ public class Helper {
 
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
-			if (conf.getOpenWaybackLink() == null
-					|| conf.getOpenWaybackLink().isEmpty()) {
-				String owDatestamp =
-						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
-				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
-						+ "/" + conf.getUrl());
 
+			/**
+			 * TOS-1347 Die Collection, auf die im waybackLink verwiesen wird, richtet
+			 * sich nach dem aktuellen AccessScheme. Wir führen noch einmal den
+			 * gleichen Code aus wie in Create.createWebpageVersion(), weil sich das
+			 * accessScheme zwischenzeitlich geändert haben könnte, ohne das
+			 * "OpenWaybackLink" aktualisiert worden wäre.
+			 */
+			String waybackCollectionLink = null;
+			if (node.getAccessScheme().equals("public")) {
+				waybackCollectionLink = Play.application().configuration()
+						.getString("regal-api.wayback.weltweitLink");
+			} else {
+				waybackCollectionLink = Play.application().configuration()
+						.getString("regal-api.wayback.lesesaalLink");
 			}
-			play.Logger.debug(waybackLink);
+			play.Logger.debug("waybackCollectionLink=" + waybackCollectionLink);
+
 			waybackLink = conf.getOpenWaybackLink();
-			return waybackLink != null ? waybackLink : "../" + pid;
+			play.Logger.debug("waybackLink=" + waybackLink);
+
+			/* Wir bauen einen neuen waybackLink aus den aktuellen Werten zusammen */
+			String owDatestamp = null;
+			try {
+				File outDir = new File(conf.getLocalDir());
+				owDatestamp = outDir.getName();
+			} catch (Exception e) {
+				owDatestamp =
+						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+			}
+
+			waybackLink = waybackCollectionLink + owDatestamp + "/" + conf.getUrl();
+			play.Logger.debug("waybackLink=" + waybackLink);
+			conf.setOpenWaybackLink(waybackLink);
+			return waybackLink;
 		} catch (Exception e) {
 			play.Logger.error("", e);
 			return "../" + pid;
