@@ -207,9 +207,6 @@ public class WpullThread extends Thread {
 				executeCommand += " --span-hosts";
 				if (conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
 					executeCommand += " --domains=" + host.replaceAll("^www.", "");
-					if (domains.size() == 0) {
-						noParent = false; // wirklich ?
-					}
 				} else {
 					executeCommand += " --hostnames=" + host;
 				}
