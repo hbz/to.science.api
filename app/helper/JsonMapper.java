@@ -212,7 +212,9 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLd() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata2();
+		// Map<String, Object> m = getDescriptiveMetadata2();
+		Map<String, Object> m =
+				getDescriptiveToscience(node.getMetadata("toscience"));
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 
 		changeDcIsPartOfToRegalIsPartOf(rdf);
@@ -916,7 +918,7 @@ public class JsonMapper {
 		// play.Logger.debug("*******************m****************");
 		// TosHelper.logObjectInfo(m);
 
-		m2 = TosHelper.jsonToMap(node.getMetadata("toscience"));
+		m2 = getDescriptiveToscience(node.getMetadata("toscience"));
 		if (m2 != null) {
 			m2.put("@context", profile.getContext().get("@context"));
 			play.Logger.debug("********************m2***************");
@@ -1095,6 +1097,56 @@ public class JsonMapper {
 				result = true;
 		}
 		return result;
+	}
+
+	/**
+	 * Die Methode liest den toscience-Datenstrom als JSON-String. Das JSON wird
+	 * als JSON-LD vorbereitet. Falls noetig, werden @context und @id ergaenzt.
+	 * Danach wird ein Subject fuer die Konvertierung bestimmt. Das JSON-LD wird
+	 * mit jsonConverter.convert(...) in eine RDF-basierte Java-Map umgewandelt.
+	 * 
+	 * @param toscienceJson: Inhalt des Tos-Datenstromes
+	 * @return: eine Map mit den aus `toscience` erzeugten RDF-/JSON-LD-Daten
+	 */
+	private Map<String, Object> getDescriptiveToscience(String toscienceJson) {
+		try {
+			if (toscienceJson == null || toscienceJson.isEmpty()) {
+				return null;
+			}
+			JSONObject jo = new JSONObject(toscienceJson);
+			if (!jo.has("@context")) {
+				jo.put("@context", profile.getContext().get("@context"));
+			}
+			if (!jo.has("@id") && jo.has("id")) {
+				jo.put("@id", jo.get("id"));
+			}
+			String subject = null;
+			if (jo.has("@id")) {
+				subject = jo.get("@id").toString();
+			} else if (node.getPid() != null) {
+				subject = node.getPid();
+			}
+			if (subject == null || subject.isEmpty()) {
+				return null;
+			}
+			InputStream stream = new ByteArrayInputStream(
+					jo.toString().getBytes(StandardCharsets.UTF_8));
+
+			Map<String, Object> rdf = jsonConverter.convert(subject, stream,
+					RDFFormat.JSONLD, profile.getContext().get("@context"));
+
+			// joinedFunding is deleted here because it will be mapped later in the
+			// JsonMapper class, and joinedFunding continues to exist in toscience.
+			if (rdf.containsKey("joinedFunding")) {
+				rdf.remove("joinedFunding");
+			}
+
+			return rdf;
+		} catch (Exception e) {
+			play.Logger.trace(node.getPid() + " has no descriptive Toscience!");
+			play.Logger.trace("", e);
+		}
+		return null;
 	}
 
 }
