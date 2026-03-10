@@ -232,33 +232,7 @@ public class WpullCrawl {
 						+ "/logAnalyses/" + conf.getName() + "/" + datetime);
 				logAnalysesDir.mkdirs();
 			}
-			/**
-			 * Im resultDir symbolische Links auf die Log- und Textdateien in crawlDir
-			 * erzeugen.
-			 */
-			Path crawlLog = Paths.get(crawlDir.getPath() + "/crawl.log");
-			Path crawlLogLink = Paths.get(resultDir.getPath() + "/crawl.log");
-			try {
-				Files.createSymbolicLink(crawlLogLink, crawlLog);
-			} catch (IOException e) {
-				msg =
-						"Cannot create symbolic link " + resultDir.getPath() + "/crawl.log"
-								+ " pointing to " + crawlDir.getPath() + "/crawl.log";
-				WebgatherLogger.error(msg);
-			}
-			/**
-			 * Symbolische Links in crawlreports/logAnalyses erzuegen, die wiederum
-			 * auf diese symbolischen Links im resultDir verweisen. Für TOS-1273.
-			 */
-			Path crawlLogAnalysesLink = Paths.get(logAnalysesDir + "/crawl.log");
-			try {
-				Files.createSymbolicLink(crawlLogAnalysesLink, crawlLogLink);
-			} catch (IOException e) {
-				msg = "Cannot create symbolic link " + logAnalysesDir.getPath()
-						+ "/crawl.log" + " pointing to " + resultDir.getPath()
-						+ "/crawl.log";
-				WebgatherLogger.error(msg);
-			}
+			createSymLinks();
 			/**
 			 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
 			 * geschaut, ob eine CDX-Datei für diese Webpage existiert. Eine CDX-Datei
@@ -668,6 +642,59 @@ public class WpullCrawl {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Diese Methode erzeugt symbolische Links für die Log-Analyse via
+	 * Browser-Zugriff.
+	 * 
+	 * @author: I. Kuss (hbz)
+	 * @date 2026-03-10
+	 * @reference TOS-1273
+	 */
+	public void createSymLinks() {
+		/**
+		 * Im resultDir symbolische Links auf die Log- und Textdateien in crawlDir
+		 * erzeugen.
+		 */
+		createSymLink(crawlDir, resultDir, "cdnparse.log");
+		createSymLink(crawlDir, resultDir, "cdn.txt");
+		createSymLink(crawlDir, resultDir, "hostnames.txt");
+		createSymLink(crawlDir, resultDir, "cdncrawl.log");
+		createSymLink(crawlDir, resultDir, "crawl.log");
+		/**
+		 * Symbolische Links in crawlreports/logAnalyses erzuegen, die wiederum auf
+		 * diese symbolischen Links im resultDir verweisen. Für TOS-1273.
+		 */
+		createSymLink(resultDir, logAnalysesDir, "cdnparse.log");
+		createSymLink(resultDir, logAnalysesDir, "cdn.txt");
+		createSymLink(resultDir, logAnalysesDir, "hostnames.txt");
+		createSymLink(resultDir, logAnalysesDir, "cdncrwal.log");
+		createSymLink(resultDir, logAnalysesDir, "crawl.log");
+	}
+
+	/**
+	 * Diese Methode erzeugt einen symbolischen Link im Verzeichnis linkDir, der
+	 * auf eine Datei namens filename im Verzeichnis fileDir zeigt.
+	 * 
+	 * @author I. Kuss (hbz)
+	 * @date 2026-03-10
+	 * 
+	 * @param fileDir das Verzeichnis, in dem sich die Datei befindet (Typ File)
+	 * @param linkDir das Verzeichnis, in dem die symbolische Verknüpfung angelegt
+	 *          werden soll (Typ File)
+	 * @param filename der Dateiname (Zeichenkette; ohne Pfadangabe)
+	 */
+	public void createSymLink(File fileDir, File linkDir, String filename) {
+		Path filePath = Paths.get(fileDir.getPath() + "/" + filename);
+		Path fileLink = Paths.get(linkDir.getPath() + "/" + filename);
+		try {
+			Files.createSymbolicLink(fileLink, filePath);
+		} catch (IOException e) {
+			msg = "Cannot create symbolic link " + linkDir.getPath() + "/" + filename
+					+ " pointing to " + fileDir.getPath() + "/" + filename;
+			WebgatherLogger.error(msg);
+		}
 	}
 
 }
