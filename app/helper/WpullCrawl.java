@@ -669,7 +669,7 @@ public class WpullCrawl {
 		createSymLink(resultDir, logAnalysesDir, "cdnparse.log");
 		createSymLink(resultDir, logAnalysesDir, "cdn.txt");
 		createSymLink(resultDir, logAnalysesDir, "hostnames.txt");
-		createSymLink(resultDir, logAnalysesDir, "cdncrwal.log");
+		createSymLink(resultDir, logAnalysesDir, "cdncrawl.log");
 		createSymLink(resultDir, logAnalysesDir, "crawl.log");
 	}
 
