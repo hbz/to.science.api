@@ -66,6 +66,10 @@ regal-api.urnbase="https://localhost/resource/"
 #regal-api.urnTask="0/5 * * * * ?"
 #regal-api.webgatherTask="* * */3 * * ?"
 
+#------------Webgathering-----------
+toscience-api.webgatherer.lastlyCrawledWebpageIdFile="/opt/toscience/toscience-api/conf/lastlyCrawledWebpageId"
+toscience-api.webgatherer.crawlreports="/opt/toscience/crawlreports"
+
 #-------------Heritrix------------------------------                            
 regal-api.heritrix.port=8443
 regal-api.heritrix.hostname="localhost"
