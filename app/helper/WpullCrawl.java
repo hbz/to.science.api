@@ -35,6 +35,8 @@ import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +68,7 @@ public class WpullCrawl {
 	private String datetime = null;
 	private File crawlDir = null;
 	private File resultDir = null;
+	private File logAnalysesDir = null;
 	private File cdxFile = null;
 	private File cdxFileNew = null;
 	private String localpath = null;
@@ -96,6 +99,8 @@ public class WpullCrawl {
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 	final static String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
+	final static String crawlreportsDir = Play.application().configuration()
+			.getString("toscience-api.webgatherer.crawlreports");
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
@@ -182,6 +187,8 @@ public class WpullCrawl {
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
+			this.logAnalysesDir = new File(crawlreportsDir + "/" + "logAnalyses/"
+					+ conf.getName() + "/" + datetime);
 			this.cdxFile =
 					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
 			this.warcFilename = "WEB-" + host + "-" + datetime;
@@ -218,6 +225,39 @@ public class WpullCrawl {
 				WebgatherLogger.debug("Create Output Directory " + outDir + "/"
 						+ conf.getName() + "/" + datetime);
 				resultDir.mkdirs();
+			}
+			if (!logAnalysesDir.exists()) {
+				// create logAnalyses directory
+				WebgatherLogger.debug("Create logAnalyses Directory " + crawlreportsDir
+						+ "/logAnalyses/" + conf.getName() + "/" + datetime);
+				logAnalysesDir.mkdirs();
+			}
+			/**
+			 * Im resultDir symbolische Links auf die Log- und Textdateien in crawlDir
+			 * erzeugen.
+			 */
+			Path crawlLog = Paths.get(crawlDir.getPath() + "/crawl.log");
+			Path crawlLogLink = Paths.get(resultDir.getPath() + "/crawl.log");
+			try {
+				Files.createSymbolicLink(crawlLogLink, crawlLog);
+			} catch (IOException e) {
+				msg =
+						"Cannot create symbolic link " + resultDir.getPath() + "/crawl.log"
+								+ " pointing to " + crawlDir.getPath() + "/crawl.log";
+				WebgatherLogger.error(msg);
+			}
+			/**
+			 * Symbolische Links in crawlreports/logAnalyses erzuegen, die wiederum
+			 * auf diese symbolischen Links im resultDir verweisen. Für TOS-1273.
+			 */
+			Path crawlLogAnalysesLink = Paths.get(logAnalysesDir + "/crawl.log");
+			try {
+				Files.createSymbolicLink(crawlLogAnalysesLink, crawlLogLink);
+			} catch (IOException e) {
+				msg = "Cannot create symbolic link " + logAnalysesDir.getPath()
+						+ "/crawl.log" + " pointing to " + resultDir.getPath()
+						+ "/crawl.log";
+				WebgatherLogger.error(msg);
 			}
 			/**
 			 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
