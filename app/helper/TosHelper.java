@@ -96,9 +96,6 @@ public class TosHelper {
 	 */
 	public static JSONObject getPrefLabelsResolved(JSONObject allJsonObjects) {
 
-		Object oldPrefLabel = null;
-		JSONObject jsObject = null;
-
 		Iterator<String> keys = allJsonObjects.keys();
 
 		try {
@@ -111,31 +108,17 @@ public class TosHelper {
 					play.Logger.debug("value contains prefLabel");
 					if (value instanceof JSONObject) {
 						play.Logger.debug("value instanceof JSONObject");
-						jsObject = allJsonObjects.getJSONObject(key);
+						JSONObject jsObject = allJsonObjects.getJSONObject(key);
 						play.Logger.debug("jsObject=" + jsObject.toString());
-						oldPrefLabel = jsObject.get("prefLabel");
-						if (oldPrefLabel.toString().contains("http")
-								&& !oldPrefLabel.toString().contains("www.openstreetmap.org")) {
-							play.Logger.debug("oldPrefLabel=" + oldPrefLabel.toString());
-							String newPrefLabel =
-									MyEtikettMaker.getLabelFromEtikettWs(oldPrefLabel.toString());
-							play.Logger.debug("newPrefLabel=" + newPrefLabel);
-							jsObject.put("prefLabel", newPrefLabel);
-						}
+						resolvePrefLabel(jsObject);
 					} else if (value instanceof JSONArray) {
 						play.Logger.debug("value instanceof JSONArray");
 						JSONArray jsArray = allJsonObjects.getJSONArray(key);
 						play.Logger.debug("jsArray=" + jsArray.toString());
 						for (int j = 0; j < jsArray.length(); j++) {
-							jsObject = jsArray.getJSONObject(j);
-							oldPrefLabel = jsObject.get("prefLabel");
-							if (oldPrefLabel.toString().contains("http") && !oldPrefLabel
-									.toString().contains("www.openstreetmap.org")) {
-								play.Logger.debug("oldPrefLabel=" + oldPrefLabel.toString());
-								String newPrefLabel = MyEtikettMaker
-										.getLabelFromEtikettWs(oldPrefLabel.toString());
-								play.Logger.debug("newPrefLabel=" + newPrefLabel);
-								jsObject.put("prefLabel", newPrefLabel);
+							JSONObject jsObject = jsArray.getJSONObject(j);
+							if (jsObject.has("prefLabel")) {
+								resolvePrefLabel(jsObject);
 							}
 						}
 					}
@@ -150,6 +133,37 @@ public class TosHelper {
 
 		return allJsonObjects;
 
+	}
+
+	private static void resolvePrefLabel(JSONObject jsObject) {
+		try {
+			Object oldPrefLabel = jsObject.opt("prefLabel");
+			if (oldPrefLabel == null) {
+				return;
+			}
+
+			String oldPrefLabelString = oldPrefLabel.toString();
+			if (!oldPrefLabelString.contains("http")
+					|| oldPrefLabelString.contains("www.openstreetmap.org")) {
+				return;
+			}
+
+			play.Logger.debug("oldPrefLabel=" + oldPrefLabelString);
+			String newPrefLabel =
+					MyEtikettMaker.getLabelFromEtikettWs(oldPrefLabelString);
+			play.Logger.debug("newPrefLabel=" + newPrefLabel);
+			if (newPrefLabel != null && !newPrefLabel.trim().isEmpty()) {
+				jsObject.put("prefLabel", newPrefLabel);
+			} else {
+				jsObject.put("prefLabel", oldPrefLabelString);
+			}
+		} catch (RuntimeException e) {
+			play.Logger.debug("Could not resolve prefLabel=" + jsObject.opt("prefLabel"),
+					e);
+		} catch (JSONException e) {
+			play.Logger.debug("Could not update prefLabel=" + jsObject.opt("prefLabel"),
+					e);
+		}
 	}
 
 	/**

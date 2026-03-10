@@ -335,7 +335,9 @@ public class JsonMapper {
 	 */
 	public Map<String, Object> getLdShortStyle() {
 		Collection<Link> ls = node.getRelsExt();
-		Map<String, Object> m = getDescriptiveMetadata2();
+		// Map<String, Object> m = getDescriptiveMetadata2();
+		Map<String, Object> m =
+				getDescriptiveToscience(node.getMetadata("toscience"));
 		Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		rdf.put(ID2, node.getPid());
 		for (Link l : ls) {
