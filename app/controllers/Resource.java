@@ -203,54 +203,8 @@ public class Resource extends MyController {
 	@ApiOperation(produces = "application/json,text/html,application/rdf+xml", nickname = "listResource", value = "listResource", notes = "Returns a resource. Redirects in dependends to the accept header ", response = Message.class, httpMethod = "GET")
 	public static Promise<Result> listResource(@PathParam("pid") String pid,
 			@QueryParam("design") String design) {
-		JSONObject allMd = null;
-		Map<String, Object> rdf = null;
 		Node node = readNodeOrNull(pid);
-
-		// persist Toscience Data Stream if not exist
-		try {
-			if (!Helper.mdStreamExists(pid, "toscience")
-					|| node.getMetadata("toscience").length() < 5) {
-
-				if (Helper.mdStreamExists(pid, "metadata2")) {
-					rdf = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
-							node.getMetadata("metadata2"));
-
-				} else if (!Helper.mdStreamExists(pid, "metadata2")
-						&& Helper.mdStreamExists(pid, "metadata")) {
-					rdf = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
-							node.getMetadata("metadata"));
-				}
-
-				if (rdf != null) {
-					allMd = new JSONObject(rdf);
-					allMd = TosHelper.getPrefLabelsResolved(allMd);
-					modify.updateMetadata("toscience", node, allMd.toString());
-				} else {
-					play.Logger
-							.debug("No metadata2/metadata stream found for pid=" + pid);
-				}
-
-				// The Toscience data stream exists, but may contain some elements with
-				// an
-				// invalid structure.
-			} else if (TosHelper.isValidJson(node.getMetadata("toscience"))) {
-
-				allMd = new JSONObject(node.getMetadata("toscience"));
-				JSONObject original = new JSONObject(allMd.toString());
-				allMd = TosHelper.validateJsonStructure(allMd);
-
-				if (!original.toString().equals(allMd.toString())) {
-					modify.updateMetadata("toscience", node, allMd.toString());
-					// metadata2 should also be updated here?
-					node.getLd2();
-				}
-
-			}
-
-		} catch (Exception e) {
-			play.Logger.debug("Exception in the Endpoint listResource " + e);
-		}
+		TosHelper.persistAndNormalizeToscienceMetadata(pid, node);
 		if (request().accepts("text/html"))
 			return asHtml(pid, design);
 		if (request().accepts("application/rdf+xml"))

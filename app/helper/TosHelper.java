@@ -23,6 +23,8 @@ import models.Node;
 import java.util.stream.Collectors;
 import org.json.JSONException;
 import play.Play;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import views.Helper;
 
 /**
  * 
@@ -31,6 +33,8 @@ import play.Play;
  */
 
 public class TosHelper {
+
+	private static final Modify modify = new Modify();
 
 	/**
 	 * If a resource is edited via Drupal, the method gets the roles from the old
@@ -158,11 +162,11 @@ public class TosHelper {
 				jsObject.put("prefLabel", oldPrefLabelString);
 			}
 		} catch (RuntimeException e) {
-			play.Logger.debug("Could not resolve prefLabel=" + jsObject.opt("prefLabel"),
-					e);
+			play.Logger
+					.debug("Could not resolve prefLabel=" + jsObject.opt("prefLabel"), e);
 		} catch (JSONException e) {
-			play.Logger.debug("Could not update prefLabel=" + jsObject.opt("prefLabel"),
-					e);
+			play.Logger
+					.debug("Could not update prefLabel=" + jsObject.opt("prefLabel"), e);
 		}
 	}
 
@@ -714,5 +718,59 @@ public class TosHelper {
 			play.Logger.debug("Exception in validateJsonStructure()" + e);
 		}
 		return allMd;
+	}
+
+	public static void persistAndNormalizeToscienceMetadata(String pid, Node node) {
+		JSONObject allMd = null;
+		Map<String, Object> map = null;
+		try {
+
+			// Case 1: toscience does not exist and will be persisted
+			if (!Helper.mdStreamExists(pid, "toscience")
+					|| node.getMetadata("toscience").length() < 5) {
+
+				if (Helper.mdStreamExists(pid, "metadata2")) {
+					map = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
+							node.getMetadata("metadata2"));
+
+				} else if (!Helper.mdStreamExists(pid, "metadata2")
+						&& Helper.mdStreamExists(pid, "metadata")) {
+					map = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
+							node.getMetadata("metadata"));
+				}
+
+				if (map != null) {
+					allMd = new JSONObject(map);
+					allMd = TosHelper.getPrefLabelsResolved(allMd);
+					modify.updateMetadata("toscience", node, allMd.toString());
+				} else {
+					play.Logger
+							.debug("No metadata2/metadata stream found for pid=" + pid);
+				}
+
+				// Case 2: toscience exists, but may have JSON elements with invalid
+				// structures
+			} else if (TosHelper.isValidJson(node.getMetadata("toscience"))) {
+
+				allMd = new JSONObject(node.getMetadata("toscience"));
+				JSONObject original = new JSONObject(allMd.toString());
+				allMd = TosHelper.validateJsonStructure(allMd);
+
+				if (!original.toString().equals(allMd.toString())) {
+					// 1: update toscience
+					modify.updateMetadata("toscience", node, allMd.toString());
+					// 2: update metadata2?
+					// 3: update ktbl?
+
+					// update json2
+					node.getLd2();
+				}
+
+			}
+
+		} catch (Exception e) {
+			play.Logger
+					.debug("Exception in persistAndNormalizeToscienceMetadata() " + e);
+		}
 	}
 }
