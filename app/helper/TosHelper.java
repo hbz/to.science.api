@@ -694,9 +694,14 @@ public class TosHelper {
 		return false;
 	}
 
-	public static JSONObject validateJsonStructure(JSONObject allMd) {
+	public static JSONObject validateJsonStructure(JSONObject allMd, Node n) {
 
 		try {
+			if (n != null && n.getPid() != null
+					&& (!allMd.has("@id") || allMd.opt("@id") == null
+							|| allMd.optString("@id").trim().isEmpty())) {
+				allMd.put("@id", n.getPid());
+			}
 
 			if (allMd.has("issued")) {
 				String issued = allMd.get("issued").toString();
@@ -720,7 +725,8 @@ public class TosHelper {
 		return allMd;
 	}
 
-	public static void persistAndNormalizeToscienceMetadata(String pid, Node node) {
+	public static void persistAndNormalizeToscienceMetadata(String pid,
+			Node node) {
 		JSONObject allMd = null;
 		Map<String, Object> map = null;
 		try {
@@ -754,7 +760,7 @@ public class TosHelper {
 
 				allMd = new JSONObject(node.getMetadata("toscience"));
 				JSONObject original = new JSONObject(allMd.toString());
-				allMd = TosHelper.validateJsonStructure(allMd);
+				allMd = TosHelper.validateJsonStructure(allMd, node);
 
 				if (!original.toString().equals(allMd.toString())) {
 					// 1: update toscience
