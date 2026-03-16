@@ -204,7 +204,7 @@ public class Resource extends MyController {
 	public static Promise<Result> listResource(@PathParam("pid") String pid,
 			@QueryParam("design") String design) {
 		Node node = readNodeOrNull(pid);
-		TosHelper.persistAndNormalizeToscienceMetadata(pid, node);
+		TosHelper.persistAndNormalizeToscienceMetadataWithParts(pid, node);
 		if (request().accepts("text/html"))
 			return asHtml(pid, design);
 		if (request().accepts("application/rdf+xml"))

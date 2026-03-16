@@ -725,6 +725,15 @@ public class TosHelper {
 		return allMd;
 	}
 
+	/**
+	 * Method Persists the Toscience data stream if it is not already present. If
+	 * the data stream already exists, the method checks the structure of the
+	 * individual elements. If necessary, the required modifications to the
+	 * structure will be made.
+	 * 
+	 * @param pid
+	 * @param node
+	 */
 	public static void persistAndNormalizeToscienceMetadata(String pid,
 			Node node) {
 		JSONObject allMd = null;
@@ -777,6 +786,21 @@ public class TosHelper {
 		} catch (Exception e) {
 			play.Logger
 					.debug("Exception in persistAndNormalizeToscienceMetadata() " + e);
+		}
+	}
+
+	/**
+	 * This method is an extension of the `persistAndNormalizeToScienceMetadata`
+	 * method. It handles child objects if they exist.
+	 * 
+	 * @param pid
+	 * @param node
+	 */
+	public static void persistAndNormalizeToscienceMetadataWithParts(String pid,
+			Node node) {
+		persistAndNormalizeToscienceMetadata(pid, node);
+		for (Node child : new Read().getParts(node)) {
+			persistAndNormalizeToscienceMetadata(child.getPid(), child);
 		}
 	}
 }
