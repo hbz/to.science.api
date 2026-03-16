@@ -35,6 +35,8 @@ import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +68,7 @@ public class WpullCrawl {
 	private String datetime = null;
 	private File crawlDir = null;
 	private File resultDir = null;
+	private File logAnalysesDir = null;
 	private File cdxFile = null;
 	private File cdxFileNew = null;
 	private String localpath = null;
@@ -96,6 +99,8 @@ public class WpullCrawl {
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 	final static String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
+	final static String crawlreportsDir = Play.application().configuration()
+			.getString("toscience-api.webgatherer.crawlreports");
 
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
@@ -182,6 +187,8 @@ public class WpullCrawl {
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
+			this.logAnalysesDir = new File(crawlreportsDir + "/" + "logAnalyses/"
+					+ conf.getName() + "/" + datetime);
 			this.cdxFile =
 					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
 			this.warcFilename = "WEB-" + host + "-" + datetime;
@@ -219,6 +226,13 @@ public class WpullCrawl {
 						+ conf.getName() + "/" + datetime);
 				resultDir.mkdirs();
 			}
+			if (!logAnalysesDir.exists()) {
+				// create logAnalyses directory
+				WebgatherLogger.debug("Create logAnalyses Directory " + crawlreportsDir
+						+ "/logAnalyses/" + conf.getName() + "/" + datetime);
+				logAnalysesDir.mkdirs();
+			}
+			createSymLinks();
 			/**
 			 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
 			 * geschaut, ob eine CDX-Datei für diese Webpage existiert. Eine CDX-Datei
@@ -628,6 +642,59 @@ public class WpullCrawl {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Diese Methode erzeugt symbolische Links für die Log-Analyse via
+	 * Browser-Zugriff.
+	 * 
+	 * @author: I. Kuss (hbz)
+	 * @date 2026-03-10
+	 * @reference TOS-1273
+	 */
+	public void createSymLinks() {
+		/**
+		 * Im resultDir symbolische Links auf die Log- und Textdateien in crawlDir
+		 * erzeugen.
+		 */
+		createSymLink(crawlDir, resultDir, "cdnparse.log");
+		createSymLink(crawlDir, resultDir, "cdn.txt");
+		createSymLink(crawlDir, resultDir, "hostnames.txt");
+		createSymLink(crawlDir, resultDir, "cdncrawl.log");
+		createSymLink(crawlDir, resultDir, "crawl.log");
+		/**
+		 * Symbolische Links in crawlreports/logAnalyses erzuegen, die wiederum auf
+		 * diese symbolischen Links im resultDir verweisen. Für TOS-1273.
+		 */
+		createSymLink(resultDir, logAnalysesDir, "cdnparse.log");
+		createSymLink(resultDir, logAnalysesDir, "cdn.txt");
+		createSymLink(resultDir, logAnalysesDir, "hostnames.txt");
+		createSymLink(resultDir, logAnalysesDir, "cdncrawl.log");
+		createSymLink(resultDir, logAnalysesDir, "crawl.log");
+	}
+
+	/**
+	 * Diese Methode erzeugt einen symbolischen Link im Verzeichnis linkDir, der
+	 * auf eine Datei namens filename im Verzeichnis fileDir zeigt.
+	 * 
+	 * @author I. Kuss (hbz)
+	 * @date 2026-03-10
+	 * 
+	 * @param fileDir das Verzeichnis, in dem sich die Datei befindet (Typ File)
+	 * @param linkDir das Verzeichnis, in dem die symbolische Verknüpfung angelegt
+	 *          werden soll (Typ File)
+	 * @param filename der Dateiname (Zeichenkette; ohne Pfadangabe)
+	 */
+	public void createSymLink(File fileDir, File linkDir, String filename) {
+		Path filePath = Paths.get(fileDir.getPath() + "/" + filename);
+		Path fileLink = Paths.get(linkDir.getPath() + "/" + filename);
+		try {
+			Files.createSymbolicLink(fileLink, filePath);
+		} catch (IOException e) {
+			msg = "Cannot create symbolic link " + linkDir.getPath() + "/" + filename
+					+ " pointing to " + fileDir.getPath() + "/" + filename;
+			WebgatherLogger.error(msg);
+		}
 	}
 
 }
