@@ -95,7 +95,7 @@ public class Gatherconf {
 					put(AgentIdSelection.Googlebot,
 							"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)");
 					put(AgentIdSelection.Toscience,
-							"to.science%20(https://github.com/hbz/to.science.api;mailto:toscience@hbz-nrw.de)");
+							"Mozilla/5.0%20(compatible;%20to.science.bot%20+https://toscience.hbz-nrw.de/crawler)");
 				}
 			};
 
