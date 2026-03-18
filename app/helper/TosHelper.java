@@ -36,14 +36,78 @@ public class TosHelper {
 
 	private static final Modify modify = new Modify();
 
+	private enum StructureType {
+		STRING, STRING_ARRAY, SIMPLEOBJECT_ARRAY
+	}
+
+	private static final Map<String, StructureType> FIELD_TYPES =
+			new LinkedHashMap<>();
+
+	static {
+		FIELD_TYPES.put("@id", StructureType.STRING);
+		FIELD_TYPES.put("id", StructureType.STRING);
+		FIELD_TYPES.put("catalogId", StructureType.STRING);
+		FIELD_TYPES.put("issued", StructureType.STRING);
+		FIELD_TYPES.put("contentType", StructureType.STRING);
+		FIELD_TYPES.put("primaryTopic", StructureType.STRING);
+
+		FIELD_TYPES.put("title", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("prefLabel", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("alternative", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("description", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("usageManual", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("edition", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("associatedPublication", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("reference", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("creatorName", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("contributorName", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("contributorOrder", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("fundingProgram", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("embargoTime", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("nextVersion", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("previousVersion", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("urn", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("subjectName", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("yearOfCopyright", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("projectId", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("recordingPeriod", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("fulltextVersion", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("additionalNotes", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("internalReference", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("abstractText", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("publicationYear", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("bibliographicCitation", StructureType.STRING_ARRAY);
+
+		FIELD_TYPES.put("fundingId", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("isLike", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("subject", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("language", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("medium", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("rdftype", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("institution", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("dataOrigin", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("associatedDataset", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("additionalMaterial", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("license", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("ddc", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("publisherVersion", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("containedIn", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("collectionOne", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("collectionTwo", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("publicationStatus", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("reviewStatus", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("professionalGroup", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("isPrimaryTopicOf", StructureType.SIMPLEOBJECT_ARRAY);
+	}
+
 	/**
 	 * If a resource is edited via Drupal, the method gets the roles from the old
 	 * data stream and saves them in the newly edited toscience data stream
 	 * 
 	 * @param tosOld
 	 * @param tosNew
-	 * @return The newly edited data stream(toscience) with the roles for ‘other’,
-	 *         ‘creator’ and ‘contributor
+	 * @return The newly edited data stream(toscience) with the roles for other,
+	 *         creator and contributor
 	 */
 
 	public static String getRoles(String tosOld, String tosNew) {
@@ -256,307 +320,6 @@ public class TosHelper {
 		}
 	}
 
-	private static Map<String, Object> jsonObjectToMap(JSONObject jsonObject) {
-		Map<String, Object> map = new TreeMap<>();
-		try {
-			Iterator<String> keys = jsonObject.keys();
-			while (keys.hasNext()) {
-				String key = keys.next();
-				Object value = jsonObject.get(key);
-				if (value instanceof JSONObject) {
-					map.put(key, jsonObjectToMap((JSONObject) value));
-				} else if (value instanceof JSONArray) {
-					map.put(key, jsonArrayToList((JSONArray) value));
-				} else {
-					map.put(key, value);
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.debug("Exception in jsonObjectToMap(): " + e);
-		}
-		return map;
-	}
-
-	public static Map<String, Object> jsonToMap(String tosDs) {
-		Map<String, Object> map = null;
-		play.Logger.debug("EjsonToMap(), tosDs= " + tosDs);
-		JSONObject jo = null;
-		try {
-
-			jo = new JSONObject(tosDs);
-
-		} catch (Exception e) {
-			play.Logger.debug("Exception in jsonToMap()" + e);
-
-		}
-		// map = removeQuotes(map);
-		map = transformMap(jo);
-
-		return map;
-	}
-
-	private static List<Object> jsonArrayToList(JSONArray jsonArray) {
-		List<Object> list = new ArrayList<>();
-		try {
-			for (int i = 0; i < jsonArray.length(); i++) {
-				Object value = jsonArray.get(i);
-				if (value instanceof JSONObject) {
-					list.add(jsonObjectToMap((JSONObject) value));
-				} else {
-					list.add(value);
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.debug("Exception in jsonArrayToList(): " + e);
-		}
-
-		return list;
-	}
-
-	public static void addHasPartElementByNewFile(Node node) {
-
-		String result = null;
-		try {
-			if (node.getParentPid() != null) {
-				Node parentNode = new Read().readNode(node.getParentPid());
-				String tosDs = parentNode.getMetadata("toscience");
-				JSONObject jo = new JSONObject(tosDs);
-				JSONArray hasPartArray = jo.optJSONArray("hasPart");
-
-				if (hasPartArray == null) {
-					hasPartArray = new JSONArray();
-				}
-
-				boolean alreadyExists = false;
-				for (int i = 0; i < hasPartArray.length(); i++) {
-					JSONObject existingObject = hasPartArray.getJSONObject(i);
-					if (existingObject.getString("@id").equals(node.getPid())) {
-						alreadyExists = true;
-						break;
-					}
-				}
-
-				if (!alreadyExists) {
-					JSONObject hasPartObject = new JSONObject();
-					hasPartObject.put("prefLabel", node.getFileLabel());
-					hasPartObject.put("@id", node.getPid());
-					hasPartArray.put(hasPartObject);
-					jo.put("hasPart", hasPartArray);
-					result = jo.toString();
-					new Modify().updateMetadata("toscience", parentNode, result);
-				}
-			}
-		} catch (Exception e) {
-			play.Logger.debug("JSONException," + e);
-		}
-	}
-
-	public static Map<String, String> extractFRLIds(List<Link> links) {
-		Map<String, String> idMap = new HashMap<>();
-		for (Link link : links) {
-			if (link.getPredicate() != null
-					&& link.getPredicate().contains("#hasPart")) {
-				idMap.put(link.getObject(), link.getPredicateLabel());
-			}
-		}
-		return idMap;
-	}
-
-	public static void addHasPartElementByOldFile(Map<String, String> map) {
-		Node childNode = null;
-		for (String pid : map.keySet()) {
-			childNode = new Read().readNode(pid);
-			addHasPartElementByNewFile(childNode);
-		}
-	}
-
-	public static Map<String, Object> removeQuotes(Map<String, Object> data) {
-		Map<String, Object> cleanedData = new LinkedHashMap<>();
-		for (String key : data.keySet()) {
-			play.Logger.debug("key" + key);
-			String cleanedKey = key.replace("\"", "");
-			Object value = data.get(key);
-			value = value.toString().replace("\"", "");
-			if (value.toString().contains("prefLabel:")
-					|| value.toString().contains("@id:")) {
-				value = value.toString().replace("prefLabel:", "prefLabel=");
-				value = value.toString().replace("@id:", "@id=");
-			}
-			cleanedData.put(cleanedKey, value);
-		}
-		return cleanedData;
-	}
-
-	private static String addSpaceAfterClosingBrace(String input) {
-		return input.replaceAll("\\},", "}, ");
-	}
-
-	public static String restructureDataRecords(String input) {
-		String regex = "\\{prefLabel=(.*?),@id=(.*?)\\}";
-		String replacement = "{@id=$2, prefLabel=$1}";
-
-		String s = replaceRecords(input, regex, replacement);
-		return addSpaceAfterClosingBrace(s);
-	}
-
-	private static String replaceRecords(String input, String regex,
-			String replacement) {
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(input);
-		if (!matcher.find()) {
-			return input;
-		}
-		return matcher.replaceAll(replacement);
-	}
-
-	public static String cleanBrackets(String cleanedString) {
-		if (cleanedString.startsWith("[")) {
-			cleanedString = cleanedString.substring(1);
-		}
-		if (cleanedString.endsWith("]")) {
-			cleanedString = cleanedString.substring(0, cleanedString.length() - 1);
-		}
-		return cleanedString;
-	}
-
-	public static Map<String, Object> transformMap(JSONObject jo) {
-		if (jo == null) {
-			return new LinkedHashMap<>();
-		}
-
-		play.Logger.debug("transformMap(), jo=" + jo.toString());
-
-		Map<String, Object> newMap = new LinkedHashMap<>();
-		JSONArray jsonArray = null;
-		String key = null;
-		Object value = null;
-
-		try {
-			Iterator<String> keys = jo.keys();
-			while (keys.hasNext()) {
-
-				key = keys.next();
-				value = jo.opt(key);
-
-				if (key == null || value == null) {
-					continue;
-				}
-
-				// String strValue = value.toString();
-				// strValue = cleanBrackets(strValue);
-
-				if ("id".equals(key)) {
-					continue;
-
-					// (ArrayList, Strings)
-				} else if ("fundingProgram".equals(key) || "projectId".equals(key)
-						|| "contributorOrder".equals(key)) {
-					List<String> arrayList = new ArrayList<>();
-					jsonArray = jo.getJSONArray(key);
-					for (int i = 0; i < jsonArray.length(); i++) {
-						arrayList.add(jsonArray.get(i).toString());
-					}
-					newMap.put(key, arrayList);
-
-					// (ArraList,TreeMap)
-				} else if ("fundingId".equals(key) || "creator".equals(key)
-						|| "contributor".equals(key) || "publisherVersion".equals(key)
-						|| "additionalMaterial".equals(key) || "contribution".equals(key)
-						|| "joinedFunding".equals(key) || "professionalGroup".equals(key)) {
-					List<Map<String, Object>> arrayList = new ArrayList<>();
-					jsonArray = jo.getJSONArray(key);
-					for (int i = 0; i < jsonArray.length(); i++) {
-						JSONObject jsonObject = jsonArray.getJSONObject(i);
-						Map<String, Object> keyMap = new TreeMap<>();
-						keyMap = jsonObjectToMap(jsonObject);
-						arrayList.add(keyMap);
-					}
-					newMap.put(key, arrayList);
-
-					// (ArraList,TreeMap)
-				} else if ("fulltextVersion".equals(key)
-						|| "internalReference".equals(key)) {
-
-					List<Map<String, Object>> arrayList = new ArrayList<>();
-					jsonArray = jo.getJSONArray(key);
-					for (int i = 0; i < jsonArray.length(); i++) {
-						Object o = jsonArray.opt(i);
-						Map<String, Object> keyMap = new TreeMap<>();
-						keyMap.put("@id", o);
-						keyMap.put("prefLabel", o);
-						arrayList.add(keyMap);
-					}
-					newMap.put(key, arrayList);
-
-				} else if ("@id".equals(key)) {
-					newMap.put(key, cleanBrackets(value.toString()));
-
-					// (HashSet,TreeMap)
-				} else if ("language".equals(key) || "dataOrigin".equals(key)
-						|| "ddc".equals(key) || "license".equals(key)
-						|| "medium".equals(key) || "isPrimaryTopicOf".equals(key)
-						|| "rdftype".equals(key) || "isLike".equals(key)
-						|| "other".equals(key) || "institution".equals(key)
-						|| "subject".equals(key) || "collectionOne".equals(key)
-						|| "editor".equals(key) || "containedIn".equals(key)
-						|| "publicationStatus".equals(key) || "reviewStatus".equals(key)
-						|| "collectionTwo".equals(key) || "parallelEdition".equals(key)
-						|| "recordingLocation".equals(key)
-						|| "recordingCoordinates".equals(key)
-						|| "bibliographicLevel".equals(key) || "describedby".equals(key)
-						|| "fulltextOnline".equals(key) || "hasItem".equals(key)
-						|| "inCollection".equals(key) || "lv:isPartOf".equals(key)
-						|| "parallelEdition".equals(key) || "publication".equals(key)
-						|| "sameAs".equals(key) || "spatial".equals(key)
-						|| "relation".equals(key) || "natureOfContent".equals(key)
-						|| "successor".equals(key) || "predecessor".equals(key)
-						|| "exampleOfWork".equals(key) || "tableOfContents".equals(key)
-						|| "containsExampleOfWork".equals(key)
-						|| "associatedDataset".equals(key)) {
-					jsonArray = jo.getJSONArray(key);
-					Set<Map<String, Object>> mySet = new HashSet<>();
-
-					for (int i = 0; i < jsonArray.length(); i++) {
-						JSONObject jsonObject = jsonArray.getJSONObject(i);
-						Map<String, Object> keyMap = new TreeMap<>();
-						keyMap = jsonObjectToMap(jsonObject);
-						mySet.add(keyMap);
-					}
-					newMap.put(key, mySet);
-
-				} else if ("publishScheme".equals(key) || "accessScheme".equals(key)
-						|| "catalogId".equals(key) || "primaryTopic".equals(key)
-						|| "issued".equals(key) || "contentType".equals(key)
-						|| "@context".equals(key)) {
-
-					Set<String> mySet = new HashSet<>();
-					mySet.add(jo.get(key).toString());
-					newMap.put(key, mySet);
-
-					// joinedFunding
-				} else if ("joinedFunding".equals(key)) {
-					play.Logger.debug("jo.get(joinedFunding)" + jo.get("joinedFunding"));
-				} else {
-					// z.B description | usageManual | urn (HashSet, Strings)
-					Set<String> mySet = new HashSet<>();
-					jsonArray = jo.getJSONArray(key);
-					for (int i = 0; i < jsonArray.length(); i++) {
-						mySet.add(jsonArray.get(i).toString());
-					}
-					newMap.put(key, mySet);
-				}
-			}
-			// Key prefLabel is saved as a HashSet
-			newMap.put("prefLabel", new HashSet<>(Arrays.asList(jo.get("@id"))));
-
-		} catch (Exception e) {
-			play.Logger.debug("Exception in transformMap(), Key=" + key + ", value="
-					+ value + "," + e);
-		}
-
-		return newMap;
-	}
-
 	public static void displayDataStructuresAndTypes(Map<String, Object> map) {
 
 		if (map != null) {
@@ -697,15 +460,11 @@ public class TosHelper {
 	public static JSONObject validateJsonStructure(JSONObject allMd, Node n) {
 
 		try {
+
 			if (n != null && n.getPid() != null
 					&& (!allMd.has("@id") || allMd.opt("@id") == null
 							|| allMd.optString("@id").trim().isEmpty())) {
 				allMd.put("@id", n.getPid());
-			}
-
-			if (allMd.has("issued")) {
-				String issued = allMd.get("issued").toString();
-				allMd.put("issued", Metadata2Helper.getQuotedValues(issued));
 			}
 
 			if (allMd.has("license")) {
@@ -716,13 +475,139 @@ public class TosHelper {
 						licenseObject.put("prefLabel", licenseObject.opt("@id"));
 					}
 				}
+
 			}
 
-			// wird ergaenzt um weitere Elemente
+			for (Map.Entry<String, StructureType> field : FIELD_TYPES.entrySet()) {
+				validateFieldByStructureType(allMd, field.getKey(), field.getValue());
+			}
+
 		} catch (JSONException e) {
 			play.Logger.debug("Exception in validateJsonStructure()" + e);
 		}
 		return allMd;
+	}
+
+	private static void validateFieldByStructureType(JSONObject metadata,
+			String key, StructureType structureType) throws JSONException {
+		switch (structureType) {
+		case STRING:
+			validateStringField(metadata, key);
+			return;
+		case STRING_ARRAY:
+			normalizeStringArrayField(metadata, key);
+			return;
+		case SIMPLEOBJECT_ARRAY:
+			normalizeSimpleObjectArrayField(metadata, key);
+			return;
+		default:
+			return;
+		}
+	}
+
+	private static void validateStringField(JSONObject metadata, String key)
+			throws JSONException {
+		if (!metadata.has(key) || metadata.isNull(key)) {
+			return;
+		}
+
+		Object value = metadata.get(key);
+
+		if (value instanceof String) {
+			String stringValue = (String) value;
+			if (stringValue.trim().isEmpty()) {
+				return;
+			}
+			if (isStringInArrayFormat(stringValue)) {
+				metadata.put(key, Metadata2Helper.getQuotedValues(stringValue));
+			}
+			return;
+		}
+
+		metadata.put(key, Metadata2Helper.getQuotedValues(String.valueOf(value)));
+	}
+
+	private static boolean isStringInArrayFormat(String value) {
+		String trimmed = value.trim();
+		return trimmed.startsWith("[\"") && trimmed.endsWith("\"]");
+	}
+
+	private static void normalizeStringArrayField(JSONObject metadata, String key)
+			throws JSONException {
+
+		if (!metadata.has(key) || metadata.isNull(key)) {
+			return;
+		}
+
+		Object value = metadata.get(key);
+
+		if (value instanceof JSONArray) {
+			return;
+		}
+
+		JSONArray ja = new JSONArray();
+
+		String stringValue = String.valueOf(value);
+
+		if (isStringInArrayFormat(stringValue)) {
+			ja.put(Metadata2Helper.getQuotedValues(stringValue));
+		} else {
+			ja.put(stringValue);
+		}
+
+		metadata.put(key, ja);
+	}
+
+	private static void normalizeSimpleObjectArrayField(JSONObject metadata,
+			String key) throws JSONException {
+		if (!metadata.has(key) || metadata.isNull(key)) {
+			return;
+		}
+
+		Object value = metadata.get(key);
+		JSONArray normalized = new JSONArray();
+		if (value instanceof JSONObject) {
+			normalized.put(normalizeSimpleObjectEntry(value));
+		} else if (value instanceof JSONArray) {
+			JSONArray input = (JSONArray) value;
+			for (int i = 0; i < input.length(); i++) {
+				Object entry = input.get(i);
+				JSONObject normalizedEntry = normalizeSimpleObjectEntry(entry);
+				if (normalizedEntry != null) {
+					normalized.put(normalizedEntry);
+				}
+			}
+		} else {
+			normalized.put(normalizeSimpleObjectEntry(value));
+		}
+		metadata.put(key, normalized);
+	}
+
+	private static JSONObject normalizeSimpleObjectEntry(Object entry)
+			throws JSONException {
+		if (entry instanceof JSONObject) {
+			return addPrefLabelIfMissing((JSONObject) entry);
+		}
+
+		if (entry == null || entry == JSONObject.NULL) {
+			return null;
+		}
+
+		JSONObject wrapped = new JSONObject();
+		wrapped.put("@id", String.valueOf(entry));
+		wrapped.put("prefLabel", String.valueOf(entry));
+		return wrapped;
+	}
+
+	private static JSONObject addPrefLabelIfMissing(JSONObject object)
+			throws JSONException {
+		if (!object.has("prefLabel") && object.has("@id")) {
+			object.put("prefLabel", object.opt("@id"));
+		}
+		if (!object.has("@id") && object.has("prefLabel")) {
+			object.put("@id", object.opt("prefLabel"));
+		}
+		return object;
 	}
 
 	/**
@@ -770,6 +655,8 @@ public class TosHelper {
 				allMd = new JSONObject(node.getMetadata("toscience"));
 				JSONObject original = new JSONObject(allMd.toString());
 				allMd = TosHelper.validateJsonStructure(allMd, node);
+
+				allMd = TosHelper.getPrefLabelsResolved(allMd);
 
 				if (!original.toString().equals(allMd.toString())) {
 					// 1: update toscience
