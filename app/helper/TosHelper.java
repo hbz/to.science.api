@@ -17,6 +17,7 @@ import org.json.JSONArray;
 import helper.MyEtikettMaker;
 import actions.Modify;
 import actions.Read;
+import archive.fedora.RdfUtils;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -560,14 +561,17 @@ public class TosHelper {
 
 	private static void normalizeSimpleObjectArrayField(JSONObject metadata,
 			String key) throws JSONException {
+
 		if (!metadata.has(key) || metadata.isNull(key)) {
 			return;
 		}
 
 		Object value = metadata.get(key);
 		JSONArray normalized = new JSONArray();
+
 		if (value instanceof JSONObject) {
 			normalized.put(normalizeSimpleObjectEntry(value));
+
 		} else if (value instanceof JSONArray) {
 			JSONArray input = (JSONArray) value;
 			for (int i = 0; i < input.length(); i++) {
@@ -586,7 +590,7 @@ public class TosHelper {
 	private static JSONObject normalizeSimpleObjectEntry(Object entry)
 			throws JSONException {
 		if (entry instanceof JSONObject) {
-			return addPrefLabelIfMissing((JSONObject) entry);
+			return completeSimpleObject((JSONObject) entry);
 		}
 
 		if (entry == null || entry == JSONObject.NULL) {
@@ -594,20 +598,29 @@ public class TosHelper {
 		}
 
 		JSONObject wrapped = new JSONObject();
-		wrapped.put("@id", String.valueOf(entry));
-		wrapped.put("prefLabel", String.valueOf(entry));
+		String prefLabel = String.valueOf(entry);
+		wrapped.put("@id", buildAdhocUri(prefLabel));
+		wrapped.put("prefLabel", prefLabel);
 		return wrapped;
 	}
 
-	private static JSONObject addPrefLabelIfMissing(JSONObject object)
+	private static JSONObject completeSimpleObject(JSONObject object)
 			throws JSONException {
-		if (!object.has("prefLabel") && object.has("@id")) {
+		String prefLabel = object.optString("prefLabel", "").trim();
+		String id = object.optString("@id", "").trim();
+
+		if (prefLabel.isEmpty() && !id.isEmpty()) {
 			object.put("prefLabel", object.opt("@id"));
 		}
-		if (!object.has("@id") && object.has("prefLabel")) {
-			object.put("@id", object.opt("prefLabel"));
+		if (id.isEmpty() && !prefLabel.isEmpty()) {
+			object.put("@id", buildAdhocUri(prefLabel));
 		}
 		return object;
+	}
+
+	private static String buildAdhocUri(String prefLabel) {
+		return Globals.protocol + Globals.server + "/adhoc/"
+				+ RdfUtils.urlEncode(prefLabel).replace("+", "%20");
 	}
 
 	/**
