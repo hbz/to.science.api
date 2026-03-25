@@ -468,20 +468,10 @@ public class TosHelper {
 				allMd.put("@id", n.getPid());
 			}
 
-			if (allMd.has("license")) {
-				JSONArray licenseArray = allMd.getJSONArray("license");
-				for (int i = 0; i < licenseArray.length(); i++) {
-					JSONObject licenseObject = licenseArray.getJSONObject(i);
-					if (!licenseObject.has("prefLabel")) {
-						licenseObject.put("prefLabel", licenseObject.opt("@id"));
-					}
-				}
-
-			}
-
 			for (Map.Entry<String, StructureType> field : FIELD_TYPES.entrySet()) {
 				validateFieldByStructureType(allMd, field.getKey(), field.getValue());
 			}
+			normalizeAssociatedDatasets(allMd, n);
 
 		} catch (JSONException e) {
 			play.Logger.debug("Exception in validateJsonStructure()" + e);
@@ -596,7 +586,7 @@ public class TosHelper {
 		if (entry == null || entry == JSONObject.NULL) {
 			return null;
 		}
-
+		// String
 		JSONObject wrapped = new JSONObject();
 		String prefLabel = String.valueOf(entry);
 		wrapped.put("@id", buildAdhocUri(prefLabel));
@@ -618,6 +608,53 @@ public class TosHelper {
 		return object;
 	}
 
+	private static void normalizeAssociatedDatasets(JSONObject metadata,
+			Node node) throws JSONException {
+		if (!metadata.has("associatedDataset") && metadata.has("relatedDatasets")
+				&& !metadata.isNull("relatedDatasets")) {
+			metadata.put("associatedDataset", metadata.get("relatedDatasets"));
+		}
+
+		if (metadata.has("associatedDataset") && metadata.has("relatedDatasets")) {
+			metadata.remove("relatedDatasets");
+		}
+
+		if (!metadata.has("associatedDataset")
+				|| metadata.isNull("associatedDataset")) {
+			return;
+		}
+
+		JSONArray datasets = metadata.optJSONArray("associatedDataset");
+		if (datasets == null) {
+			return;
+		}
+
+		for (int i = 0; i < datasets.length(); i++) {
+			Object entry = datasets.get(i);
+			if (!(entry instanceof JSONObject)) {
+				continue;
+			}
+			JSONObject dataset = (JSONObject) entry;
+			String id = dataset.optString("@id", "").trim();
+			if (id.isEmpty() || !id.startsWith("http")) {
+				String prefLabel = dataset.optString("prefLabel", "").trim();
+				if (!prefLabel.isEmpty()) {
+					dataset.put("@id", buildAdhocUri(prefLabel));
+				} else {
+					String pid = node != null ? node.getPid() : "resource";
+					dataset.put("@id", buildAdhocUri(pid + "/associatedDataset/" + i));
+				}
+			}
+		}
+	}
+
+	/**
+	 * The method generates a dummy URI if it is missing from a SimpleObject, so
+	 * that Elasticsearch does not throw parsing exceptions.
+	 * 
+	 * @param prefLabel
+	 * @return
+	 */
 	private static String buildAdhocUri(String prefLabel) {
 		return Globals.protocol + Globals.server + "/adhoc/"
 				+ RdfUtils.urlEncode(prefLabel).replace("+", "%20");
