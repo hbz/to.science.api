@@ -82,6 +82,8 @@ public class WpullCrawl extends CrawlerModel {
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
 			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
 			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
+			this.logAnalysesDir = new File(crawlreportsDir + "/" + "logAnalyses/"
+					+ conf.getName() + "/" + datetime);
 			this.cdxFile =
 					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
 			this.warcFilename = "WEB-" + host + "-" + datetime;
@@ -444,6 +446,59 @@ public class WpullCrawl extends CrawlerModel {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Diese Methode erzeugt symbolische Links für die Log-Analyse via
+	 * Browser-Zugriff.
+	 * 
+	 * @author: I. Kuss (hbz)
+	 * @date 2026-03-10
+	 * @reference TOS-1273
+	 */
+	public void createSymLinks() {
+		/**
+		 * Im resultDir symbolische Links auf die Log- und Textdateien in crawlDir
+		 * erzeugen.
+		 */
+		createSymLink(crawlDir, resultDir, "cdnparse.log");
+		createSymLink(crawlDir, resultDir, "cdn.txt");
+		createSymLink(crawlDir, resultDir, "hostnames.txt");
+		createSymLink(crawlDir, resultDir, "cdncrawl.log");
+		createSymLink(crawlDir, resultDir, "crawl.log");
+		/**
+		 * Symbolische Links in crawlreports/logAnalyses erzuegen, die wiederum auf
+		 * diese symbolischen Links im resultDir verweisen. Für TOS-1273.
+		 */
+		createSymLink(resultDir, logAnalysesDir, "cdnparse.log");
+		createSymLink(resultDir, logAnalysesDir, "cdn.txt");
+		createSymLink(resultDir, logAnalysesDir, "hostnames.txt");
+		createSymLink(resultDir, logAnalysesDir, "cdncrawl.log");
+		createSymLink(resultDir, logAnalysesDir, "crawl.log");
+	}
+
+	/**
+	 * Diese Methode erzeugt einen symbolischen Link im Verzeichnis linkDir, der
+	 * auf eine Datei namens filename im Verzeichnis fileDir zeigt.
+	 * 
+	 * @author I. Kuss (hbz)
+	 * @date 2026-03-10
+	 * 
+	 * @param fileDir das Verzeichnis, in dem sich die Datei befindet (Typ File)
+	 * @param linkDir das Verzeichnis, in dem die symbolische Verknüpfung angelegt
+	 *          werden soll (Typ File)
+	 * @param filename der Dateiname (Zeichenkette; ohne Pfadangabe)
+	 */
+	public void createSymLink(File fileDir, File linkDir, String filename) {
+		Path filePath = Paths.get(fileDir.getPath() + "/" + filename);
+		Path fileLink = Paths.get(linkDir.getPath() + "/" + filename);
+		try {
+			Files.createSymbolicLink(fileLink, filePath);
+		} catch (IOException e) {
+			msg = "Cannot create symbolic link " + linkDir.getPath() + "/" + filename
+					+ " pointing to " + fileDir.getPath() + "/" + filename;
+			WebgatherLogger.error(msg);
+		}
 	}
 
 }
