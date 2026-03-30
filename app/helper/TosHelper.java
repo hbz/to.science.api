@@ -382,32 +382,7 @@ public class TosHelper {
 			jo.remove("isMemberOf");
 			// jo.remove("joinedFunding");
 
-			if (!jo.has("rdftype")) {
-				String contentType = jo.optString("contentType");
-				String prefLabel = null;
-				String id = null;
-
-				if ("monograph".equals(contentType)) {
-					prefLabel = "Monografie";
-					id = "http://purl.org/ontology/bibo/Book";
-
-				} else if ("researchData".equals(contentType)) {
-					prefLabel = "Forschungsdaten";
-					id = "http://hbz-nrw.de/regal#ResearchData";
-
-				} else {
-					play.Logger.debug("updateContent(), rdftype not set for contentType="
-							+ contentType);
-				}
-
-				if (prefLabel != null && id != null) {
-					JSONObject rdfTypeObject =
-							new JSONObject().put("prefLabel", prefLabel).put("@id", id);
-					JSONArray rdfTypeArray = new JSONArray().put(rdfTypeObject);
-					jo.put("rdftype", rdfTypeArray);
-					play.Logger.debug("updateContent(), rdftype has been added");
-				}
-			}
+			addRdftypeIfMissing(jo);
 
 			if (jo.has("contributerOrder")) {
 				JSONArray contOrder = jo.getJSONArray("contributerOrder");
@@ -431,6 +406,41 @@ public class TosHelper {
 			return null;
 		}
 		return jo.toString();
+	}
+
+	public static void addRdftypeIfMissing(JSONObject jo) {
+		if (jo == null || jo.has("rdftype")) {
+			return;
+		}
+
+		try {
+			String contentType = jo.optString("contentType");
+			String prefLabel = null;
+			String id = null;
+
+			if ("monograph".equalsIgnoreCase(contentType)) {
+				prefLabel = "Monografie";
+				id = "http://purl.org/ontology/bibo/Book";
+
+			} else if ("researchData".equalsIgnoreCase(contentType)) {
+				prefLabel = "Forschungsdaten";
+				id = "http://hbz-nrw.de/regal#ResearchData";
+
+			} else {
+				play.Logger.debug(
+						"updateContent(), rdftype not set for contentType=" + contentType);
+			}
+
+			if (prefLabel != null && id != null) {
+				JSONObject rdfTypeObject =
+						new JSONObject().put("prefLabel", prefLabel).put("@id", id);
+				JSONArray rdfTypeArray = new JSONArray().put(rdfTypeObject);
+				jo.put("rdftype", rdfTypeArray);
+				play.Logger.debug("updateContent(), rdftype has been added");
+			}
+		} catch (Exception e) {
+			play.Logger.debug("Exception in addRdftypeIfMissing " + e);
+		}
 	}
 
 	/**
@@ -705,6 +715,8 @@ public class TosHelper {
 				allMd = new JSONObject(node.getMetadata("toscience"));
 				JSONObject original = new JSONObject(allMd.toString());
 				allMd = TosHelper.validateJsonStructure(allMd, node);
+
+				addRdftypeIfMissing(allMd);
 
 				allMd = TosHelper.getPrefLabelsResolved(allMd);
 
