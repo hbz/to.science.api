@@ -258,18 +258,8 @@ public class TosHelper {
 				ktblAndTos.put("id", resource_id);
 			}
 
-			if (ktblAndTos.has("license")) {
-				JSONArray licenseArray = ktblAndTos.getJSONArray("license");
+			normalizeLicensesForPersistence(ktblAndTos);
 
-				for (int i = 0; i < licenseArray.length(); i++) {
-					JSONObject licenseObject = licenseArray.getJSONObject(i);
-					if (!licenseObject.has("prefLabel")) {
-						licenseObject.put("prefLabel", licenseObject.opt("@id"));
-
-					}
-				}
-
-			}
 			for (String element : elementsToRemove) {
 				if (ktblAndTos.has(element)) {
 					ktblAndTos.remove(element);
@@ -280,6 +270,39 @@ public class TosHelper {
 		}
 
 		return ktblAndTos.toString();
+	}
+
+	private static void normalizeLicensesForPersistence(JSONObject metadata)
+			throws JSONException {
+
+		boolean isArticle =
+				"article".equalsIgnoreCase(metadata.optString("contentType"));
+
+		if (!metadata.has("license")) {
+			return;
+		}
+
+		JSONArray licenseArray = metadata.getJSONArray("license");
+		for (int i = 0; i < licenseArray.length(); i++) {
+			JSONObject licenseObject = licenseArray.getJSONObject(i);
+			if (!licenseObject.has("prefLabel")) {
+				licenseObject.put("prefLabel", licenseObject.opt("@id"));
+			} else if (isArticle) {
+				normalizeArticleLicensePrefLabel(licenseObject);
+			}
+		}
+	}
+
+	private static void normalizeArticleLicensePrefLabel(JSONObject licenseObject)
+			throws JSONException {
+		String licenseId = licenseObject.optString("@id", "").trim();
+		String prefLabel = licenseObject.optString("prefLabel", "").trim();
+
+		if (!licenseId.isEmpty() && licenseId.startsWith("http")
+				&& !prefLabel.isEmpty() && !prefLabel.startsWith("http")
+				&& !prefLabel.equals(licenseId)) {
+			licenseObject.put("prefLabel", licenseId);
+		}
 	}
 
 	static public String getAssociatedDatasets(String tosOld, String tosNew) {
@@ -482,6 +505,7 @@ public class TosHelper {
 				validateFieldByStructureType(allMd, field.getKey(), field.getValue());
 			}
 			normalizeAssociatedDatasets(allMd, n);
+			// normalizeArticleLicensePrefLabel(allMd);
 
 		} catch (JSONException e) {
 			play.Logger.debug("Exception in validateJsonStructure()" + e);
