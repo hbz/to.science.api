@@ -59,6 +59,7 @@ public class CrawlerModel {
 	protected String datetime = null;
 	protected File crawlDir = null;
 	protected File resultDir = null;
+	protected File logAnalysesDir = null;
 	protected File cdxFile = null;
 	protected File cdxFileNew = null;
 	protected String localpath = null;
@@ -73,6 +74,8 @@ public class CrawlerModel {
 	private static String outDir = null;
 	final static public String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
+	final static public String crawlreportsDir = Play.application()
+			.configuration().getString("toscience-api.webgatherer.crawlreports");
 
 	/**
 	 * ein Logger für das Webgathering
