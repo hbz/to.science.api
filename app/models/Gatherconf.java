@@ -50,7 +50,7 @@ public class Gatherconf {
 	@SuppressWarnings("javadoc")
 	public enum Interval {
 		annually, halfYearly, quarterly, monthly, weekly, daily, once
-	};
+	}
 
 	@SuppressWarnings("javadoc")
 	public enum RobotsPolicy {
