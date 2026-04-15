@@ -45,23 +45,8 @@ import java.util.regex.Pattern;
  */
 public class WpullCrawl extends CrawlerModel {
 
-	/**
-	 * Die Schreibzugriffe von wpull (Downloads) erfolgen in das Verzeichnis
-	 * jobDir hinein. jobDir ist das Arbeitsverzeichnis von wpull. jobDir sollte
-	 * ein lokales Verzeichnis sein.
-	 */
-	final static String jobDir =
-			Play.application().configuration().getString("regal-api.wpull.jobDir");
 	final static String tempJobDir = Play.application().configuration()
 			.getString("regal-api.wpull.tempJobDir");
-	/**
-	 * Im Verzeichnis outDir liegen die fertigen Crawls. Das ist das
-	 * Output-Verzeichnis von wpull. Von hier aus werden die Crawls entweder
-	 * direkt von Wayback indexiert oder vorher noch weitergehend bearbeitet, z.B.
-	 * getestet, ob sie erfolgreich waren.
-	 */
-	final static String outDir =
-			Play.application().configuration().getString("regal-api.wpull.outDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 
@@ -75,21 +60,30 @@ public class WpullCrawl extends CrawlerModel {
 	public WpullCrawl(Node node, Gatherconf conf) {
 		super(node, conf);
 		try {
-			WebgatherLogger.debug("URL=" + conf.getUrl());
-			this.urlAscii = WebgatherUtils.convertUnicodeURLToAscii(conf.getUrl());
-			WebgatherLogger.debug("urlAscii=" + urlAscii);
-			this.host = WebgatherUtils.getDomain(urlAscii);
-			WebgatherLogger.debug("host=" + host);
-			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-			this.datetime =
-					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
-			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
-			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
+			/**
+			 * Die Schreibzugriffe von wpull (Downloads) erfolgen in das Verzeichnis
+			 * jobDir hinein. jobDir ist das Arbeitsverzeichnis von wpull. jobDir
+			 * sollte ein lokales Verzeichnis sein.
+			 */
+			CrawlerModel.jobDir = Play.application().configuration()
+					.getString("regal-api.wpull.jobDir");
+			/**
+			 * Im Verzeichnis outDir liegen die fertigen Crawls. Das ist das
+			 * Output-Verzeichnis von wpull. Von hier aus werden die Crawls entweder
+			 * direkt von Wayback indexiert oder vorher noch weitergehend bearbeitet,
+			 * z.B. getestet, ob sie erfolgreich waren.
+			 */
+			CrawlerModel.outDir = Play.application().configuration()
+					.getString("regal-api.wpull.outDir");
+			this.crawlDir =
+					new File(CrawlerModel.jobDir + "/" + conf.getName() + "/" + datetime);
+			this.resultDir =
+					new File(CrawlerModel.outDir + "/" + conf.getName() + "/" + datetime);
+			this.cdxFile = new File(
+					CrawlerModel.outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
+
 			this.logAnalysesDir = new File(crawlreportsDir + "/" + "logAnalyses/"
 					+ conf.getName() + "/" + datetime);
-			this.cdxFile =
-					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
-			this.warcFilename = "WEB-" + host + "-" + datetime;
 			/*
 			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
 			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback

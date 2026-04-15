@@ -16,6 +16,7 @@
 package helper;
 
 import java.io.Closeable;
+import java.io.File;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -88,14 +89,20 @@ public class BtrixWebclient extends CrawlerModel {
 		 * Das Arbeitsverzeichnis von Browsertrix-Crawls für den CDN-Precrawl ist
 		 * jobDir. jobDir sollte ein lokales Verzeichnis sein.
 		 */
-		this.jobDir =
+		CrawlerModel.jobDir =
 				Play.application().configuration().getString("regal-api.btrix.jobDir");
 		/**
 		 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
 		 * Crawls direkt von Wayback indexiert.
 		 */
-		this.outDir =
+		CrawlerModel.outDir =
 				Play.application().configuration().getString("regal-api.btrix.outDir");
+		this.crawlDir =
+				new File(CrawlerModel.jobDir + "/" + conf.getName() + "/" + datetime);
+		this.resultDir =
+				new File(CrawlerModel.outDir + "/" + conf.getName() + "/" + datetime);
+		this.cdxFile = new File(
+				CrawlerModel.outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
 		try {
 			getBearerToken();
 			if (conf.getBtrixWorkflowId() != null) {
