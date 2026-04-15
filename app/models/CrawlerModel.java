@@ -70,8 +70,8 @@ public class CrawlerModel {
 	protected String msg = null;
 	protected int exitState = 0;
 
-	protected String jobDir = null;
-	protected String outDir = null;
+	protected static String jobDir = null;
+	protected static String outDir = null;
 	final static public String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
 	final static public String crawlreportsDir = Play.application()
