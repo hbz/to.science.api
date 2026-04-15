@@ -155,7 +155,6 @@ public class BtrixWebclient extends CrawlerModel {
 	private void updateCrawlerConfig() {
 		try {
 			httpClient = HttpClientBuilder.create().build();
-			WebgatherLogger.debug("btrixWorkflowId " + this.btrixWorkflowId);
 			if (this.btrixWorkflowId == null) {
 				request = new HttpPost(
 						btrix_api_url + "/orgs/" + btrix_orgid + "/crawlconfigs/");
@@ -165,6 +164,7 @@ public class BtrixWebclient extends CrawlerModel {
 			}
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
+			WebgatherLogger.debug("request = " + request.toString());
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
 			request.addHeader("Content-Type", "application/json");
 			String jsonBody = createJsonBody();
@@ -176,14 +176,18 @@ public class BtrixWebclient extends CrawlerModel {
 			WebgatherLogger.debug("received response: " + responseJson);
 			// JSON ausparsen
 			JSONObject responseJsonObject = new JSONObject(responseJson);
-			this.btrixWorkflowId = responseJsonObject.getString("id");
-			// JsonNode responseJsonNode = objectMapper.readTree(responseJson);
-			// this.btrixWorkflowId = responseJsonNode.get("id").asText();
-			WebgatherLogger.debug(
-					"Crawler Config angelegt mit btrix_workflow_id: " + btrixWorkflowId);
-			conf.setBtrixWorkflowId(btrixWorkflowId);
-			msg = new Modify().updateConf(node, conf.toString());
-			WebgatherLogger.info(msg);
+			if (this.btrixWorkflowId == null) {
+				this.btrixWorkflowId = responseJsonObject.getString("id");
+				WebgatherLogger
+						.debug("Crawler Workflow angelegt mit btrix_workflow_id: "
+								+ btrixWorkflowId);
+				conf.setBtrixWorkflowId(btrixWorkflowId);
+				msg = new Modify().updateConf(node, conf.toString());
+				WebgatherLogger.info(msg);
+			} else {
+				WebgatherLogger.debug("Crawler Workflow mit btrix_workflow_id "
+						+ btrixWorkflowId + " wurde aktualisiert.");
+			}
 		} catch (Exception e) {
 			msg = "Browsertrix Crawler Config für PID " + node.getPid()
 					+ " kann nicht gesendet werden!";
@@ -376,7 +380,6 @@ public class BtrixWebclient extends CrawlerModel {
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode == 200) {
 				String responseJson = EntityUtils.toString(response.getEntity());
-				WebgatherLogger.debug("received response: " + responseJson);
 				return responseJson;
 			}
 			String errorBody = EntityUtils.toString(response.getEntity());
