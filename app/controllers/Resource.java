@@ -1310,6 +1310,7 @@ public class Resource extends MyController {
 			play.Logger.debug("Starting Resource.createVersion()");
 			Node node = readNodeOrNull(pid);
 			Gatherconf conf = Gatherconf.create(node.getConf());
+			play.Logger.debug("Gatherconf conf=" + conf.toString());
 			if (conf.hasUrlMoved(node)) {
 				return Promise.promise(() -> {
 					return JsonMessage(WebgatherUtils.createInvalidUrlMessage(conf));

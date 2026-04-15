@@ -156,6 +156,7 @@ public class WebgatherUtils {
 						+ " is not supported. Operation works only on regalType:\"webpage\"");
 			}
 			WebgatherLogger.debug("Starte Webcrawl für PID: " + node.getPid());
+			WebgatherLogger.debug("Gatherer-Konfiguration JSON: " + node.getConf());
 			conf = Gatherconf.create(node.getConf());
 			WebgatherLogger.debug("Gatherer-Konfiguration: " + conf.toString());
 			conf.setName(node.getPid());
