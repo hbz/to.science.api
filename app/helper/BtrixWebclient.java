@@ -76,19 +76,6 @@ public class BtrixWebclient extends CrawlerModel {
 			Play.application().configuration().getString("regal-api.btrix.orgId");
 
 	/**
-	 * Das Arbeitsverzeichnis von Browsertrix-Crawls für den CDN-Precrawl ist
-	 * jobDir. jobDir sollte ein lokales Verzeichnis sein.
-	 */
-	final static String jobDir =
-			Play.application().configuration().getString("regal-api.btrix.jobDir");
-	/**
-	 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
-	 * Crawls direkt von Wayback indexiert.
-	 */
-	final static String outDir =
-			Play.application().configuration().getString("regal-api.btrix.outDir");
-
-	/**
 	 * Konstruktor zu Browsertrix Crawler Workflow
 	 * 
 	 * @param node der Knoten der Website, zu der ein neuer Crawl gestartet werden
@@ -97,6 +84,18 @@ public class BtrixWebclient extends CrawlerModel {
 	 */
 	public BtrixWebclient(Node node, Gatherconf conf) {
 		super(node, conf);
+		/**
+		 * Das Arbeitsverzeichnis von Browsertrix-Crawls für den CDN-Precrawl ist
+		 * jobDir. jobDir sollte ein lokales Verzeichnis sein.
+		 */
+		this.jobDir =
+				Play.application().configuration().getString("regal-api.btrix.jobDir");
+		/**
+		 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
+		 * Crawls direkt von Wayback indexiert.
+		 */
+		this.outDir =
+				Play.application().configuration().getString("regal-api.btrix.outDir");
 		try {
 			getBearerToken();
 			if (conf.getBtrixWorkflowId() != null) {
