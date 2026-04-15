@@ -101,6 +101,7 @@ public class BtrixWebclient extends CrawlerModel {
 			getBearerToken();
 			if (conf.getBtrixWorkflowId() != null) {
 				this.btrixWorkflowId = conf.getBtrixWorkflowId();
+				WebgatherLogger.debug("btrixWorkflowId: " + btrixWorkflowId);
 			}
 			/*
 			 * Wenn es noch keine Worfkflow ID in der conf gibt, wird jetzt eine
@@ -154,6 +155,7 @@ public class BtrixWebclient extends CrawlerModel {
 	private void updateCrawlerConfig() {
 		try {
 			httpClient = HttpClientBuilder.create().build();
+			WebgatherLogger.debug("btrixWorkflowId " + this.btrixWorkflowId);
 			if (this.btrixWorkflowId == null) {
 				request = new HttpPost(
 						btrix_api_url + "/orgs/" + btrix_orgid + "/crawlconfigs/");
