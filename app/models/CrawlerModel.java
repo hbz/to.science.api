@@ -61,7 +61,8 @@ public class CrawlerModel {
 	protected File resultDir = null;
 	protected File logAnalysesDir = null;
 	protected File cdxFile = null;
-	protected File cdxFileNew = null;
+	protected static File cdxFileNew = null;
+	protected static File cdxFileSave = null;
 	protected String localpath = null;
 	protected String host = null;
 	protected String warcFilename = null;
@@ -113,6 +114,15 @@ public class CrawlerModel {
 	 */
 	public File getCdxFile() {
 		return cdxFile;
+	}
+
+	/**
+	 * Die Methode, um die neue CDX-Datei zu setzen
+	 * 
+	 * @param newfile eine Datei, die als CDX-Datei gesetzt wird.
+	 */
+	public static void setCdxFileNew(File newfile) {
+		cdxFileNew = newfile;
 	}
 
 	/**

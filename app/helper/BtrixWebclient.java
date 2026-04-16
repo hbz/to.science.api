@@ -18,6 +18,7 @@ package helper;
 import java.io.Closeable;
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
@@ -332,16 +333,49 @@ public class BtrixWebclient extends CrawlerModel {
 	 */
 	@Override
 	public void startCrawl() {
+		// Dies führt den CDN-Precrawl aus.
 		super.startCrawl();
 
 		try {
+			/**
+			 * Für Browsertrix-Crawls wird die cdx-Datei des CDN-Precrawls hier ein
+			 * Verzeichnis höher kopiert, um als Vorlage für den nächsten CDN-Precrawl
+			 * dienen zu können. Für wpull-Crawls ist das nicht notwendig, da die
+			 * CDX-Datei in die des Hauptcrawls integriert ist. Diese wird am Ende des
+			 * Hauptcrawls ein Verzeichnis höher kopiert (siehe "cdxFileSave" in
+			 * Create.createWebpageVersion). Evtl. kann man auch für Browsertrix
+			 * diesen Punkt durch eine Aktion ersetzen, die am Ende des Hauptcrawls
+			 * geschehen wird.
+			 */
+			CrawlerModel.setCdxFileNew(new File(
+					this.resultDir.getAbsolutePath() + "/" + warcFilename + ".cdx"));
+			if (cdxFileNew.exists()) {
+				cdxFileSave = new File(Play.application().configuration()
+						.getString("regal-api.btrix.outDir") + "/" + conf.getName()
+						+ "/WEB-" + WebgatherUtils.getDomain(conf.getUrl()) + ".cdx");
+				FileUtils.copyFile(cdxFileNew, cdxFileSave);
+				WebgatherLogger.debug(
+						"Aktuelle CDX-Datei abgelegt in: " + cdxFileSave.getAbsolutePath());
+			}
 
-			// Rufe Hauptcrawl in Browsertrix auf
+		} catch (Exception e) {
+			WebgatherLogger.warn(e.toString());
+			WebgatherLogger.warn("CDX file could not be copied to main directory! "
+					+ cdxFileSave.getAbsolutePath());
+		}
 
-			// ToDo: berücksichtige cdxFile (von evtl. vorhergehenden Crawls)
+		try {
+
+			/**
+			 * Rufe Hauptcrawl in Browsertrix auf
+			 */
+
+			// ToDo: berücksichtige cdxFile (von evtl. vorhergehenden Crawls ==> siehe
+			// den Kommentar oben.
 			// ToDo: berücksichtige domains (aus hostnames.txt, vom CDN-Precrawl
-			// ermittelt)
-			// ToDo: berücksichtige CDN-Precrawl (.warc-Datei davon)
+			// ermittelt) ==> OK, das geschieht in der übergeordneten Klasse.
+			// ToDo: berücksichtige CDN-Precrawl (.warc-Datei davon) ==> OK, Wayback
+			// indexiert diesen als separate Datei.
 
 			try {
 				httpClient = HttpClientBuilder.create().build();
