@@ -39,8 +39,6 @@ import static archive.fedora.Vocabulary.*;
 import actions.Modify;
 import models.CrawlerModel;
 import models.Gatherconf;
-import models.Gatherconf.CrawlSubdomains;
-import models.Gatherconf.QuotaUnitSelection;
 
 import models.Node;
 import play.Play;
@@ -90,20 +88,20 @@ public class BtrixWebclient extends CrawlerModel {
 		 * Das Arbeitsverzeichnis von Browsertrix-Crawls für den CDN-Precrawl ist
 		 * jobDir. jobDir sollte ein lokales Verzeichnis sein.
 		 */
-		CrawlerModel.jobDir =
-				Play.application().configuration().getString("regal-api.btrix.jobDir");
+		this.setJobDir(
+				Play.application().configuration().getString("regal-api.btrix.jobDir"));
 		/**
 		 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
 		 * Crawls direkt von Wayback indexiert.
 		 */
-		CrawlerModel.outDir =
-				Play.application().configuration().getString("regal-api.btrix.outDir");
-		this.crawlDir =
-				new File(CrawlerModel.jobDir + "/" + conf.getName() + "/" + datetime);
-		this.resultDir =
-				new File(CrawlerModel.outDir + "/" + conf.getName() + "/" + datetime);
-		this.cdxFile = new File(
-				CrawlerModel.outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
+		this.setOutDir(
+				Play.application().configuration().getString("regal-api.btrix.outDir"));
+		this.setCrawlDir(
+				new File(this.getJobDir() + "/" + conf.getName() + "/" + datetime));
+		this.setResultDir(
+				new File(this.getOutDir() + "/" + conf.getName() + "/" + datetime));
+		this.setCdxFile(new File(
+				this.getOutDir() + "/" + conf.getName() + "/WEB-" + host + ".cdx"));
 		try {
 			getBearerToken();
 			if (conf.getBtrixWorkflowId() != null) {
@@ -336,6 +334,10 @@ public class BtrixWebclient extends CrawlerModel {
 		// Dies führt den CDN-Precrawl aus.
 		super.startCrawl();
 
+		/*
+		 * Das hier muss in einem Thread passieren; wie bei WpullCawl.startCrawl()
+		 * ==> Wirklich ?? NEIN
+		 */
 		try {
 			/**
 			 * Für Browsertrix-Crawls wird die cdx-Datei des CDN-Precrawls hier ein
@@ -347,21 +349,21 @@ public class BtrixWebclient extends CrawlerModel {
 			 * diesen Punkt durch eine Aktion ersetzen, die am Ende des Hauptcrawls
 			 * geschehen wird.
 			 */
-			CrawlerModel.setCdxFileNew(new File(
-					this.resultDir.getAbsolutePath() + "/" + warcFilename + ".cdx"));
-			if (cdxFileNew.exists()) {
-				cdxFileSave = new File(Play.application().configuration()
+			this.setCdxFileNew(new File(
+					this.getResultDir().getAbsolutePath() + "/" + warcFilename + ".cdx"));
+			if (this.getCdxFileNew().exists()) {
+				this.setCdxFileSave(new File(Play.application().configuration()
 						.getString("regal-api.btrix.outDir") + "/" + conf.getName()
-						+ "/WEB-" + WebgatherUtils.getDomain(conf.getUrl()) + ".cdx");
-				FileUtils.copyFile(cdxFileNew, cdxFileSave);
-				WebgatherLogger.debug(
-						"Aktuelle CDX-Datei abgelegt in: " + cdxFileSave.getAbsolutePath());
+						+ "/WEB-" + WebgatherUtils.getDomain(conf.getUrl()) + ".cdx"));
+				FileUtils.copyFile(this.getCdxFileNew(), this.getCdxFileSave());
+				WebgatherLogger.debug("Aktuelle CDX-Datei abgelegt in: "
+						+ this.getCdxFileSave().getAbsolutePath());
 			}
 
 		} catch (Exception e) {
 			WebgatherLogger.warn(e.toString());
 			WebgatherLogger.warn("CDX file could not be copied to main directory! "
-					+ cdxFileSave.getAbsolutePath());
+					+ this.getCdxFileSave().getAbsolutePath());
 		}
 
 		try {

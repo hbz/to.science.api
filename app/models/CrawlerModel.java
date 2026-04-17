@@ -15,24 +15,19 @@
 */
 package models;
 
-import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
-import models.Node;
 import play.Logger;
 import play.Play;
 
 import java.io.*;
 import java.nio.file.Files;
 
-import helper.CrawlLog;
 import helper.WebgatherUtils;
 import helper.Webgatherer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 
@@ -57,12 +52,12 @@ public class CrawlerModel {
 	protected String urlAscii = null;
 	protected String date = null;
 	protected String datetime = null;
-	protected File crawlDir = null;
-	protected File resultDir = null;
+	private File crawlDir = null;
+	private File resultDir = null;
 	protected File logAnalysesDir = null;
-	protected File cdxFile = null;
-	protected static File cdxFileNew = null;
-	protected static File cdxFileSave = null;
+	private File cdxFile = null;
+	private File cdxFileNew = null;
+	private File cdxFileSave = null;
 	protected String localpath = null;
 	protected String host = null;
 	protected String warcFilename = null;
@@ -71,8 +66,8 @@ public class CrawlerModel {
 	protected String msg = null;
 	protected int exitState = 0;
 
-	protected static String jobDir = null;
-	protected static String outDir = null;
+	private String jobDir = null;
+	private String outDir = null;
 	final static public String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
 	final static public String crawlreportsDir = Play.application()
@@ -83,6 +78,15 @@ public class CrawlerModel {
 	 */
 	protected static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+
+	/**
+	 * Setter für crawlDir
+	 * 
+	 * @param file eine Datei, die als crawlDir gesetzt wird.
+	 */
+	public void setCrawlDir(File file) {
+		crawlDir = file;
+	}
 
 	/**
 	 * Die Methode, um das crawlDir auszulesen.
@@ -96,13 +100,31 @@ public class CrawlerModel {
 	}
 
 	/**
+	 * Setter für resultDir
+	 * 
+	 * @param file eine Datei, die als resultDir gesetzt wird.
+	 */
+	public void setResultDir(File file) {
+		resultDir = file;
+	}
+
+	/**
 	 * Die Methode, um resultDir auszulesen
 	 * 
 	 * @return resultDir Das Verzeichnis (absolute Pfadangabe, oberste Ebene), in
 	 *         dem die Wayback nach fertigen WARC-Dateien sucht.
 	 */
-	public File getResultsDir() {
+	public File getResultDir() {
 		return resultDir;
+	}
+
+	/**
+	 * Die Methode, um die CDX-Datei zu setzen
+	 * 
+	 * @param newfile eine Datei, die als CDX-Datei gesetzt wird.
+	 */
+	public void setCdxFile(File newfile) {
+		cdxFile = newfile;
 	}
 
 	/**
@@ -121,7 +143,7 @@ public class CrawlerModel {
 	 * 
 	 * @param newfile eine Datei, die als CDX-Datei gesetzt wird.
 	 */
-	public static void setCdxFileNew(File newfile) {
+	public void setCdxFileNew(File newfile) {
 		cdxFileNew = newfile;
 	}
 
@@ -134,6 +156,26 @@ public class CrawlerModel {
 	 */
 	public File getCdxFileNew() {
 		return cdxFileNew;
+	}
+
+	/**
+	 * Die Methode, um die gespeicherte CDX-Datei zu setzen
+	 * 
+	 * @param file eine Datei, die als gespeicherte CDX-Datei gesetzt wird.
+	 */
+	public void setCdxFileSave(File file) {
+		cdxFileSave = file;
+	}
+
+	/**
+	 * Die Methode, um die gespeicherte CDX-Datei auszulesen
+	 * 
+	 * @return cdxFileSave ist eine CDX-Datei, die der Crawler beim nächsten Crawl
+	 *         wieder verwenden wird. Sie liegt im Hauptverzeichnis der
+	 *         Site-Crawls.
+	 */
+	public File getCdxFileSave() {
+		return cdxFileSave;
 	}
 
 	/**
@@ -154,6 +196,42 @@ public class CrawlerModel {
 	 */
 	public int getExitState() {
 		return exitState;
+	}
+
+	/**
+	 * Setter für jobDir
+	 * 
+	 * @param dir eine Verzeichnisname, der als jobDir gesetzt wird
+	 */
+	public void setJobDir(String dir) {
+		jobDir = dir;
+	}
+
+	/**
+	 * Getter für jobDir
+	 * 
+	 * @return das jobDir
+	 */
+	public String getJobDir() {
+		return this.jobDir;
+	}
+
+	/**
+	 * Setter für outDir
+	 * 
+	 * @param dir eine Verzeichnisname, der als outDir gesetzt wird
+	 */
+	public void setOutDir(String dir) {
+		outDir = dir;
+	}
+
+	/**
+	 * Getter für outDir
+	 * 
+	 * @return das outDir
+	 */
+	public String getOutDir() {
+		return this.outDir;
 	}
 
 	/**
@@ -277,6 +355,10 @@ public class CrawlerModel {
 			WebgatherLogger.info("Executing command " + executeCommand);
 			WebgatherLogger
 					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
+			/*
+			 * Das geht so nicht. Der CDN-Crawl muss in einem Thread laufen, sonst
+			 * gibt es "Gateway Timeout"
+			 */
 			ProcessBuilder pb = new ProcessBuilder(execArr);
 			assert crawlDir.isDirectory();
 			pb.directory(crawlDir);
@@ -316,101 +398,5 @@ public class CrawlerModel {
 			throw new RuntimeException("cdn crawl not successfully started!", e);
 		}
 	} // Ende startCrawl()
-
-	/**
-	 * Suche neuestes Crawler-Logfile. Guckt zuerst in crawlDir
-	 * (Arbeitsverzeichnis). Falls dort nichts gefunden, guckt in outDir
-	 * (Ergebnisverzeichnis).
-	 * 
-	 * @param node der Knoten einer Webpage
-	 */
-	private static File findLatestLogFile(Node node) {
-		File logfile = null;
-		File latestCrawlDir = Webgatherer.getLatestCrawlDir(jobDir, node.getPid());
-		File latestOutDir = Webgatherer.getLatestCrawlDir(outDir, node.getPid());
-		if (latestCrawlDir != null) {
-			logfile = new File(latestCrawlDir.toString() + "/crawl.log");
-		}
-		if (logfile == null || !logfile.exists()) {
-			if (latestOutDir != null) {
-				logfile = new File(latestOutDir.toString() + "/crawl.log");
-			}
-		}
-		return logfile;
-	}
-
-	/**
-	 * Ermittelt Crawler Exit Status des letzten Crawls. Der Exit-Status ist eine
-	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
-	 * verfügbar.
-	 * 
-	 * @param node der Knoten einer Webpage
-	 * @return Crawler Exit Status des letzten wpull-Crawls
-	 */
-	public static int getCrawlExitStatus(Node node) {
-		File logfile = findLatestLogFile(node);
-		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.warn(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
-			return -2;
-		}
-		CrawlLog crawlLog = new CrawlLog(logfile);
-		crawlLog.parse();
-		return crawlLog.getExitStatus();
-	}
-
-	/**
-	 * Ermittelt den aktuellen Status des zuletzt gestarteten Crawls. Mögliche
-	 * Werte sind : NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
-	 * Operator) - CRASHED - FINISHED
-	 * 
-	 * @param node der Knoten einer Webpage
-	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls
-	 */
-	public static CrawlControllerState getCrawlControllerState(Node node) {
-		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
-		File logfile = findLatestLogFile(node);
-		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.info(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
-			return CrawlControllerState.NEW;
-		}
-		// 2. Läuft noch => Status = RUNNING
-		if (isCrawlRunning(node)) {
-			return CrawlControllerState.RUNNING;
-		}
-		BufferedReader buf = null;
-		String regExp = "^INFO FINISHED.";
-		Pattern pattern = Pattern.compile(regExp);
-		try {
-			buf = new BufferedReader(new FileReader(logfile));
-			String line = null;
-			while ((line = buf.readLine()) != null) {
-				Matcher matcher = pattern.matcher(line);
-				if (matcher.find()) {
-					return CrawlControllerState.FINISHED;
-				}
-			}
-		} catch (IOException e) {
-			WebgatherLogger.warn(
-					"Crawl Controller State cannot be defered from crawlLog "
-							+ logfile.getAbsolutePath() + "! Assuming CRASHED.",
-					e.toString());
-		} finally {
-			try {
-				if (buf != null) {
-					buf.close();
-				}
-			} catch (IOException e) {
-				WebgatherLogger.warn("Read Buffer cannot be closed!");
-			}
-		}
-		return CrawlControllerState.CRASHED;
-	}
-
-	private static boolean isCrawlRunning(Node node) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 }

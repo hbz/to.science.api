@@ -1,18 +1,16 @@
 package helper;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.Process;
 import java.lang.ProcessBuilder;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 import actions.Create;
+import models.CrawlerModel;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
-import models.Gatherconf.RobotsPolicy;
 import models.Gatherconf.CrawlSubdomains;
 import play.Logger;
 
@@ -25,6 +23,7 @@ import play.Logger;
  */
 public class WpullThread extends Thread {
 
+	private WpullCrawl wpullCrawl = null;
 	private Node node = null;
 	private Gatherconf conf = null;
 	private List<String> title = null;
@@ -55,9 +54,11 @@ public class WpullThread extends Thread {
 	/**
 	 * Der Konstruktor für diese Klasse.
 	 * 
+	 * @param model a Crawler Model for this wpull crawl
 	 * @param attempt Der wievielte Versuch es ist, diesen Webschnitt zu sammeln.
 	 */
-	public WpullThread(int attempt) {
+	public WpullThread(WpullCrawl model, int attempt) {
+		this.wpullCrawl = model;
 		this.attempt = attempt;
 		exitState = 0;
 	}
@@ -243,7 +244,7 @@ public class WpullThread extends Thread {
 				 * Hier eine Mail schicken, falls nichts eingesammelt wurde. Für
 				 * TOS-1326
 				 */
-				if (WpullCrawl.isWpullCrawlEmpty(node)) {
+				if (wpullCrawl.isWpullCrawlEmpty()) {
 					title = node.getDublinCoreData().getTitle();
 					msg =
 							"Für die Website " + conf.getName() + ", Titel: " + title + "\n";
@@ -285,7 +286,7 @@ public class WpullThread extends Thread {
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
 			pb.directory(crawlDir);
 			pb.redirectErrorStream(true);
-			WpullThread wpullThread = new WpullThread(attempt);
+			WpullThread wpullThread = new WpullThread(wpullCrawl, attempt);
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);

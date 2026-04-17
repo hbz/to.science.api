@@ -29,7 +29,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import java.util.Hashtable;
@@ -65,22 +64,22 @@ public class WpullCrawl extends CrawlerModel {
 			 * jobDir hinein. jobDir ist das Arbeitsverzeichnis von wpull. jobDir
 			 * sollte ein lokales Verzeichnis sein.
 			 */
-			CrawlerModel.jobDir = Play.application().configuration()
-					.getString("regal-api.wpull.jobDir");
+			this.setJobDir(Play.application().configuration()
+					.getString("regal-api.wpull.jobDir"));
 			/**
 			 * Im Verzeichnis outDir liegen die fertigen Crawls. Das ist das
 			 * Output-Verzeichnis von wpull. Von hier aus werden die Crawls entweder
 			 * direkt von Wayback indexiert oder vorher noch weitergehend bearbeitet,
 			 * z.B. getestet, ob sie erfolgreich waren.
 			 */
-			CrawlerModel.outDir = Play.application().configuration()
-					.getString("regal-api.wpull.outDir");
-			this.crawlDir =
-					new File(CrawlerModel.jobDir + "/" + conf.getName() + "/" + datetime);
-			this.resultDir =
-					new File(CrawlerModel.outDir + "/" + conf.getName() + "/" + datetime);
-			this.cdxFile = new File(
-					CrawlerModel.outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
+			this.setOutDir(Play.application().configuration()
+					.getString("regal-api.wpull.outDir"));
+			this.setCrawlDir(
+					new File(this.getJobDir() + "/" + conf.getName() + "/" + datetime));
+			this.setResultDir(
+					new File(this.getOutDir() + "/" + conf.getName() + "/" + datetime));
+			this.setCdxFile(new File(
+					this.getOutDir() + "/" + conf.getName() + "/WEB-" + host + ".cdx"));
 
 			this.logAnalysesDir = new File(crawlreportsDir + "/" + "logAnalyses/"
 					+ conf.getName() + "/" + datetime);
@@ -113,11 +112,11 @@ public class WpullCrawl extends CrawlerModel {
 	public void startCrawl() {
 		super.startCrawl();
 		try {
-			WpullThread wpullThread = new WpullThread(1);
+			WpullThread wpullThread = new WpullThread(this, 1);
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
-			wpullThread.setCrawlDir(crawlDir);
-			wpullThread.setOutDir(resultDir);
+			wpullThread.setCrawlDir(this.getCrawlDir());
+			wpullThread.setOutDir(this.getResultDir());
 			wpullThread.setWarcFilename(warcFilename);
 			wpullThread.setHost(host);
 			wpullThread.setLocalPath(localpath);
@@ -235,9 +234,9 @@ public class WpullCrawl extends CrawlerModel {
 		sb.append(" --warc-append");
 		// auskommentiert 27.08.2020 für EDOZWO-1026
 		// sb.append(" --warc-tempdir=" + tempJobDir)
-		sb.append(" --warc-move=" + resultDir);
+		sb.append(" --warc-move=" + this.getResultDir());
 		sb.append(" --warc-cdx");
-		if (this.cdxFileNew != null && this.cdxFileNew.exists()) {
+		if (this.getCdxFileNew() != null && this.getCdxFileNew().exists()) {
 			sb.append(" --warc-dedup=" + warcFilename + ".cdx");
 		}
 		play.Logger.debug("Built Crawl command: " + sb.toString());
@@ -251,7 +250,7 @@ public class WpullCrawl extends CrawlerModel {
 	 * 
 	 * @param node der Knoten einer Webpage
 	 */
-	private static File findLatestLogFile(Node node) {
+	private File findLatestLogFile() {
 		File logfile = null;
 		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
 				Play.application().configuration().getString("regal-api.wpull.jobDir"),
@@ -275,11 +274,10 @@ public class WpullCrawl extends CrawlerModel {
 	 * ganze Zahl. Der Exit-Status ist erst nach Beendigung eines Crawls
 	 * verfügbar.
 	 * 
-	 * @param node der Knoten einer Webpage
 	 * @return Crawler Exit Status des letzten wpull-Crawls
 	 */
-	public static int getCrawlExitStatus(Node node) {
-		File logfile = findLatestLogFile(node);
+	public int getCrawlExitStatus() {
+		File logfile = findLatestLogFile();
 		if (logfile == null || !logfile.exists()) {
 			WebgatherLogger.warn(
 					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
@@ -295,19 +293,18 @@ public class WpullCrawl extends CrawlerModel {
 	 * Werte sind : NEW - RUNNING - PAUSED (nur Heritrix) - ABORTED (beendet vom
 	 * Operator) - CRASHED - FINISHED
 	 * 
-	 * @param node der Knoten einer Webpage
 	 * @return Crawler Status des zuletzt gestarteten wpull-Crawls
 	 */
-	public static CrawlControllerState getCrawlControllerState(Node node) {
+	public CrawlControllerState getCrawlControllerState() {
 		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
-		File logfile = findLatestLogFile(node);
+		File logfile = findLatestLogFile();
 		if (logfile == null || !logfile.exists()) {
 			WebgatherLogger.info(
 					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
 			return CrawlControllerState.NEW;
 		}
 		// 2. Läuft noch => Status = RUNNING
-		if (isWpullCrawlRunning(node)) {
+		if (isWpullCrawlRunning()) {
 			return CrawlControllerState.RUNNING;
 		}
 		// 3. Läuft nicht mehr.
@@ -345,11 +342,10 @@ public class WpullCrawl extends CrawlerModel {
 	 * Ermittelt, ob ein Crawl nichts eingesammelt hat. Das wird anhand einer
 	 * Meldung im Logfile ermittelt.
 	 * 
-	 * @param node der Node einer Webpage
 	 * @return wahr (leer bzw. nichts eingesammelt) oder falsch (nicht leer)
 	 */
-	public static boolean isWpullCrawlEmpty(Node node) {
-		File logfile = findLatestLogFile(node);
+	public boolean isWpullCrawlEmpty() {
+		File logfile = findLatestLogFile();
 		/**
 		 * Kein Crawl-Verzeichnis mit crawl.log vorhanden => wird wie "leer"
 		 * behandelt
@@ -393,10 +389,9 @@ public class WpullCrawl extends CrawlerModel {
 	/**
 	 * Prüfung, ob ein Crawl zu einer gegebenen URL aktuell läuft
 	 * 
-	 * @param node der Knoten zu der Webpage mit der URL
 	 * @return boolean Crawl läuft
 	 */
-	public static boolean isWpullCrawlRunning(Node node) {
+	public boolean isWpullCrawlRunning() {
 		BufferedReader buf = null;
 		String cmd = "ps -eaf";
 		String regExp1 =
@@ -404,7 +399,7 @@ public class WpullCrawl extends CrawlerModel {
 		Pattern pattern1 = Pattern.compile(regExp1);
 		Matcher matcher1 = null;
 		try {
-			String urlAscii = WebgatherUtils
+			urlAscii = WebgatherUtils
 					.convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
 			String regExp2 = urlAscii;
 			// Maskiere Sonderzeichen des Regulären Ausdrucks mit Pattern.quote
@@ -458,20 +453,20 @@ public class WpullCrawl extends CrawlerModel {
 		 * Im resultDir symbolische Links auf die Log- und Textdateien in crawlDir
 		 * erzeugen.
 		 */
-		createSymLink(crawlDir, resultDir, "cdnparse.log");
-		createSymLink(crawlDir, resultDir, "cdn.txt");
-		createSymLink(crawlDir, resultDir, "hostnames.txt");
-		createSymLink(crawlDir, resultDir, "cdncrawl.log");
-		createSymLink(crawlDir, resultDir, "crawl.log");
+		createSymLink(this.getCrawlDir(), this.getResultDir(), "cdnparse.log");
+		createSymLink(this.getCrawlDir(), this.getResultDir(), "cdn.txt");
+		createSymLink(this.getCrawlDir(), this.getResultDir(), "hostnames.txt");
+		createSymLink(this.getCrawlDir(), this.getResultDir(), "cdncrawl.log");
+		createSymLink(this.getCrawlDir(), this.getResultDir(), "crawl.log");
 		/**
 		 * Symbolische Links in crawlreports/logAnalyses erzuegen, die wiederum auf
 		 * diese symbolischen Links im resultDir verweisen. Für TOS-1273.
 		 */
-		createSymLink(resultDir, logAnalysesDir, "cdnparse.log");
-		createSymLink(resultDir, logAnalysesDir, "cdn.txt");
-		createSymLink(resultDir, logAnalysesDir, "hostnames.txt");
-		createSymLink(resultDir, logAnalysesDir, "cdncrawl.log");
-		createSymLink(resultDir, logAnalysesDir, "crawl.log");
+		createSymLink(this.getResultDir(), logAnalysesDir, "cdnparse.log");
+		createSymLink(this.getResultDir(), logAnalysesDir, "cdn.txt");
+		createSymLink(this.getResultDir(), logAnalysesDir, "hostnames.txt");
+		createSymLink(this.getResultDir(), logAnalysesDir, "cdncrawl.log");
+		createSymLink(this.getResultDir(), logAnalysesDir, "crawl.log");
 	}
 
 	/**
