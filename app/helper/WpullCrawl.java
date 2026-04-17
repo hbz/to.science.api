@@ -17,6 +17,7 @@
 package helper;
 
 import models.CrawlerModel;
+import models.CrawlerModel.CrawlControllerState;
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
 import models.Gatherconf.RobotsPolicy;

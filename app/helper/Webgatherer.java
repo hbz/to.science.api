@@ -251,7 +251,8 @@ public class Webgatherer implements Runnable {
 		if (new Date().before(conf.getStartDate()))
 			return false;
 		// Falls ein Crawl noch läuft, gib nie `true` zurück !!
-		CrawlControllerState ccs = WpullCrawl.getCrawlControllerState(n);
+		WpullCrawl wpullCrawl = new WpullCrawl(n, conf);
+		CrawlControllerState ccs = wpullCrawl.getCrawlControllerState();
 		if (ccs.equals(CrawlControllerState.RUNNING)) {
 			return false;
 		}
