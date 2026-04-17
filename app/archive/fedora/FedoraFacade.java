@@ -311,7 +311,6 @@ public class FedoraFacade {
 					new GetDatastreamDissemination(pid, "conf").execute();
 			node.setConf(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
-			play.Logger.debug("node.setConf to " + node.getConf());
 		} catch (Exception e) {
 			// datastream with name conf is optional
 		}
