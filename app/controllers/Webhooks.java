@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
@@ -30,6 +32,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import authenticate.BasicAuth;
+import helper.BtrixWebclient;
 import models.Message;
 import models.CrawlerModel.CrawlControllerState;
 import play.libs.F.Promise;
@@ -86,12 +89,29 @@ public class Webhooks extends MyController {
 				throw re;
 			}
 			String cid_stub = matcher.group(2) + "-" + matcher.group(3);
-			play.Logger.debug("Found cid_stub in filename:" + cid_stub);
+			play.Logger.debug("Found cid_stub in filename: " + cid_stub);
 
 			/**
 			 * Hole Workflow Config über Get Crawl Configs mit Abfrageparameter
 			 * description = cid_stub. Dasselbe macht das Shell-Skript
 			 * ks.btrix_get_crawl_configs.sh.
+			 */
+			BtrixWebclient btrixWebclient = new BtrixWebclient();
+			JSONObject crawlConfigs =
+					btrixWebclient.getCrawlConfigs("description=" + cid_stub);
+			JSONObject crawlConfig =
+					(JSONObject) crawlConfigs.getJSONArray("items").get(0);
+			play.Logger.debug(
+					"Found Crawl Config with name: " + crawlConfig.getString("name"));
+			play.Logger.debug("Crawl Config cid = " + crawlConfig.getString("id"));
+			play.Logger
+					.debug("Last Crawl Id = " + crawlConfig.getString("lastCrawlId"));
+			String toscienceId = (String) crawlConfig.getJSONArray("tags").get(0);
+			play.Logger.debug("Crawl Config is for toscience ID: " + toscienceId);
+
+			/**
+			 * hier weiter; Webschnitt anlegen und Webarchiv archivieren und in
+			 * Wayback indexieren.
 			 */
 
 			return ok();

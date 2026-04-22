@@ -235,6 +235,15 @@ public class CrawlerModel {
 	}
 
 	/**
+	 * Leer-Konstruktor für das Crawler Modell
+	 */
+	public CrawlerModel() {
+		this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+		this.datetime =
+				date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
+	}
+
+	/**
 	 * Konstruktor für das Crawler Modell
 	 * 
 	 * @param node Der Knoten der Website, zu der ein neuer Crawl gestartet werden

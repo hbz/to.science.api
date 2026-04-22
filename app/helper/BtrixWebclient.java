@@ -21,8 +21,11 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -53,7 +56,8 @@ public class BtrixWebclient extends CrawlerModel {
 
 	/* Browsertrix spezifische Variablen */
 	private CloseableHttpClient httpClient = null;
-	private HttpEntityEnclosingRequestBase request = null;
+	private HttpEntityEnclosingRequestBase entityEnclosingRequest = null;
+	private HttpRequestBase request = null;
 	private CloseableHttpResponse response = null;
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private String bearerToken = null;
@@ -74,6 +78,35 @@ public class BtrixWebclient extends CrawlerModel {
 			Play.application().configuration().getString("regal-api.btrix.orgName");
 	final static String btrix_orgid =
 			Play.application().configuration().getString("regal-api.btrix.orgId");
+
+	/**
+	 * (Leerer) Konstruktor für den Browsertrix Webclient
+	 * 
+	 * Dieser Konstruktor wird benötigt, um Aufrufe an Browsertrix zu ermöglichen,
+	 * die noch nicht auf ein toscience-Objekt bezogen sind.
+	 */
+	public BtrixWebclient() {
+		super();
+		/**
+		 * Das Arbeitsverzeichnis von Browsertrix-Crawls für den CDN-Precrawl ist
+		 * jobDir. jobDir sollte ein lokales Verzeichnis sein.
+		 */
+		this.setJobDir(
+				Play.application().configuration().getString("regal-api.btrix.jobDir"));
+		/**
+		 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
+		 * Crawls direkt von Wayback indexiert.
+		 */
+		this.setOutDir(
+				Play.application().configuration().getString("regal-api.btrix.outDir"));
+		try {
+			getBearerToken();
+		} catch (Exception e) {
+			WebgatherLogger.error("Browsertrix-Workflow für PID " + node.getPid()
+					+ " URL " + conf.getUrl() + " kann nicht angelegt werden !");
+			throw new RuntimeException(e);
+		}
+	}
 
 	/**
 	 * Konstruktor zu Browsertrix Crawler Workflow
@@ -123,15 +156,17 @@ public class BtrixWebclient extends CrawlerModel {
 	private void getBearerToken() {
 		try {
 			httpClient = HttpClients.createDefault();
-			request = new HttpPost(btrix_api_url + "/auth/jwt/login");
+			entityEnclosingRequest = new HttpPost(btrix_api_url + "/auth/jwt/login");
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_admin_username " + btrix_admin_username);
 			// WebgatherLogger.debug("btrix_admin_password " + btrix_admin_password);
-			request.addHeader("Content-Type", "application/x-www-form-urlencoded");
-			request.setEntity(new StringEntity("username=" + btrix_admin_username
-					+ "&password=" + btrix_admin_password + "&grant_type=password"));
-			request.addHeader("Accept", "application/json");
-			response = httpClient.execute(request);
+			entityEnclosingRequest.addHeader("Content-Type",
+					"application/x-www-form-urlencoded");
+			entityEnclosingRequest
+					.setEntity(new StringEntity("username=" + btrix_admin_username
+							+ "&password=" + btrix_admin_password + "&grant_type=password"));
+			entityEnclosingRequest.addHeader("Accept", "application/json");
+			response = httpClient.execute(entityEnclosingRequest);
 			if (response.getStatusLine().getStatusCode() == 200) {
 				String tokenResponseJson = EntityUtils.toString(response.getEntity());
 				JsonNode tokenJsonNode = objectMapper.readTree(tokenResponseJson);
@@ -149,7 +184,49 @@ public class BtrixWebclient extends CrawlerModel {
 		} finally {
 			try {
 				httpClient.close();
-				((Closeable) response).close();
+				response.close();
+			} catch (Exception e) {
+				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
+						e.toString());
+			}
+		}
+	}
+
+	/**
+	 * Diese Methode führt einen GET-Request auf den Browsertrix-Endpoint Get
+	 * Crawl Configs durch.
+	 * 
+	 * API-Doc: https://docs.browsertrix.com/api/#tag/crawlconfigs/operation/
+	 * get_crawl_configs_api_orgs__oid__crawlconfigs_get
+	 * 
+	 * @param queryString ein queryString für die Anfrage
+	 * @return a JSON Object with the found Crawl Configs
+	 */
+	public JSONObject getCrawlConfigs(String queryString) {
+		try {
+			httpClient = HttpClientBuilder.create().build();
+			request = new HttpGet(btrix_api_url + "/orgs/" + btrix_orgid
+					+ "/crawlconfigs?" + queryString);
+			WebgatherLogger.debug("request = " + request.toString());
+			request.addHeader("Authorization", "Bearer " + this.bearerToken);
+			request.addHeader("Accept", "application/json");
+			response = httpClient.execute(request);
+			String responseJson = getResponseJson();
+			WebgatherLogger.debug("received response: " + responseJson);
+			// JSON ausparsen
+			JSONObject responseJsonObject = new JSONObject(responseJson);
+			int total = responseJsonObject.getInt("total");
+			WebgatherLogger.debug("Found a number of " + total + "item(s).");
+			return responseJsonObject;
+
+		} catch (Exception e) {
+			msg = "Could not get Crawl Configs for queryString " + queryString;
+			WebgatherLogger.error(msg, e.getMessage());
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				httpClient.close();
+				response.close();
 			} catch (Exception e) {
 				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
 						e.toString());
@@ -161,22 +238,23 @@ public class BtrixWebclient extends CrawlerModel {
 		try {
 			httpClient = HttpClientBuilder.create().build();
 			if (this.btrixWorkflowId == null) {
-				request = new HttpPost(
+				entityEnclosingRequest = new HttpPost(
 						btrix_api_url + "/orgs/" + btrix_orgid + "/crawlconfigs/");
 			} else {
-				request = new HttpPatch(btrix_api_url + "/orgs/" + btrix_orgid
-						+ "/crawlconfigs/" + btrixWorkflowId);
+				entityEnclosingRequest = new HttpPatch(btrix_api_url + "/orgs/"
+						+ btrix_orgid + "/crawlconfigs/" + btrixWorkflowId);
 			}
 			WebgatherLogger.debug("btrix_api_url " + btrix_api_url);
 			WebgatherLogger.debug("btrix_orgid " + btrix_orgid);
-			WebgatherLogger.debug("request = " + request.toString());
-			request.addHeader("Authorization", "Bearer " + this.bearerToken);
-			request.addHeader("Content-Type", "application/json");
+			WebgatherLogger.debug("request = " + entityEnclosingRequest.toString());
+			entityEnclosingRequest.addHeader("Authorization",
+					"Bearer " + this.bearerToken);
+			entityEnclosingRequest.addHeader("Content-Type", "application/json");
 			String jsonBody = createJsonBody();
 			WebgatherLogger.debug("jsonBody=" + jsonBody);
-			request.setEntity(new StringEntity(jsonBody, "UTF-8"));
-			request.addHeader("Accept", "application/json");
-			response = httpClient.execute(request);
+			entityEnclosingRequest.setEntity(new StringEntity(jsonBody, "UTF-8"));
+			entityEnclosingRequest.addHeader("Accept", "application/json");
+			response = httpClient.execute(entityEnclosingRequest);
 			String responseJson = getResponseJson();
 			WebgatherLogger.debug("received response: " + responseJson);
 			// JSON ausparsen
@@ -193,15 +271,17 @@ public class BtrixWebclient extends CrawlerModel {
 				 * Workflow IDs.
 				 */
 				Thread.sleep(10000);
-				request = new HttpPatch(btrix_api_url + "/orgs/" + btrix_orgid
-						+ "/crawlconfigs/" + btrixWorkflowId);
-				request.addHeader("Authorization", "Bearer " + this.bearerToken);
-				request.addHeader("Content-Type", "application/json");
+				entityEnclosingRequest = new HttpPatch(btrix_api_url + "/orgs/"
+						+ btrix_orgid + "/crawlconfigs/" + btrixWorkflowId);
+				entityEnclosingRequest.addHeader("Authorization",
+						"Bearer " + this.bearerToken);
+				entityEnclosingRequest.addHeader("Content-Type", "application/json");
 				JSONObject data = new JSONObject(jsonBody);
 				data.put("description", btrixWorkflowId.substring(0, 12));
-				request.setEntity(new StringEntity(data.toString(), "UTF-8"));
-				request.addHeader("Accept", "application/json");
-				response = httpClient.execute(request);
+				entityEnclosingRequest
+						.setEntity(new StringEntity(data.toString(), "UTF-8"));
+				entityEnclosingRequest.addHeader("Accept", "application/json");
+				response = httpClient.execute(entityEnclosingRequest);
 				responseJson = getResponseJson();
 				WebgatherLogger.debug("received response from update wit description "
 						+ btrixWorkflowId.substring(0, 12) + ": " + responseJson);
@@ -221,7 +301,7 @@ public class BtrixWebclient extends CrawlerModel {
 		} finally {
 			try {
 				httpClient.close();
-				((Closeable) response).close();
+				response.close();
 			} catch (Exception e) {
 				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
 						e.toString());
@@ -426,7 +506,7 @@ public class BtrixWebclient extends CrawlerModel {
 			} finally {
 				try {
 					httpClient.close();
-					((Closeable) response).close();
+					response.close();
 				} catch (Exception e) {
 					WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
 							e.toString());
