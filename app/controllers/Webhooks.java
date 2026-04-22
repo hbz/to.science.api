@@ -46,11 +46,22 @@ public class Webhooks extends MyController {
 	@ApiOperation(produces = "application/json", nickname = "btrixCrawlFinished", value = "btrixCrawlFinished", notes = "Implementing Browsertrix Webhook \"Crawl Finished\".", response = Message.class, httpMethod = "POST")
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	/**
+	 * Dieser Endpoint verarbeitet eine vom Browertrix bereit gestellte neue
+	 * Archivdatei (der Endung WACZ)
+	 * 
+	 * @author I. Kuss
+	 * @date 2026-04-22
+	 * @return
+	 */
 	public static Promise<Result> btrixCrawlFinished() {
 
 		return Promise.promise(() -> {
 			JsonNode body = request().body().asJson();
-			play.Logger.debug("btrix Crawl Finished sent: " + body);
+			play.Logger.debug("btrix Crawl Finished sent body: " + body);
+			String filename =
+					body.findValue("filename").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("filename found: " + filename);
 			return ok();
 		});
 	}
