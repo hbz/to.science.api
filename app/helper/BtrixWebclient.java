@@ -216,7 +216,7 @@ public class BtrixWebclient extends CrawlerModel {
 			// JSON ausparsen
 			JSONObject responseJsonObject = new JSONObject(responseJson);
 			int total = responseJsonObject.getInt("total");
-			WebgatherLogger.debug("Found a number of " + total + "item(s).");
+			WebgatherLogger.debug("Found a number of " + total + " item(s).");
 			return responseJsonObject;
 
 		} catch (Exception e) {
