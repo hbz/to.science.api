@@ -16,6 +16,13 @@
  */
 package controllers;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
@@ -24,6 +31,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import authenticate.BasicAuth;
 import models.Message;
+import models.CrawlerModel.CrawlControllerState;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -66,10 +74,22 @@ public class Webhooks extends MyController {
 			 * Hole description aus dem Dateinamen. description = die ersten 12
 			 * Zeichen der Worfklow Id.
 			 */
+			File waczFile = new File(filename);
+			String regExp = "^[0-9]+-([0-9a-f]{7}-[0-9a-f]{3})-[0-9]+.wacz$";
+			Pattern pattern = Pattern.compile(regExp);
+			Matcher matcher = pattern.matcher(waczFile.getName());
+			if (!matcher.find()) {
+				throw new RuntimeException("cid_stub can not be infered from filename "
+						+ waczFile.getName() + " !");
+			}
+			String cid_stub = matcher.group(1);
+			play.Logger.debug("Found cid_stub in filename:" + cid_stub);
+
 			/**
 			 * Hole Workflow Config über Get Crawl Configs mit Abfrageparameter
 			 * description
 			 */
+
 			return ok();
 		});
 	}
