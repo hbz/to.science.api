@@ -192,11 +192,15 @@ public class BtrixWebclient extends CrawlerModel {
 				 * mit den crawl_ids. Diese enthalten nur die ersten 12 Ziffern der
 				 * Workflow IDs.
 				 */
+				Thread.sleep(3000);
 				request = new HttpPatch(btrix_api_url + "/orgs/" + btrix_orgid
 						+ "/crawlconfigs/" + btrixWorkflowId);
+				request.addHeader("Authorization", "Bearer " + this.bearerToken);
+				request.addHeader("Content-Type", "application/json");
 				JSONObject data = new JSONObject(jsonBody);
 				data.put("description", btrixWorkflowId.substring(0, 12));
 				request.setEntity(new StringEntity(data.toString(), "UTF-8"));
+				request.addHeader("Accept", "application/json");
 				response = httpClient.execute(request);
 				responseJson = getResponseJson();
 				WebgatherLogger.debug("received response from update wit description "
