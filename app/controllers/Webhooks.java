@@ -62,6 +62,14 @@ public class Webhooks extends MyController {
 			String filename =
 					body.findValue("filename").toString().replaceAll("^\"|\"$", "");
 			play.Logger.debug("filename found: " + filename);
+			/**
+			 * Hole description aus dem Dateinamen. description = die ersten 12
+			 * Zeichen der Worfklow Id.
+			 */
+			/**
+			 * Hole Workflow Config über Get Crawl Configs mit Abfrageparameter
+			 * description
+			 */
 			return ok();
 		});
 	}

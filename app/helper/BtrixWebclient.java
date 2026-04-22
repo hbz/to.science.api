@@ -186,6 +186,22 @@ public class BtrixWebclient extends CrawlerModel {
 				WebgatherLogger
 						.debug("Crawler Workflow angelegt mit btrix_workflow_id: "
 								+ btrixWorkflowId);
+				/**
+				 * hier werden die ersten 12 Stellen der Crawler Workflow ID (cid) als
+				 * "description" hinterlegt. Dies geschieht für den späteren Abgleich
+				 * mit den crawl_ids. Diese enthalten nur die ersten 12 Ziffern der
+				 * Workflow IDs.
+				 */
+				request = new HttpPatch(btrix_api_url + "/orgs/" + btrix_orgid
+						+ "/crawlconfigs/" + btrixWorkflowId);
+				JSONObject data = new JSONObject(jsonBody);
+				data.put("description", btrixWorkflowId.substring(0, 12));
+				request.setEntity(new StringEntity(data.toString(), "UTF-8"));
+				response = httpClient.execute(request);
+				responseJson = getResponseJson();
+				WebgatherLogger.debug("received response from update wit description "
+						+ btrixWorkflowId.substring(0, 12) + ": " + responseJson);
+				/* Übernahme der WorkflowId in die toscience Crawler Conf */
 				conf.setBtrixWorkflowId(btrixWorkflowId);
 				msg = new Modify().updateConf(node, conf.toString());
 				WebgatherLogger.info(msg);
@@ -223,7 +239,10 @@ public class BtrixWebclient extends CrawlerModel {
 				}
 			}
 			data.put("inactive", !conf.isActive());
-			data.put("description", conf.getNotices());
+			// data.put("description", conf.getNotices());
+			JSONArray tags = new JSONArray();
+			tags.put(conf.getName());
+			data.put("tags", tags);
 			// maximale Crawlgröße in Byte
 			data.put("maxCrawlSize", conf.getMaxCrawlSize());
 			if (conf.getMaxCrawlSize() > 0) {
