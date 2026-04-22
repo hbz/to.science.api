@@ -71,23 +71,27 @@ public class Webhooks extends MyController {
 					body.findValue("filename").toString().replaceAll("^\"|\"$", "");
 			play.Logger.debug("filename found: " + filename);
 			/**
-			 * Hole description aus dem Dateinamen. description = die ersten 12
-			 * Zeichen der Worfklow Id.
+			 * Hole cid_stub aus dem Dateinamen. cid_stub = die ersten 12 Zeichen der
+			 * Crawler Worfklow Id (cid).
 			 */
 			File waczFile = new File(filename);
-			String regExp = "^[0-9]+-([0-9a-f]{7}-[0-9a-f]{3})-[0-9]+.wacz$";
+			String regExp = "^([0-9]+)-([0-9a-f]{8})-([0-9a-f]{3})-([0-9]+)\\.wacz$";
 			Pattern pattern = Pattern.compile(regExp);
 			Matcher matcher = pattern.matcher(waczFile.getName());
 			if (!matcher.find()) {
-				throw new RuntimeException("cid_stub can not be infered from filename "
-						+ waczFile.getName() + " !");
+				RuntimeException re =
+						new RuntimeException("cid_stub can not be infered from filename "
+								+ waczFile.getName() + " !");
+				play.Logger.error(re.toString());
+				throw re;
 			}
-			String cid_stub = matcher.group(1);
+			String cid_stub = matcher.group(2) + "-" + matcher.group(3);
 			play.Logger.debug("Found cid_stub in filename:" + cid_stub);
 
 			/**
 			 * Hole Workflow Config über Get Crawl Configs mit Abfrageparameter
-			 * description
+			 * description = cid_stub. Dasselbe macht das Shell-Skript
+			 * ks.btrix_get_crawl_configs.sh.
 			 */
 
 			return ok();
