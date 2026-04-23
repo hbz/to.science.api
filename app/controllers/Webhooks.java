@@ -20,6 +20,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -139,13 +142,16 @@ public class Webhooks extends MyController {
 
 			// ToDo: ab hier in einen Thread schicken; lang dauernde Dateioperationen!
 			try {
-				play.Logger.debug("Moving file " + waczFile.toString()
-						+ " to directory " + btrixWebclient.getResultDir().toString());
-				waczFile.renameTo(new File(btrixWebclient.getResultDir().toString()
-						+ "/" + waczFile.getName()));
-			} catch (Exception e) {
-				play.Logger.error("WACZ file could not be moved to result directory!");
-				e.printStackTrace();
+				Path sourcePath = Paths.get(filename);
+				Path targetPath = Paths.get(btrixWebclient.getResultDir().toString()
+						+ "/" + waczFile.getName());
+				play.Logger.debug("Moving file " + filename + " to directory "
+						+ btrixWebclient.getResultDir().toString());
+				Files.move(sourcePath, targetPath);
+				play.Logger.debug("File moved successfully.");
+			} catch (IOException e) {
+				play.Logger.error("WACZ file could not be moved to result directory! "
+						+ e.getMessage());
 				throw new RuntimeException(e);
 			}
 
