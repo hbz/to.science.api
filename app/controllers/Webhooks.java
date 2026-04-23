@@ -118,12 +118,13 @@ public class Webhooks extends MyController {
 					"lastCrawlStartTime: " + crawlConfig.getString("lastCrawlStartTime"));
 			DateTimeFormatter formatterIn =
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
-			LocalDateTime dateTime = LocalDateTime
+			ZonedDateTime dateTime = ZonedDateTime
 					.parse(crawlConfig.getString("lastCrawlStartTime"), formatterIn);
-			ZonedDateTime zonedDateTime = dateTime.atZone(ZoneId.systemDefault());
+			ZonedDateTime dateTimeLocal =
+					dateTime.withZoneSameInstant(ZoneId.systemDefault());
 			DateTimeFormatter formatterOut =
 					DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			String timestamp = zonedDateTime.format(formatterOut);
+			String timestamp = dateTimeLocal.format(formatterOut);
 			play.Logger.debug("timestamp: " + timestamp);
 
 			/**
