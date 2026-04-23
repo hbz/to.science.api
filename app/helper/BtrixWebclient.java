@@ -124,8 +124,8 @@ public class BtrixWebclient extends CrawlerModel {
 		this.setJobDir(
 				Play.application().configuration().getString("regal-api.btrix.jobDir"));
 		/**
-		 * Im Verzeichnis outDir liegen die fertigen Crawls. Von hier aus werden die
-		 * Crawls direkt von Wayback indexiert.
+		 * Im Verzeichnis outDir liegen die fertigen Browsertrox-Crawls. Von hier
+		 * aus werden die Crawls direkt von Wayback indexiert.
 		 */
 		this.setOutDir(
 				Play.application().configuration().getString("regal-api.btrix.outDir"));
@@ -217,6 +217,11 @@ public class BtrixWebclient extends CrawlerModel {
 			JSONObject responseJsonObject = new JSONObject(responseJson);
 			int total = responseJsonObject.getInt("total");
 			WebgatherLogger.debug("Found a number of " + total + " item(s).");
+			if (total != 1) {
+				throw new RuntimeException(
+						"Did not find exactly one Crawl Config for queryString "
+								+ queryString + " !");
+			}
 			return responseJsonObject;
 
 		} catch (Exception e) {
@@ -437,10 +442,6 @@ public class BtrixWebclient extends CrawlerModel {
 		// Dies führt den CDN-Precrawl aus.
 		super.startCrawl();
 
-		/*
-		 * Das hier muss in einem Thread passieren; wie bei WpullCawl.startCrawl()
-		 * ==> Wirklich ?? NEIN
-		 */
 		try {
 			/**
 			 * Für Browsertrix-Crawls wird die cdx-Datei des CDN-Precrawls hier ein
@@ -453,10 +454,10 @@ public class BtrixWebclient extends CrawlerModel {
 			 * geschehen wird.
 			 */
 			this.setCdxFileNew(new File(
-					this.getResultDir().getAbsolutePath() + "/" + warcFilename + ".cdx"));
+					this.getCrawlDir().getAbsolutePath() + "/" + warcFilename + ".cdx"));
 			if (this.getCdxFileNew().exists()) {
 				this.setCdxFileSave(new File(Play.application().configuration()
-						.getString("regal-api.btrix.outDir") + "/" + conf.getName()
+						.getString("regal-api.btrix.jobDir") + "/" + conf.getName()
 						+ "/WEB-" + WebgatherUtils.getDomain(conf.getUrl()) + ".cdx"));
 				FileUtils.copyFile(this.getCdxFileNew(), this.getCdxFileSave());
 				WebgatherLogger.debug("Aktuelle CDX-Datei abgelegt in: "

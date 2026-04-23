@@ -288,8 +288,10 @@ public class CrawlerModel {
 						+ conf.getName() + "/" + datetime);
 				crawlDir.mkdirs();
 			}
-			if (!resultDir.exists()) {
+			if (!resultDir.exists() && conf.getCrawlerSelection()
+					.equals(Gatherconf.CrawlerSelection.wpull)) {
 				// create output directory
+				// der Move vom jobDir zum outDir findet nur bei wpull-Crawls statt.
 				WebgatherLogger.debug("Create Output Directory " + outDir + "/"
 						+ conf.getName() + "/" + datetime);
 				resultDir.mkdirs();

@@ -118,6 +118,9 @@ regal-api.btrix.adminUsername="admin@example.com"
 regal-api.btrix.adminPassword="PASSW0RD!"
 regal-api.btrix.orgName="toscience"
 regal-api.btrix.orgId=""
+# Das Arbeitsverzeichnis für die CDN-Precrawls:
+regal-api.btrix.jobDir="/opt/toscience/cdn-data"
+# Hierhin werden die fertigen Browsertrix-Crawls gestellt:
 regal-api.btrix.outDir="/opt/toscience/btrix-data"
 #--- importHome: von hier können Webarchive importiert werden.
 #--- importHome: diese Variable i.d.R. nur auf Produktionssystemen setzen!

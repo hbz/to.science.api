@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -106,8 +108,20 @@ public class Webhooks extends MyController {
 			play.Logger.debug("Crawl Config cid = " + crawlConfig.getString("id"));
 			play.Logger
 					.debug("Last Crawl Id = " + crawlConfig.getString("lastCrawlId"));
+			// ToDo: die lastCrawlId in der conf des anzulegenden Webschnitts
+			// hinterlegen
 			String toscienceId = (String) crawlConfig.getJSONArray("tags").get(0);
 			play.Logger.debug("Crawl Config is for toscience ID: " + toscienceId);
+			play.Logger.debug(
+					"lastCrawlStartTime: " + crawlConfig.getString("lastCrawlStartTime"));
+			DateTimeFormatter formatterIn =
+					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
+			LocalDateTime dateTime = LocalDateTime
+					.parse(crawlConfig.getString("lastCrawlStartTime"), formatterIn);
+			DateTimeFormatter formatterOut =
+					DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+			String timestamp = dateTime.format(formatterOut);
+			play.Logger.debug("timestamp: " + timestamp);
 
 			/**
 			 * hier weiter; Webschnitt anlegen und Webarchiv archivieren und in
