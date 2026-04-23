@@ -16,14 +16,11 @@
  */
 package controllers;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,9 +37,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import authenticate.BasicAuth;
 import helper.BtrixWebclient;
-import models.Gatherconf;
+import helper.WebgatherUtils;
 import models.Message;
-import models.CrawlerModel.CrawlControllerState;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -141,10 +137,11 @@ public class Webhooks extends MyController {
 			}
 
 			// ToDo: ab hier in einen Thread schicken; lang dauernde Dateioperationen!
+			String waczFilenameResultDir =
+					btrixWebclient.getResultDir().toString() + "/" + waczFile.getName();
 			try {
 				Path sourcePath = Paths.get(filename);
-				Path targetPath = Paths.get(btrixWebclient.getResultDir().toString()
-						+ "/" + waczFile.getName());
+				Path targetPath = Paths.get(waczFilenameResultDir);
 				play.Logger.debug("Moving file " + filename + " to directory "
 						+ btrixWebclient.getResultDir().toString());
 				Files.move(sourcePath, targetPath);
@@ -155,8 +152,20 @@ public class Webhooks extends MyController {
 				throw new RuntimeException(e);
 			}
 
+			try {
+				play.Logger
+						.debug("WACZ-Datei " + waczFilenameResultDir + " wird ausgepackt.");
+				WebgatherUtils.unzip(waczFilenameResultDir,
+						btrixWebclient.getResultDir().toString());
+				play.Logger.debug("WACZ-Datei wurde ausgepackt.");
+			} catch (IOException e) {
+				play.Logger
+						.error("WACZ file kann nicht ausgepackt werden! " + e.getMessage());
+				throw new RuntimeException(e);
+			}
+
 			/**
-			 * hier weiter; Webarchiv am Zielort auspacken und Webschnitt anlegen
+			 * hier weiter; WACZ-Datei löschen und Webschnitt anlegen
 			 */
 
 			return ok();

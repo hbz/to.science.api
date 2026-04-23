@@ -18,6 +18,8 @@ package helper;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.IDN;
@@ -25,6 +27,8 @@ import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import actions.Create;
 import helper.mail.Mail;
@@ -282,6 +286,41 @@ public class WebgatherUtils {
 	public static String getDomain(String url) {
 		return url.replaceAll("^http://", "").replaceAll("^https://", "")
 				.replaceAll("/.*$", "");
+	}
+
+	/**
+	 * Diese Methode entpackt ein ZIP-Archiv. Sie macht dasselbe wie der
+	 * Unix/Linux-Befehl unzip. Quelle:
+	 * https://www.geeksforgeeks.org/java/how-to-zip-and-unzip-files-in-java/
+	 * 
+	 * @author I. Kuss, hbz
+	 * @date 2026-04-23
+	 * @param zipFile der volle Pfadname eines ZIP-Archivs (Dateiendung .zip)
+	 * @param destFolder der volle Pfadname eines Dateiordners, in dem das
+	 *          ZIP-Archiv ausgepackt werden soll
+	 * @throws IOException eine Ausnahmebehandlung
+	 */
+	public static void unzip(String zipFile, String destFolder)
+			throws IOException {
+		try (
+				ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+			ZipEntry entry;
+			byte[] buffer = new byte[1024];
+			while ((entry = zis.getNextEntry()) != null) {
+				File newFile = new File(destFolder + File.separator + entry.getName());
+				if (entry.isDirectory()) {
+					newFile.mkdirs();
+				} else {
+					new File(newFile.getParent()).mkdirs();
+					try (FileOutputStream fos = new FileOutputStream(newFile)) {
+						int length;
+						while ((length = zis.read(buffer)) > 0) {
+							fos.write(buffer, 0, length);
+						}
+					}
+				}
+			}
+		}
 	}
 
 }
