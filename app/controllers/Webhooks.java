@@ -138,8 +138,16 @@ public class Webhooks extends MyController {
 			}
 
 			// ToDo: ab hier in einen Thread schicken; lang dauernde Dateioperationen!
-			waczFile.renameTo(new File(
-					btrixWebclient.getResultDir().toString() + "/" + waczFile.getName()));
+			try {
+				play.Logger.debug("Moving file " + waczFile.toString()
+						+ " to directory " + btrixWebclient.getResultDir().toString());
+				waczFile.renameTo(new File(btrixWebclient.getResultDir().toString()
+						+ "/" + waczFile.getName()));
+			} catch (Exception e) {
+				play.Logger.error("WACZ file could not be moved to result directory!");
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
 
 			/**
 			 * hier weiter; Webarchiv am Zielort auspacken und Webschnitt anlegen
