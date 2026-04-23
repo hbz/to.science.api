@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -118,9 +120,10 @@ public class Webhooks extends MyController {
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
 			LocalDateTime dateTime = LocalDateTime
 					.parse(crawlConfig.getString("lastCrawlStartTime"), formatterIn);
+			ZonedDateTime zonedDateTime = dateTime.atZone(ZoneId.systemDefault());
 			DateTimeFormatter formatterOut =
 					DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			String timestamp = dateTime.format(formatterOut);
+			String timestamp = zonedDateTime.format(formatterOut);
 			play.Logger.debug("timestamp: " + timestamp);
 
 			/**
