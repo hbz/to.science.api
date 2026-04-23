@@ -37,6 +37,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import authenticate.BasicAuth;
 import helper.BtrixWebclient;
+import models.Gatherconf;
 import models.Message;
 import models.CrawlerModel.CrawlControllerState;
 import play.libs.F.Promise;
@@ -124,12 +125,24 @@ public class Webhooks extends MyController {
 					dateTime.withZoneSameInstant(ZoneId.systemDefault());
 			DateTimeFormatter formatterOut =
 					DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			String timestamp = dateTimeLocal.format(formatterOut);
-			play.Logger.debug("timestamp: " + timestamp);
+			String datetime = dateTimeLocal.format(formatterOut);
+			play.Logger.debug("datetime: " + datetime);
+
+			btrixWebclient.setResultDir(new File(
+					btrixWebclient.getOutDir() + "/" + toscienceId + "/" + datetime));
+			if (!btrixWebclient.getResultDir().exists()) {
+				// create output directory for this Browsertrix Crawl
+				play.Logger.debug("Creating Output Directory "
+						+ btrixWebclient.getResultDir().toString());
+				btrixWebclient.getResultDir().mkdirs();
+			}
+
+			// ToDo: ab hier in einen Thread schicken; lang dauernde Dateioperationen!
+			waczFile.renameTo(new File(
+					btrixWebclient.getResultDir().toString() + "/" + waczFile.getName()));
 
 			/**
-			 * hier weiter; Webschnitt anlegen und Webarchiv archivieren und in
-			 * Wayback indexieren.
+			 * hier weiter; Webarchiv am Zielort auspacken und Webschnitt anlegen
 			 */
 
 			return ok();
