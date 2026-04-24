@@ -152,20 +152,8 @@ public class Webhooks extends MyController {
 				throw new RuntimeException(e);
 			}
 
-			try {
-				play.Logger
-						.debug("WACZ-Datei " + waczFilenameResultDir + " wird ausgepackt.");
-				WebgatherUtils.unzip(waczFilenameResultDir,
-						btrixWebclient.getResultDir().toString());
-				play.Logger.debug("WACZ-Datei wurde ausgepackt.");
-			} catch (IOException e) {
-				play.Logger
-						.error("WACZ file kann nicht ausgepackt werden! " + e.getMessage());
-				throw new RuntimeException(e);
-			}
-
 			/**
-			 * hier weiter; WACZ-Datei löschen und Webschnitt anlegen
+			 * hier weiter; Webschnitt anlegen
 			 */
 
 			return ok();
