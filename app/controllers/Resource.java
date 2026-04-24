@@ -1349,7 +1349,8 @@ public class Resource extends MyController {
 			@QueryParam("filename") String filename) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			Node result = create.postWebpageVersion(node, versionPid,
+			String lastCrawlId = null;
+			Node result = create.postWebpageVersion(node, versionPid, lastCrawlId,
 					crawlerSelection, timestamp, filename);
 			return getJsonResult(result);
 		});

@@ -116,6 +116,7 @@ public class Gatherconf {
 	String notices;
 	CrawlerSelection crawlerSelection;
 	String btrixWorkflowId;
+	String lastCrawlId;
 	QuotaUnitSelection quotaUnitSelection;
 	AgentIdSelection agentIdSelection;
 	ArrayList<String> urlsExcluded;
@@ -140,7 +141,7 @@ public class Gatherconf {
 		httpResponseCode = 0;
 		invalidUrl = false;
 		urlNew = null;
-		domains = new ArrayList<String>();
+		domains = new ArrayList<>();
 		crawlSubdomains = CrawlSubdomains.hostnames;
 		cookie = null;
 		active = true;
@@ -150,9 +151,10 @@ public class Gatherconf {
 		notices = null;
 		crawlerSelection = CrawlerSelection.wpull;
 		btrixWorkflowId = null;
+		lastCrawlId = null;
 		quotaUnitSelection = QuotaUnitSelection.GB;
 		agentIdSelection = AgentIdSelection.Toscience;
-		urlsExcluded = new ArrayList<String>();
+		urlsExcluded = new ArrayList<>();
 		startDate = null;
 		localDir = null;
 		name = null;
@@ -330,6 +332,20 @@ public class Gatherconf {
 	 */
 	public void setBtrixWorkflowId(String btrixWorkflowId) {
 		this.btrixWorkflowId = btrixWorkflowId;
+	}
+
+	/**
+	 * @return a browsertrix last crawl_id
+	 */
+	public String getLastCrawlId() {
+		return lastCrawlId;
+	}
+
+	/**
+	 * @param lastCrawlId a browsertrix workflow id
+	 */
+	public void setLastCrawlId(String lastCrawlId) {
+		this.lastCrawlId = lastCrawlId;
 	}
 
 	/**

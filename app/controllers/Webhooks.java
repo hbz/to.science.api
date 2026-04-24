@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,10 +36,14 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import actions.Create;
+import actions.Read;
 import authenticate.BasicAuth;
 import helper.BtrixWebclient;
 import helper.WebgatherUtils;
+import models.Gatherconf.CrawlerSelection;
 import models.Message;
+import models.Node;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -108,23 +113,22 @@ public class Webhooks extends MyController {
 			play.Logger.debug(
 					"Found Crawl Config with name: " + crawlConfig.getString("name"));
 			play.Logger.debug("Crawl Config cid = " + crawlConfig.getString("id"));
-			play.Logger
-					.debug("Last Crawl Id = " + crawlConfig.getString("lastCrawlId"));
-			// ToDo: die lastCrawlId in der conf des anzulegenden Webschnitts
-			// hinterlegen
+			String lastCrawlId = crawlConfig.getString("lastCrawlId");
+			play.Logger.debug("Last Crawl Id = " + lastCrawlId);
 			String toscienceId = (String) crawlConfig.getJSONArray("tags").get(0);
 			play.Logger.debug("Crawl Config is for toscience ID: " + toscienceId);
 			play.Logger.debug(
 					"lastCrawlStartTime: " + crawlConfig.getString("lastCrawlStartTime"));
-			DateTimeFormatter formatterIn =
-					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
-			ZonedDateTime dateTime = ZonedDateTime
-					.parse(crawlConfig.getString("lastCrawlStartTime"), formatterIn);
-			ZonedDateTime dateTimeLocal =
-					dateTime.withZoneSameInstant(ZoneId.systemDefault());
-			DateTimeFormatter formatterOut =
+			// Hole Zeitstempel aus Dateinamen
+			DateTimeFormatter formatter =
 					DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-			String datetime = dateTimeLocal.format(formatterOut);
+			LocalDateTime dateTime =
+					LocalDateTime.parse(waczFile.getName().substring(0, 14), formatter);
+			ZoneId zoneId = ZoneId.of("UTC");
+			ZonedDateTime dateTimeUtc = ZonedDateTime.of(dateTime, zoneId);
+			ZonedDateTime dateTimeLocal =
+					dateTimeUtc.withZoneSameInstant(ZoneId.systemDefault());
+			String datetime = dateTimeLocal.format(formatter);
 			play.Logger.debug("datetime: " + datetime);
 
 			btrixWebclient.setResultDir(new File(
@@ -153,8 +157,15 @@ public class Webhooks extends MyController {
 			}
 
 			/**
-			 * hier weiter; Webschnitt anlegen
+			 * Webschnitt anlegen mit Zeitstempel: Angezeigt wird dateTimeLocal im
+			 * Format "yyyy-MM-dd HH:mm:ss" . Der Link unter "zum Webschnitt" führt
+			 * aber auf dateTimeUtc im Format "yyyyMMddHHmmss".
 			 */
+			String versionPid = null;
+			Node n = new Read().readNode(toscienceId);
+			new Create().postWebpageVersion(n, versionPid, lastCrawlId, "btrix",
+					datetime, waczFile.getName());
+			play.Logger.info("WebpageVersion für " + toscienceId + "wurde angelegt.");
 
 			return ok();
 		});

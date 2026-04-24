@@ -664,20 +664,23 @@ public class Create extends RegalAction {
 	 * dataDir liegt.
 	 * 
 	 * @author Ingolf Kuss | 27.07.2020 | Neuanlage für EDOZWO-1020
+	 * @date 2026-04-24 Diese Methode wird auch für WACZ-Archive benutzt
 	 * 
 	 * @param n Der Knoten der Webpage
 	 * @param versionPid gewünschte Pid für die Version (7-stellig numerisch) oder
 	 *          leer (Pid wird generiert)
+	 * @param lastCrawlId eine ID für diese Crawl, z.B. Browsertrix' last_crawl_id
+	 *          oder null
 	 * @param crawlerSelection der Name des für diesen Crawl verwendeten
 	 *          Webcrawlers gem. Aufzählung in der Klasse Gatherconf
 	 * @param timestamp Der Zeitstempel des Crawl. Ist auch Name des
 	 *          Unterverzeichnisses für den Crawl. Aus dem Datum wird der
 	 *          Bezeichner (Label auf der UI) für den Webschnitt generiert.
 	 * @param filename Der Dateiname der Archivdatei (ohne Pfadangaben, aber mit
-	 *          Dateiendung) (WARC-Archiv).
+	 *          Dateiendung) (WARC/WACZ-Archiv).
 	 * @return a new website version pointing to the posted crawl.
 	 */
-	public Node postWebpageVersion(Node n, String versionPid,
+	public Node postWebpageVersion(Node n, String versionPid, String lastCrawlId,
 			String crawlerSelection, String timestamp, String filename) {
 		Gatherconf conf = null;
 		try {
@@ -697,6 +700,7 @@ public class Create extends RegalAction {
 			ApplicationLogger.debug("timestamp: " + timestamp);
 			Date startDate = new SimpleDateFormat("yyyyMMddHHmmss").parse(timestamp);
 			conf.setStartDate(startDate);
+			conf.setLastCrawlId(lastCrawlId);
 			ApplicationLogger.debug("Crawl Startdate: " + startDate);
 
 			String dataDir = Play.application().configuration()
@@ -721,7 +725,8 @@ public class Create extends RegalAction {
 							+ conf.getName() + "/" + timestamp + "/" + filenameFound;
 
 			ApplicationLogger.debug("URI-Path to WARC " + localDataUrl);
-			String warcFilenameBase = filenameFound.replaceAll(".warc.gz$", "");
+			String warcFilenameBase =
+					filenameFound.replaceAll(".warc.gz$", "").replaceAll(".wacz$", "");
 			ApplicationLogger.debug("WARC file name base: " + warcFilenameBase);
 
 			return createWebpageVersion(n, conf, warcFilenameBase, outDir,
