@@ -8,6 +8,10 @@ import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -29,6 +33,7 @@ import com.wordnik.swagger.core.util.JsonUtil;
 import actions.Read;
 import helper.MyEtikettMaker;
 import models.Gatherconf;
+import models.Gatherconf.CrawlerSelection;
 import models.Globals;
 import helper.JsonMdLoader;
 import models.Link;
@@ -128,9 +133,9 @@ public class Helper {
 	}
 
 	/**
-	 * Diese Methode erzeugt für ein Version-Objekt den Link unter
-	 * "Zum Webschnitt". Dieser führt zu dem zugehörigen Objekt in der
-	 * Wayback-Machine (Replay-Engine).
+	 * Diese Methode erzeugt für ein Version-Objekt den Link unter "Zum
+	 * Webschnitt". Dieser führt zu dem zugehörigen Objekt in der Wayback-Machine
+	 * (Replay-Engine).
 	 * 
 	 * @autor Kuss
 	 * @param pid toscience PID of a version object
@@ -176,7 +181,19 @@ public class Helper {
 				owDatestamp = outDir.getName();
 			} catch (Exception e) {
 				owDatestamp =
-						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+						new SimpleDateFormat("yyyyMMddHHmmss").format(conf.getStartDate());
+			}
+			if (!conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
+				// KS20260424: Für Wayback muss von lokaler Zeit zu UTC konvertiert
+				// werden. Für Heritrix sind die Crawl-Verzeichnisnamen schon in UTC.
+				DateTimeFormatter formatter =
+						DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+				LocalDateTime dateTime = LocalDateTime.parse(owDatestamp, formatter);
+				ZoneId zoneId = ZoneId.systemDefault();
+				ZonedDateTime dateTimeLocal = ZonedDateTime.of(dateTime, zoneId);
+				ZonedDateTime dateTimeUtc =
+						dateTimeLocal.withZoneSameInstant(ZoneId.of("UTC"));
+				owDatestamp = dateTimeUtc.format(formatter);
 			}
 
 			waybackLink = waybackCollectionLink + owDatestamp + "/" + conf.getUrl();
