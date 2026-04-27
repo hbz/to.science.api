@@ -193,6 +193,16 @@ public class Gatherconf {
 	}
 
 	/**
+	 * Setter für Domains
+	 * 
+	 * @param myDomains eine Liste von Domains, die für diese Webpage gecrawlt
+	 *          werden sollen
+	 */
+	public void setDomains(ArrayList<String> myDomains) {
+		this.domains = myDomains;
+	}
+
+	/**
 	 * @param domain a domain that shall be included in the crawl
 	 */
 	public void addDomain(String domain) {

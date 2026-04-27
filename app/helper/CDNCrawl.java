@@ -143,6 +143,7 @@ public class CDNCrawl extends Thread {
 			}
 			domains.addAll(hostnames);
 			crawlerModel.setDomains(domains);
+			conf.setDomains(domains);
 
 			/**
 			 * 4. Nach erfolgreichem CDN-Precrawl wird die neue CDX-Datei für den
