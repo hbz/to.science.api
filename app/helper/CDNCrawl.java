@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+
 import models.CrawlerModel;
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
@@ -125,6 +127,7 @@ public class CDNCrawl extends Thread {
 			}
 			domains.addAll(hostnames);
 			crawlerModel.setDomains(domains);
+
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("cdn crawl not successfully started!", e);

@@ -447,34 +447,6 @@ public class BtrixWebclient extends CrawlerModel {
 		super.startCrawl();
 
 		try {
-			/**
-			 * Für Browsertrix-Crawls wird die cdx-Datei des CDN-Precrawls hier ein
-			 * Verzeichnis höher kopiert, um als Vorlage für den nächsten CDN-Precrawl
-			 * dienen zu können. Für wpull-Crawls ist das nicht notwendig, da die
-			 * CDX-Datei in die des Hauptcrawls integriert ist. Diese wird am Ende des
-			 * Hauptcrawls ein Verzeichnis höher kopiert (siehe "cdxFileSave" in
-			 * Create.createWebpageVersion). Evtl. kann man auch für Browsertrix
-			 * diesen Punkt durch eine Aktion ersetzen, die am Ende des Hauptcrawls
-			 * geschehen wird.
-			 */
-			this.setCdxFileNew(new File(this.getCrawlDir().getAbsolutePath() + "/"
-					+ getWarcFilename() + ".cdx"));
-			if (this.getCdxFileNew().exists()) {
-				this.setCdxFileSave(new File(Play.application().configuration()
-						.getString("regal-api.btrix.jobDir") + "/" + getConf().getName()
-						+ "/WEB-" + WebgatherUtils.getDomain(getConf().getUrl()) + ".cdx"));
-				FileUtils.copyFile(this.getCdxFileNew(), this.getCdxFileSave());
-				WebgatherLogger.debug("Aktuelle CDX-Datei abgelegt in: "
-						+ this.getCdxFileSave().getAbsolutePath());
-			}
-
-		} catch (Exception e) {
-			WebgatherLogger.warn(e.toString());
-			WebgatherLogger.warn("CDX file could not be copied to main directory! "
-					+ this.getCdxFileSave().getAbsolutePath());
-		}
-
-		try {
 
 			/**
 			 * Rufe Hauptcrawl in Browsertrix auf

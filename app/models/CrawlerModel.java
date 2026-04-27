@@ -394,10 +394,6 @@ public class CrawlerModel {
 			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
 			this.datetime =
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
-			this.crawlDir = new File(jobDir + "/" + conf.getName() + "/" + datetime);
-			this.resultDir = new File(outDir + "/" + conf.getName() + "/" + datetime);
-			this.cdxFile =
-					new File(outDir + "/" + conf.getName() + "/WEB-" + host + ".cdx");
 			this.warcFilename = "WEB-" + host + "-" + date;
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
@@ -422,8 +418,11 @@ public class CrawlerModel {
 			}
 			if (!resultDir.exists() && conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.wpull)) {
-				// create output directory
-				// der Move vom jobDir zum outDir findet nur bei wpull-Crawls statt.
+				/**
+				 * Create output directory. Der Move vom jobDir zum outDir findet nur
+				 * bei wpull-Crawls statt. Bei Browsertrix-Crawls erzeugt der Webhook
+				 * btirxCrawlFinished das ResultDir.
+				 */
 				WebgatherLogger.debug("Create Output Directory " + outDir + "/"
 						+ conf.getName() + "/" + datetime);
 				resultDir.mkdirs();

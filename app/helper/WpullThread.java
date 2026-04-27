@@ -1,6 +1,7 @@
 package helper;
 
 import java.io.File;
+import java.io.InputStream;
 import java.lang.Process;
 import java.lang.ProcessBuilder;
 import java.util.ArrayList;
@@ -220,7 +221,8 @@ public class WpullThread extends Thread {
 			Process proc = pb.start();
 			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
 			assert pb.redirectOutput().file() == logFile;
-			assert proc.getInputStream().read() == -1;
+			InputStream inputStream = proc.getInputStream();
+			assert inputStream.read() == -1;
 			exitState = proc.waitFor();
 			/**
 			 * Exit-Status: 0 = Crawl erfolgreich beendet

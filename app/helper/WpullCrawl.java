@@ -17,6 +17,7 @@
 package helper;
 
 import models.CrawlerModel;
+import models.CrawlerModel.CrawlControllerState;
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
 import models.Gatherconf.RobotsPolicy;
@@ -48,6 +49,7 @@ public class WpullCrawl extends CrawlerModel {
 			.getString("regal-api.wpull.tempJobDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
+	private File tempCrawlDir = null;
 	private File logAnalysesDir = null;
 	private BufferedReader buf;
 
@@ -78,6 +80,8 @@ public class WpullCrawl extends CrawlerModel {
 					.getString("regal-api.wpull.outDir"));
 			this.setCrawlDir(new File(
 					this.getJobDir() + "/" + conf.getName() + "/" + getDatetime()));
+			tempCrawlDir =
+					new File(tempJobDir + "/" + conf.getName() + "/" + getDatetime());
 			this.setResultDir(new File(
 					this.getOutDir() + "/" + conf.getName() + "/" + getDatetime()));
 			this.setCdxFile(new File(this.getOutDir() + "/" + conf.getName() + "/WEB-"
@@ -92,6 +96,7 @@ public class WpullCrawl extends CrawlerModel {
 			 */
 			setLocalpath(Globals.heritrixData + "/wpull-data" + "/" + conf.getName()
 					+ "/" + getDatetime() + "/" + getWarcFilename() + ".warc.gz");
+			setDomains(conf.getDomains());
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
 			throw new RuntimeException(e);
@@ -104,6 +109,12 @@ public class WpullCrawl extends CrawlerModel {
 	@Override
 	public void createCrawl() {
 		super.createCrawl();
+		if (!tempCrawlDir.exists()) {
+			// create temp crawl directory
+			WebgatherLogger.debug("Create temp crawl directory " + tempJobDir + "/"
+					+ getConf().getName() + "/" + getDatetime());
+			tempCrawlDir.mkdirs();
+		}
 	}
 
 	/**
@@ -119,7 +130,7 @@ public class WpullCrawl extends CrawlerModel {
 			WpullThread wpullThread = new WpullThread(this, 1);
 			wpullThread.setNode(getNode());
 			wpullThread.setConf(getConf());
-			wpullThread.setCrawlDir(getCrawlDir());
+			wpullThread.setCrawlDir(tempCrawlDir);
 			wpullThread.setOutDir(getResultDir());
 			wpullThread.setWarcFilename(getWarcFilename());
 			wpullThread.setHost(getHost());
