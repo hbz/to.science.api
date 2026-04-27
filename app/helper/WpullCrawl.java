@@ -17,7 +17,6 @@
 package helper;
 
 import models.CrawlerModel;
-import models.CrawlerModel.CrawlControllerState;
 import models.Gatherconf;
 import models.Gatherconf.AgentIdSelection;
 import models.Gatherconf.RobotsPolicy;
@@ -49,6 +48,8 @@ public class WpullCrawl extends CrawlerModel {
 			.getString("regal-api.wpull.tempJobDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
+	private File logAnalysesDir = null;
+	private BufferedReader buf;
 
 	/**
 	 * Konstruktor zu WpullCrawl
@@ -75,22 +76,22 @@ public class WpullCrawl extends CrawlerModel {
 			 */
 			this.setOutDir(Play.application().configuration()
 					.getString("regal-api.wpull.outDir"));
-			this.setCrawlDir(
-					new File(this.getJobDir() + "/" + conf.getName() + "/" + datetime));
-			this.setResultDir(
-					new File(this.getOutDir() + "/" + conf.getName() + "/" + datetime));
-			this.setCdxFile(new File(
-					this.getOutDir() + "/" + conf.getName() + "/WEB-" + host + ".cdx"));
+			this.setCrawlDir(new File(
+					this.getJobDir() + "/" + conf.getName() + "/" + getDatetime()));
+			this.setResultDir(new File(
+					this.getOutDir() + "/" + conf.getName() + "/" + getDatetime()));
+			this.setCdxFile(new File(this.getOutDir() + "/" + conf.getName() + "/WEB-"
+					+ getHost() + ".cdx"));
 
 			this.logAnalysesDir = new File(crawlreportsDir + "/" + "logAnalyses/"
-					+ conf.getName() + "/" + datetime);
+					+ conf.getName() + "/" + getDatetime());
 			/*
 			 * Die URI localpath wird von Fedora benötigt, um ein Objekt anlegen zu
 			 * können. Ohne "localpath" wird im Frontend kein Link zur Wayback
 			 * erzeugt.
 			 */
-			this.localpath = Globals.heritrixData + "/wpull-data" + "/"
-					+ conf.getName() + "/" + datetime + "/" + warcFilename + ".warc.gz";
+			setLocalpath(Globals.heritrixData + "/wpull-data" + "/" + conf.getName()
+					+ "/" + getDatetime() + "/" + getWarcFilename() + ".warc.gz");
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
 			throw new RuntimeException(e);
@@ -111,20 +112,26 @@ public class WpullCrawl extends CrawlerModel {
 	 */
 	@Override
 	public void startCrawl() {
+		// Dies führt den CDN-Precrawl aus.
 		super.startCrawl();
+		// Jetzt rufe den Hauptcrawl auf
 		try {
 			WpullThread wpullThread = new WpullThread(this, 1);
-			wpullThread.setNode(node);
-			wpullThread.setConf(conf);
-			wpullThread.setCrawlDir(this.getCrawlDir());
-			wpullThread.setOutDir(this.getResultDir());
-			wpullThread.setWarcFilename(warcFilename);
-			wpullThread.setHost(host);
-			wpullThread.setLocalPath(localpath);
+			wpullThread.setNode(getNode());
+			wpullThread.setConf(getConf());
+			wpullThread.setCrawlDir(getCrawlDir());
+			wpullThread.setOutDir(getResultDir());
+			wpullThread.setWarcFilename(getWarcFilename());
+			wpullThread.setHost(getHost());
+			wpullThread.setLocalPath(getLocalpath());
 			wpullThread.setExecuteCommand(buildExecCommand());
-			wpullThread.setDomains(domains);
+			wpullThread.setDomains(getDomains());
 			wpullThread.start();
-			exitState = wpullThread.getExitState();
+			/*
+			 * Das hier nicht gewartet wird, ist das Setzen des Exit-Status hier
+			 * eigentlich Blödsinn; Es steht immer "0" drin.
+			 */
+			setExitState(wpullThread.getExitState());
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
@@ -144,15 +151,15 @@ public class WpullCrawl extends CrawlerModel {
 	 */
 	private String buildExecCommand() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(crawler + " " + urlAscii);
+		sb.append(crawler + " " + getUrlAscii());
 
-		if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-			sb.append(
-					" --header=Cookie:%20" + conf.getCookie().replaceAll(" ", "%20"));
+		if (getConf().getCookie() != null && !getConf().getCookie().isEmpty()) {
+			sb.append(" --header=Cookie:%20"
+					+ getConf().getCookie().replaceAll(" ", "%20"));
 		}
 
 		sb.append(" --recursive");
-		ArrayList<String> urlsExcluded = conf.getUrlsExcluded();
+		ArrayList<String> urlsExcluded = getConf().getUrlsExcluded();
 		if (urlsExcluded.size() > 0) {
 			sb.append(" --reject-regex=.*" + urlsExcluded.get(0).trim());
 			for (int i = 1; i < urlsExcluded.size(); i++) {
@@ -161,14 +168,14 @@ public class WpullCrawl extends CrawlerModel {
 			sb.append(".*");
 		}
 
-		int level = conf.getDeepness();
+		int level = getConf().getDeepness();
 		if (level > 0) {
 			sb.append(" --level=" + Integer.toString(level)); // number of recursions
 		}
 
-		long maxByte = conf.getMaxCrawlSize();
+		long maxByte = getConf().getMaxCrawlSize();
 		if (maxByte > 0) {
-			QuotaUnitSelection qFactor = conf.getQuotaUnitSelection();
+			QuotaUnitSelection qFactor = getConf().getQuotaUnitSelection();
 			Hashtable<QuotaUnitSelection, Integer> sizeFactor = new Hashtable<>();
 			sizeFactor.put(QuotaUnitSelection.KB, 1024);
 			sizeFactor.put(QuotaUnitSelection.MB, 1048576);
@@ -178,39 +185,39 @@ public class WpullCrawl extends CrawlerModel {
 			sb.append(" --quota=" + Long.toString(size));
 		}
 
-		int waitSec = conf.getWaitSecBtRequests();
+		int waitSec = getConf().getWaitSecBtRequests();
 		if (waitSec != 0) {
 			sb.append(" --wait=" + Integer.toString(waitSec)); // number of second
 																													// wpull waits between
 																													// requests
 		} else {
-			boolean random = conf.isRandomWait();
+			boolean random = getConf().isRandomWait();
 			if (random == true) {
 				sb.append(" --random-wait"); // randomize wait times
 			}
 		}
 
-		int tries = conf.getTries();
+		int tries = getConf().getTries();
 		if (tries != 0) {
 			sb.append(" --tries=" + Integer.toString(tries)); // number of requests
 																												// wpull performs on
 																												// transient errors
 		}
 
-		int waitRetry = conf.getWaitRetry();
+		int waitRetry = getConf().getWaitRetry();
 		if (waitRetry != 0) {
 			sb.append(" --waitretry=" + Integer.toString(waitRetry)); // wait between
 																																// re-tries
 		}
 
 		// select agent-string for http-request
-		AgentIdSelection agentId = conf.getAgentIdSelection();
+		AgentIdSelection agentId = getConf().getAgentIdSelection();
 		sb.append(" --user-agent=" + Gatherconf.agentTable.get(agentId));
 
 		sb.append(" --link-extractors=javascript,html,css");
-		sb.append(" --warc-file=" + warcFilename);
-		if (conf.getRobotsPolicy().equals(RobotsPolicy.classic)
-				|| conf.getRobotsPolicy().equals(RobotsPolicy.ignore)) {
+		sb.append(" --warc-file=" + getWarcFilename());
+		if (getConf().getRobotsPolicy().equals(RobotsPolicy.classic)
+				|| getConf().getRobotsPolicy().equals(RobotsPolicy.ignore)) {
 			sb.append(" --no-robots");
 		}
 		/* Benutze Internet-Protokoll Version 4 */
@@ -219,7 +226,7 @@ public class WpullCrawl extends CrawlerModel {
 		// kommt "Misconfigured redirect"
 		sb.append(" --escaped-fragment --strip-session-id");
 		sb.append(" --no-host-directories --page-requisites");
-		sb.append(" --database=" + warcFilename + ".db");
+		sb.append(" --database=" + getWarcFilename() + ".db");
 		sb.append(" --no-check-certificate");
 		sb.append(" --no-directories"); // mandatory to prevent runtime errors
 		sb.append(" --delete-after"); // mandatory for reducing required disc space
@@ -235,10 +242,10 @@ public class WpullCrawl extends CrawlerModel {
 		sb.append(" --warc-append");
 		// auskommentiert 27.08.2020 für EDOZWO-1026
 		// sb.append(" --warc-tempdir=" + tempJobDir)
-		sb.append(" --warc-move=" + this.getResultDir());
+		sb.append(" --warc-move=" + getResultDir());
 		sb.append(" --warc-cdx");
-		if (this.getCdxFileNew() != null && this.getCdxFileNew().exists()) {
-			sb.append(" --warc-dedup=" + warcFilename + ".cdx");
+		if (getCdxFileNew() != null && getCdxFileNew().exists()) {
+			sb.append(" --warc-dedup=" + getWarcFilename() + ".cdx");
 		}
 		play.Logger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
@@ -255,10 +262,10 @@ public class WpullCrawl extends CrawlerModel {
 		File logfile = null;
 		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
 				Play.application().configuration().getString("regal-api.wpull.jobDir"),
-				node.getPid());
+				getNode().getPid());
 		File latestOutDir = Webgatherer.getLatestCrawlDir(
 				Play.application().configuration().getString("regal-api.wpull.outDir"),
-				node.getPid());
+				getNode().getPid());
 		if (latestCrawlDir != null) {
 			logfile = new File(latestCrawlDir.toString() + "/crawl.log");
 		}
@@ -280,8 +287,8 @@ public class WpullCrawl extends CrawlerModel {
 	public int getCrawlExitStatus() {
 		File logfile = findLatestLogFile();
 		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.warn(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
+			WebgatherLogger.warn("Letztes Crawl-Log für PID " + getNode().getPid()
+					+ " nicht gefunden.");
 			return -2;
 		}
 		CrawlLog crawlLog = new CrawlLog(logfile);
@@ -300,17 +307,15 @@ public class WpullCrawl extends CrawlerModel {
 		// 1. Kein Crawl-Verzeichnis mit crawl.log vorhanden => Status = NEW
 		File logfile = findLatestLogFile();
 		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.info(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
+			WebgatherLogger.info("Letztes Crawl-Log für PID " + getNode().getPid()
+					+ " nicht gefunden.");
 			return CrawlControllerState.NEW;
 		}
 		// 2. Läuft noch => Status = RUNNING
 		if (isWpullCrawlRunning()) {
 			return CrawlControllerState.RUNNING;
 		}
-		// 3. Läuft nicht mehr.
-		/* das Log wird geparst */
-		BufferedReader buf = null;
+		buf = null;
 		String regExp = "^INFO FINISHED.";
 		Pattern pattern = Pattern.compile(regExp);
 		try {
@@ -352,12 +357,11 @@ public class WpullCrawl extends CrawlerModel {
 		 * behandelt
 		 */
 		if (logfile == null || !logfile.exists()) {
-			WebgatherLogger.warn(
-					"Letztes Crawl-Log für PID " + node.getPid() + " nicht gefunden.");
+			WebgatherLogger.warn("Letztes Crawl-Log für PID " + getNode().getPid()
+					+ " nicht gefunden.");
 			return true;
 		}
-		/* Das Log wird geparst */
-		BufferedReader buf = null;
+		buf = null;
 		String regExp = "^INFO Downloaded: 0 files, 0.0 B.";
 		Pattern pattern = Pattern.compile(regExp);
 		boolean isEmpty = false;
@@ -393,16 +397,16 @@ public class WpullCrawl extends CrawlerModel {
 	 * @return boolean Crawl läuft
 	 */
 	public boolean isWpullCrawlRunning() {
-		BufferedReader buf = null;
+		buf = null;
 		String cmd = "ps -eaf";
 		String regExp1 =
 				Play.application().configuration().getString("regal-api.wpull.crawler");
 		Pattern pattern1 = Pattern.compile(regExp1);
 		Matcher matcher1 = null;
 		try {
-			urlAscii = WebgatherUtils
-					.convertUnicodeURLToAscii(Gatherconf.create(node.getConf()).getUrl());
-			String regExp2 = urlAscii;
+			setUrlAscii(WebgatherUtils.convertUnicodeURLToAscii(
+					Gatherconf.create(getNode().getConf()).getUrl()));
+			String regExp2 = getUrlAscii();
 			// Maskiere Sonderzeichen des Regulären Ausdrucks mit Pattern.quote
 			Pattern pattern2 = Pattern.compile(Pattern.quote(regExp2));
 			Matcher matcher2 = null;
@@ -488,9 +492,9 @@ public class WpullCrawl extends CrawlerModel {
 		try {
 			Files.createSymbolicLink(fileLink, filePath);
 		} catch (IOException e) {
-			msg = "Cannot create symbolic link " + linkDir.getPath() + "/" + filename
-					+ " pointing to " + fileDir.getPath() + "/" + filename;
-			WebgatherLogger.error(msg);
+			setMsg("Cannot create symbolic link " + linkDir.getPath() + "/" + filename
+					+ " pointing to " + fileDir.getPath() + "/" + filename);
+			WebgatherLogger.error(getMsg());
 		}
 	}
 

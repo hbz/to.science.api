@@ -15,21 +15,16 @@
 */
 package models;
 
-import models.Gatherconf.AgentIdSelection;
 import play.Logger;
 import play.Play;
-
 import java.io.*;
-import java.nio.file.Files;
-
-import helper.WebgatherUtils;
-import helper.Webgatherer;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+
+import helper.CDNCrawl;
+import helper.WebgatherUtils;
 
 /**
  * A class to generally describe a Web-Crawler to be inherited by the
@@ -47,29 +42,31 @@ public class CrawlerModel {
 		NEW, RUNNING, PAUSED, ABORTED, CRASHED, FINISHED
 	}
 
-	protected Node node = null;
-	protected Gatherconf conf = null;
-	protected String urlAscii = null;
-	protected String date = null;
-	protected String datetime = null;
+	private Node node = null;
+	private Gatherconf conf = null;
+	private String urlAscii = null;
+	private String date = null;
+	private String datetime = null;
 	private File crawlDir = null;
 	private File resultDir = null;
-	protected File logAnalysesDir = null;
+
 	private File cdxFile = null;
 	private File cdxFileNew = null;
 	private File cdxFileSave = null;
-	protected String localpath = null;
-	protected String host = null;
-	protected String warcFilename = null;
-	protected int CDNGathererExitState = 0;
-	protected ArrayList<String> domains = null;
-	protected String msg = null;
-	protected int exitState = 0;
+	private String localpath = null;
+	private String host = null;
+	private String warcFilename = null;
+
+	private ArrayList<String> domains = null;
+	private String msg = null;
+	private int exitState = 0;
 
 	private String jobDir = null;
 	private String outDir = null;
-	final static public String cdn =
-			Play.application().configuration().getString("regal-api.cdntools.cdn");
+
+	/**
+	 * Das lokale Verzeichnis, in das die Crawlreports geschrieben werden
+	 */
 	final static public String crawlreportsDir = Play.application()
 			.configuration().getString("toscience-api.webgatherer.crawlreports");
 
@@ -78,6 +75,69 @@ public class CrawlerModel {
 	 */
 	protected static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+
+	/**
+	 * Setter f+r Node
+	 * 
+	 * @param myNode ein Node-Objekt für eine Webpage
+	 */
+	public void setNode(Node myNode) {
+		this.node = myNode;
+	}
+
+	/**
+	 * Getter für Node
+	 * 
+	 * @return das Node-Objekt der Webpage
+	 */
+	public Node getNode() {
+		return node;
+	}
+
+	/**
+	 * Getter für Conf
+	 * 
+	 * @return eine Gatherconf (Crawler-Konfiguration)
+	 */
+	public Gatherconf getConf() {
+		return conf;
+	}
+
+	/**
+	 * Setter for urlAscii
+	 * 
+	 * @param url an url in ASCII format
+	 */
+	public void setUrlAscii(String url) {
+		this.urlAscii = url;
+	}
+
+	/**
+	 * Getter für URL ASCII
+	 * 
+	 * @return die URL im ASCII-Format
+	 */
+	public String getUrlAscii() {
+		return urlAscii;
+	}
+
+	/**
+	 * Setter für Datetime
+	 * 
+	 * @param myDatetime ein Datums-Zeit-String
+	 */
+	public void setDatetime(String myDatetime) {
+		this.datetime = myDatetime;
+	}
+
+	/**
+	 * Getter für Datetime
+	 * 
+	 * @return ein Datums-Zeit-String
+	 */
+	public String getDatetime() {
+		return datetime;
+	}
 
 	/**
 	 * Setter für crawlDir
@@ -179,6 +239,15 @@ public class CrawlerModel {
 	}
 
 	/**
+	 * Setter für localpath
+	 * 
+	 * @param mylocalpath der lokale Pfad zum Webarchiv
+	 */
+	public void setLocalpath(String mylocalpath) {
+		this.localpath = mylocalpath;
+	}
+
+	/**
 	 * Die Methode, um localPath auszulesen
 	 * 
 	 * @return localPath is ein Parameter, den Fedora benötigt. Es ist eine URL zu
@@ -186,6 +255,69 @@ public class CrawlerModel {
 	 */
 	public String getLocalpath() {
 		return localpath;
+	}
+
+	/**
+	 * Getter für Host
+	 * 
+	 * @return der Hostname, von dem eingesammelt wird
+	 */
+	public String getHost() {
+		return host;
+	}
+
+	/**
+	 * Getter für warcFilename
+	 * 
+	 * @return warcFilename der Name der WARC-Datei
+	 */
+	public String getWarcFilename() {
+		return warcFilename;
+	}
+
+	/**
+	 * Setter für Domains
+	 * 
+	 * @param myDomains eine Liste von Domains, die gecrawlt werden sollen
+	 */
+	public void setDomains(ArrayList<String> myDomains) {
+		this.domains = myDomains;
+	}
+
+	/**
+	 * Getter für Domains
+	 * 
+	 * @return eine Liste von Domains, die gecrawlt werden sollen
+	 */
+	public ArrayList<String> getDomains() {
+		return this.domains;
+	}
+
+	/**
+	 * Setter für Message
+	 * 
+	 * @param myMsg eine Textnachricht
+	 */
+	public void setMsg(String myMsg) {
+		this.msg = myMsg;
+	}
+
+	/**
+	 * Getter für Message
+	 * 
+	 * @return eine Textnachricht
+	 */
+	public String getMsg() {
+		return this.msg;
+	}
+
+	/**
+	 * Setter für ExitState
+	 * 
+	 * @param myExitState Exit Status für den Hauptcrawl
+	 */
+	public void setExitState(int myExitState) {
+		this.exitState = myExitState;
 	}
 
 	/**
@@ -328,86 +460,14 @@ public class CrawlerModel {
 	 * Ruft den CDN-Gatherer für diese Website auf.
 	 */
 	public void startCrawl() {
-		WebgatherLogger.info("Bereite Aufruf des CDN-Gatherer vor. warcFilename="
-				+ this.warcFilename + ".");
 		try {
-			// 1. Vorbereiten des CDN-Precrawls
-			String waitParam = null;
-			int waitSec = conf.getWaitSecBtRequests();
-			if (waitSec != 0) {
-				// number of second wpull will wait between two requests
-				waitParam = "wait=" + Integer.toString(waitSec);
-			} else {
-				boolean random = conf.isRandomWait();
-				if (random == true) {
-					// randomize wait times
-					waitParam = "random-wait";
-				} else {
-					// don't wait
-					waitParam = "wait=0";
-				}
-			}
-			String executeCommand =
-					new String(cdn + " " + this.urlAscii + " " + this.warcFilename);
-			AgentIdSelection agentId = conf.getAgentIdSelection();
-			executeCommand =
-					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));
-			executeCommand = executeCommand.concat(" Cookie:");
-			if (conf.getCookie() != null && !conf.getCookie().isEmpty()) {
-				executeCommand =
-						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
-			}
-			executeCommand = executeCommand.concat(" " + waitParam);
-			if (cdxFileNew != null) {
-				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
-			}
-			String[] execArr = executeCommand.split(" ");
-			executeCommand = executeCommand.replaceAll("%20", " ");
-			WebgatherLogger.info("Executing command " + executeCommand);
-			WebgatherLogger
-					.info("Logfile = " + crawlDir.toString() + "/cdncrawl.log");
-			/*
-			 * Das geht so nicht. Der CDN-Crawl muss in einem Thread laufen, sonst
-			 * gibt es "Gateway Timeout"
-			 */
-			ProcessBuilder pb = new ProcessBuilder(execArr);
-			assert crawlDir.isDirectory();
-			pb.directory(crawlDir);
-			File log = new File(crawlDir.toString() + "/cdncrawl.log");
-			log.createNewFile();
-			pb.redirectErrorStream(true);
-			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-			// 2. Ausführung des CDN-Precrawls (1. und 2. Schritt)
-			Process proc = pb.start();
-			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
-			assert pb.redirectOutput().file() == log;
-			assert proc.getInputStream().read() == -1;
-			CDNGathererExitState = proc.waitFor();
-			/**
-			 * Exit-Status: 0 = Crawl erfolgreich beendet
-			 */
-			WebgatherLogger.info("CDN-Crawl für " + conf.getName()
-					+ " wurde beendet mit Exit-Status " + CDNGathererExitState);
-
-			// 3. Auslesen der vom cdnparse angelegten Datei hostnames.txt
-			// cdnparse ist der 1. Schritt des CDN-Precrawls und ein Python-Programm
-			domains = conf.getDomains();
-			// Add hostnames from cdn precrawl textfile
-			List<String> hostnames = new ArrayList<>();
-			WebgatherLogger.info("Adding hostnames from file " + crawlDir.toString()
-					+ "/hostnames.txt");
-			try {
-				hostnames = Files.readAllLines(
-						new File(crawlDir.toString() + "/hostnames.txt").toPath());
-			} catch (IOException e) {
-				WebgatherLogger.warn("File hostnames.txt can not be opened!",
-						e.toString());
-			}
-			domains.addAll(hostnames);
+			CDNCrawl cdnCrawl = new CDNCrawl(this);
+			cdnCrawl.start();
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
-			throw new RuntimeException("cdn crawl not successfully started!", e);
+			throw new RuntimeException("Crawl not successfully started!", e);
 		}
+
 	} // Ende startCrawl()
 
 }

@@ -105,8 +105,8 @@ public class BtrixWebclient extends CrawlerModel {
 		try {
 			getBearerToken();
 		} catch (Exception e) {
-			WebgatherLogger.error("Browsertrix-Workflow für PID " + node.getPid()
-					+ " URL " + conf.getUrl() + " kann nicht angelegt werden !");
+			WebgatherLogger
+					.error("Browsertrix-Webclient kann nicht angelegt werden !");
 			throw new RuntimeException(e);
 		}
 	}
@@ -132,12 +132,12 @@ public class BtrixWebclient extends CrawlerModel {
 		 */
 		this.setOutDir(
 				Play.application().configuration().getString("regal-api.btrix.outDir"));
-		this.setCrawlDir(
-				new File(this.getJobDir() + "/" + conf.getName() + "/" + datetime));
-		this.setResultDir(
-				new File(this.getOutDir() + "/" + conf.getName() + "/" + datetime));
-		this.setCdxFile(new File(
-				this.getOutDir() + "/" + conf.getName() + "/WEB-" + host + ".cdx"));
+		this.setCrawlDir(new File(
+				this.getJobDir() + "/" + conf.getName() + "/" + getDatetime()));
+		this.setResultDir(new File(
+				this.getOutDir() + "/" + conf.getName() + "/" + getDatetime()));
+		this.setCdxFile(new File(this.getOutDir() + "/" + conf.getName() + "/WEB-"
+				+ getHost() + ".cdx"));
 		try {
 			getBearerToken();
 			if (conf.getBtrixWorkflowId() != null) {
@@ -180,9 +180,9 @@ public class BtrixWebclient extends CrawlerModel {
 						+ response.getStatusLine().getStatusCode());
 			}
 		} catch (Exception e) {
-			msg = "Bearer-Token für Browsertrix-Workflow für PID " + node.getPid()
-					+ " kann nicht geholt werden!";
-			WebgatherLogger.error(msg, e.toString());
+			setMsg("Bearer-Token für Browsertrix-Workflow für PID "
+					+ getNode().getPid() + " kann nicht geholt werden!");
+			WebgatherLogger.error(getMsg(), e.toString());
 			throw new RuntimeException(e);
 		} finally {
 			try {
@@ -228,8 +228,8 @@ public class BtrixWebclient extends CrawlerModel {
 			return responseJsonObject;
 
 		} catch (Exception e) {
-			msg = "Could not get Crawl Configs for queryString " + queryString;
-			WebgatherLogger.error(msg, e.getMessage());
+			setMsg("Could not get Crawl Configs for queryString " + queryString);
+			WebgatherLogger.error(getMsg(), e.getMessage());
 			throw new RuntimeException(e);
 		} finally {
 			try {
@@ -294,17 +294,17 @@ public class BtrixWebclient extends CrawlerModel {
 				WebgatherLogger.debug("received response from update wit description "
 						+ btrixWorkflowId.substring(0, 12) + ": " + responseJson);
 				/* Übernahme der WorkflowId in die toscience Crawler Conf */
-				conf.setBtrixWorkflowId(btrixWorkflowId);
-				msg = new Modify().updateConf(node, conf.toString());
-				WebgatherLogger.info(msg);
+				getConf().setBtrixWorkflowId(btrixWorkflowId);
+				setMsg(new Modify().updateConf(getNode(), getConf().toString()));
+				WebgatherLogger.info(getMsg());
 			} else {
 				WebgatherLogger.debug("Crawler Workflow mit btrix_workflow_id "
 						+ btrixWorkflowId + " wurde aktualisiert.");
 			}
 		} catch (Exception e) {
-			msg = "Browsertrix Crawler Config für PID " + node.getPid()
-					+ " kann nicht gesendet werden!";
-			WebgatherLogger.error(msg, e.getMessage());
+			setMsg("Browsertrix Crawler Config für PID " + getNode().getPid()
+					+ " kann nicht gesendet werden!");
+			WebgatherLogger.error(getMsg(), e.getMessage());
 			throw new RuntimeException(e);
 		} finally {
 			try {
@@ -319,10 +319,11 @@ public class BtrixWebclient extends CrawlerModel {
 
 	private String createJsonBody() {
 		JSONObject data = new JSONObject();
+		Gatherconf conf = getConf();
 		try {
 			// Name oder Titel der Site
 			data.put("name", conf.getName());
-			String md = node.getMetadata(toscience);
+			String md = getNode().getMetadata(toscience);
 			if (md != null) {
 				JSONObject jo = new JSONObject(md);
 				if (jo.has("title")) {
@@ -370,7 +371,7 @@ public class BtrixWebclient extends CrawlerModel {
 			}
 			JSONArray seeds = new JSONArray();
 			JSONObject seed =
-					createSeed(this.urlAscii, this.scopeType, conf.getDeepness());
+					createSeed(this.getUrlAscii(), this.scopeType, conf.getDeepness());
 			seeds.put(seed);
 			/*
 			 * zu inkludierende (zusätzliche) Domains. Diese erhalten jeweils ein
@@ -406,9 +407,9 @@ public class BtrixWebclient extends CrawlerModel {
 					Gatherconf.agentTable.get(conf.getAgentIdSelection()));
 			data.put("config", config);
 		} catch (JSONException e) {
-			msg = "Crawlerconf JSON (JsonBody) für PID " + node.getPid()
-					+ " kann nicht gebaut werden!";
-			WebgatherLogger.error(msg, e.getMessage());
+			setMsg("Crawlerconf JSON (JsonBody) für PID " + getNode().getPid()
+					+ " kann nicht gebaut werden!");
+			WebgatherLogger.error(getMsg(), e.getMessage());
 		}
 		return data.toString();
 	} // ENDE createJsonBody()
@@ -422,8 +423,8 @@ public class BtrixWebclient extends CrawlerModel {
 			/* one hop out -- the crawler will visit pages one link away. */
 			seed.put("extraHops", 1);
 		} catch (JSONException e) {
-			msg = "Seed with url " + url + " could not be created!";
-			WebgatherLogger.warn(msg, e.getMessage());
+			setMsg("Seed with url " + url + " could not be created!");
+			WebgatherLogger.warn(getMsg(), e.getMessage());
 		}
 		return seed;
 	}
@@ -456,12 +457,12 @@ public class BtrixWebclient extends CrawlerModel {
 			 * diesen Punkt durch eine Aktion ersetzen, die am Ende des Hauptcrawls
 			 * geschehen wird.
 			 */
-			this.setCdxFileNew(new File(
-					this.getCrawlDir().getAbsolutePath() + "/" + warcFilename + ".cdx"));
+			this.setCdxFileNew(new File(this.getCrawlDir().getAbsolutePath() + "/"
+					+ getWarcFilename() + ".cdx"));
 			if (this.getCdxFileNew().exists()) {
 				this.setCdxFileSave(new File(Play.application().configuration()
-						.getString("regal-api.btrix.jobDir") + "/" + conf.getName()
-						+ "/WEB-" + WebgatherUtils.getDomain(conf.getUrl()) + ".cdx"));
+						.getString("regal-api.btrix.jobDir") + "/" + getConf().getName()
+						+ "/WEB-" + WebgatherUtils.getDomain(getConf().getUrl()) + ".cdx"));
 				FileUtils.copyFile(this.getCdxFileNew(), this.getCdxFileSave());
 				WebgatherLogger.debug("Aktuelle CDX-Datei abgelegt in: "
 						+ this.getCdxFileSave().getAbsolutePath());
@@ -503,9 +504,9 @@ public class BtrixWebclient extends CrawlerModel {
 				WebgatherLogger.debug("Crawl zu Workflow " + this.btrixWorkflowId
 						+ " gestartet: " + started);
 			} catch (Exception e) {
-				msg = "Browsertrix Crawl für Workflow " + btrixWorkflowId + ", PID "
-						+ node.getPid() + " kann nicht gestartet werden!";
-				WebgatherLogger.error(msg, e.getMessage());
+				setMsg("Browsertrix Crawl für Workflow " + btrixWorkflowId + ", PID "
+						+ getNode().getPid() + " kann nicht gestartet werden!");
+				WebgatherLogger.error(getMsg(), e.getMessage());
 				throw new RuntimeException(e);
 			} finally {
 				try {
