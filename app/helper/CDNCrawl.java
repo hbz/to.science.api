@@ -44,8 +44,9 @@ public class CDNCrawl extends Thread {
 	public CDNCrawl(CrawlerModel model) {
 		this.crawlerModel = model;
 		// das CDX-File für CDN-Crawls
-		this.cdxFile = new File(crawlerModel.getJobDir() + "/" + conf.getName()
-				+ "/WEB-" + crawlerModel.getHost() + ".cdx");
+		this.cdxFile = new File(
+				crawlerModel.getJobDir() + "/" + crawlerModel.getConf().getName()
+						+ "/WEB-" + crawlerModel.getHost() + ".cdx");
 	}
 
 	/**
@@ -152,6 +153,8 @@ public class CDNCrawl extends Thread {
 			 * @author Ingolf Kuss
 			 * @date 2026-04-27
 			 */
+			this.cdxFileNew = new File(crawlerModel.getCrawlDir().getAbsolutePath()
+					+ "/" + crawlerModel.getWarcFilename() + ".cdx");
 			if (cdxFileNew.exists()) {
 				/*
 				 * File cdxFileSave = new File(crawlDir.getParent() + "/WEB-" +
