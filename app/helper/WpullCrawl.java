@@ -126,6 +126,7 @@ public class WpullCrawl extends CrawlerModel {
 		// Dies führt den CDN-Precrawl aus.
 		super.startCrawl();
 		// Jetzt rufe den Hauptcrawl auf
+		WebgatherLogger.debug("Starting Wpull Hauptcrawl");
 		try {
 			WpullThread wpullThread = new WpullThread(this, 1);
 			wpullThread.setNode(getNode());
@@ -259,6 +260,7 @@ public class WpullCrawl extends CrawlerModel {
 			sb.append(" --warc-dedup=" + getWarcFilename() + ".cdx");
 		}
 		play.Logger.debug("Built Crawl command: " + sb.toString());
+		WebgatherLogger.debug("Built Crawl command: " + sb.toString());
 		return sb.toString();
 	}
 

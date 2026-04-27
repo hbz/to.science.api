@@ -61,6 +61,7 @@ public class WpullThread extends Thread {
 	public WpullThread(WpullCrawl model, int attempt) {
 		this.wpullCrawl = model;
 		this.attempt = attempt;
+		WebgatherLogger.debug("Instantiating attempt No. " + attempt);
 		exitState = 0;
 	}
 
@@ -170,6 +171,7 @@ public class WpullThread extends Thread {
 	 */
 	@Override
 	public void run() {
+		WebgatherLogger.debug("Start runnig Wpull Crawl.");
 		try {
 			boolean noParent = true;
 			String zusDomain = null;
