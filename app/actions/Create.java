@@ -442,8 +442,8 @@ public class Create extends RegalAction {
 			File cdxFileNew =
 					new File(outDir.getAbsolutePath() + "/" + warcFilename + ".cdx");
 			if (cdxFileNew.exists()) {
-				File cdxFileSave =
-						new File(outDir.getParent() + "/" + warcFilename + ".cdx");
+				File cdxFileSave = new File(outDir.getParent() + "/WEB-"
+						+ WebgatherUtils.getDomain(conf.getUrl()) + ".cdx");
 				FileUtils.copyFile(cdxFileNew, cdxFileSave);
 				WebgatherLogger.debug(
 						"Aktuelle CDX-Datei abgelegt in: " + cdxFileSave.getAbsolutePath());

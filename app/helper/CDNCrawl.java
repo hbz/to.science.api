@@ -23,6 +23,8 @@ public class CDNCrawl extends Thread {
 	private CrawlerModel crawlerModel = null;
 	private Gatherconf conf = null;
 	private File crawlDir = null;
+	private File cdxFile = null;
+	private File cdxFileNew = null;
 	private int CDNGathererExitState = 0;
 
 	final static private String cdn =
@@ -41,6 +43,9 @@ public class CDNCrawl extends Thread {
 	 */
 	public CDNCrawl(CrawlerModel model) {
 		this.crawlerModel = model;
+		// das CDX-File für CDN-Crawls
+		this.cdxFile = new File(crawlerModel.getJobDir() + "/" + conf.getName()
+				+ "/WEB-" + crawlerModel.getHost() + ".cdx");
 	}
 
 	/**
@@ -54,6 +59,17 @@ public class CDNCrawl extends Thread {
 			// 1. Vorbereiten des CDN-Precrawls
 			conf = crawlerModel.getConf();
 			crawlDir = crawlerModel.getCrawlDir();
+
+			if (cdxFile.exists()) {
+				WebgatherLogger
+						.debug("CDX-Datei gefunden: " + cdxFile.getAbsolutePath());
+				this.cdxFileNew = new File(crawlerModel.getCrawlDir().getAbsolutePath()
+						+ "/" + crawlerModel.getWarcFilename() + ".cdx");
+				FileUtils.copyFile(cdxFile, cdxFileNew);
+				WebgatherLogger
+						.debug("Neue CDX-Datei angelegt: " + cdxFileNew.getAbsolutePath());
+			}
+
 			String waitParam = null;
 			int waitSec = conf.getWaitSecBtRequests();
 			if (waitSec != 0) {
@@ -80,9 +96,8 @@ public class CDNCrawl extends Thread {
 						executeCommand.concat(conf.getCookie().replaceAll(" ", "%20"));
 			}
 			executeCommand = executeCommand.concat(" " + waitParam);
-			if (crawlerModel.getCdxFileNew() != null) {
-				executeCommand =
-						executeCommand.concat(" " + crawlerModel.getCdxFileNew().getName());
+			if (this.cdxFileNew != null) {
+				executeCommand = executeCommand.concat(" " + cdxFileNew.getName());
 			}
 			String[] execArr = executeCommand.split(" ");
 			executeCommand = executeCommand.replaceAll("%20", " ");
@@ -127,6 +142,25 @@ public class CDNCrawl extends Thread {
 			}
 			domains.addAll(hostnames);
 			crawlerModel.setDomains(domains);
+
+			/**
+			 * 4. Nach erfolgreichem CDN-Precrawl wird die neue CDX-Datei für den
+			 * Precrawl in das übergeordenete Verzeichnis kopiert und umbenannt. Beim
+			 * nächsten CDN-Crawl wird die CDX-Datei von diesem Ort wieder abgeholt
+			 * werden.
+			 * 
+			 * @author Ingolf Kuss
+			 * @date 2026-04-27
+			 */
+			if (cdxFileNew.exists()) {
+				/*
+				 * File cdxFileSave = new File(crawlDir.getParent() + "/WEB-" +
+				 * WebgatherUtils.getDomain(conf.getUrl()) + ".cdx");
+				 */
+				FileUtils.copyFile(cdxFileNew, cdxFile);
+				WebgatherLogger.debug(
+						"Aktuelle CDX-Datei abgelegt in: " + cdxFile.getAbsolutePath());
+			}
 
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());

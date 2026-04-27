@@ -37,6 +37,8 @@ import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * a class to implement a wpull crawl
  * 
@@ -114,6 +116,31 @@ public class WpullCrawl extends CrawlerModel {
 			WebgatherLogger.debug("Create temp crawl directory " + tempJobDir + "/"
 					+ getConf().getName() + "/" + getDatetime());
 			tempCrawlDir.mkdirs();
+		}
+		/**
+		 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
+		 * geschaut, ob eine CDX-Datei für diese Webpage existiert. Eine CDX-Datei
+		 * enthält eine Liste bereits gesammelter URLs für diese Webpage. Falls eine
+		 * CDX-Datei existiert, wird sie in das Arbeitsverzeichnis tempJobDir
+		 * kopiert und entsprechend so umbenannt, dass der neue Crawl sie weiter
+		 * schreiben wird.
+		 * 
+		 * @author Ingolf Kuss
+		 * @date 2026-04-27
+		 */
+		try {
+			if (getCdxFile().exists()) {
+				WebgatherLogger
+						.debug("CDX-Datei gefunden: " + getCdxFile().getAbsolutePath());
+				setCdxFileNew(new File(
+						tempCrawlDir.getAbsolutePath() + "/" + getWarcFilename() + ".cdx"));
+				FileUtils.copyFile(getCdxFile(), getCdxFileNew());
+				WebgatherLogger.debug(
+						"Neue CDX-Datei angelegt: " + getCdxFileNew().getAbsolutePath());
+			}
+		} catch (IOException e) {
+			WebgatherLogger.warn("Neue CDX-Datei " + getCdxFileNew().getAbsolutePath()
+					+ " kann nicht angelegt werden!", e.toString());
 		}
 	}
 

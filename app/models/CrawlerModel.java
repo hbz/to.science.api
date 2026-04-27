@@ -427,26 +427,7 @@ public class CrawlerModel {
 						+ conf.getName() + "/" + datetime);
 				resultDir.mkdirs();
 			}
-			/**
-			 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
-			 * geschaut, ob eine CDX-Datei für diese Webpage existiert. Eine CDX-Datei
-			 * enthält eine Liste bereits gesammelter URLs für diese Webpage. Falls
-			 * eine CDX-Datei existiert, wird sie in das Arbeitsverzeichnis jobDir
-			 * kopiert und entsprechend so umbenannt, dass der neue Crawl sie weiter
-			 * schreiben wird.
-			 * 
-			 * @author Ingolf Kuss
-			 * @date 2025-03-12
-			 */
-			if (cdxFile.exists()) {
-				WebgatherLogger
-						.debug("CDX-Datei gefunden: " + cdxFile.getAbsolutePath());
-				this.cdxFileNew = new File(
-						this.crawlDir.getAbsolutePath() + "/" + this.warcFilename + ".cdx");
-				FileUtils.copyFile(cdxFile, cdxFileNew);
-				WebgatherLogger
-						.debug("Neue CDX-Datei angelegt: " + cdxFileNew.getAbsolutePath());
-			}
+
 		} catch (Exception e) {
 			msg = "Cannot create jobDir in " + jobDir + "/" + conf.getName();
 			msg.concat("Cannot create outDir in " + outDir + "/" + conf.getName());
