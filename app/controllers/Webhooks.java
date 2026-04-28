@@ -39,6 +39,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import actions.Create;
 import actions.Read;
 import authenticate.BasicAuth;
+import helper.BtrixCrawlMoveArchiveThread;
 import helper.BtrixWebclient;
 import helper.WebgatherUtils;
 import models.Gatherconf.CrawlerSelection;
@@ -140,32 +141,19 @@ public class Webhooks extends MyController {
 				btrixWebclient.getResultDir().mkdirs();
 			}
 
-			// ToDo: ab hier in einen Thread schicken; lang dauernde Dateioperationen!
-			String waczFilenameResultDir =
-					btrixWebclient.getResultDir().toString() + "/" + waczFile.getName();
-			try {
-				Path sourcePath = Paths.get(filename);
-				Path targetPath = Paths.get(waczFilenameResultDir);
-				play.Logger.debug("Moving file " + filename + " to directory "
-						+ btrixWebclient.getResultDir().toString());
-				Files.move(sourcePath, targetPath);
-				play.Logger.debug("File moved successfully.");
-			} catch (IOException e) {
-				play.Logger.error("WACZ file could not be moved to result directory! "
-						+ e.getMessage());
-				throw new RuntimeException(e);
-			}
-
-			/**
-			 * Webschnitt anlegen mit Zeitstempel: Angezeigt wird dateTimeLocal im
-			 * Format "yyyy-MM-dd HH:mm:ss" . Der Link unter "zum Webschnitt" führt
-			 * aber auf dateTimeUtc im Format "yyyyMMddHHmmss".
+			/*
+			 * Ab hier wird die Verarbeitung an einen Thread übergeben
+			 * (Nebenläufigkeit); lang dauernde Dateioperationen möglich! Nach dem
+			 * Verschieben der Archivdatei in den Ergebnisbereich (btrix-data) wird
+			 * automatisch ein Webschnitt angelegt.
 			 */
-			String versionPid = null;
-			Node n = new Read().readNode(toscienceId);
-			new Create().postWebpageVersion(n, versionPid, lastCrawlId, "btrix",
-					datetime, waczFile.getName());
-			play.Logger.info("WebpageVersion für " + toscienceId + "wurde angelegt.");
+			BtrixCrawlMoveArchiveThread moveArchive =
+					new BtrixCrawlMoveArchiveThread(btrixWebclient);
+			moveArchive.setFilename(filename);
+			moveArchive.setToscienceId(toscienceId);
+			moveArchive.setLastCrawlId(lastCrawlId);
+			moveArchive.setDatetime(datetime);
+			moveArchive.run();
 
 			return ok();
 		});
