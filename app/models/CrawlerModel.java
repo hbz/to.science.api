@@ -21,8 +21,6 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import org.apache.commons.io.FileUtils;
-
 import helper.CDNCrawl;
 import helper.WebgatherUtils;
 
@@ -438,11 +436,25 @@ public class CrawlerModel {
 
 	/**
 	 * Ruft den CDN-Gatherer für diese Website auf.
+	 * 
+	 * @param mainCrawl ein Java-Objekt der Klasse Thread. Darin wird der
+	 *          Hauptcrawl ausgeführt.
+	 * @param wait ein Boolescher Parameter, der angibt, ob der Hauptcrawl erst
+	 *          beginnen soll, wenn der Precrawl fertig ist.
 	 */
-	public void startCrawl() {
+	public void startCrawl(Thread mainCrawl, boolean wait) {
 		try {
-			CDNCrawl cdnCrawl = new CDNCrawl(this);
+			CDNCrawl cdnCrawl = new CDNCrawl(this, mainCrawl);
+			cdnCrawl.setWait(wait);
 			cdnCrawl.start();
+			if (!wait) {
+				/**
+				 * Der Hauptcrawl soll nicht auf Beendigung des Precrawls warten. Daher
+				 * wird er jetzt, parallel zum bereits laufenden Precrawl-Thread,
+				 * gestartet.
+				 */
+				mainCrawl.start();
+			}
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("Crawl not successfully started!", e);

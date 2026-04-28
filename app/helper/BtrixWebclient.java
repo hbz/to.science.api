@@ -15,12 +15,8 @@
 */
 package helper;
 
-import java.io.Closeable;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -42,7 +38,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static archive.fedora.Vocabulary.*;
 import actions.Modify;
-import actions.Read;
 import models.CrawlerModel;
 import models.Gatherconf;
 import models.Globals;
@@ -66,7 +61,6 @@ public class BtrixWebclient extends CrawlerModel {
 	private String bearerToken = null;
 	private String scopeType = null;
 	private String btrixWorkflowId = null;
-	private String started = null;
 
 	/*
 	 * Authorisierung für Browsertrix
@@ -156,6 +150,42 @@ public class BtrixWebclient extends CrawlerModel {
 		}
 	}
 
+	/**
+	 * Getter für BtrixApiUrl
+	 * 
+	 * @return BtrixApiUrl
+	 */
+	public String getBtrixApiUrl() {
+		return btrix_api_url;
+	}
+
+	/**
+	 * Getter für BtrixOrgId
+	 * 
+	 * @return BtrixOgrId
+	 */
+	public String getBtrixOrgId() {
+		return btrix_orgid;
+	}
+
+	/**
+	 * Getter für Bearer Token
+	 * 
+	 * @return Bearer Token
+	 */
+	public String exportBearerToken() {
+		return bearerToken;
+	}
+
+	/**
+	 * Getter für BtrixWorkflowId
+	 * 
+	 * @return Btrix WorkflowId
+	 */
+	public String getBtrixWorkflowId() {
+		return btrixWorkflowId;
+	}
+
 	private void getBearerToken() {
 		try {
 			httpClient = HttpClients.createDefault();
@@ -214,7 +244,7 @@ public class BtrixWebclient extends CrawlerModel {
 			request.addHeader("Authorization", "Bearer " + this.bearerToken);
 			request.addHeader("Accept", "application/json");
 			response = httpClient.execute(request);
-			String responseJson = getResponseJson();
+			String responseJson = getResponseJson(response);
 			WebgatherLogger.debug("received response: " + responseJson);
 			// JSON ausparsen
 			JSONObject responseJsonObject = new JSONObject(responseJson);
@@ -263,7 +293,7 @@ public class BtrixWebclient extends CrawlerModel {
 			entityEnclosingRequest.setEntity(new StringEntity(jsonBody, "UTF-8"));
 			entityEnclosingRequest.addHeader("Accept", "application/json");
 			response = httpClient.execute(entityEnclosingRequest);
-			String responseJson = getResponseJson();
+			String responseJson = getResponseJson(response);
 			WebgatherLogger.debug("received response: " + responseJson);
 			// JSON ausparsen
 			JSONObject responseJsonObject = new JSONObject(responseJson);
@@ -290,7 +320,7 @@ public class BtrixWebclient extends CrawlerModel {
 						.setEntity(new StringEntity(data.toString(), "UTF-8"));
 				entityEnclosingRequest.addHeader("Accept", "application/json");
 				response = httpClient.execute(entityEnclosingRequest);
-				responseJson = getResponseJson();
+				responseJson = getResponseJson(response);
 				WebgatherLogger.debug("received response from update wit description "
 						+ btrixWorkflowId.substring(0, 12) + ": " + responseJson);
 				/* Übernahme der WorkflowId in die toscience Crawler Conf */
@@ -438,58 +468,15 @@ public class BtrixWebclient extends CrawlerModel {
 	}
 
 	/**
-	 * Ruft den CDN-Gatherer für diese Website auf, anschließend Browsertrix für
-	 * den Hauptcrawl
+	 * Ruft den CDN-Gatherer für diese Website auf, außerdem Browsertrix für den
+	 * Hauptcrawl
 	 */
-	@Override
 	public void startCrawl() {
-		// Dies führt den CDN-Precrawl aus.
-		super.startCrawl();
-
 		try {
-
-			/**
-			 * Rufe Hauptcrawl in Browsertrix auf
-			 */
-
-			// ToDo: berücksichtige cdxFile (von evtl. vorhergehenden Crawls ==> siehe
-			// den Kommentar oben.
-			// ToDo: berücksichtige domains (aus hostnames.txt, vom CDN-Precrawl
-			// ermittelt) ==> OK, das geschieht in der übergeordneten Klasse.
-			// ToDo: berücksichtige CDN-Precrawl (.warc-Datei davon) ==> OK, Wayback
-			// indexiert diesen als separate Datei.
-
-			try {
-				httpClient = HttpClientBuilder.create().build();
-				request = new HttpPost(btrix_api_url + "/orgs/" + btrix_orgid
-						+ "/crawlconfigs/" + this.btrixWorkflowId + "/run");
-				request.addHeader("Authorization", "Bearer " + this.bearerToken);
-				request.addHeader("Content-Type", "application/json");
-				WebgatherLogger.debug("request=" + request.toString());
-				request.addHeader("Accept", "application/json");
-				response = httpClient.execute(request);
-				String responseJson = getResponseJson();
-				WebgatherLogger.debug("received response: " + responseJson);
-				// JSON ausparsen
-				JSONObject responseJsonObject = new JSONObject(responseJson);
-				this.started = responseJsonObject.getString("started");
-				WebgatherLogger.debug("Crawl zu Workflow " + this.btrixWorkflowId
-						+ " gestartet: " + started);
-			} catch (Exception e) {
-				setMsg("Browsertrix Crawl für Workflow " + btrixWorkflowId + ", PID "
-						+ getNode().getPid() + " kann nicht gestartet werden!");
-				WebgatherLogger.error(getMsg(), e.getMessage());
-				throw new RuntimeException(e);
-			} finally {
-				try {
-					httpClient.close();
-					response.close();
-				} catch (Exception e) {
-					WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
-							e.toString());
-				}
-			}
-
+			BtrixCrawl btrixCrawl = new BtrixCrawl(this);
+			// Dies führt den CDN-Precrawl aus, parallel dazu den Hauptcrawl.
+			boolean wait = false;
+			super.startCrawl(btrixCrawl, wait);
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("Browsertrix crawl not successfully started!",
@@ -497,16 +484,23 @@ public class BtrixWebclient extends CrawlerModel {
 		}
 	}
 
-	private String getResponseJson() {
+	/**
+	 * Diese Methode parst eine HTTP-Response aus und gibt sie als JSON-String
+	 * zurück.
+	 * 
+	 * @param myresponse eine Closeable HTTP-Response
+	 * @return die Response als JSON-String
+	 */
+	public String getResponseJson(CloseableHttpResponse myresponse) {
 		try {
-			int statusCode = response.getStatusLine().getStatusCode();
+			int statusCode = myresponse.getStatusLine().getStatusCode();
 			if (statusCode == 200) {
-				String responseJson = EntityUtils.toString(response.getEntity());
+				String responseJson = EntityUtils.toString(myresponse.getEntity());
 				return responseJson;
 			}
-			String errorBody = EntityUtils.toString(response.getEntity());
-			throw new RuntimeException("Status-Code von " + request + " : "
-					+ statusCode + ". Fehler-Body: " + errorBody);
+			String errorBody = EntityUtils.toString(myresponse.getEntity());
+			throw new RuntimeException(
+					"Status-Code : " + statusCode + ". Fehler-Body: " + errorBody);
 		} catch (Exception e) {
 			WebgatherLogger.error(e.getMessage());
 			throw new RuntimeException(e);

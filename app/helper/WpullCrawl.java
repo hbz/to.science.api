@@ -148,13 +148,10 @@ public class WpullCrawl extends CrawlerModel {
 	 * Ruft den CDN-Gatherer für diese Website auf, anschließend wpull für den
 	 * Hauptcrawl
 	 */
-	@Override
 	public void startCrawl() {
-		// Dies führt den CDN-Precrawl aus.
-		super.startCrawl();
-		// Jetzt rufe den Hauptcrawl auf
-		WebgatherLogger.debug("Starting Wpull Hauptcrawl");
+
 		try {
+			// Erzeuge einen Thread für den Hauptcrawl
 			WpullThread wpullThread = new WpullThread(this, 1);
 			wpullThread.setNode(getNode());
 			wpullThread.setConf(getConf());
@@ -165,9 +162,13 @@ public class WpullCrawl extends CrawlerModel {
 			wpullThread.setLocalPath(getLocalpath());
 			wpullThread.setExecuteCommand(buildExecCommand());
 			wpullThread.setDomains(getDomains());
-			wpullThread.start();
+
+			// Dies führt zunächst den CDN-Precrawl aus, dann den Hauptcrawl.
+			boolean wait = true;
+			super.startCrawl(wpullThread, wait);
+
 			/*
-			 * Das hier nicht gewartet wird, ist das Setzen des Exit-Status hier
+			 * Da hier nicht gewartet wird, ist das Setzen des Exit-Status hier
 			 * eigentlich Blödsinn; Es steht immer "0" drin.
 			 */
 			setExitState(wpullThread.getExitState());

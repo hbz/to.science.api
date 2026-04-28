@@ -26,6 +26,8 @@ public class CDNCrawl extends Thread {
 	private File cdxFile = null;
 	private File cdxFileNew = null;
 	private int CDNGathererExitState = 0;
+	private Thread mainCrawl = null;
+	private boolean wait = false;
 
 	final static private String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
@@ -40,13 +42,26 @@ public class CDNCrawl extends Thread {
 	 * Der Konstruktor für diese Klasse.
 	 * 
 	 * @param model a Crawler Model for this Crawl
+	 * @param main ein Objekt der Klasse Java Thread für den Hauptcrawl.
 	 */
-	public CDNCrawl(CrawlerModel model) {
+	public CDNCrawl(CrawlerModel model, Thread main) {
 		this.crawlerModel = model;
+		this.mainCrawl = main;
 		// das CDX-File für CDN-Crawls
 		this.cdxFile = new File(
 				crawlerModel.getJobDir() + "/" + crawlerModel.getConf().getName()
 						+ "/WEB-" + crawlerModel.getHost() + ".cdx");
+	}
+
+	/**
+	 * Setter für Wait
+	 * 
+	 * @param mywait boolescher Wert, wahr oder falsch. Falls wahr, wartet auf
+	 *          Beendigung des CDN-Precrawls und führt dann den Hauotrcawl aus.
+	 *          Falls unwahr, führt den Hauptcrawl nicht aus.
+	 */
+	public void setWait(boolean mywait) {
+		this.wait = mywait;
 	}
 
 	/**
@@ -120,6 +135,7 @@ public class CDNCrawl extends Thread {
 			try (InputStream inputStream = proc.getInputStream()) {
 				assert inputStream.read() == -1;
 			}
+
 			CDNGathererExitState = proc.waitFor();
 			/**
 			 * Exit-Status: 0 = Crawl erfolgreich beendet
@@ -164,6 +180,18 @@ public class CDNCrawl extends Thread {
 				FileUtils.copyFile(cdxFileNew, cdxFile);
 				WebgatherLogger.debug(
 						"Aktuelle CDX-Datei abgelegt in: " + cdxFile.getAbsolutePath());
+			}
+
+			if (wait) {
+				/**
+				 * Der Hauptcrawl "wartet" auf Beendigung des CDN-Precrawls. Er wird
+				 * also jetzt und hier ausgeführt. Falls wait==false muss der Hauptcrawl
+				 * in einer separaten Verarbeitung (z.B. ein Thread) vom aufrufenden
+				 * Porgramm gestartet werden und läuft dann i.d.R. parallel zum Precrawl
+				 * ab.
+				 */
+				WebgatherLogger.debug("Beginne Hauptcrawl");
+				mainCrawl.start();
 			}
 
 		} catch (Exception e) {
