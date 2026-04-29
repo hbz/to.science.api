@@ -61,6 +61,7 @@ public class BtrixWebclient extends CrawlerModel {
 	private String bearerToken = null;
 	private String scopeType = null;
 	private String btrixWorkflowId = null;
+	private String crawlId = null;
 
 	/*
 	 * Authorisierung für Browsertrix
@@ -196,6 +197,25 @@ public class BtrixWebclient extends CrawlerModel {
 		return btrixWorkflowId;
 	}
 
+	/**
+	 * Setter für CrawlId
+	 * 
+	 * @param mycrawlid Eine Browsertrix crawl_id (siehe Browsertrix-API-Doc
+	 *          https://docs.browsertrix.com/api/)
+	 */
+	public void setCrawlId(String mycrawlid) {
+		this.crawlId = mycrawlid;
+	}
+
+	/**
+	 * Getter für CrawlId
+	 * 
+	 * @return eine Browsertrix crawl_id
+	 */
+	public String getCrawlId() {
+		return crawlId;
+	}
+
 	private void getBearerToken() {
 		try {
 			httpClient = HttpClients.createDefault();
@@ -308,6 +328,45 @@ public class BtrixWebclient extends CrawlerModel {
 			return responseJsonObject;
 		} catch (Exception e) {
 			setMsg("Could not get Crawl Config for WorkflowId " + btrixWorkflowId);
+			WebgatherLogger.error(getMsg(), e.getMessage());
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				httpClient.close();
+				response.close();
+			} catch (Exception e) {
+				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
+						e.toString());
+			}
+		}
+	}
+
+	/**
+	 * Diese Methode führt einen GET-Request auf den Browsertrix-Endpoint Get
+	 * Crawl Out durch. Dabei wird ein JSON-Objekt geholt, das einen bestimmten
+	 * Crawl ("Webschnitt") beschreibt. Die crawl_id muss in der Klassenvariable
+	 * crawlId stehen.
+	 * 
+	 * API-Doc: https://docs.browsertrix.com/api/#tag/crawls/operation/
+	 * get_crawl_out_api_orgs__oid__crawls__crawl_id__replay_json_get
+	 * 
+	 * @return a JSON Object describing a Browsertrix Crawl
+	 */
+	public JSONObject getCrawlOut() {
+		try {
+			httpClient = HttpClientBuilder.create().build();
+			request = new HttpGet(btrix_api_url + "/orgs/" + btrix_orgid + "/crawls/"
+					+ this.crawlId + "/replay.json");
+			WebgatherLogger.debug("request = " + request.toString());
+			request.addHeader("Authorization", "Bearer " + this.bearerToken);
+			request.addHeader("Accept", "application/json");
+			response = httpClient.execute(request);
+			String responseJson = getResponseJson(response);
+			WebgatherLogger.debug("received response: " + responseJson);
+			JSONObject responseJsonObject = new JSONObject(responseJson);
+			return responseJsonObject;
+		} catch (Exception e) {
+			setMsg("Could not get Crawl Out for crawlId " + crawlId);
 			WebgatherLogger.error(getMsg(), e.getMessage());
 			throw new RuntimeException(e);
 		} finally {

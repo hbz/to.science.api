@@ -851,12 +851,24 @@ public class Read extends RegalAction {
 	private Map<String, Object> getGatherStatus(Node node) {
 		Map<String, Object> entries = new HashMap<String, Object>();
 		try {
+			Gatherconf conf = Gatherconf.create(node.getConf());
 			entries.put("lastLaunch", Webgatherer.getLastLaunch(node) == null ? ""
 					: Webgatherer.getLastLaunch(node));
-			// if ("version".equals(node.getContentType())) {
-			// } else
-			if ("webpage".equals(node.getContentType())) {
-				Gatherconf conf = Gatherconf.create(node.getConf());
+			if ("version".equals(node.getContentType())) {
+				if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.btrix)) {
+					BtrixWebclient btrixWebclient = new BtrixWebclient();
+					btrixWebclient.setBtrixWorkflowId(conf.getBtrixWorkflowId());
+					btrixWebclient.setCrawlId(conf.getLastCrawlId());
+					JSONObject crawlConfig = btrixWebclient.getCrawlOut();
+					entries.put("crawlExitStatus", crawlConfig.getString("state"));
+					entries.put("crawlFileSize",
+							crawlConfig.getString("fileSize") + " Bytes");
+					entries.put("crawlDuration",
+							crawlConfig.getString("crawlExecSeconds"));
+					entries.put("crawlStarted", crawlConfig.getString("started"));
+				}
+			} else if ("webpage".equals(node.getContentType())) {
 				if (conf.getCrawlerSelection()
 						.equals(Gatherconf.CrawlerSelection.heritrix)) {
 					String hertrixXmlResponse =
