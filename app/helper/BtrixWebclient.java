@@ -178,6 +178,16 @@ public class BtrixWebclient extends CrawlerModel {
 	}
 
 	/**
+	 * Setter für BtrixWorkflowId
+	 * 
+	 * @param myWorkflowId Eine Browsertrix-WorkflowId (= cid in der
+	 *          Browsertrix-API-Doc https://docs.browsertrix.com/api/)
+	 */
+	public void setBtrixWorkflowId(String myWorkflowId) {
+		this.btrixWorkflowId = myWorkflowId;
+	}
+
+	/**
 	 * Getter für BtrixWorkflowId
 	 * 
 	 * @return Btrix WorkflowId
@@ -259,6 +269,45 @@ public class BtrixWebclient extends CrawlerModel {
 
 		} catch (Exception e) {
 			setMsg("Could not get Crawl Configs for queryString " + queryString);
+			WebgatherLogger.error(getMsg(), e.getMessage());
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				httpClient.close();
+				response.close();
+			} catch (Exception e) {
+				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
+						e.toString());
+			}
+		}
+	}
+
+	/**
+	 * Diese Methode führt einen GET-Request auf den Browsertrix-Endpoint Get
+	 * Crawl Config Out durch. Dabei wird die Crawler-Konfiguration zu einem
+	 * bestimmten Workflow ("Webpage") geholt. Die cid des Workflows muss in der
+	 * BtrixWorkflowId stehen.
+	 * 
+	 * API-Doc: https://docs.browsertrix.com/api/#tag/crawlconfigs/operation/
+	 * get_crawl_configs_api_orgs__oid__crawlconfigs_get
+	 * 
+	 * @return a JSON Object with the found Crawl Config
+	 */
+	public JSONObject getCrawlConfigOut() {
+		try {
+			httpClient = HttpClientBuilder.create().build();
+			request = new HttpGet(btrix_api_url + "/orgs/" + btrix_orgid
+					+ "/crawlconfigs/" + this.btrixWorkflowId);
+			WebgatherLogger.debug("request = " + request.toString());
+			request.addHeader("Authorization", "Bearer " + this.bearerToken);
+			request.addHeader("Accept", "application/json");
+			response = httpClient.execute(request);
+			String responseJson = getResponseJson(response);
+			WebgatherLogger.debug("received response: " + responseJson);
+			JSONObject responseJsonObject = new JSONObject(responseJson);
+			return responseJsonObject;
+		} catch (Exception e) {
+			setMsg("Could not get Crawl Config for WorkflowId " + btrixWorkflowId);
 			WebgatherLogger.error(getMsg(), e.getMessage());
 			throw new RuntimeException(e);
 		} finally {

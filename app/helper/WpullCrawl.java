@@ -301,9 +301,9 @@ public class WpullCrawl extends CrawlerModel {
 	 */
 	private File findLatestLogFile() {
 		File logfile = null;
-		File latestCrawlDir = Webgatherer.getLatestCrawlDir(
-				Play.application().configuration().getString("regal-api.wpull.jobDir"),
-				getNode().getPid());
+		File latestCrawlDir =
+				Webgatherer.getLatestCrawlDir(Play.application().configuration()
+						.getString("regal-api.wpull.tempJobDir"), getNode().getPid());
 		File latestOutDir = Webgatherer.getLatestCrawlDir(
 				Play.application().configuration().getString("regal-api.wpull.outDir"),
 				getNode().getPid());

@@ -24,6 +24,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.net.URISyntaxException;
@@ -34,8 +35,16 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import models.Gatherconf;
+import models.Gatherconf.CrawlerSelection;
 import models.Globals;
 import models.Link;
 import models.Node;
@@ -45,7 +54,14 @@ import models.CrawlerModel.CrawlControllerState;
 import actions.Read;
 
 /**
- * @author Jan Schnasse
+ * Diese Klasse implementiert den nächtlichen Cronjob für das Webgathering (sog.
+ * Webgatherer). Dabei werden alle Webpages durchgegangen und es wird geguckt,
+ * ob Websites aktuell wieder mit dem Einsammeln an der Reihe sind (Entscheidung
+ * anhand des eingestellten Sammelintervalls und dem letzen erfolgreichen
+ * Crawl). Falls ja, wird ein neuer Crawl angestoßen. Diese Klasse wird vom
+ * Endpoint /utils/runGatherer aufgerufen.
+ * 
+ * @author Jan Schnasse, Ingolf Kuss
  *
  */
 public class Webgatherer implements Runnable {
@@ -54,8 +70,13 @@ public class Webgatherer implements Runnable {
 			Play.application().configuration().getString("regal-api.heritrix.jobDir");
 	final static String wpullJobDir =
 			Play.application().configuration().getString("regal-api.wpull.jobDir");
+	final static int limit = play.Play.application().configuration()
+			.getInt("regal-api.heritrix.crawlsPerNight");
+
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
+	private Node node = null;
+	private Gatherconf conf = null;
 	private int precount = 0; // die Anzahl bearbeiteter Webpages
 	private int count = 0; // die Anzahl tatsächlich gestarteter Crawls
 
@@ -70,8 +91,6 @@ public class Webgatherer implements Runnable {
 		List<Node> webpages =
 				new Read().listRepo("webpage", Globals.defaultNamespace, 0, 50000);
 		WebgatherLogger.info("Found " + webpages.size() + " webpages.");
-		int limit = play.Play.application().configuration()
-				.getInt("regal-api.heritrix.crawlsPerNight");
 
 		Node webpagesArray[] = webpages.toArray(new Node[0]);
 		WebgatherLogger.debug("Found: " + webpagesArray.length + " webpages.");
@@ -106,8 +125,10 @@ public class Webgatherer implements Runnable {
 			if (precount >= webpagesArray.length)
 				break;
 		}
-		// er hat webpagesArray.length Webseiten bearbeitet, oder limit Crawls
-		// gestartet
+		/*
+		 * Es wurden alle webpagesArray.length Webseiten bearbeitet, oder limit
+		 * Crawls gestartet
+		 */
 		// Ende des Nachtlaufes
 		WebgatherLogger
 				.info("Ich habe " + precount + " Webpages bearbeitet und dabei " + count
@@ -120,21 +141,26 @@ public class Webgatherer implements Runnable {
 	 * eingesammelt werden muss - beginnt ggfs. einen neuen Sammelvorgang
 	 * ("Crawl")
 	 */
-	private void bearbWebpage(Node node) {
-		Gatherconf conf = null;
-		Node n = node;
+	private void bearbWebpage(Node n) {
+		this.node = n;
+		this.conf = null;
 		try {
+			WebgatherLogger.info("Precount: " + precount);
+			WebgatherLogger.info("PID: " + n.getPid());
+
 			// Merke toscience-ID der Webpage in einer Datei
 			String fileName =
 					helper.WebgatherUtils.getFileNameLastlyCrawledWebpageId();
-			FileWriter fw = new FileWriter(fileName);
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(n.getPid());
-			// bw.newLine();
-			bw.close();
+			try (FileWriter fw = new FileWriter(fileName);
+					BufferedWriter bw = new BufferedWriter(fw)) {
+				bw.write(n.getPid());
+				// bw.newLine();
+				bw.close();
+			} catch (Exception e) {
+				WebgatherLogger
+						.warn("Datei " + fileName + " kann nicht geschrieben werden.");
+			}
 
-			WebgatherLogger.info("Precount: " + precount);
-			WebgatherLogger.info("PID: " + n.getPid());
 			if (n.getState().equals("D")) {
 				WebgatherLogger.info("Objekt " + n.getPid() + " wurde gelöscht.");
 				return;
@@ -144,8 +170,6 @@ public class Webgatherer implements Runnable {
 						"Webpage " + n.getPid() + " hat noch keine Crawler-Konfigration.");
 				return;
 			}
-			WebgatherLogger
-					.info("Config: " + n.getConf() + " is being created in Gatherconf.");
 			conf = Gatherconf.create(n.getConf());
 			if (!conf.isActive()) {
 				WebgatherLogger.info("Site " + n.getPid() + " ist deaktiviert.");
@@ -153,7 +177,7 @@ public class Webgatherer implements Runnable {
 			}
 			WebgatherLogger.info("Test if " + n.getPid() + " is scheduled.");
 			// find open jobs
-			if (isOutstanding(n, conf)) {
+			if (isOutstanding()) {
 				WebgatherLogger.info(
 						"Die Website " + n.getPid() + " soll jetzt eingesammelt werden.");
 				if (conf.hasUrlMoved(n)) {
@@ -176,10 +200,10 @@ public class Webgatherer implements Runnable {
 			WebgatherLogger.error(
 					"Webgathering for " + n.getPid() + " stopped! Heritrix is too busy.");
 		} catch (MalformedURLException | URISyntaxException e) {
-			setUnknownHost(n, conf);
+			setUnknownHost();
 			WebgatherLogger.error("Fehlgeformte URL bei " + n.getPid() + " !");
 		} catch (UnknownHostException e) {
-			setUnknownHost(n, conf);
+			setUnknownHost();
 			WebgatherLogger
 					.error("Ungültige URL. Neue URL unbekannt für " + n.getPid() + " !");
 		} catch (Exception e) {
@@ -189,7 +213,7 @@ public class Webgatherer implements Runnable {
 
 	} // ENDE bearbWebpage()
 
-	private static void setUnknownHost(Node node, Gatherconf conf) {
+	private void setUnknownHost() {
 		if (conf != null && conf.getInvalidUrl() == false) {
 			conf.setInvalidUrl(true);
 			conf.setUrlNew((String) null);
@@ -246,19 +270,21 @@ public class Webgatherer implements Runnable {
 		return nextTimeHarvest;
 	}
 
-	private static boolean isOutstanding(Node n, Gatherconf conf) {
-		WebgatherLogger.debug("BEGIN isOutstanding for pid: " + n.getPid());
-		if (new Date().before(conf.getStartDate()))
+	private boolean isOutstanding() {
+		WebgatherLogger.debug("BEGIN isOutstanding for pid: " + node.getPid());
+		if (new Date().before(conf.getStartDate())) {
+			WebgatherLogger.debug("Webpage " + node.getPid()
+					+ " soll noch nicht gesammelt werden (vor Start-Datum).");
 			return false;
-		// Falls ein Crawl noch läuft, gib nie `true` zurück !!
-		WpullCrawl wpullCrawl = new WpullCrawl(n, conf);
-		CrawlControllerState ccs = wpullCrawl.getCrawlControllerState();
-		if (ccs.equals(CrawlControllerState.RUNNING)) {
+		}
+		if (isRunning()) {
 			return false;
 		}
 		WebgatherLogger
-				.debug("Nicht vor Beginndatum und Crawl läuft auch noch nicht.");
-		List<Link> parts = n.getRelatives(archive.fedora.FedoraVocabulary.HAS_PART);
+				.debug("Nicht vor Beginndatum und es läuft gerade kein Crawl.");
+
+		List<Link> parts =
+				node.getRelatives(archive.fedora.FedoraVocabulary.HAS_PART);
 		if (parts == null || parts.isEmpty()) {
 			WebgatherLogger.debug(
 					"Website hat noch keine \"Teile\" und soll jetzt gesammelt werden.");
@@ -267,7 +293,7 @@ public class Webgatherer implements Runnable {
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			SimpleDateFormat sdf_hr = new SimpleDateFormat("yyyy-MM-dd");
-			Date latestDate = getLastLaunch(n);
+			Date latestDate = getLastLaunch(node);
 			if (latestDate == null) {
 				return true;
 			}
@@ -278,26 +304,26 @@ public class Webgatherer implements Runnable {
 			latestCalendar.setTime(latestDate);
 			WebgatherLogger.debug("Set Date and time in calendar instance");
 			if (conf.getInterval().equals(models.Gatherconf.Interval.once)) {
-				WebgatherLogger.info(n.getPid()
+				WebgatherLogger.info(node.getPid()
 						+ " will be gathered only once. It has already been gathered on "
 						+ sdf_hr.format(latestDate));
 				return false;
 			}
-			WebgatherLogger.info(n.getPid() + " has been last gathered on "
+			WebgatherLogger.info(node.getPid() + " has been last gathered on "
 					+ sdf_hr.format(latestDate));
 			WebgatherLogger
-					.info(n.getPid() + " shall be launched " + conf.getInterval());
+					.info(node.getPid() + " shall be launched " + conf.getInterval());
 			Date nextDateHarvest = getSchedule(latestCalendar, conf);
-			WebgatherLogger.info(n.getPid() + " should be next gathered on "
+			WebgatherLogger.info(node.getPid() + " should be next gathered on "
 					+ sdf_hr.format(nextDateHarvest));
 			Date today = new Date();
 			if (sdf.format(nextDateHarvest).compareTo(sdf.format(today)) > 0) {
-				WebgatherLogger.info(
-						n.getPid() + " " + n.getConf() + " will be launched next time at "
-								+ new SimpleDateFormat("yyyy-MM-dd").format(nextDateHarvest));
+				WebgatherLogger.info(node.getPid() + " " + conf.toString()
+						+ " will be launched next time at "
+						+ new SimpleDateFormat("yyyy-MM-dd").format(nextDateHarvest));
 				return false;
 			}
-			WebgatherLogger.info(n.getPid() + " will be launched now!");
+			WebgatherLogger.info(node.getPid() + " will be launched now!");
 			return true;
 		} catch (ParseException e) {
 			WebgatherLogger.error("Cannot parse date string.", e);
@@ -306,6 +332,46 @@ public class Webgatherer implements Runnable {
 			WebgatherLogger.error("Kann letztes Crawl-Datum nicht bestimmen.", e);
 			return false;
 		}
+	}
+
+	private boolean isRunning() {
+		WebgatherLogger.debug("BEGIN isRunning for pid: " + node.getPid());
+		try {
+			if (conf.getCrawlerSelection().equals(CrawlerSelection.wpull)) {
+				WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
+				CrawlControllerState ccs = wpullCrawl.getCrawlControllerState();
+				if (ccs.equals(CrawlControllerState.RUNNING)) {
+					return true;
+				}
+			} else if (conf.getCrawlerSelection().equals(CrawlerSelection.btrix)) {
+				if (conf.getBtrixWorkflowId() != null) {
+					BtrixWebclient btrixWebclient = new BtrixWebclient();
+					btrixWebclient.setBtrixWorkflowId(conf.getBtrixWorkflowId());
+					JSONObject crawlConfig = btrixWebclient.getCrawlConfigOut();
+					if (crawlConfig.getBoolean("isCrawlRunning")) {
+						return true;
+					}
+				}
+			} else if (conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
+				String hertrixXmlResponse =
+						Globals.heritrix.getJobStatus(node.getPid());
+				XmlMapper xmlMapper = new XmlMapper();
+
+				Map<String, Object> entries =
+						xmlMapper.readValue(hertrixXmlResponse, Map.class);
+				if (entries.get("crawlControllerState")
+						.equals(CrawlControllerState.RUNNING)) {
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			WebgatherLogger.error(e.toString());
+			WebgatherLogger.warn(
+					"Crawler Status (\"crawlControllerState\") could not be determined. Assuming \"not running\".");
+		}
+		WebgatherLogger
+				.debug("Es läuft aktuell kein Crawl zur Webpage " + node.getPid());
+		return false;
 	}
 
 	private static Date getSchedule(Calendar cal, Gatherconf conf) {
@@ -330,6 +396,8 @@ public class Webgatherer implements Runnable {
 			break;
 		case once:
 			break;
+		default:
+			break;
 		}
 		return cal.getTime();
 	}
@@ -349,7 +417,7 @@ public class Webgatherer implements Runnable {
 		// gibt es das Verzeichnis überhaupt ?
 		if (!dir.exists() || !dir.isDirectory()) {
 			WebgatherLogger
-					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+					.info("Das Verzeichnis " + dir.toString() + " gibt es nicht.");
 			return null;
 		}
 		File[] files = dir.listFiles(new FileFilter() {
@@ -359,8 +427,8 @@ public class Webgatherer implements Runnable {
 			}
 		});
 		if (files == null || files.length <= 0) {
-			WebgatherLogger
-					.info("Zu " + name + " wurden noch keine Crawls angestoßen.");
+			WebgatherLogger.info("Im Verzeichnis " + dir.toString()
+					+ "gibt es keine Crawl-Verzeichnisse.");
 			return null;
 		}
 		WebgatherLogger
@@ -370,9 +438,13 @@ public class Webgatherer implements Runnable {
 		return latest;
 	}
 
-	/*
+	/**
+	 * Ermittelt Anzahl bisher erfolgter Crawls für eine Webpage
+	 * 
+	 * @param node der Node einer Webpage
+	 * 
 	 * @return die Anzahl bisher begonnener Sammelvorgänge (Summe über alle
-	 * möglichen Crawler) = die Anzahl angelegter Versionen
+	 *         möglichen Crawler) = die Anzahl angelegter Versionen
 	 */
 	public static int getLaunchCount(Node node) {
 		int launchCount = 0;
