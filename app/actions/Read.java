@@ -19,6 +19,8 @@ package actions;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.*;
+
+import helper.BtrixWebclient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
 import helper.Webgatherer;
@@ -41,6 +43,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+import models.CrawlerModel.CrawlControllerState;
 import models.DublinCoreData;
 import models.Gatherconf;
 import models.Globals;
@@ -54,6 +57,7 @@ import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 import org.apache.commons.codec.binary.Base64;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.json.JSONObject;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
@@ -847,11 +851,9 @@ public class Read extends RegalAction {
 	private Map<String, Object> getGatherStatus(Node node) {
 		Map<String, Object> entries = new HashMap<String, Object>();
 		try {
+			entries.put("lastLaunch", Webgatherer.getLastLaunch(node) == null ? ""
+					: Webgatherer.getLastLaunch(node));
 			// if ("version".equals(node.getContentType())) {
-			//
-			// new java.io.File(Gatherconf.create(node.getConf())
-			// .getLocalDir() + "/reports/crawl-report.txt"))
-			// .as("text/plain");
 			// } else
 			if ("webpage".equals(node.getContentType())) {
 				Gatherconf conf = Gatherconf.create(node.getConf());
@@ -869,18 +871,29 @@ public class Read extends RegalAction {
 					entries.put("crawlExitStatus",
 							wpullCrawl.getCrawlExitStatus() < 0 ? ""
 									: wpullCrawl.getCrawlExitStatus());
+				} else if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.btrix)) {
+					if (conf.getBtrixWorkflowId() != null) {
+						BtrixWebclient btrixWebclient = new BtrixWebclient();
+						btrixWebclient.setBtrixWorkflowId(conf.getBtrixWorkflowId());
+						JSONObject crawlConfig = btrixWebclient.getCrawlConfigOut();
+						if (crawlConfig.getBoolean("isCrawlRunning")) {
+							entries.put("crawlControllerState", CrawlControllerState.RUNNING);
+						}
+						entries.put("crawlExitStatus",
+								crawlConfig.getString("lastCrawlState"));
+						entries.put("launchCount", crawlConfig.getString("crawlCount"));
+						entries.put("lastCrawlSize",
+								crawlConfig.getString("lastCrawlSize"));
+						entries.put("lastLaunch",
+								crawlConfig.getString("lastCrawlStartTime"));
+					}
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
-				 * überschreibt launchCount von Heritrix
+				 * überschreibt launchCount von Heritrix und Browsertrix
 				 */
 				entries.put("launchCount", Webgatherer.getLaunchCount(node));
-				/*
-				 * call of getLastLaunch may be omitted for heritrix, as also determined
-				 * by heritrixXmlResponse
-				 */
-				entries.put("lastLaunch", Webgatherer.getLastLaunch(node) == null ? ""
-						: Webgatherer.getLastLaunch(node));
 				entries.put("nextLaunch", Webgatherer.nextLaunch(node));
 			} // end if webpage
 		} catch (Exception e) {
