@@ -884,7 +884,7 @@ public class Read extends RegalAction {
 								crawlConfig.getString("lastCrawlState"));
 						entries.put("launchCount", crawlConfig.getString("crawlCount"));
 						entries.put("lastCrawlSize",
-								crawlConfig.getString("lastCrawlSize"));
+								crawlConfig.getString("lastCrawlSize") + " Bytes");
 						entries.put("lastLaunch",
 								crawlConfig.getString("lastCrawlStartTime"));
 					}
