@@ -210,56 +210,60 @@ public class Read extends RegalAction {
 	 * @return node
 	 */
 	public Node getLastlyCreatedChildOrNull(Node node, String contentType) {
-		play.Logger.debug("BEGIN getLastlyCreatedChildOrNull for pid: "
-				+ node.getPid() + "; contentType: " + contentType);
+		/*
+		 * play.Logger.debug("BEGIN getLastlyCreatedChildOrNull for pid: " +
+		 * node.getPid() + "; contentType: " + contentType);
+		 */
 		if (contentType == null || contentType.isEmpty()) {
 			return null;
 		}
-		Node oldestNode = null;
+		Node newestNode = null;
 		for (Node n : getParts(node)) {
-			play.Logger.debug("found child with pid: " + n.getPid()
-					+ "; contentType: " + n.getContentType());
+			/*
+			 * play.Logger.debug("found child with pid: " + n.getPid() +
+			 * "; contentType: " + n.getContentType());
+			 */
 			if (contentType.equals(n.getContentType())) {
-				oldestNode = compareCreationDates(n, oldestNode);
-				play.Logger.debug("oldest node is now: pid: " + oldestNode.getPid());
+				newestNode = compareCreationDates(n, newestNode);
+				// play.Logger.debug("newest node is now: pid: " + newestNode.getPid());
 			}
 		}
-		if (oldestNode == null)
+		if (newestNode == null)
 			return null;
-		play.Logger.debug("returning oldest node with pid: " + oldestNode.getPid());
-		return oldestNode;
+		play.Logger.debug("returning newest node with pid: " + newestNode.getPid());
+		return newestNode;
 	}
 
-	private static Node compareCreationDates(Node currentNode, Node oldestNode) {
+	private static Node compareCreationDates(Node currentNode, Node newestNode) {
 		Date currentNodeDate = currentNode.getCreationDate();
 		if (currentNodeDate == null)
 			currentNodeDate = currentNode.getObjectTimestamp();
 		if (currentNodeDate == null)
 			currentNodeDate = currentNode.getLastModified();
 		currentNode.setCreationDate(currentNodeDate);
-		if (oldestNode != null) {
-			Date oldestNodeDate = oldestNode.getCreationDate();
-			if (oldestNodeDate == null)
-				oldestNodeDate = oldestNode.getObjectTimestamp();
-			if (oldestNodeDate == null)
-				oldestNodeDate = oldestNode.getLastModified();
-			oldestNode.setCreationDate(oldestNodeDate);
-			if (currentNodeDate.after(oldestNodeDate)) {
-				oldestNode = currentNode;
+		if (newestNode != null) {
+			Date newestNodeDate = newestNode.getCreationDate();
+			if (newestNodeDate == null)
+				newestNodeDate = newestNode.getObjectTimestamp();
+			if (newestNodeDate == null)
+				newestNodeDate = newestNode.getLastModified();
+			newestNode.setCreationDate(newestNodeDate);
+			if (currentNodeDate.after(newestNodeDate)) {
+				newestNode = currentNode;
 			}
 			// Special case: Since input has not to be sorted in any way, we
 			// need a condition to prefer child nodes over parent nodes.
 			// If both nodes have the same timestamp, the currentNode
 			// will win, if it is NOT a parent the oldest.
-			if (currentNodeDate.equals(oldestNodeDate)) {
-				if (!currentNode.getPid().equals(oldestNode.getParentPid())) {
-					oldestNode = currentNode;
+			if (currentNodeDate.equals(newestNodeDate)) {
+				if (!currentNode.getPid().equals(newestNode.getParentPid())) {
+					newestNode = currentNode;
 				}
 			}
 		} else {
 			return currentNode;
 		}
-		return oldestNode;
+		return newestNode;
 	}
 
 	/**
