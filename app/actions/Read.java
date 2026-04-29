@@ -865,7 +865,7 @@ public class Read extends RegalAction {
 					entries.put("crawlFileSize",
 							crawlConfig.getString("fileSize") + " Bytes");
 					entries.put("crawlDuration",
-							crawlConfig.getString("crawlExecSeconds"));
+							crawlConfig.getString("crawlExecSeconds") + "Sekunden");
 					entries.put("crawlStarted", crawlConfig.getString("started"));
 				}
 			} else if ("webpage".equals(node.getContentType())) {
