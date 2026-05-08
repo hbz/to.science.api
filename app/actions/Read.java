@@ -868,8 +868,7 @@ public class Read extends RegalAction {
 							Long.parseLong(crawlConfig.getString("fileSize"))));
 					entries.put("crawlDuration",
 							WebgatherUtils.humanReadableDuration(Duration.ofSeconds(
-									Long.parseLong(crawlConfig.getString("crawlExecSeconds"))
-											* 1000)));
+									Long.parseLong(crawlConfig.getString("crawlExecSeconds")))));
 					entries.put("crawlStarted", crawlConfig.getString("started"));
 				}
 			} else if ("webpage".equals(node.getContentType())) {
