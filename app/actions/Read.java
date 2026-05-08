@@ -23,6 +23,7 @@ import static archive.fedora.Vocabulary.*;
 import helper.BtrixWebclient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
+import helper.WebgatherUtils;
 import helper.Webgatherer;
 import helper.WpullCrawl;
 
@@ -34,6 +35,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -862,10 +864,12 @@ public class Read extends RegalAction {
 					btrixWebclient.setCrawlId(conf.getLastCrawlId());
 					JSONObject crawlConfig = btrixWebclient.getCrawlOut();
 					entries.put("crawlExitStatus", crawlConfig.getString("state"));
-					entries.put("crawlFileSize",
-							crawlConfig.getString("fileSize") + " Bytes");
+					entries.put("crawlFileSize", WebgatherUtils.humanReadableByteCount(
+							Long.parseLong(crawlConfig.getString("fileSize"))));
 					entries.put("crawlDuration",
-							crawlConfig.getString("crawlExecSeconds") + "Sekunden");
+							WebgatherUtils.humanReadableDuration(Duration.ofSeconds(
+									Long.parseLong(crawlConfig.getString("crawlExecSeconds"))
+											* 1000)));
 					entries.put("crawlStarted", crawlConfig.getString("started"));
 				}
 			} else if ("webpage".equals(node.getContentType())) {
@@ -895,8 +899,8 @@ public class Read extends RegalAction {
 						entries.put("crawlExitStatus",
 								crawlConfig.getString("lastCrawlState"));
 						entries.put("launchCount", crawlConfig.getString("crawlCount"));
-						entries.put("lastCrawlSize",
-								crawlConfig.getString("lastCrawlSize") + " Bytes");
+						entries.put("lastCrawlSize", WebgatherUtils.humanReadableByteCount(
+								Long.parseLong(crawlConfig.getString("lastCrawlSize"))));
 						entries.put("lastLaunch",
 								crawlConfig.getString("lastCrawlStartTime"));
 					}
