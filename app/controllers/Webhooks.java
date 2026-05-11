@@ -180,11 +180,13 @@ public class Webhooks extends MyController {
 			 */
 			JsonNode body = request().body().asJson();
 			play.Logger.debug("wpull Crawl Finished sent body: " + body);
-			String pid = body.findValue("pid").toString();
+			String pid = body.findValue("pid").toString().replaceAll("^\"|\"$", "");
 			play.Logger.debug("webpage pid: " + pid);
-			String crawldir = body.findValue("crawldir").toString();
+			String crawldir =
+					body.findValue("crawldir").toString().replaceAll("^\"|\"$", "");
 			play.Logger.debug("crawldir: " + crawldir);
-			String warcFilenameBase = body.findValue("warcFilenameBase").toString();
+			String warcFilenameBase = body.findValue("warcFilenameBase").toString()
+					.replaceAll("^\"|\"$", "");
 			play.Logger.debug("warcFilenameBase: " + warcFilenameBase);
 
 			/*
