@@ -153,6 +153,7 @@ public class Webhooks extends MyController {
 			moveArchive.setToscienceId(toscienceId);
 			moveArchive.setLastCrawlId(lastCrawlId);
 			moveArchive.setDatetime(datetime);
+			moveArchive.setDaemon(true);
 			moveArchive.run();
 
 			return ok();

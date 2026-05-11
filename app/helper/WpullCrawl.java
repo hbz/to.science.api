@@ -162,6 +162,7 @@ public class WpullCrawl extends CrawlerModel {
 			wpullThread.setLocalPath(getLocalpath());
 			wpullThread.setExecuteCommand(buildExecCommand());
 			wpullThread.setDomains(getDomains());
+			wpullThread.setDaemon(true);
 
 			// Dies führt zunächst den CDN-Precrawl aus, dann den Hauptcrawl.
 			boolean wait = true;

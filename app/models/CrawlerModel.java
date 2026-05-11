@@ -446,6 +446,7 @@ public class CrawlerModel {
 		try {
 			CDNCrawl cdnCrawl = new CDNCrawl(this, mainCrawl);
 			cdnCrawl.setWait(wait);
+			cdnCrawl.setDaemon(true);
 			cdnCrawl.start();
 			if (!wait) {
 				/**
