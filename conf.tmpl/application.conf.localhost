@@ -105,6 +105,7 @@ regal-api.wpull.crawler="/usr/local/bin/wpull3"
 regal-api.wpull.jobDir="/opt/toscience/cdn-data"
 # nach hier werden gecrawlte Inhalte heruntergeladen (jedoch nicht permanent gespeichert):
 regal-api.wpull.tempJobDir="/opt/toscience/wpull-data-crawldir"
+regal-api.wpull.finishedDir="/opt/toscience/wpull-data-finished"
 # nach hier werden fertige Crawls endgültig verschoben und permanent gespeichert:
 regal-api.wpull.outDir="/opt/toscience/wpull-data"
 #--- importHome: von hier können Webarchive importiert werden.

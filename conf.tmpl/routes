@@ -167,3 +167,4 @@ GET /browse/:facetName				controllers.Browse.browse(facetName:String,design?="")
 POST /context.json 					controllers.Context.updateContext()
 
 POST /webhooks/btrixCrawlFinished	controllers.Webhooks.btrixCrawlFinished()
+POST /webhooks/wpullCrawlFinished	controllers.Webhooks.wpullCrawlFinished()

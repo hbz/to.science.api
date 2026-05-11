@@ -29,6 +29,7 @@ public class WpullThread extends Thread {
 	private Gatherconf conf = null;
 	private List<String> title = null;
 	private File crawlDir = null;
+	private File finishedDir = null;
 	private File outDir = null;
 	private String warcFilename = null;
 	private String host = null; /* = domain */
@@ -92,6 +93,16 @@ public class WpullThread extends Thread {
 	 */
 	public void setCrawlDir(File crawlDir) {
 		this.crawlDir = crawlDir;
+	}
+
+	/**
+	 * Die Methode, um den Parameter finishedDir zu setzen.
+	 * 
+	 * @param finishedDir Das Verzeichnis (absoluter Pfad), in das wpull seine
+	 *          fertigen Webarchive (per --warc-move) verschiebt.
+	 */
+	public void setFinishedDir(File finishedDir) {
+		this.finishedDir = finishedDir;
 	}
 
 	/**
@@ -239,11 +250,14 @@ public class WpullThread extends Thread {
 				 * daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für
 				 * TOS-1182 und TOS-1224
 				 */
-				String versionPid = null;
-				new Create().createWebpageVersion(node, conf, warcFilename, outDir,
-						localpath, versionPid);
-				WebgatherLogger
-						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
+				/**
+				 * Die Anlage des Webschnitts wird in einen Cronjob ausgelagert.
+				 * KS20260511 siehe TOSDEV-46.
+				 */
+				WebgatherLogger.info("Webpage " + host + " mit PID " + conf.getName()
+						+ " wurde erfolgreich eingesammelt. Finished-Dir: "
+						+ finishedDir.toString() + ", Dateiname: " + warcFilename);
+
 				/**
 				 * Hier eine Mail schicken, falls nichts eingesammelt wurde. Für
 				 * TOS-1326
@@ -294,6 +308,7 @@ public class WpullThread extends Thread {
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);
+			wpullThread.setFinishedDir(finishedDir);
 			wpullThread.setOutDir(outDir);
 			wpullThread.setWarcFilename(warcFilename);
 			wpullThread.setLocalPath(localpath);

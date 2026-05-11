@@ -39,9 +39,12 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import actions.Create;
 import actions.Read;
 import authenticate.BasicAuth;
-import helper.BtrixCrawlMoveArchiveThread;
+import helper.BtrixCrawlIngestArchive;
 import helper.BtrixWebclient;
 import helper.WebgatherUtils;
+import helper.WpullCrawl;
+import helper.WpullCrawlIngestArchive;
+import models.Gatherconf;
 import models.Gatherconf.CrawlerSelection;
 import models.Message;
 import models.Node;
@@ -147,13 +150,56 @@ public class Webhooks extends MyController {
 			 * Verschieben der Archivdatei in den Ergebnisbereich (btrix-data) wird
 			 * automatisch ein Webschnitt angelegt.
 			 */
-			BtrixCrawlMoveArchiveThread moveArchive =
-					new BtrixCrawlMoveArchiveThread(btrixWebclient);
-			moveArchive.setFilename(filename);
+			BtrixCrawlIngestArchive moveArchive = new BtrixCrawlIngestArchive();
+			moveArchive.setCrawler(Gatherconf.CrawlerSelection.btrix);
+			moveArchive.setCrawlerModel(btrixWebclient);
 			moveArchive.setToscienceId(toscienceId);
+			moveArchive.setFilename(filename);
 			moveArchive.setLastCrawlId(lastCrawlId);
 			moveArchive.setDatetime(datetime);
-			moveArchive.setDaemon(false);
+			moveArchive.run();
+
+			return ok();
+		});
+	}
+
+	/**
+	 * Dieser Endpoint verarbeitet eine von wpull bereit gestellte neu Archivdatei
+	 * (der Endung .warc.gz)
+	 * 
+	 * @author I. Kuss
+	 * @date 2026-05-11
+	 * @return
+	 */
+	public static Promise<Result> wpullCrawlFinished() {
+
+		return Promise.promise(() -> {
+
+			/**
+			 * Entgegennahme der POST-Parameter
+			 */
+			JsonNode body = request().body().asJson();
+			play.Logger.debug("wpull Crawl Finished sent body: " + body);
+			String pid = body.findValue("pid").toString();
+			play.Logger.debug("webpage pid: " + pid);
+			String crawldir = body.findValue("crawldir").toString();
+			play.Logger.debug("crawldir: " + crawldir);
+			String warcFilenameBase = body.findValue("warcFilenameBase").toString();
+			play.Logger.debug("warcFilenameBase: " + warcFilenameBase);
+
+			/*
+			 * Ab hier wird die Verarbeitung an einen Thread übergeben
+			 * (Nebenläufigkeit); lang dauernde Dateioperationen möglich! Nach dem
+			 * Verschieben der Archivdatei in den Ergebnisbereich (wpull-data) wird
+			 * automatisch ein Webschnitt angelegt. Anschließend wird das crawldir im
+			 * "finished"-Verzeichnis gelöscht.
+			 */
+			WpullCrawlIngestArchive moveArchive = new WpullCrawlIngestArchive();
+			moveArchive.setCrawler(Gatherconf.CrawlerSelection.wpull);
+			moveArchive.setToscienceId(pid);
+			moveArchive.setFilename(warcFilenameBase + ".warc.gz");
+			moveArchive.setFilenameBase(warcFilenameBase);
+			moveArchive.setDatetime(crawldir);
 			moveArchive.run();
 
 			return ok();

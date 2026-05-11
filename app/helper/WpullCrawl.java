@@ -47,11 +47,14 @@ import org.apache.commons.io.FileUtils;
  */
 public class WpullCrawl extends CrawlerModel {
 
-	final static String tempJobDir = Play.application().configuration()
-			.getString("regal-api.wpull.tempJobDir");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
+	final static String tempJobDir = Play.application().configuration()
+			.getString("regal-api.wpull.tempJobDir");
 	private File tempCrawlDir = null;
+	final static String finishedDir = Play.application().configuration()
+			.getString("regal-api.wpull.finishedDir");
+	private File finishedFile = null;
 	private File logAnalysesDir = null;
 	private BufferedReader buf;
 
@@ -66,26 +69,41 @@ public class WpullCrawl extends CrawlerModel {
 		super(node, conf);
 		try {
 			/**
-			 * Die Schreibzugriffe von wpull (Downloads) erfolgen in das Verzeichnis
-			 * jobDir hinein. jobDir ist das Arbeitsverzeichnis von wpull. jobDir
-			 * sollte ein lokales Verzeichnis sein.
+			 * jobDir ist das Arbeitsverzeichnis für die CDN-Crawls. Mit toscience-ID
+			 * und Zeitstempel versehen heißt das Verzeichnis crawlDir.
 			 */
 			this.setJobDir(Play.application().configuration()
 					.getString("regal-api.wpull.jobDir"));
+			this.setCrawlDir(new File(
+					this.getJobDir() + "/" + conf.getName() + "/" + getDatetime()));
 			/**
-			 * Im Verzeichnis outDir liegen die fertigen Crawls. Das ist das
-			 * Output-Verzeichnis von wpull. Von hier aus werden die Crawls entweder
-			 * direkt von Wayback indexiert oder vorher noch weitergehend bearbeitet,
-			 * z.B. getestet, ob sie erfolgreich waren.
+			 * Die Schreibzugriffe von wpull (Downloads) erfolgen in ein lokales
+			 * Verzeichnis tempJobDir hinein. Das ist das Arbeitsverzeichnis von
+			 * wpull. Mit toscience-ID und Zeitstempel versehen heißt das Verzeichnis
+			 * tempCrawlDir.
+			 */
+			tempCrawlDir =
+					new File(tempJobDir + "/" + conf.getName() + "/" + getDatetime());
+			/**
+			 * Nach erfolgreichem Crawl verschiebt wpulll die Archivdateien in das
+			 * Verzeichnis finishedDir. Von hier werden die Dateien in periodischen
+			 * Abständen (per cronjob) abgeholt und an ihren endgültigen Speicherort
+			 * verschoben. Mit toscience-ID und Zeitstempel versehen heißt das
+			 * Verzeichnis finishedFile.
+			 */
+			finishedFile =
+					new File(finishedDir + "/" + conf.getName() + "/" + getDatetime());
+			/**
+			 * Im Verzeichnis outDir liegen die fertigen Crawls, hier werden sie
+			 * endgültig gespeichert. Von hier aus werden die Crawls entweder direkt
+			 * von Wayback indexiert. Mit toscience-ID und Zeitstempel versehen heißt
+			 * das Verzeichnis resultDir.
 			 */
 			this.setOutDir(Play.application().configuration()
 					.getString("regal-api.wpull.outDir"));
-			this.setCrawlDir(new File(
-					this.getJobDir() + "/" + conf.getName() + "/" + getDatetime()));
-			tempCrawlDir =
-					new File(tempJobDir + "/" + conf.getName() + "/" + getDatetime());
 			this.setResultDir(new File(
 					this.getOutDir() + "/" + conf.getName() + "/" + getDatetime()));
+
 			this.setCdxFile(new File(this.getOutDir() + "/" + conf.getName() + "/WEB-"
 					+ getHost() + ".cdx"));
 
@@ -116,6 +134,12 @@ public class WpullCrawl extends CrawlerModel {
 			WebgatherLogger.debug("Create temp crawl directory " + tempJobDir + "/"
 					+ getConf().getName() + "/" + getDatetime());
 			tempCrawlDir.mkdirs();
+		}
+		if (!finishedFile.exists()) {
+			// create directory for finished crawls
+			WebgatherLogger.debug("Create directory for finished crawls "
+					+ finishedDir + "/" + getConf().getName() + "/" + getDatetime());
+			finishedFile.mkdirs();
 		}
 		/**
 		 * Dieser Codeblock wird für das inkrementelle Crawling benötigt. Es wird
@@ -156,6 +180,7 @@ public class WpullCrawl extends CrawlerModel {
 			wpullThread.setNode(getNode());
 			wpullThread.setConf(getConf());
 			wpullThread.setCrawlDir(tempCrawlDir);
+			wpullThread.setFinishedDir(finishedFile);
 			wpullThread.setOutDir(getResultDir());
 			wpullThread.setWarcFilename(getWarcFilename());
 			wpullThread.setHost(getHost());
@@ -283,7 +308,7 @@ public class WpullCrawl extends CrawlerModel {
 		sb.append(" --warc-append");
 		// auskommentiert 27.08.2020 für EDOZWO-1026
 		// sb.append(" --warc-tempdir=" + tempJobDir)
-		sb.append(" --warc-move=" + getResultDir());
+		sb.append(" --warc-move=" + finishedFile);
 		sb.append(" --warc-cdx");
 		if (getCdxFileNew() != null && getCdxFileNew().exists()) {
 			sb.append(" --warc-dedup=" + getWarcFilename() + ".cdx");
