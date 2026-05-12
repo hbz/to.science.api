@@ -50,20 +50,19 @@ public class WpullCrawlIngestArchive extends CrawlerModelIngestArchive {
 					+ getFilenameBase();
 			Path sourcePath = Paths.get(finishedDir + relPath + ".warc.gz");
 			Path targetPath = Paths.get(outDir + relPath + ".warc.gz");
-			play.Logger.debug("Moving file " + sourcePath.toString() + " to "
+			WebgatherLogger.debug("Moving file " + sourcePath.toString() + " to "
 					+ targetPath.toString());
 			Files.move(sourcePath, targetPath);
-			play.Logger.debug("File moved successfully.");
+			WebgatherLogger.debug("File moved successfully.");
 
 			sourcePath = Paths.get(finishedDir + relPath + ".cdx");
 			targetPath = Paths.get(outDir + relPath + ".cdx");
-			play.Logger.debug("Moving file " + sourcePath.toString() + " to "
+			WebgatherLogger.debug("Moving file " + sourcePath.toString() + " to "
 					+ targetPath.toString());
 			Files.move(sourcePath, targetPath);
 			play.Logger.debug("File moved successfully.");
 		} catch (IOException e) {
-			play.Logger
-					.error("WARC and/or CDX file could not be moved to result directory! "
+			WebgatherLogger.error("WARC and/or CDX file could not be moved to result directory! "
 							+ e.getMessage());
 			throw new RuntimeException(e);
 		}

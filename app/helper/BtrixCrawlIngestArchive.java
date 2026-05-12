@@ -44,12 +44,12 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 		try {
 			Path sourcePath = Paths.get(getFilename());
 			Path targetPath = Paths.get(waczFilenameResultDir);
-			play.Logger.debug("Moving file " + getFilename() + " to directory "
+			WebgatherLogger.debug("Moving file " + getFilename() + " to directory "
 					+ getCrawlerModel().getResultDir().toString());
 			Files.move(sourcePath, targetPath);
-			play.Logger.debug("File moved successfully.");
+			WebgatherLogger.debug("File moved successfully.");
 		} catch (IOException e) {
-			play.Logger.error("WACZ file could not be moved to result directory! "
+			WebgatherLogger.error("WACZ file could not be moved to result directory! "
 					+ e.getMessage());
 			throw new RuntimeException(e);
 		}

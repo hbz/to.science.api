@@ -181,8 +181,7 @@ public class CrawlerModelIngestArchive extends Thread {
 		new Create().postWebpageVersion(n, versionPid, getLastCrawlId(),
 				getCrawler().toString(), getDatetime(),
 				new File(getFilename()).getName());
-		play.Logger
-				.info("WebpageVersion für " + getToscienceId() + "wurde angelegt.");
+		WebgatherLogger.info("WebpageVersion für " + getToscienceId() + "wurde angelegt.");
 	}
 
 }
