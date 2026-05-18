@@ -50,7 +50,7 @@ public class CDNCrawl extends Thread {
 		// das CDX-File für CDN-Crawls
 		this.cdxFile = new File(
 				crawlerModel.getJobDir() + "/" + crawlerModel.getConf().getName()
-						+ "/WEB-" + crawlerModel.getHost() + ".cdx");
+						+ "/WEB-" + crawlerModel.getHost() + "-cdn.cdx");
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class CDNCrawl extends Thread {
 				WebgatherLogger
 						.debug("CDX-Datei gefunden: " + cdxFile.getAbsolutePath());
 				this.cdxFileNew = new File(crawlerModel.getCrawlDir().getAbsolutePath()
-						+ "/" + crawlerModel.getWarcFilename() + ".cdx");
+						+ "/" + crawlerModel.getWarcFilename() + "-cdn.cdx");
 				FileUtils.copyFile(cdxFile, cdxFileNew);
 				WebgatherLogger
 						.debug("Neue CDX-Datei angelegt: " + cdxFileNew.getAbsolutePath());
@@ -171,7 +171,7 @@ public class CDNCrawl extends Thread {
 			 * @date 2026-04-27
 			 */
 			this.cdxFileNew = new File(crawlerModel.getCrawlDir().getAbsolutePath()
-					+ "/" + crawlerModel.getWarcFilename() + ".cdx");
+					+ "/" + crawlerModel.getWarcFilename() + "-cdn.cdx");
 			if (cdxFileNew.exists()) {
 				/*
 				 * File cdxFileSave = new File(crawlDir.getParent() + "/WEB-" +
