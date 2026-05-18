@@ -392,7 +392,7 @@ public class CrawlerModel {
 			this.date = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
 			this.datetime =
 					date + new SimpleDateFormat("HHmmss").format(new java.util.Date());
-			this.warcFilename = "WEB-" + host + "-" + date;
+			this.warcFilename = "WEB-" + host + "-" + datetime;
 		} catch (Exception e) {
 			WebgatherLogger.error("Ungültige URL :" + conf.getUrl() + " !");
 			throw new RuntimeException(e);
