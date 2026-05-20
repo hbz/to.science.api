@@ -78,6 +78,14 @@ public class TosHelper {
 		FIELD_TYPES.put("abstractText", StructureType.STRING_ARRAY);
 		FIELD_TYPES.put("publicationYear", StructureType.STRING_ARRAY);
 		FIELD_TYPES.put("bibliographicCitation", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("extent", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("hbzId", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("almaMmsId", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("deprecatedUri", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("otherTitleInformation", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("responsibilityStatement", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("Isbn", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("bibo:doi", StructureType.STRING_ARRAY);
 
 		FIELD_TYPES.put("fundingId", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("isLike", StructureType.SIMPLEOBJECT_ARRAY);
@@ -92,13 +100,25 @@ public class TosHelper {
 		FIELD_TYPES.put("license", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("ddc", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("publisherVersion", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("catalogLink", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("containedIn", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("collectionOne", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("collectionTwo", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("natureOfContent", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("publicationStatus", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("reviewStatus", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("professionalGroup", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("isPrimaryTopicOf", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("publication", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("hasItem", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("inCollection", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("sameAs", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("accessRights", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("bibliographicLevel", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("parallelEdition", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("describedby", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("contribution", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("fulltextOnline", StructureType.SIMPLEOBJECT_ARRAY);
 	}
 
 	/**
@@ -270,6 +290,703 @@ public class TosHelper {
 		}
 
 		return ktblAndTos.toString();
+	}
+
+	public static JSONObject getLobidMonographAsJson(String contentJsFile,
+			String pid) {
+		try {
+			JSONObject lobid = new JSONObject(contentJsFile);
+			JSONObject mapped = mapLobidMonographToTos(lobid, pid);
+			normalizeLicensesForPersistence(mapped);
+			return mapped;
+		} catch (Exception e) {
+			play.Logger.debug("Exception in getLobidMonographAsJson()" + e);
+			return null;
+		}
+	}
+
+	/**
+	 * Maps Lobid JSON of a monograph to the toscience JSON format.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @param pid local pid
+	 * @return mapped toscience JSON
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONObject mapLobidMonographToTos(JSONObject lobid, String pid)
+			throws JSONException {
+		JSONObject mapped = new JSONObject();
+		mapped.put("@id", pid);
+		mapped.put("id", Globals.protocol + Globals.server + "/resource/" + pid);
+		mapped.put("contentType", "monograph");
+
+		putStringArray(mapped, "title", getStringValue(lobid.opt("title")));
+		copyStringLikeAsArray(mapped, lobid, "extent");
+		copyStringLikeAsArray(mapped, lobid, "hbzId");
+		copyStringLikeAsArray(mapped, lobid, "almaMmsId");
+		copyStringLikeAsArray(mapped, lobid, "deprecatedUri");
+		copyStringLikeAsArray(mapped, lobid, "otherTitleInformation");
+		copyStringLikeAsArray(mapped, lobid, "responsibilityStatement");
+		copyStringLikeAsArray(mapped, lobid, "edition");
+		copyStringLikeAsArray(mapped, lobid, "isbn", "Isbn");
+
+		String issued = getIssuedFromLobidMonograph(lobid);
+		putStringField(mapped, "issued", issued);
+		if (issued != null && !issued.trim().isEmpty()) {
+			putStringArray(mapped, "publicationYear", issued);
+		}
+
+		putIfNotEmpty(mapped, "language",
+				normalizeLobidArray(lobid.optJSONArray("language")));
+		putIfNotEmpty(mapped, "medium",
+				normalizeLobidArray(lobid.optJSONArray("medium")));
+		putIfNotEmpty(mapped, "natureOfContent",
+				normalizeLobidArray(lobid.optJSONArray("natureOfContent")));
+		putIfNotEmpty(mapped, "license", mapLicensesFromDescribedBy(lobid));
+		putIfNotEmpty(mapped, "rdftype",
+				mapMonographRdfTypes(lobid.optJSONArray("type")));
+		putIfNotEmpty(mapped, "catalogLink", mapCatalogLinks(lobid));
+		putIfNotEmpty(mapped, "containedIn", mapContainedIn(lobid));
+		putIfNotEmpty(mapped, "subject", mapMonographSubjects(lobid));
+		putIfNotEmpty(mapped, "publication",
+				normalizeLobidArray(lobid.optJSONArray("publication")));
+		putIfNotEmpty(mapped, "hasItem",
+				normalizeLobidArray(lobid.optJSONArray("hasItem")));
+		putIfNotEmpty(mapped, "inCollection",
+				normalizeLobidArray(lobid.optJSONArray("inCollection")));
+		putIfNotEmpty(mapped, "sameAs",
+				normalizeLobidArray(lobid.optJSONArray("sameAs")));
+		putIfNotEmpty(mapped, "accessRights",
+				normalizeLobidArray(lobid.optJSONArray("accessRights")));
+		putIfNotEmpty(mapped, "bibliographicLevel",
+				normalizeLobidArray(lobid.optJSONArray("bibliographicLevel")));
+		putIfNotEmpty(mapped, "parallelEdition", mapParallelEdition(lobid));
+		putIfNotEmpty(mapped, "describedby", mapDescribedBy(lobid));
+		putIfNotEmpty(mapped, "contribution",
+				normalizeLobidArray(lobid.optJSONArray("contribution")));
+		putIfNotEmpty(mapped, "fulltextOnline", mapFulltextOnline(lobid));
+		putIfNotEmpty(mapped, "bibo:doi", mapDoiValues(lobid));
+
+		JSONObject contributions =
+				mapMonographContributions(lobid.optJSONArray("contribution"));
+		JSONArray creators = contributions.optJSONArray("creator");
+		JSONArray contributors = contributions.optJSONArray("contributor");
+		JSONArray contributorOrder = contributions.optJSONArray("contributorOrder");
+		putIfNotEmpty(mapped, "creator", creators);
+		putIfNotEmpty(mapped, "contributor", contributors);
+		putIfNotEmpty(mapped, "contributorOrder", contributorOrder);
+
+		return mapped;
+	}
+
+	/**
+	 * Converts Lobid objects to simple objects with @id and prefLabel.
+	 * 
+	 * @param source source array
+	 * @param idKey key for id
+	 * @param labelKey key for label
+	 * @return normalized array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapSimpleObjects(JSONArray source, String idKey,
+			String labelKey) throws JSONException {
+		JSONArray result = new JSONArray();
+		if (source == null) {
+			return result;
+		}
+		for (int i = 0; i < source.length(); i++) {
+			if (!(source.get(i) instanceof JSONObject)) {
+				continue;
+			}
+			JSONObject current = source.getJSONObject(i);
+			JSONObject simpleObject = createSimpleObject(current.optString(idKey, ""),
+					current.optString(labelKey, ""));
+			if (simpleObject != null) {
+				result.put(simpleObject);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Reads license entries from Lobid describedBy.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return license array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapLicensesFromDescribedBy(JSONObject lobid)
+			throws JSONException {
+		JSONObject describedBy = lobid.optJSONObject("describedBy");
+		if (describedBy == null) {
+			return new JSONArray();
+		}
+		return mapSimpleObjects(describedBy.optJSONArray("license"), "id", "label");
+	}
+
+	/**
+	 * Reads the Lobid type values and maps them to the rdftype field in the
+	 * toscience JSON.
+	 * 
+	 * @param types Lobid types
+	 * @return rdf type array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapMonographRdfTypes(JSONArray types)
+			throws JSONException {
+		JSONArray result = new JSONArray();
+		if (types == null) {
+			return result;
+		}
+		for (int i = 0; i < types.length(); i++) {
+			String rawType = types.optString(i, "").trim();
+			String uri = toLobidTypeUri(rawType);
+			if (uri == null || uri.isEmpty()) {
+				continue;
+			}
+			String label = Globals.profile.getEtikett(uri).getLabel();
+			if (label == null || label.trim().isEmpty() || label.equals(uri)) {
+				label = rawType;
+			}
+			JSONObject simpleObject = createSimpleObject(uri, label);
+			if (simpleObject != null) {
+				result.put(simpleObject);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Converts known Lobid type labels to URIs.
+	 * 
+	 * @param rawType type label or URI
+	 * @return URI or null
+	 */
+	private static String toLobidTypeUri(String rawType) {
+		if (rawType == null || rawType.trim().isEmpty()) {
+			return null;
+		}
+		if (rawType.startsWith("http://") || rawType.startsWith("https://")) {
+			return rawType;
+		}
+		switch (rawType) {
+		case "BibliographicResource":
+			return "http://purl.org/dc/terms/BibliographicResource";
+		case "EditedVolume":
+			return "http://purl.org/lobid/lv#EditedVolume";
+		case "Book":
+			return "http://purl.org/ontology/bibo/Book";
+		case "Document":
+			return "http://purl.org/ontology/bibo/Document";
+		case "MultiVolumeBook":
+			return "http://purl.org/ontology/bibo/MultiVolumeBook";
+		case "Series":
+			return "http://purl.org/ontology/bibo/Series";
+		case "Periodical":
+			return "http://purl.org/ontology/bibo/Periodical";
+		case "Proceedings":
+			return "http://purl.org/ontology/bibo/Proceedings";
+		case "Thesis":
+			return "http://purl.org/ontology/bibo/Thesis";
+		case "Manifestation":
+			return "http://purl.org/vocab/frbr/core#Manifestation";
+		default:
+			return null;
+		}
+	}
+
+	/**
+	 * Builds the catalogLink value from Lobid ids.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return catalog link array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapCatalogLinks(JSONObject lobid)
+			throws JSONException {
+		JSONArray result = new JSONArray();
+		String hbzId = lobid.optString("hbzId", "").trim();
+		if (!hbzId.isEmpty()) {
+			JSONObject catalogLink =
+					createSimpleObject("https://lobid.org/resources/" + hbzId, hbzId);
+			if (catalogLink != null) {
+				result.put(catalogLink);
+			}
+			return result;
+		}
+		String deprecatedUri = lobid.optString("deprecatedUri", "").trim();
+		if (!deprecatedUri.isEmpty()) {
+			JSONObject catalogLink = createSimpleObject(deprecatedUri, deprecatedUri);
+			if (catalogLink != null) {
+				result.put(catalogLink);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Uses the Lobid id as a simple parallelEdition value.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return parallel edition array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapParallelEdition(JSONObject lobid)
+			throws JSONException {
+		JSONArray result = new JSONArray();
+		String id = lobid.optString("id", "").trim();
+		if (!id.isEmpty()) {
+			JSONObject parallelEdition = new JSONObject();
+			parallelEdition.put("@id", id);
+			parallelEdition.put("prefLabel", id);
+			result.put(parallelEdition);
+		}
+		return result;
+	}
+
+	/**
+	 * Normalizes the Lobid describedBy object.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return normalized describedby array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapDescribedBy(JSONObject lobid)
+			throws JSONException {
+		JSONArray result = new JSONArray();
+		JSONObject describedBy = lobid.optJSONObject("describedBy");
+		if (describedBy != null) {
+			result.put(normalizeLobidObject(describedBy));
+		}
+		return result;
+	}
+
+	/**
+	 * Reads parent relations from Lobid isPartOf.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return containedIn array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapContainedIn(JSONObject lobid)
+			throws JSONException {
+		JSONArray result = new JSONArray();
+		JSONArray isPartOf = lobid.optJSONArray("isPartOf");
+		if (isPartOf == null) {
+			return result;
+		}
+		for (int i = 0; i < isPartOf.length(); i++) {
+			JSONObject relation = isPartOf.optJSONObject(i);
+			if (relation == null) {
+				continue;
+			}
+			JSONArray superordinates = relation.optJSONArray("hasSuperordinate");
+			if (superordinates == null) {
+				continue;
+			}
+			for (int j = 0; j < superordinates.length(); j++) {
+				JSONObject current = superordinates.optJSONObject(j);
+				if (current == null) {
+					continue;
+				}
+				JSONObject simpleObject = createSimpleObject(
+						current.optString("id", ""), current.optString("label", ""));
+				if (simpleObject != null) {
+					result.put(simpleObject);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Normalizes monograph subject entries.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return normalized subject array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapMonographSubjects(JSONObject lobid)
+			throws JSONException {
+		JSONArray subjects = lobid.optJSONArray("subject");
+		return normalizeLobidArray(subjects);
+	}
+
+	/**
+	 * Splits Lobid contributions into creator, contributor and contributorOrder.
+	 * 
+	 * @param contributions Lobid contribution array
+	 * @return object with three arrays
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONObject mapMonographContributions(JSONArray contributions)
+			throws JSONException {
+		JSONObject result = new JSONObject();
+		JSONArray creators = new JSONArray();
+		JSONArray contributors = new JSONArray();
+		JSONArray contributorOrder = new JSONArray();
+		if (contributions == null) {
+			result.put("creator", creators);
+			result.put("contributor", contributors);
+			result.put("contributorOrder", contributorOrder);
+			return result;
+		}
+
+		for (int i = 0; i < contributions.length(); i++) {
+			JSONObject contribution = contributions.optJSONObject(i);
+			if (contribution == null) {
+				continue;
+			}
+			JSONObject agent = contribution.optJSONObject("agent");
+			JSONObject role = contribution.optJSONObject("role");
+			if (agent == null) {
+				continue;
+			}
+			String id = agent.optString("id", "").trim();
+			String label = agent.optString("label", "").trim();
+			JSONObject simpleObject = createSimpleObject(id, label);
+			if (simpleObject == null) {
+				continue;
+			}
+			String resolvedId = simpleObject.optString("@id", "");
+			if (!resolvedId.isEmpty()) {
+				contributorOrder.put(resolvedId);
+			}
+
+			String roleLabel = role != null ? role.optString("label", "") : "";
+			if ("Autor/in".equals(roleLabel)) {
+				creators.put(simpleObject);
+			} else {
+				contributors.put(simpleObject);
+			}
+		}
+
+		result.put("creator", creators);
+		result.put("contributor", contributors);
+		result.put("contributorOrder", contributorOrder);
+		return result;
+	}
+
+	/**
+	 * Creates a simple object with @id and prefLabel. Missing ids get an ad-hoc
+	 * URI.
+	 * 
+	 * @param id preferred identifier
+	 * @param prefLabel preferred label
+	 * @return simple object or null
+	 * @throws JSONException if writing JSON fails
+	 */
+	private static JSONObject createSimpleObject(String id, String prefLabel)
+			throws JSONException {
+		String resolvedLabel = prefLabel != null ? prefLabel.trim() : "";
+		String resolvedId = id != null ? id.trim() : "";
+		if (resolvedLabel.isEmpty() && resolvedId.isEmpty()) {
+			return null;
+		}
+		if (resolvedId.isEmpty()) {
+			resolvedId = buildAdhocUri(resolvedLabel);
+		}
+		if (resolvedLabel.isEmpty()) {
+			resolvedLabel = resolvedId;
+		}
+		JSONObject result = new JSONObject();
+		result.put("@id", resolvedId);
+		result.put("prefLabel", resolvedLabel);
+		return result;
+	}
+
+	/**
+	 * Reads the first publication date for the issued field.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return issued value or null
+	 */
+	private static String getIssuedFromLobidMonograph(JSONObject lobid) {
+		JSONArray publication = lobid.optJSONArray("publication");
+		if (publication == null || publication.length() == 0) {
+			return null;
+		}
+		JSONObject firstPublication = publication.optJSONObject(0);
+		if (firstPublication == null) {
+			return null;
+		}
+		String startDate = firstPublication.optString("startDate", "").trim();
+		if (!startDate.isEmpty()) {
+			return startDate;
+		}
+		String dateStatement =
+				firstPublication.optString("dateStatement", "").trim();
+		return dateStatement.isEmpty() ? null : dateStatement;
+	}
+
+	/**
+	 * Writes one string value if it is not empty.
+	 * 
+	 * @param target target object
+	 * @param key target key
+	 * @param value value to write
+	 * @throws JSONException if writing JSON fails
+	 */
+	private static void putStringField(JSONObject target, String key,
+			String value) throws JSONException {
+		if (value != null && !value.trim().isEmpty()) {
+			target.put(key, value);
+		}
+	}
+
+	/**
+	 * Copies a Lobid value to a toscience string-array field with the same key.
+	 * 
+	 * @param target target object
+	 * @param source source object
+	 * @param key shared source and target key
+	 * @throws JSONException if writing JSON fails
+	 */
+	private static void copyStringLikeAsArray(JSONObject target,
+			JSONObject source, String key) throws JSONException {
+		copyStringLikeAsArray(target, source, key, key);
+	}
+
+	/**
+	 * Copies a Lobid value to a toscience string-array field.
+	 * 
+	 * @param target target object
+	 * @param source source object
+	 * @param sourceKey source key
+	 * @param targetKey target key
+	 * @throws JSONException if writing JSON fails
+	 */
+	private static void copyStringLikeAsArray(JSONObject target,
+			JSONObject source, String sourceKey, String targetKey)
+			throws JSONException {
+		Object value = source.opt(sourceKey);
+		if (value == null || value == JSONObject.NULL) {
+			return;
+		}
+		if (value instanceof JSONArray) {
+			target.put(targetKey, value);
+			return;
+		}
+		String text = String.valueOf(value).trim();
+		if (text.isEmpty()) {
+			return;
+		}
+		putStringArray(target, targetKey, text);
+	}
+
+	/**
+	 * Puts one string into a JSON array.
+	 * 
+	 * @param target target object
+	 * @param key target key
+	 * @param value string value
+	 * @throws JSONException if writing JSON fails
+	 */
+	private static void putStringArray(JSONObject target, String key,
+			String value) throws JSONException {
+		if (value == null || value.trim().isEmpty()) {
+			return;
+		}
+		JSONArray values = new JSONArray();
+		values.put(value);
+		target.put(key, values);
+	}
+
+	/**
+	 * Writes an array only if it is not empty.
+	 * 
+	 * @param target target object
+	 * @param key target key
+	 * @param value array to write
+	 * @throws JSONException if writing JSON fails
+	 */
+	private static void putIfNotEmpty(JSONObject target, String key,
+			JSONArray value) throws JSONException {
+		if (value != null && value.length() > 0) {
+			target.put(key, value);
+		}
+	}
+
+	/**
+	 * Returns one string value. If the input is an array, it uses the first
+	 * value.
+	 * 
+	 * @param value string or array input
+	 * @return extracted string or null
+	 */
+	private static String getStringValue(Object value) {
+		if (value == null || value == JSONObject.NULL) {
+			return null;
+		}
+		if (value instanceof JSONArray) {
+			JSONArray values = (JSONArray) value;
+			return values.length() > 0 ? values.optString(0, null) : null;
+		}
+		return String.valueOf(value);
+	}
+
+	/**
+	 * Normalizes all values in a Lobid array.
+	 * 
+	 * @param source source array
+	 * @return normalized array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray normalizeLobidArray(JSONArray source)
+			throws JSONException {
+		JSONArray result = new JSONArray();
+		if (source == null) {
+			return result;
+		}
+		for (int i = 0; i < source.length(); i++) {
+			result.put(normalizeLobidValue(source.get(i)));
+		}
+		return result;
+	}
+
+	/**
+	 * Reads links that should be used as fulltext references.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return fulltextOnline array
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONArray mapFulltextOnline(JSONObject lobid)
+			throws JSONException {
+		JSONArray result = new JSONArray();
+		JSONArray sameAs = lobid.optJSONArray("sameAs");
+		if (sameAs != null) {
+			for (int i = 0; i < sameAs.length(); i++) {
+				JSONObject current = sameAs.optJSONObject(i);
+				if (current == null) {
+					continue;
+				}
+				String id = current.optString("id", "").trim();
+				String label = current.optString("label", "").trim();
+				if (id.contains("doi.org") || id.contains("repository")) {
+					JSONObject simpleObject = createSimpleObject(id, label);
+					if (simpleObject != null) {
+						result.put(simpleObject);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Reads DOI values from Lobid sameAs links.
+	 * 
+	 * @param lobid Lobid JSON
+	 * @return DOI array without the URL prefix
+	 */
+	private static JSONArray mapDoiValues(JSONObject lobid) {
+		JSONArray result = new JSONArray();
+		JSONArray sameAs = lobid.optJSONArray("sameAs");
+		if (sameAs == null) {
+			return result;
+		}
+		for (int i = 0; i < sameAs.length(); i++) {
+			JSONObject current = sameAs.optJSONObject(i);
+			if (current == null) {
+				continue;
+			}
+			String id = current.optString("id", "").trim();
+			if (id.startsWith("https://doi.org/")) {
+				result.put(id.replace("https://doi.org/", ""));
+			} else if (id.startsWith("http://doi.org/")) {
+				result.put(id.replace("http://doi.org/", ""));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Normalizes a Lobid value. Strings stay unchanged.
+	 * 
+	 * @param value source value
+	 * @return normalized value
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static Object normalizeLobidValue(Object value) throws JSONException {
+		if (value == null || value == JSONObject.NULL) {
+			return JSONObject.NULL;
+		}
+		if (value instanceof JSONObject) {
+			return normalizeLobidObject((JSONObject) value);
+		}
+		if (value instanceof JSONArray) {
+			return normalizeLobidArray((JSONArray) value);
+		}
+		return value;
+	}
+
+	/**
+	 * Normalizes a Lobid object to the internal JSON format.
+	 * 
+	 * @param source source object
+	 * @return normalized object
+	 * @throws JSONException if reading JSON fails
+	 */
+	private static JSONObject normalizeLobidObject(JSONObject source)
+			throws JSONException {
+		JSONObject result = new JSONObject();
+		Iterator<String> keys = source.keys();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = source.get(key);
+			String normalizedKey = normalizeLobidKey(key);
+			Object normalizedValue = normalizeLobidValue(value);
+			if (shouldWrapSingleObject(normalizedKey)
+					&& normalizedValue instanceof JSONObject) {
+				JSONArray wrapped = new JSONArray();
+				wrapped.put(normalizedValue);
+				result.put(normalizedKey, wrapped);
+			} else {
+				result.put(normalizedKey, normalizedValue);
+			}
+		}
+		if (result.has("@id") && !result.has("prefLabel")) {
+			if (result.has("label") && result.opt("label") instanceof String) {
+				result.put("prefLabel", result.optString("label"));
+			} else {
+				result.put("prefLabel", result.optString("@id"));
+			}
+		}
+		if (result.has("type") && !result.has("rdftype")) {
+			result.put("rdftype", result.remove("type"));
+		}
+		return result;
+	}
+
+	/**
+	 * Rewrites Lobid field names to internal field names.
+	 * 
+	 * @param key Lobid key
+	 * @return normalized key
+	 */
+	private static String normalizeLobidKey(String key) {
+		if ("id".equals(key)) {
+			return "@id";
+		}
+		if ("type".equals(key)) {
+			return "rdftype";
+		}
+		return key;
+	}
+
+	/**
+	 * Some nested object fields are always stored as arrays.
+	 * 
+	 * @param key normalized key
+	 * @return true if the value should be wrapped into an array
+	 */
+	private static boolean shouldWrapSingleObject(String key) {
+		return "agent".equals(key) || "role".equals(key) || "heldBy".equals(key)
+				|| "inCollection".equals(key) || "license".equals(key)
+				|| "inDataset".equals(key) || "resultOf".equals(key)
+				|| "object".equals(key) || "provider".equals(key)
+				|| "sourceOrganization".equals(key) || "modifiedBy".equals(key);
 	}
 
 	private static void normalizeLicensesForPersistence(JSONObject metadata)
@@ -491,6 +1208,14 @@ public class TosHelper {
 		return false;
 	}
 
+	/**
+	 * Checks the JSON structure and fixes missing or wrong field formats.
+	 * It also adds the local pid as @id if needed.
+	 * 
+	 * @param allMd metadata JSON
+	 * @param n current node
+	 * @return validated JSON
+	 */
 	public static JSONObject validateJsonStructure(JSONObject allMd, Node n) {
 
 		try {

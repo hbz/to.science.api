@@ -103,8 +103,13 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> languageMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					languageMap.put("@id", jObj.getString("@id"));
-					languageMap.put("prefLabel", jObj.get("prefLabel"));
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					languageMap.put("@id", id);
+					languageMap.put("prefLabel", label);
 					langList.add(languageMap);
 				}
 				rdf.put("language", langList);
@@ -133,6 +138,21 @@ public class Metadata2Helper {
 				currentKey = "contentType";
 				String contentType = jo.getString("contentType");
 				rdf.put("contentType", contentType);
+			}
+
+			if (jo.has("hbzId")) {
+				currentKey = "hbzId";
+				rdf.put("hbzId", getQuotedValues(jo.get("hbzId").toString()));
+			}
+
+			if (jo.has("almaMmsId")) {
+				currentKey = "almaMmsId";
+				rdf.put("almaMmsId", getQuotedValues(jo.get("almaMmsId").toString()));
+			}
+
+			if (jo.has("extent")) {
+				currentKey = "extent";
+				rdf.put("extent", getQuotedValues(jo.get("extent").toString()));
 			}
 
 			if (jo.has("license")) {
@@ -175,8 +195,23 @@ public class Metadata2Helper {
 				jsArr = jo.getJSONArray("subject");
 				for (int i = 0; i < jsArr.length(); i++) {
 					jObj = jsArr.getJSONObject(i);
-					String uri = jObj.getString("@id");
-					String label = jObj.get("prefLabel").toString();
+					String uri = jObj.optString("@id");
+					if (uri.isEmpty()) {
+						uri = jObj.optString("id");
+					}
+					String label = jObj.optString("prefLabel");
+					if (label.isEmpty()) {
+						label = jObj.optString("label");
+					}
+					if (label.isEmpty() && jObj.has("componentList")) {
+						label = jObj.optJSONArray("componentList").toString();
+					}
+					if (label.isEmpty() && uri.isEmpty()) {
+						continue;
+					}
+					if (uri.isEmpty()) {
+						uri = ahu.getAdhocUri(label);
+					}
 					KtblService.checkAndLoadUri(uri, label);
 					Map<String, Object> subjectMap = new LinkedHashMap<>();
 					subjectMap.put("@id", uri);
@@ -193,11 +228,70 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> mediumMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					mediumMap.put("prefLabel", jObj.get("prefLabel").toString());
-					mediumMap.put("@id", jObj.get("@id").toString());
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					mediumMap.put("prefLabel", label);
+					mediumMap.put("@id", id);
 					mediumList.add(mediumMap);
 				}
 				rdf.put("medium", mediumList);
+			}
+			if (jo.has("catalogLink")) {
+				currentKey = "catalogLink";
+				List<Map<String, Object>> catalogLinkList = new ArrayList<>();
+				jsArr = jo.getJSONArray("catalogLink");
+				for (int i = 0; i < jsArr.length(); i++) {
+					Map<String, Object> catalogLinkMap = new LinkedHashMap<>();
+					jObj = jsArr.getJSONObject(i);
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					catalogLinkMap.put("prefLabel", label);
+					catalogLinkMap.put("@id", id);
+					catalogLinkList.add(catalogLinkMap);
+				}
+				rdf.put("catalogLink", catalogLinkList);
+			}
+			if (jo.has("containedIn")) {
+				currentKey = "containedIn";
+				List<Map<String, Object>> containedInList = new ArrayList<>();
+				jsArr = jo.getJSONArray("containedIn");
+				for (int i = 0; i < jsArr.length(); i++) {
+					Map<String, Object> containedInMap = new LinkedHashMap<>();
+					jObj = jsArr.getJSONObject(i);
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					containedInMap.put("prefLabel", label);
+					containedInMap.put("@id", id);
+					containedInList.add(containedInMap);
+				}
+				rdf.put("containedIn", containedInList);
+			}
+			if (jo.has("natureOfContent")) {
+				currentKey = "natureOfContent";
+				List<Map<String, Object>> natureOfContentList = new ArrayList<>();
+				jsArr = jo.getJSONArray("natureOfContent");
+				for (int i = 0; i < jsArr.length(); i++) {
+					Map<String, Object> natureOfContentMap = new LinkedHashMap<>();
+					jObj = jsArr.getJSONObject(i);
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					natureOfContentMap.put("prefLabel", label);
+					natureOfContentMap.put("@id", id);
+					natureOfContentList.add(natureOfContentMap);
+				}
+				rdf.put("natureOfContent", natureOfContentList);
 			}
 			if (jo.has("creator")) {
 				currentKey = "creator";
@@ -208,10 +302,10 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> creatorMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					uri = jObj.get("@id").toString();
-					label = jObj.get("prefLabel").toString();
-					if (uri.length() == 0) {
-						uri = ahu.getAdhocUri(label);
+					uri = getSafeObjectId(jObj, ahu);
+					label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && uri.isEmpty()) {
+						continue;
 					}
 					creatorMap.put("prefLabel", label);
 					creatorMap.put("@id", uri);
@@ -228,10 +322,10 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> contributorrMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					uri = jObj.get("@id").toString();
-					label = jObj.get("prefLabel").toString();
-					if (uri.length() == 0) {
-						uri = ahu.getAdhocUri(label);
+					uri = getSafeObjectId(jObj, ahu);
+					label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && uri.isEmpty()) {
+						continue;
 					}
 					contributorrMap.put("prefLabel", label);
 					contributorrMap.put("@id", uri);
@@ -248,10 +342,10 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> otherMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					uri = jObj.get("@id").toString();
-					label = jObj.get("prefLabel").toString();
-					if (uri.length() == 0) {
-						uri = ahu.getAdhocUri(label);
+					uri = getSafeObjectId(jObj, ahu);
+					label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && uri.isEmpty()) {
+						continue;
 					}
 					otherMap.put("prefLabel", label);
 					otherMap.put("@id", uri);
@@ -281,8 +375,11 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> languageMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					String uri = jObj.getString("@id");
-					String label = jObj.get("prefLabel").toString();
+					String uri = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && uri.isEmpty()) {
+						continue;
+					}
 					languageMap.put("@id", uri);
 					languageMap.put("prefLabel", label);
 					KtblService.checkAndLoadUri(uri, label);
@@ -303,8 +400,13 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> institutionMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					institutionMap.put("prefLabel", jObj.get("prefLabel").toString());
-					institutionMap.put("@id", jObj.get("@id").toString());
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					institutionMap.put("prefLabel", label);
+					institutionMap.put("@id", id);
 					institutionList.add(institutionMap);
 				}
 				rdf.put("institution", institutionList);
@@ -317,8 +419,13 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> rdftypeMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					rdftypeMap.put("prefLabel", jObj.get("prefLabel").toString());
-					rdftypeMap.put("@id", "http://hbz-nrw.de/regal#ResearchData");
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					rdftypeMap.put("prefLabel", label);
+					rdftypeMap.put("@id", id);
 					rdftypeList.add(rdftypeMap);
 				}
 				rdf.put("rdftype", rdftypeList);
@@ -337,8 +444,13 @@ public class Metadata2Helper {
 				for (int i = 0; i < jsArr.length(); i++) {
 					Map<String, Object> ddcMap = new LinkedHashMap<>();
 					jObj = jsArr.getJSONObject(i);
-					ddcMap.put("@id", jObj.getString("@id"));
-					ddcMap.put("prefLabel", jObj.get("prefLabel"));
+					String id = getSafeObjectId(jObj, ahu);
+					String label = getSafeObjectLabel(jObj);
+					if (label.isEmpty() && id.isEmpty()) {
+						continue;
+					}
+					ddcMap.put("@id", id);
+					ddcMap.put("prefLabel", label);
 					ddcList.add(ddcMap);
 				}
 				rdf.put("ddc", ddcList);
@@ -505,6 +617,34 @@ public class Metadata2Helper {
 					.debug("Exception in getRdfFromTos(), key=" + currentKey + "," + e);
 		}
 		return md2Map;
+	}
+
+	private static String getSafeObjectId(JSONObject jObj, AdHocUriProvider ahu) {
+		String id = jObj.optString("@id");
+		if (id.isEmpty()) {
+			id = jObj.optString("id");
+		}
+		if (id.isEmpty()) {
+			String label = getSafeObjectLabel(jObj);
+			if (!label.isEmpty()) {
+				id = ahu.getAdhocUri(label);
+			}
+		}
+		return id;
+	}
+
+	private static String getSafeObjectLabel(JSONObject jObj) {
+		String label = jObj.optString("prefLabel");
+		if (label.isEmpty()) {
+			label = jObj.optString("label");
+		}
+		if (label.isEmpty() && jObj.has("@id")) {
+			label = jObj.optString("@id");
+		}
+		if (label.isEmpty() && jObj.has("id")) {
+			label = jObj.optString("id");
+		}
+		return label;
 	}
 
 }

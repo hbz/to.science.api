@@ -104,7 +104,7 @@ import views.Helper;
  * /resource) definiert. Siehe die Definitionen der HTTP-Requests in der
  * "routes"-Datei, to.science.api/conf/routes.
  * 
- * Zur eigentlichen Verarbeitung der Calls wird an andere Klassen übergeben.
+ * Zur eigentlichen Verarbeitung der Calls wird an andere Klassen uebergeben.
  * 
  * @author Jan Schnasse, schnasse@hbz-nrw.de
  * 
@@ -1321,7 +1321,7 @@ public class Resource extends MyController {
 				});
 			}
 			// conf im Node neu setzen, weil die URLs vom Umzugsservice evtl.
-			// verändert wurden
+			// veraendert wurden
 			node.setConf(conf.toString());
 			new WebgatherUtils().startCrawl(node);
 			return Promise.promise(() -> {
@@ -1360,7 +1360,7 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Dieser Endpunkt fügt eine Forschungsdaten-Ressource (Datei) zu einem
+	 * Dieser Endpunkt fuegt eine Forschungsdaten-Ressource (Datei) zu einem
 	 * Forschungsdatenobjekt hinzu.
 	 */
 	public static Promise<Result> createResearchData(@PathParam("pid") String pid,
@@ -1377,8 +1377,8 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Mit diesem Endpoint kann man eine Webpage mitsamt URL und vorläufigem Titel
-	 * anlegen.
+	 * Mit diesem Endpoint kann man eine Webpage mitsamt URL und vorlaeufigem
+	 * Titel anlegen.
 	 * 
 	 * @author Ingolf Kuss, hbz
 	 */
@@ -1410,13 +1410,13 @@ public class Resource extends MyController {
 	}
 
 	/**
-	 * Dieser Endpoint realiert ein gewünschtes Zugriffsrecht (AccessScheme) für
-	 * eine WebpageVersion (Webschnitt). Aktuell unterstützt werden die
-	 * Zugriffsrechte "öffentlich" (public) und "eingeschränkt" (restricted).
-	 * "eingeschränkt" bedeutet, dass der Webschnitt nur für bestimmte
+	 * Dieser Endpoint realiert ein gewuenschtes Zugriffsrecht (AccessScheme) fuer
+	 * eine WebpageVersion (Webschnitt). Aktuell unterstuetzt werden die
+	 * Zugriffsrechte "oeffentlich" (public) und "eingeschraenkt" (restricted).
+	 * "eingeschraenkt" bedeutet, dass der Webschnitt nur fuer bestimmte
 	 * IP-Adressen, die i.d.R. im Lesesaal des LBZ liegen, abgerufen (z.B. Replay
-	 * in Wayback) werden kann. "öffentlich" bedeutet, dass der Webschnitt
-	 * (Inhalt) für jedermann öffentlich im Netz dargestellt werden kann.
+	 * in Wayback) werden kann. "oeffentlich" bedeutet, dass der Webschnitt
+	 * (Inhalt) fuer jedermann oeffentlich im Netz dargestellt werden kann.
 	 * 
 	 * @param pid Die PID des Webschnitts
 	 * @param accessScheme Zugrifssrecht, kodiert als "public", "restricted", ...
@@ -1701,7 +1701,6 @@ public class Resource extends MyController {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
 
-				String name = data.getFilename();
 				if (!readNode.getContentType().contains("file")
 						&& !readNode.getContentType().contains("part")) {
 					content = KTBLMapperHelper.getFileData(data);
@@ -1713,20 +1712,38 @@ public class Resource extends MyController {
 						play.Logger.debug("Invalid JSON structure or no content provided.");
 					}
 
-					content = TosHelper.updateConent(content);
-					if (content == null || TosHelper.isValidJson(content) == false) {
-						play.Logger.debug("Invalid JSON structure or no content provided");
-					}
+					// Monographs
+					if ("monograph".equals(readNode.getContentType())) {
+						tosJson =
+								TosHelper.getLobidMonographAsJson(content, readNode.getPid());
+						if (tosJson == null) {
+							play.Logger
+									.debug("Invalid monograph metadata or no content provided");
+						}
 
-					/**
-					 * toscience
-					 */
-					String tosMd =
-							TosHelper.getToPersistTosMd(content, readNode.getPid());
-					tosJson = new JSONObject(tosMd);
-					tosJson = TosHelper.getPrefLabelsResolved(tosJson);
-					result1 =
-							modify.updateMetadata("toscience", readNode, tosJson.toString());
+						tosJson = TosHelper.validateJsonStructure(tosJson, readNode);
+						tosJson = TosHelper.getPrefLabelsResolved(tosJson);
+						result1 = modify.updateMetadata("toscience", readNode,
+								tosJson.toString());
+
+						// KTBL, Article and ResearchData
+					} else {
+						content = TosHelper.updateConent(content);
+						if (content == null || TosHelper.isValidJson(content) == false) {
+							play.Logger
+									.debug("Invalid JSON structure or no content provided");
+						}
+
+						/**
+						 * toscience
+						 */
+						String tosMd =
+								TosHelper.getToPersistTosMd(content, readNode.getPid());
+						tosJson = new JSONObject(tosMd);
+						tosJson = TosHelper.getPrefLabelsResolved(tosJson);
+						result1 = modify.updateMetadata("toscience", readNode,
+								tosJson.toString());
+					}
 
 					/**
 					 * KTBL
@@ -1740,9 +1757,7 @@ public class Resource extends MyController {
 					/**
 					 * Metadata2
 					 */
-
-					rdf =
-							Metadata2Helper.getRdfFromTos(new JSONObject(content), readNode);
+					rdf = Metadata2Helper.getRdfFromTos(tosJson, readNode);
 					String rdfMd = modify.rdfToString(
 							(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
 					result3 = modify.updateMetadata("metadata2", readNode, rdfMd);
