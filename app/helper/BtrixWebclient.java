@@ -64,7 +64,7 @@ public class BtrixWebclient extends CrawlerModel {
 	private String crawlId = null;
 
 	/*
-	 * Authorisierung für Browsertrix
+	 * Authorisierung und Organisation (Mandant) für Browsertrix
 	 */
 	final static String btrix_api_url =
 			Play.application().configuration().getString("regal-api.btrix.apiUrl");
@@ -76,6 +76,12 @@ public class BtrixWebclient extends CrawlerModel {
 			Play.application().configuration().getString("regal-api.btrix.orgName");
 	final static String btrix_orgid =
 			Play.application().configuration().getString("regal-api.btrix.orgId");
+	/*
+	 * Standardwerte für Browsertrix-Crawls
+	 */
+	final static int btrix_std_max_depth_in_scope =
+			Integer.parseInt(Play.application().configuration()
+					.getString("regal-api.btrix.stdMaxDepthInScope"));
 
 	/**
 	 * (Leerer) Konstruktor für den Browsertrix Webclient
@@ -557,7 +563,15 @@ public class BtrixWebclient extends CrawlerModel {
 		try {
 			seed.put("url", url);
 			seed.put("scopeType", seedScopeType);
-			seed.put("depth", depth);
+			int actualDepth = depth;
+			if (depth < 0) {
+				/*
+				 * Vorbelegung "Max Depth in Scope" (maximale Verzeichnistiefe) mit
+				 * Standardwert
+				 */
+				actualDepth = btrix_std_max_depth_in_scope;
+			}
+			seed.put("depth", actualDepth);
 			/* one hop out -- the crawler will visit pages one link away. */
 			seed.put("extraHops", 1);
 		} catch (JSONException e) {
