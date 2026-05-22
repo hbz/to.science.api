@@ -122,7 +122,7 @@ regal-api.btrix.adminUsername="admin@example.com"
 regal-api.btrix.adminPassword="PASSW0RD!"
 regal-api.btrix.orgName="toscience"
 regal-api.btrix.orgId=""
-regal-api.btrix.stdMaxDepthInScope=3
+regal-api.btrix.stdMaxDepthInScope=-1
 # Das Arbeitsverzeichnis für die CDN-Precrawls:
 regal-api.btrix.jobDir="/opt/toscience/cdn-data"
 # Hierhin werden die fertigen Browsertrix-Crawls gestellt:
