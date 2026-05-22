@@ -564,7 +564,7 @@ public class BtrixWebclient extends CrawlerModel {
 			seed.put("url", url);
 			seed.put("scopeType", seedScopeType);
 			int actualDepth = depth;
-			if (depth < 0) {
+			if (depth <= 0) {
 				/*
 				 * Vorbelegung "Max Depth in Scope" (maximale Verzeichnistiefe) mit
 				 * Standardwert
