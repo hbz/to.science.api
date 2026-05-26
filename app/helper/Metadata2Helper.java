@@ -155,6 +155,27 @@ public class Metadata2Helper {
 				rdf.put("extent", getQuotedValues(jo.get("extent").toString()));
 			}
 
+			if (jo.has("issn")) {
+				currentKey = "issn";
+				rdf.put("issn", getQuotedValues(jo.get("issn").toString()));
+			}
+
+			if (jo.has("urn")) {
+				currentKey = "urn";
+				rdf.put("urn", getQuotedValues(jo.get("urn").toString()));
+			}
+
+			if (jo.has("abstractText")) {
+				currentKey = "abstracttext";
+				rdf.put("abstractText",
+						getQuotedValues(jo.get("abstractText").toString()));
+			}
+
+			if (jo.has("note")) {
+				currentKey = "note";
+				rdf.put("note", getQuotedValues(jo.get("note").toString()));
+			}
+
 			if (jo.has("license")) {
 				currentKey = "license";
 				List<Map<String, Object>> licenseList = new ArrayList<>();

@@ -86,6 +86,8 @@ public class TosHelper {
 		FIELD_TYPES.put("responsibilityStatement", StructureType.STRING_ARRAY);
 		FIELD_TYPES.put("Isbn", StructureType.STRING_ARRAY);
 		FIELD_TYPES.put("bibo:doi", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("issn", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("note", StructureType.STRING_ARRAY);
 
 		FIELD_TYPES.put("fundingId", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("isLike", StructureType.SIMPLEOBJECT_ARRAY);
@@ -329,6 +331,10 @@ public class TosHelper {
 		copyStringLikeAsArray(mapped, lobid, "responsibilityStatement");
 		copyStringLikeAsArray(mapped, lobid, "edition");
 		copyStringLikeAsArray(mapped, lobid, "isbn", "Isbn");
+		copyStringLikeAsArray(mapped, lobid, "issn");
+		copyStringLikeAsArray(mapped, lobid, "note");
+		copyStringLikeAsArray(mapped, lobid, "urn");
+		copyStringLikeAsArray(mapped, lobid, "abstract", "abstractText");
 
 		String issued = getIssuedFromLobidMonograph(lobid);
 		putStringField(mapped, "issued", issued);
@@ -346,7 +352,7 @@ public class TosHelper {
 		putIfNotEmpty(mapped, "rdftype",
 				mapMonographRdfTypes(lobid.optJSONArray("type")));
 		putIfNotEmpty(mapped, "catalogLink", mapCatalogLinks(lobid));
-		putIfNotEmpty(mapped, "containedIn", mapContainedIn(lobid));
+		putIfNotEmpty(mapped, "lv:isPartOf", mapIsPartOf(lobid));
 		putIfNotEmpty(mapped, "subject", mapMonographSubjects(lobid));
 		putIfNotEmpty(mapped, "publication",
 				normalizeLobidArray(lobid.optJSONArray("publication")));
@@ -568,8 +574,7 @@ public class TosHelper {
 	 * @return containedIn array
 	 * @throws JSONException if reading JSON fails
 	 */
-	private static JSONArray mapContainedIn(JSONObject lobid)
-			throws JSONException {
+	private static JSONArray mapIsPartOf(JSONObject lobid) throws JSONException {
 		JSONArray result = new JSONArray();
 		JSONArray isPartOf = lobid.optJSONArray("isPartOf");
 		if (isPartOf == null) {
@@ -580,20 +585,51 @@ public class TosHelper {
 			if (relation == null) {
 				continue;
 			}
-			JSONArray superordinates = relation.optJSONArray("hasSuperordinate");
-			if (superordinates == null) {
-				continue;
+			JSONObject mappedRelation = new JSONObject();
+			JSONArray types = relation.optJSONArray("type");
+			if (types != null && types.length() > 0) {
+				JSONArray mappedTypes = new JSONArray();
+				for (int j = 0; j < types.length(); j++) {
+					String rawType = types.optString(j, "").trim();
+					String uri = toLobidTypeUri(rawType);
+					if (uri == null || uri.isEmpty()) {
+						continue;
+					}
+					JSONObject mappedType = createSimpleObject(uri, uri);
+					if (mappedType != null) {
+						mappedTypes.put(mappedType);
+					}
+				}
+				if (mappedTypes.length() > 0) {
+					mappedRelation.put("rdftype", mappedTypes);
+				}
 			}
-			for (int j = 0; j < superordinates.length(); j++) {
-				JSONObject current = superordinates.optJSONObject(j);
-				if (current == null) {
-					continue;
+			JSONArray superordinates = relation.optJSONArray("hasSuperordinate");
+			if (superordinates != null) {
+				JSONArray mappedSuperordinates = new JSONArray();
+				for (int j = 0; j < superordinates.length(); j++) {
+					JSONObject current = superordinates.optJSONObject(j);
+					if (current == null) {
+						continue;
+					}
+					JSONObject simpleObject = createSimpleObject(
+							current.optString("id", ""), current.optString("id", ""));
+					if (simpleObject != null) {
+						if (current.has("label")) {
+							simpleObject.put("label", current.optString("label"));
+						}
+						mappedSuperordinates.put(simpleObject);
+					}
 				}
-				JSONObject simpleObject = createSimpleObject(
-						current.optString("id", ""), current.optString("label", ""));
-				if (simpleObject != null) {
-					result.put(simpleObject);
+				if (mappedSuperordinates.length() > 0) {
+					mappedRelation.put("hasSuperordinate", mappedSuperordinates);
 				}
+			}
+			if (relation.has("numbering")) {
+				mappedRelation.put("numbering", relation.optString("numbering"));
+			}
+			if (mappedRelation.length() > 0) {
+				result.put(mappedRelation);
 			}
 		}
 		return result;
@@ -863,11 +899,9 @@ public class TosHelper {
 				}
 				String id = current.optString("id", "").trim();
 				String label = current.optString("label", "").trim();
-				if (id.contains("doi.org") || id.contains("repository")) {
-					JSONObject simpleObject = createSimpleObject(id, label);
-					if (simpleObject != null) {
-						result.put(simpleObject);
-					}
+				JSONObject simpleObject = createSimpleObject(id, label);
+				if (simpleObject != null) {
+					result.put(simpleObject);
 				}
 			}
 		}
@@ -1209,8 +1243,8 @@ public class TosHelper {
 	}
 
 	/**
-	 * Checks the JSON structure and fixes missing or wrong field formats.
-	 * It also adds the local pid as @id if needed.
+	 * Checks the JSON structure and fixes missing or wrong field formats. It also
+	 * adds the local pid as @id if needed.
 	 * 
 	 * @param allMd metadata JSON
 	 * @param n current node
