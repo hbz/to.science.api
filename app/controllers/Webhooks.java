@@ -157,7 +157,7 @@ public class Webhooks extends MyController {
 			moveArchive.setFilename(filename);
 			moveArchive.setLastCrawlId(lastCrawlId);
 			moveArchive.setDatetime(datetime);
-			moveArchive.run();
+			moveArchive.start();
 
 			return ok();
 		});
@@ -202,7 +202,7 @@ public class Webhooks extends MyController {
 			moveArchive.setFilename(warcFilenameBase + ".warc.gz");
 			moveArchive.setFilenameBase(warcFilenameBase);
 			moveArchive.setDatetime(crawldir);
-			moveArchive.run();
+			moveArchive.start();
 
 			return ok();
 		});
