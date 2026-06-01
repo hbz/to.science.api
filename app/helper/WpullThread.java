@@ -187,7 +187,7 @@ public class WpullThread extends Thread {
 			boolean noParent = true;
 			String zusDomain = null;
 			String zusHost = null;
-			if (domains.size() > 0
+			if ((domains != null && domains.size() > 0)
 					|| conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
 				executeCommand += " --span-hosts";
 				if (conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
@@ -195,16 +195,18 @@ public class WpullThread extends Thread {
 				} else {
 					executeCommand += " --hostnames=" + host;
 				}
-				for (int i = 0; i < domains.size(); i++) {
-					zusDomain = domains.get(i);
-					zusHost = WebgatherUtils.getDomain(zusDomain);
-					WebgatherLogger.debug("zusHost=" + zusHost);
-					if (zusHost.equalsIgnoreCase(host)) {
-						WebgatherLogger.debug("Es soll von der gesamten Domain " + host
-								+ " eingesammelt werden, die Option --no-parent wird entfernt.");
-						noParent = false;
-					} else {
-						executeCommand += "," + zusHost;
+				if (domains != null) {
+					for (int i = 0; i < domains.size(); i++) {
+						zusDomain = domains.get(i);
+						zusHost = WebgatherUtils.getDomain(zusDomain);
+						WebgatherLogger.debug("zusHost=" + zusHost);
+						if (zusHost.equalsIgnoreCase(host)) {
+							WebgatherLogger.debug("Es soll von der gesamten Domain " + host
+									+ " eingesammelt werden, die Option --no-parent wird entfernt.");
+							noParent = false;
+						} else {
+							executeCommand += "," + zusHost;
+						}
 					}
 				}
 			}
