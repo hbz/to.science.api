@@ -1111,6 +1111,8 @@ public class JsonMapper {
 	 * @return: eine Map mit den aus `toscience` erzeugten RDF-/JSON-LD-Daten
 	 */
 	private Map<String, Object> getDescriptiveToscience(String toscienceJson) {
+
+		boolean isMonograph = "monograph".equals(node.getContentType());
 		try {
 			if (toscienceJson == null || toscienceJson.isEmpty()) {
 				return null;
@@ -1141,6 +1143,19 @@ public class JsonMapper {
 			// JsonMapper class, and joinedFunding continues to exist in toscience.
 			if (rdf.containsKey("joinedFunding")) {
 				rdf.remove("joinedFunding");
+			}
+			if (!rdf.containsKey("almaMmsId") && jo.has("almaMmsId")) {
+				JSONArray almaMmsIds = jo.getJSONArray("almaMmsId");
+				List<String> values = new ArrayList<>();
+				for (int i = 0; i < almaMmsIds.length(); i++) {
+					values.add(String.valueOf(almaMmsIds.get(i)));
+				}
+				rdf.put("almaMmsId", values);
+			}
+
+			// According to Lara(ZBMED), publicationYear must be removed at monographs
+			if (isMonograph && rdf.containsKey("publicationYear")) {
+				rdf.remove("publicationYear");
 			}
 
 			return rdf;

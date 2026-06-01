@@ -121,6 +121,7 @@ public class TosHelper {
 		FIELD_TYPES.put("describedby", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("contribution", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("fulltextOnline", StructureType.SIMPLEOBJECT_ARRAY);
+		FIELD_TYPES.put("recordingLocation", StructureType.SIMPLEOBJECT_ARRAY);
 	}
 
 	/**
@@ -338,6 +339,7 @@ public class TosHelper {
 
 		String issued = getIssuedFromLobidMonograph(lobid);
 		putStringField(mapped, "issued", issued);
+
 		if (issued != null && !issued.trim().isEmpty()) {
 			putStringArray(mapped, "publicationYear", issued);
 		}
