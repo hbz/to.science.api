@@ -1,10 +1,15 @@
 package helper;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import models.CrawlerModelIngestArchive;
 
@@ -55,9 +60,84 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 		}
 
 		/**
+		 * Gibt es schon einen Webschnitt für diesen Crawl ? Dann wird kein weiterer
+		 * angelegt. Für TOS-1366.
+		 */
+		if (webpageVersionExists()) {
+			WebgatherLogger.debug(
+					"Es gibt schon einen Webschnitt zur Crawl-ID " + getLastCrawlId());
+			return;
+		}
+
+		/**
 		 * Anlage eines Webschnittes
 		 */
 		postWebpageVersion();
+	}
+
+	private boolean webpageVersionExists() {
+		BtrixWebclient btrixWebclient = (BtrixWebclient) getCrawlerModel();
+		try {
+			String outDir =
+					btrixWebclient.getOutDir() + "/" + btrixWebclient.getConf().getName();
+			WebgatherLogger.debug("Durchsuche Output-Verzeichnis " + outDir
+					+ " nach Crawl-Verzeichnissen für die crawlId "
+					+ this.getLastCrawlId());
+			File outFile = new File(outDir);
+			// alle Unterverzeichnisse (=Crawl-Verzeichnisse) auflistem
+			String entries[] = outFile.list(new FilenameFilter() {
+				@Override
+				public boolean accept(File d, String name) {
+					return d.isDirectory();
+				}
+			});
+			// Absteigend numerisch sortieren (neueste zuerst untersuchen)
+			Arrays.sort(entries, new Comparator<String>() {
+				@Override
+				public int compare(String s1, String s2) {
+					return Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1));
+				}
+			});
+			for (int i = 0; i < entries.length; i++) {
+				WebgatherLogger.debug("Found output crawl directory: " + entries[i]);
+				/*
+				 * Alle Dateien um Unterverzeichnis /archive auflisten - das sind die
+				 * warc.gz-Dateien . Dabei nur solche Archivdateien berücksichtigen, die
+				 * zur aktuellem (letzen) Crawl-ID gehören.
+				 */
+				File archiveDir = new File(outDir + "/" + entries[i] + "/archive");
+				String archiveFiles[] = archiveDir.list(new FilenameFilter() {
+					@Override
+					public boolean accept(File d, String name) {
+						if (!d.isFile())
+							return false;
+						String regExp =
+								"^(.*)-" + getLastCrawlId() + "-([0-9]+)-([0-9]+)\\.warc\\.gz$";
+						Pattern pattern = Pattern.compile(regExp);
+						Matcher matcher = pattern.matcher(name);
+						if (matcher.find()) {
+							WebgatherLogger.debug("Found file " + name
+									+ " containing the lastCrawlId " + getLastCrawlId());
+							return true;
+						}
+						return false;
+					}
+				});
+				if (archiveFiles.length > 0) {
+					// Es gibt mindestens eine Archivdatei, die zu dieser Crawl-ID gehört.
+					WebgatherLogger.debug("Es gibt schon eine Archivdatei zur Crawl-ID "
+							+ getLastCrawlId() + " gefunden.");
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			WebgatherLogger.warn(
+					"Failing check whether WebsiteVersion already exsits! Zur Sicherheit wird nun ein Webschnitt angelegt."
+							+ e.getMessage());
+		}
+		WebgatherLogger.debug("Es wurde keine Archivdatei zur Crawl-ID "
+				+ getLastCrawlId() + " gefunden.");
+		return false;
 	}
 
 }
