@@ -106,14 +106,14 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 				 * zur aktuellem (letzen) Crawl-ID gehören.
 				 */
 				File archiveDir = new File(outDir + "/" + entries[i] + "/archive");
+				String regExp =
+						"^(.*)-" + getLastCrawlId() + "-([0-9]+)-([0-9]+)\\.warc\\.gz$";
+				Pattern pattern = Pattern.compile(regExp);
 				String archiveFiles[] = archiveDir.list(new FilenameFilter() {
 					@Override
 					public boolean accept(File d, String name) {
 						if (!d.isFile())
 							return false;
-						String regExp =
-								"^(.*)-" + getLastCrawlId() + "-([0-9]+)-([0-9]+)\\.warc\\.gz$";
-						Pattern pattern = Pattern.compile(regExp);
 						Matcher matcher = pattern.matcher(name);
 						if (matcher.find()) {
 							WebgatherLogger.debug("Found file " + name
