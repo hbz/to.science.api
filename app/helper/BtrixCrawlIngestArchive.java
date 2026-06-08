@@ -99,9 +99,6 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 			Arrays.sort(entries, new Comparator<String>() {
 				@Override
 				public int compare(String s1, String s2) {
-					WebgatherLogger.debug("String 1: " + s1 + ", String 2: " + s2);
-					WebgatherLogger.debug("Compare: "
-							+ Long.compare(Long.parseLong(s2), Long.parseLong(s1)));
 					return Long.compare(Long.parseLong(s2), Long.parseLong(s1));
 				}
 			});
@@ -120,18 +117,22 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 				File archiveDir = new File(outDir + "/" + entries[i] + "/archive");
 				String regExp =
 						"^(.*)-" + getLastCrawlId() + "-([0-9]+)-([0-9]+)\\.warc\\.gz$";
+				WebgatherLogger.debug("Compiling regExp pattern " + regExp);
 				Pattern pattern = Pattern.compile(regExp);
 				String archiveFiles[] = archiveDir.list(new FilenameFilter() {
 					@Override
 					public boolean accept(File d, String name) {
 						if (!d.isFile())
 							return false;
+						WebgatherLogger.debug("Found archive file " + name);
 						Matcher matcher = pattern.matcher(name);
 						if (matcher.find()) {
 							WebgatherLogger.debug("Found file " + name
 									+ " containing the lastCrawlId " + getLastCrawlId());
 							return true;
 						}
+						WebgatherLogger
+								.debug("Archive file " + name + " does not match the pattern.");
 						return false;
 					}
 				});
