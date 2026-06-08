@@ -92,13 +92,21 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 					return d.isDirectory();
 				}
 			});
-			// Absteigend numerisch sortieren (neueste zuerst untersuchen)
+			WebgatherLogger.debug(
+					"Found a number of " + entries.length + " Crawl-Verzeichnisse.");
+			// Crawl-Verzeichnisse absteigend numerisch sortieren (neueste zuerst
+			// untersuchen)
 			Arrays.sort(entries, new Comparator<String>() {
 				@Override
 				public int compare(String s1, String s2) {
 					return Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1));
 				}
 			});
+			if (entries.length > 0) {
+				WebgatherLogger.debug(
+						"Habe Crawl-Verzeichnisse absteigend numerisch sortiert; Neuestes ist: "
+								+ entries[0]);
+			}
 			for (int i = 0; i < entries.length; i++) {
 				WebgatherLogger.debug("Found output crawl directory: " + entries[i]);
 				/*
