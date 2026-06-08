@@ -107,6 +107,10 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 						"Habe Crawl-Verzeichnisse absteigend numerisch sortiert; Neuestes ist: "
 								+ entries[0]);
 			}
+			String regExp =
+					"^(.*)-" + getLastCrawlId() + "-([0-9]+)-([0-9]+)\\.warc\\.gz$";
+			WebgatherLogger.debug("Compiling regExp pattern " + regExp);
+			Pattern pattern = Pattern.compile(regExp);
 			for (int i = 0; i < entries.length; i++) {
 				WebgatherLogger.debug("Found output crawl directory: " + entries[i]);
 				/*
@@ -115,15 +119,13 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 				 * zur aktuellem (letzen) Crawl-ID gehören.
 				 */
 				File archiveDir = new File(outDir + "/" + entries[i] + "/archive");
-				String regExp =
-						"^(.*)-" + getLastCrawlId() + "-([0-9]+)-([0-9]+)\\.warc\\.gz$";
-				WebgatherLogger.debug("Compiling regExp pattern " + regExp);
-				Pattern pattern = Pattern.compile(regExp);
 				String archiveFiles[] = archiveDir.list(new FilenameFilter() {
 					@Override
 					public boolean accept(File d, String name) {
-						if (!d.isFile())
+						WebgatherLogger.debug("Found archive file or dir" + d.getName());
+						if (!d.isFile()) {
 							return false;
+						}
 						WebgatherLogger.debug("Found archive file " + name);
 						Matcher matcher = pattern.matcher(name);
 						if (matcher.find()) {
