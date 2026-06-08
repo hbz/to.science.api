@@ -79,9 +79,8 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 		BtrixWebclient btrixWebclient = (BtrixWebclient) getCrawlerModel();
 		try {
 			WebgatherLogger.debug("outDir: " + btrixWebclient.getOutDir());
-			WebgatherLogger.debug("name: " + btrixWebclient.getConf().getName());
-			String outDir =
-					btrixWebclient.getOutDir() + "/" + btrixWebclient.getConf().getName();
+			WebgatherLogger.debug("toscienceId: " + getToscienceId());
+			String outDir = btrixWebclient.getOutDir() + "/" + getToscienceId();
 			WebgatherLogger.debug("Durchsuche Output-Verzeichnis " + outDir
 					+ " nach Crawl-Verzeichnissen für die crawlId "
 					+ this.getLastCrawlId());
