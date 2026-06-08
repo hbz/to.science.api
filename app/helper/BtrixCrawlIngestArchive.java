@@ -118,15 +118,16 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 				 * warc.gz-Dateien . Dabei nur solche Archivdateien berücksichtigen, die
 				 * zur aktuellem (letzen) Crawl-ID gehören.
 				 */
-				File archiveDir = new File(outDir + "/" + entries[i] + "/archive");
+				File archiveDir = new File(outDir + "/" + entries[i] + "/archive/");
 				String archiveFiles[] = archiveDir.list(new FilenameFilter() {
 					@Override
 					public boolean accept(File d, String name) {
-						WebgatherLogger.debug("Found archive file or dir " + d.getName());
+						// WebgatherLogger.debug("Found archive file or dir: " +
+						// d.getName());
 						if (!d.isFile()) {
 							// return false;
 						}
-						WebgatherLogger.debug("Found archive file " + name);
+						// WebgatherLogger.debug("Found archive file: " + name);
 						Matcher matcher = pattern.matcher(name);
 						if (matcher.find()) {
 							WebgatherLogger.debug("Found file " + name
@@ -141,7 +142,7 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 				if (archiveFiles.length > 0) {
 					// Es gibt mindestens eine Archivdatei, die zu dieser Crawl-ID gehört.
 					WebgatherLogger.debug("Es gibt schon eine Archivdatei zur Crawl-ID "
-							+ getLastCrawlId() + " gefunden.");
+							+ getLastCrawlId() + " .");
 					return true;
 				}
 			}
