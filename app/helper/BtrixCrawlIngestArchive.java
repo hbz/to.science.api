@@ -101,8 +101,8 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 				public int compare(String s1, String s2) {
 					WebgatherLogger.debug("String 1: " + s1 + ", String 2: " + s2);
 					WebgatherLogger.debug("Compare: "
-							+ Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1)));
-					return Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1));
+							+ Long.compare(Long.parseLong(s2), Long.parseLong(s1)));
+					return Long.compare(Long.parseLong(s2), Long.parseLong(s1));
 				}
 			});
 			if (entries.length > 0) {
@@ -144,8 +144,8 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 			}
 		} catch (Exception e) {
 			WebgatherLogger.warn(
-					"Failing check whether WebsiteVersion already exsits! Zur Sicherheit wird nun ein Webschnitt angelegt."
-							+ e.getMessage());
+					"Failing check whether WebsiteVersion already exsits! Zur Sicherheit wird nun ein Webschnitt angelegt.");
+			e.printStackTrace();
 		}
 		WebgatherLogger.debug("Es wurde keine Archivdatei zur Crawl-ID "
 				+ getLastCrawlId() + " gefunden.");
