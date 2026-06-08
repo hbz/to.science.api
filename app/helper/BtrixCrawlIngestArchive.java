@@ -99,6 +99,9 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 			Arrays.sort(entries, new Comparator<String>() {
 				@Override
 				public int compare(String s1, String s2) {
+					WebgatherLogger.debug("String 1: " + s1 + ", String 2: " + s2);
+					WebgatherLogger.debug("Compare: "
+							+ Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1)));
 					return Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1));
 				}
 			});
