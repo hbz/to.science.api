@@ -88,6 +88,8 @@ public class TosHelper {
 		FIELD_TYPES.put("bibo:doi", StructureType.STRING_ARRAY);
 		FIELD_TYPES.put("issn", StructureType.STRING_ARRAY);
 		FIELD_TYPES.put("note", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("oclcNumber", StructureType.STRING_ARRAY);
+		FIELD_TYPES.put("zdbId", StructureType.STRING_ARRAY);
 
 		FIELD_TYPES.put("fundingId", StructureType.SIMPLEOBJECT_ARRAY);
 		FIELD_TYPES.put("isLike", StructureType.SIMPLEOBJECT_ARRAY);
@@ -336,6 +338,8 @@ public class TosHelper {
 		copyStringLikeAsArray(mapped, lobid, "note");
 		copyStringLikeAsArray(mapped, lobid, "urn");
 		copyStringLikeAsArray(mapped, lobid, "abstract", "abstractText");
+		copyStringLikeAsArray(mapped, lobid, "zdbId");
+		copyStringLikeAsArray(mapped, lobid, "oclcNumber");
 
 		String issued = getIssuedFromLobidMonograph(lobid);
 		putStringField(mapped, "issued", issued);
