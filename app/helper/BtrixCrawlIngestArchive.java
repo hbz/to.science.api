@@ -94,6 +94,14 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 			});
 			WebgatherLogger.debug(
 					"Found a number of " + entries.length + " Crawl-Verzeichnisse.");
+			if (entries.length <= 1) {
+				WebgatherLogger.debug(
+						"Es gibt höchstens ein Crawl-Verzeichnis, nämlich jenes, in das die Archivdatei soeben hineinkopiert wurde:");
+				WebgatherLogger.debug(entries[0] + " bzw. " + getDatetime());
+				WebgatherLogger.debug("Also gibt es noch keinen Webschnitt zur Crawl-ID"
+						+ getLastCrawlId() + ".");
+				return false;
+			}
 			// Crawl-Verzeichnisse absteigend numerisch sortieren (neueste zuerst
 			// untersuchen)
 			Arrays.sort(entries, new Comparator<String>() {
@@ -102,16 +110,14 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 					return Long.compare(Long.parseLong(s2), Long.parseLong(s1));
 				}
 			});
-			if (entries.length > 0) {
-				WebgatherLogger.debug(
-						"Habe Crawl-Verzeichnisse absteigend numerisch sortiert; Neuestes ist: "
-								+ entries[0]);
-			}
+			WebgatherLogger.debug(
+					"Habe Crawl-Verzeichnisse absteigend numerisch sortiert; Zweitneuestes ist: "
+							+ entries[1]);
 			String regExp =
 					"^(.*)-" + getLastCrawlId() + "-([0-9]+)-([0-9]+)\\.warc\\.gz$";
 			WebgatherLogger.debug("Compiling regExp pattern " + regExp);
 			Pattern pattern = Pattern.compile(regExp);
-			for (int i = 0; i < entries.length; i++) {
+			for (int i = 1; i < entries.length; i++) {
 				WebgatherLogger.debug("Found output crawl directory: " + entries[i]);
 				/*
 				 * Alle Dateien um Unterverzeichnis /archive auflisten - das sind die
