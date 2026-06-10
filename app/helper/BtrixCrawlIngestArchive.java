@@ -122,12 +122,11 @@ public class BtrixCrawlIngestArchive extends CrawlerModelIngestArchive {
 				String archiveFiles[] = archiveDir.list(new FilenameFilter() {
 					@Override
 					public boolean accept(File d, String name) {
-						// WebgatherLogger.debug("Found archive file or dir: " +
-						// d.getName());
+						WebgatherLogger.debug("Found archive file or dir: " + d.getName());
 						if (!d.isFile()) {
 							// return false;
 						}
-						// WebgatherLogger.debug("Found archive file: " + name);
+						WebgatherLogger.debug("Found archive file: " + name);
 						Matcher matcher = pattern.matcher(name);
 						if (matcher.find()) {
 							WebgatherLogger.debug("Found file " + name
