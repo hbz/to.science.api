@@ -183,7 +183,9 @@ public class Helper {
 				owDatestamp =
 						new SimpleDateFormat("yyyyMMddHHmmss").format(conf.getStartDate());
 			}
-			if (!conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)) {
+
+			if (!conf.getCrawlerSelection().equals(CrawlerSelection.heritrix)
+					&& owDatestamp.length() == 14) {
 				// KS20260424: Für Wayback muss von lokaler Zeit zu UTC konvertiert
 				// werden. Für Heritrix sind die Crawl-Verzeichnisnamen schon in UTC.
 				DateTimeFormatter formatter =
