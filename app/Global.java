@@ -140,10 +140,10 @@ public class Global extends GlobalSettings {
 		String agent = request.getHeader("User-Agent");
 		String userIp = request.getHeader("UserIp");
 
-		play.Logger.info(String.format("%s %s [%s]  \"%s\" %s", host, userIp, date,
-				httpReq, agent));
-		play.Logger.debug(
-				"\n" + request.toString() + "\n\t" + mapToString(request.headers()));
+		// play.Logger.info(String.format("%s %s [%s] \"%s\" %s", host, userIp,
+		// date, httpReq, agent));
+		// play.Logger.debug("\n" + request.toString() + "\n\t" +
+		// mapToString(request.headers()));
 		return super.onRequest(request, actionMethod);
 	}
 

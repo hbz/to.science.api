@@ -2,9 +2,6 @@
 application.langs="en"
 
 #-------------Logger-------------
-logger.root=WARN
-logger.play=INFO
-logger.application=INFO
 logger.config.developer=conf/logback.xml
 
 #-------------Backend-----------------
@@ -16,13 +13,15 @@ regal-api.escluster="localhost"
 regal-api.keystoreLocation="/opt/toscience/conf/toscience_keystore"
 regal-api.keystorePassword=""
 regal-api.namespace="toscience"
-regal-api.alephSetName=
 regal-api.etikett.url="http://api.localhost:9002/tools/etikett"
 regal-api.etikett.user="admin"
 regal-api.etikett.pwd=""
 regal-api.zettel.url="http://api.localhost/tools/zettel"
 regal-api.thumby.url="http://api.localhost/tools/thumby"
 regal-api.deepzoom.url="http://api.localhost/deepzoom"
+regal-api.home="/opt/toscience"
+regal-api.logs="/opt/toscience/logs"
+regal-api.tmp="/opt/toscience/tmp"
 regal-api.protocol="http://"
 regal-api.mab655x="Archivierte Online-Ressource"
 # Angaben zum Quellserver, von dem Webschnitte importiert werden können:
@@ -102,7 +101,12 @@ regal-api.restrictedweb.dataUrl="http://localhost/restrictedweb"
 
 #-------------wpull (Crawler)-----------------------                            
 regal-api.wpull.crawler="/usr/local/bin/wpull3"
-regal-api.wpull.jobDir="/opt/toscience/wpull-data-crawldir"
+# Das Arbeitsverzeichnis für die CDN-Precrawls:
+regal-api.wpull.jobDir="/opt/toscience/cdn-data"
+# nach hier werden gecrawlte Inhalte heruntergeladen (jedoch nicht permanent gespeichert):
+regal-api.wpull.tempJobDir="/opt/toscience/wpull-data-crawldir"
+regal-api.wpull.finishedDir="/opt/toscience/wpull-data-finished"
+# nach hier werden fertige Crawls endgültig verschoben und permanent gespeichert:
 regal-api.wpull.outDir="/opt/toscience/wpull-data"
 #--- importHome: von hier können Webarchive importiert werden.
 #--- importHome: diese Variable i.d.R. nur auf Produktionssystemen setzen!
@@ -118,6 +122,10 @@ regal-api.btrix.adminUsername="admin@example.com"
 regal-api.btrix.adminPassword="PASSW0RD!"
 regal-api.btrix.orgName="toscience"
 regal-api.btrix.orgId=""
+regal-api.btrix.stdMaxDepthInScope=-1
+# Das Arbeitsverzeichnis für die CDN-Precrawls:
+regal-api.btrix.jobDir="/opt/toscience/cdn-data"
+# Hierhin werden die fertigen Browsertrix-Crawls gestellt:
 regal-api.btrix.outDir="/opt/toscience/btrix-data"
 #--- importHome: von hier können Webarchive importiert werden.
 #--- importHome: diese Variable i.d.R. nur auf Produktionssystemen setzen!
