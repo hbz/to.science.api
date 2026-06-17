@@ -1459,6 +1459,50 @@ public class TosHelper {
 				+ RdfUtils.urlEncode(prefLabel).replace("+", "%20");
 	}
 
+	private static JSONObject copyJsonObject(JSONObject source)
+			throws JSONException {
+		return new JSONObject(source.toString());
+	}
+
+	private static void persistMissingTosMd(String pid, Node node)
+			throws JSONException {
+		Map<String, Object> map = null;
+
+		if (Helper.mdStreamExists(pid, "metadata2")) {
+			map = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
+					node.getMetadata("metadata2"));
+
+		} else if (!Helper.mdStreamExists(pid, "metadata2")
+				&& Helper.mdStreamExists(pid, "metadata")) {
+			map = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
+					node.getMetadata("metadata"));
+		}
+
+		if (map != null) {
+			JSONObject allMd = new JSONObject(map);
+			allMd = TosHelper.getPrefLabelsResolved(allMd);
+			modify.updateMetadata("toscience", node, allMd.toString());
+		} else {
+			play.Logger
+					.debug("No metadata2/metadata data stream found for pid=" + pid);
+		}
+	}
+
+	private static void normalizeExistingToMd(Node node) throws JSONException {
+		JSONObject allMd = new JSONObject(node.getMetadata("toscience"));
+		JSONObject original = copyJsonObject(allMd);
+		allMd = TosHelper.validateJsonStructure(allMd, node);
+
+		addRdftypeIfMissing(allMd);
+
+		allMd = TosHelper.getPrefLabelsResolved(allMd);
+
+		if (!original.similar(allMd)) {
+			modify.updateMetadata("toscience", node, allMd.toString());
+			node.getLd2();
+		}
+	}
+
 	/**
 	 * Method Persists the Toscience data stream if it is not already present. If
 	 * the data stream already exists, the method checks the structure of the
@@ -1468,62 +1512,56 @@ public class TosHelper {
 	 * @param pid
 	 * @param node
 	 */
-	public static void persistAndNormalizeToscienceMetadata(String pid,
-			Node node) {
-		JSONObject allMd = null;
-		Map<String, Object> map = null;
+	public static void persistAndNormalizeTosMd(String pid, Node node) {
 		try {
+			if (node == null || pid == null || pid.trim().isEmpty()) {
+				play.Logger.debug("persistAndNormalizeTosMd(): node=null");
+				return;
+			}
 
 			// Case 1: toscience does not exist and will be persisted
 			if (!Helper.mdStreamExists(pid, "toscience")
 					|| node.getMetadata("toscience").length() < 5) {
-
-				if (Helper.mdStreamExists(pid, "metadata2")) {
-					map = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
-							node.getMetadata("metadata2"));
-
-				} else if (!Helper.mdStreamExists(pid, "metadata2")
-						&& Helper.mdStreamExists(pid, "metadata")) {
-					map = RdfHelper.getRdfAsMap(node, RDFFormat.NTRIPLES,
-							node.getMetadata("metadata"));
-				}
-
-				if (map != null) {
-					allMd = new JSONObject(map);
-					allMd = TosHelper.getPrefLabelsResolved(allMd);
-					modify.updateMetadata("toscience", node, allMd.toString());
-				} else {
-					play.Logger
-							.debug("No metadata2/metadata stream found for pid=" + pid);
-				}
+				persistMissingTosMd(pid, node);
 
 				// Case 2: toscience exists, but may have JSON elements with invalid
 				// structures
 			} else if (TosHelper.isValidJson(node.getMetadata("toscience"))) {
-
-				allMd = new JSONObject(node.getMetadata("toscience"));
-				JSONObject original = new JSONObject(allMd.toString());
-				allMd = TosHelper.validateJsonStructure(allMd, node);
-
-				addRdftypeIfMissing(allMd);
-
-				allMd = TosHelper.getPrefLabelsResolved(allMd);
-
-				if (!original.toString().equals(allMd.toString())) {
-					// 1: update toscience
-					modify.updateMetadata("toscience", node, allMd.toString());
-					// 2: update metadata2?
-					// 3: update ktbl?
-
-					// update json2
-					node.getLd2();
-				}
-
+				normalizeExistingToMd(node);
 			}
-
 		} catch (Exception e) {
-			play.Logger
-					.debug("Exception in persistAndNormalizeToscienceMetadata() " + e);
+			play.Logger.debug("Exception in persistAndNormalizeTosMd() " + e);
+		}
+	}
+
+	/**
+	 * This method is an extension of the `persistAndNormalizeToScienceMetadata`
+	 * method. It handles child objects if they exist.
+	 * 
+	 * @param pid
+	 * @param node
+	 */
+	public static void ensureTosMdForRead(String pid, Node node) {
+		if (node == null || pid == null || pid.trim().isEmpty()) {
+			play.Logger.debug("ensureTosMdForRead(): node is null");
+			return;
+		}
+
+		persistAndNormalizeTosMd(pid, node);
+		persistTosMdForParts(node);
+	}
+
+	private static void persistTosMdForParts(Node node) {
+		List<Node> parts = new Read().getParts(node);
+
+		if (parts == null || parts.isEmpty()) {
+			return;
+		}
+
+		for (Node child : parts) {
+			if (child != null && child.getPid() != null) {
+				persistAndNormalizeTosMd(child.getPid(), child);
+			}
 		}
 	}
 
@@ -1536,9 +1574,6 @@ public class TosHelper {
 	 */
 	public static void persistAndNormalizeToscienceMetadataWithParts(String pid,
 			Node node) {
-		persistAndNormalizeToscienceMetadata(pid, node);
-		for (Node child : new Read().getParts(node)) {
-			persistAndNormalizeToscienceMetadata(child.getPid(), child);
-		}
+		ensureTosMdForRead(pid, node);
 	}
 }
