@@ -179,6 +179,38 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * Updates the HTML representation of a tree view.
+	 * 
+	 * @param pid the node's pid
+	 * @param content the tree in the format text/html
+	 * @return a message
+	 */
+	public String updateTree(String pid, String content) {
+		try {
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			play.Logger.info("Write tree html to fedora \n\t" + content);
+			File file = CopyUtils.copyStringToFile(content);
+			Node node = new Read().readNode(pid);
+			if (node != null) {
+				node.setTreeFile(file.getAbsolutePath());
+				Globals.fedora.updateNode(node);
+			}
+			// durch den updateIndex wird auch der Node im Cache akualisiert.
+			updateIndex(node.getPid());
+			return pid + " tree html representation updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * @param pid The pid that must be updated
 	 * @param content The metadata as rdf string
 	 * @return a short message
@@ -299,8 +331,8 @@ public class Modify extends RegalAction {
 				String toscienceMetadata =
 						TosHelper.getToPersistTosMd(allMetadata.toString(), pid);
 
-				toscienceJson = TosHelper
-						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
+				toscienceJson =
+						TosHelper.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
 				if (Helper.mdStreamExists(pid, "ktbl")) {
 					toscienceJson = TosHelper.getPrefLabelsResolved(new JSONObject(

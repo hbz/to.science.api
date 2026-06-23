@@ -70,6 +70,7 @@ public class Node implements java.io.Serializable {
 
 	private HashMap<String, String> metadataFile = new HashMap<>();
 	private String seqFile = null;
+	private String treeFile = null;
 	private String confFile = null;
 	private String urlHistFile = null;
 	private String uploadFile = null;
@@ -80,6 +81,7 @@ public class Node implements java.io.Serializable {
 
 	private HashMap<String, String> metadata = new HashMap<>();
 	private String seq = null;
+	private String treeHtml = null;
 	private String conf = null;
 	private String urlHist = null;
 
@@ -315,7 +317,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * The metadata file
+	 * The children's ordering file
 	 * 
 	 * @return the absolute path to file
 	 */
@@ -324,11 +326,28 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * The file with the tree's html representation
+	 * 
+	 * @return the absolute path to file
+	 */
+	public String getTreeFile() {
+		return treeFile;
+	}
+
+	/**
 	 * @param seqFile The absolutepath to a file that provides ordering
 	 *          information for the object's children
 	 */
 	public void setSeqFile(String seqFile) {
 		this.seqFile = seqFile;
+	}
+
+	/**
+	 * @param treeFile The absolutepath to a file that provides an html
+	 *          representation of the navigation tree
+	 */
+	public void setTreeFile(String treeFile) {
+		this.treeFile = treeFile;
 	}
 
 	/**
@@ -629,7 +648,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @return the content of seq datastream in a string
+	 * @return the content of seq data stream in a string
 	 */
 	@JsonIgnore()
 	public String getSeq() {
@@ -637,11 +656,28 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
-	 * @param seq datastream as string
+	 * @return the content of tree_html data stream in a string
+	 */
+	@JsonIgnore()
+	public String getTreeHtml() {
+		return treeHtml;
+	}
+
+	/**
+	 * @param seq data stream as string
 	 * @return this
 	 */
 	public Node setSeq(String seq) {
 		this.seq = seq;
+		return this;
+	}
+
+	/**
+	 * @param treeHtml data stream as string
+	 * @return this
+	 */
+	public Node setTreeHtml(String treeHtml) {
+		this.treeHtml = treeHtml;
 		return this;
 	}
 

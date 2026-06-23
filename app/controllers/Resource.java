@@ -449,6 +449,17 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "updateTree", value = "updateTree", notes = "Updates the HTML representation of a a tree view.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	public static Promise<Result> updateTree(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			String result =
+					modify.updateTree(pid, request().body().asText().toString());
+			return JsonMessage(new Message(result));
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "updateMetadata", value = "updateMetadata", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
