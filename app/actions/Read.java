@@ -733,6 +733,22 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * @author Ingolf Kuss
+	 * @date 2026-06-26
+	 * @param node the pid of the object
+	 * @return html representation of tree navigation
+	 */
+	public String readTree(Node node) {
+		try {
+			return node.getTreeHtml();
+		} catch (UrlConnectionException e) {
+			throw new HttpArchiveException(404, e);
+		} catch (Exception e) {
+			throw new HttpArchiveException(500, e);
+		}
+	}
+
+	/**
 	 * @param pid the pid
 	 * @return the last modified date
 	 */

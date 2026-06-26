@@ -204,7 +204,7 @@ public class Modify extends RegalAction {
 				node.setTreeFile(file.getAbsolutePath());
 				Globals.fedora.updateNode(node);
 			}
-			// durch den updateIndex wird auch der Node im Cache akualisiert.
+			// durch den updateIndex wird auch der Node im Cache aktualisiert.
 			updateIndex(node.getPid());
 			return pid + " tree html representation updated!";
 		} catch (RdfException e) {
