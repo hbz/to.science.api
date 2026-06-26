@@ -181,6 +181,9 @@ public class Modify extends RegalAction {
 	/**
 	 * Updates the HTML representation of a tree view.
 	 * 
+	 * @author Ingolf Kuss
+	 * @date 2026-06-23
+	 * 
 	 * @param pid the node's pid
 	 * @param content the tree in the format text/html
 	 * @return a message
@@ -197,6 +200,7 @@ public class Modify extends RegalAction {
 			File file = CopyUtils.copyStringToFile(content);
 			Node node = new Read().readNode(pid);
 			if (node != null) {
+				play.Logger.debug("Setting tree file " + file.getAbsolutePath());
 				node.setTreeFile(file.getAbsolutePath());
 				Globals.fedora.updateNode(node);
 			}

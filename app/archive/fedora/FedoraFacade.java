@@ -408,6 +408,9 @@ public class FedoraFacade {
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);
 		}
+		if (node.getTreeFile() != null) {
+			utils.updateTreeStream(node);
+		}
 		if (node.getConfFile() != null) {
 			play.Logger.info("Write conf file to fedora");
 			utils.updateConfStream(node);
