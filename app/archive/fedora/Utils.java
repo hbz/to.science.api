@@ -326,6 +326,30 @@ public class Utils {
 		}
 	}
 
+	/**
+	 * Diese Methode erzeugt einen Datenstrum "tree" an einem Journal- oder
+	 * Monographie-Objekt. Der Datenstrom "tree" enthält den Dateibaum als
+	 * HTML/text.
+	 * 
+	 * @author Ingolf Kuss
+	 * @date 2026-06-26
+	 * 
+	 * @param node der Node des Root-Objektes (Journal oder Monographie)
+	 */
+	public void createTreeStream(Node node) {
+		try {
+			Upload request = new Upload(new File(node.getTreeFile()));
+			UploadResponse response = request.execute();
+			String location = response.getUploadLocation();
+			new AddDatastream(node.getPid(), "tree").versionable(true).dsState("A")
+					.dsLabel("text/html of a tree view [object with all child objects]")
+					.controlGroup("M").mimeType("text/html").dsLocation(location)
+					.execute();
+		} catch (FedoraClientException e) {
+			throw new HttpArchiveException(e.getStatus(), e);
+		}
+	}
+
 	@SuppressWarnings("javadoc")
 	public void createConfStream(Node node) {
 		try {
@@ -463,7 +487,7 @@ public class Utils {
 	}
 
 	/**
-	 * Diese Methode schreibt einen Datenstrum "tree" an einem Journal- oder
+	 * Diese Methode aktualisiert einen Datenstrum "tree" an einem Journal- oder
 	 * Monographie-Objekt. Der Datenstrom "tree" enthält den Dateibaum als
 	 * HTML/text.
 	 * 

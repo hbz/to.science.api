@@ -225,6 +225,9 @@ public class FedoraFacade {
 			if (node.getSeqFile() != null) {
 				utils.createSeqStream(node);
 			}
+			if (node.getTreeFile() != null) {
+				utils.createTreeStream(node);
+			}
 			if (node.getConfFile() != null) {
 				utils.createConfStream(node);
 			}
@@ -276,6 +279,7 @@ public class FedoraFacade {
 		getMetadataFromFedora(metadata2, node);
 		getMetadataFromFedora(toscience, node);
 		getDataFromFedora(pid, node);
+		getTreeFromFedora(pid, node);
 		getConfFromFedora(pid, node);
 		getUrlHistFromFedora(pid, node);
 		getObjectTimestampFromFedora(node);
@@ -299,6 +303,17 @@ public class FedoraFacade {
 			FedoraResponse response =
 					new GetDatastreamDissemination(pid, "seq").execute();
 			node.setSeq(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// datastream with name metadata is optional
+		}
+	}
+
+	private void getTreeFromFedora(String pid, Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(pid, "tree").execute();
+			node.setTreeHtml(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
 			// datastream with name metadata is optional
