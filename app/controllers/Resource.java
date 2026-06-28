@@ -957,12 +957,11 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readTree(node);
-			try {
-				return ok(result);
-			} catch (NullPointerException e) {
+			if (result == null) {
 				return JsonMessage(new Message(
 						pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.", 404));
 			}
+			return ok(result);
 		});
 	}
 
