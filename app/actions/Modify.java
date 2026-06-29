@@ -53,6 +53,8 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.nodes.Document;
+import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -197,7 +199,13 @@ public class Modify extends RegalAction {
 								+ " Use HTTP DELETE instead.\n");
 			}
 			play.Logger.info("Write tree html to fedora \n\t" + content);
-			File file = CopyUtils.copyStringToFile(content);
+			/**
+			 * Aus dem HTML müssen alle Elemente entfernt werden, die class="...
+			 * octicon ..." haben. Außerdem sollten alle Attribute "isHtml" entfernt
+			 * werden.
+			 */
+			org.jsoup.nodes.Document doc = org.jsoup.Jsoup.parse(content);
+			File file = CopyUtils.copyStringToFile(doc.html());
 			Node node = new Read().readNode(pid);
 			if (node != null) {
 				play.Logger.debug("Setting tree file " + file.getAbsolutePath());
