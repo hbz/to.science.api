@@ -236,10 +236,10 @@ public class TosHelper {
 		try {
 			org.jsoup.nodes.Document doc = org.jsoup.Jsoup.parse(content);
 			return doc.html();
-		} catch (IOException ioe) {
+		} catch (Exception e) {
 			play.Logger.warn(
 					"TreeHtml konnte nicht bereinigt werden ! Ich gebe unbereinigtes TreeHtml weiter.",
-					ioe);
+					e);
 		}
 		return treeHtml;
 	}
