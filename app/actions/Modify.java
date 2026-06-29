@@ -263,7 +263,7 @@ public class Modify extends RegalAction {
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(String pid,
 			int embargoDuration, String deepgreenId, RDFFormat format,
-			Document content) {
+			org.w3c.dom.Document content) {
 		try {
 			Node node = new Read().readNode(pid);
 			return updateLobidify2AndEnrichDeepGreenData(node, embargoDuration,
@@ -396,7 +396,7 @@ public class Modify extends RegalAction {
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(Node node,
 			int embargoDuration, String deepgreenId, RDFFormat format,
-			Document content) {
+			org.w3c.dom.Document content) {
 
 		try {
 			play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
