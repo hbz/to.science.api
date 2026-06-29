@@ -13,7 +13,9 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
 
@@ -237,16 +239,19 @@ public class TosHelper {
 		play.Logger.debug("Bereinige treeHtml: " + content);
 		try {
 			org.jsoup.nodes.Document doc = org.jsoup.Jsoup.parse(content);
-			// Entferne alle Elemente, die die Klasse "octicon" haben.
+			// Entferne alle Elemente, die die Klasse "octicon" haben
 			Elements octiconElems = doc.getElementsByClass("octicon");
 			octiconElems.remove();
-			/**
-			 * Remove Elements with attribute "isHtml" Elements withAttr = new
-			 * Elements(); for( Element element : doc.getAllElements() ) { for(
-			 * Attribute attribute : element.attributes() ) { if(
-			 * attribute.getValue().equalsIgnoreCase("isHtml") ) {
-			 * withAttr.add(element); } } } withAttr.remove();
-			 */
+			// Remove all attributes "isHtml"
+			Elements withAttrIsHtml = new Elements();
+			for (Element element : doc.getAllElements()) {
+				for (Attribute attribute : element.attributes()) {
+					if (attribute.getValue().equalsIgnoreCase("isHtml")) {
+						withAttrIsHtml.add(element);
+					}
+				}
+			}
+			withAttrIsHtml.removeAttr("ishtml");
 			play.Logger.debug("Bereinigtes treeHtml: " + doc.html());
 			return doc.html();
 		} catch (Exception e) {
