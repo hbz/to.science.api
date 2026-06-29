@@ -15,7 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Elements;
+import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
 
 import models.Globals;
@@ -239,9 +239,10 @@ public class TosHelper {
 		try {
 			org.jsoup.nodes.Document doc = org.jsoup.Jsoup.parse(content);
 			Elements octiconElems = doc.getElementsByClass("octicon");
-			for (Element element : doc.select(octiconElems)) {
-				element.remove();
-			}
+			octiconElems.remove();
+			// for (Element element : doc.select(octiconElems)) {
+			// element.remove();
+			// }
 			play.Logger.debug("Bereinigtes treeHtml: " + doc.html());
 			return doc.html();
 		} catch (Exception e) {
