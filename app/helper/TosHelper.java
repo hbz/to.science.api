@@ -1,21 +1,27 @@
 package helper;
 
-import org.json.JSONObject;
+import play.Play;
+
 import java.util.List;
 import java.util.Set;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import org.json.JSONArray;
-import helper.MyEtikettMaker;
-import models.Globals;
 import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+import org.json.JSONArray;
 import org.json.JSONException;
-import play.Play;
+import org.jsoup.nodes.Document;
+import org.jsoup.Jsoup;
+
+import models.Globals;
+import helper.MyEtikettMaker;
 
 /**
  * 
- * @author adoud
+ * @author adoud, kuss
  *
  */
 
@@ -212,6 +218,30 @@ public class TosHelper {
 			play.Logger.debug("Exception in getAssociatedDatasets()" + e);
 			return null;
 		}
+	}
+
+	/**
+	 * Diese Methode bereinigt das HTML das Dateibaumes (tree_html) um
+	 * HTML-Elemente, die zu den Event-Handlern gehören. Das so bereinigte HTML
+	 * kann wieder in den Browser geladen werden, wo es von JavaScript / jQuery
+	 * (edoweb_tree.js) erneut mit Event-Handlern bestückt werden wird.
+	 * 
+	 * @author Ingolf Kuss
+	 * @date 2026-06-29
+	 * @param content tree_html wie von jQuery aus der Website geliefert
+	 * @return tree_html wie es in Fedora abgespeichert werden soll.
+	 */
+	public String cleanupTreeHtml(String content) {
+		String treeHtml = content;
+		try {
+			org.jsoup.nodes.Document doc = org.jsoup.Jsoup.parse(content);
+			return doc.html();
+		} catch (IOException ioe) {
+			play.Logger.warn(
+					"TreeHtml konnte nicht bereinigt werden ! Ich gebe unbereinigtes TreeHtml weiter.",
+					ioe);
+		}
+		return treeHtml;
 	}
 
 }

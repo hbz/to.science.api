@@ -53,8 +53,6 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.nodes.Document;
-import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -204,8 +202,8 @@ public class Modify extends RegalAction {
 			 * octicon ..." haben. Außerdem sollten alle Attribute "isHtml" entfernt
 			 * werden.
 			 */
-			org.jsoup.nodes.Document doc = org.jsoup.Jsoup.parse(content);
-			File file = CopyUtils.copyStringToFile(doc.html());
+			String treeHtml = new TosHelper().cleanupTreeHtml(content);
+			File file = CopyUtils.copyStringToFile(treeHtml);
 			Node node = new Read().readNode(pid);
 			if (node != null) {
 				play.Logger.debug("Setting tree file " + file.getAbsolutePath());
