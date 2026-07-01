@@ -48,8 +48,8 @@ public class WpullThread extends Thread {
 	 * Der wievielte Versuch ist es, diesen Crawl zu starten ?
 	 */
 	int attempt = 1;
-
-	private static int maxNumberAttempts = 3;
+	// CHG Kuss 1.7.2026: keine weiteren Versuche
+	private static int maxNumberAttempts = 1;
 	private static final Logger.ALogger WebgatherLogger =
 			Logger.of("webgatherer");
 
@@ -283,12 +283,13 @@ public class WpullThread extends Thread {
 			}
 
 			// Keep warc file of failed crawl
-			File warcFile =
-					new File(crawlDir.toString() + "/" + warcFilename + ".warc.gz");
-			File warcFileAttempted = new File(crawlDir.toString() + "/" + warcFilename
-					+ ".warc.gz.attempt" + attempt);
-			warcFile.renameTo(warcFileAttempted);
-			warcFile.delete();
+			// KS 20260701: gescheiterter Crawl: warc-Datei wird nicht umbenannt.
+			/**
+			 * File warcFile = new File(crawlDir.toString() + "/" + warcFilename +
+			 * ".warc.gz"); File warcFileAttempted = new File(crawlDir.toString() +
+			 * "/" + warcFilename + ".warc.gz.attempt" + attempt);
+			 * warcFile.renameTo(warcFileAttempted); warcFile.delete();
+			 */
 			// Crawl wird erneut angestoßen
 			attempt++;
 			if (attempt > maxNumberAttempts) {
@@ -302,6 +303,7 @@ public class WpullThread extends Thread {
 				 */
 				return;
 			}
+			// KS20260701: Hier kommt er nie mehr hin.
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
 			pb.directory(crawlDir);
