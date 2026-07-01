@@ -19,8 +19,11 @@ package actions;
 import static archive.fedora.FedoraVocabulary.HAS_PART;
 import static archive.fedora.FedoraVocabulary.IS_PART_OF;
 import static archive.fedora.Vocabulary.*;
+
+import helper.BtrixWebclient;
 import helper.HttpArchiveException;
 import helper.JsonMapper;
+import helper.WebgatherUtils;
 import helper.Webgatherer;
 import helper.WpullCrawl;
 
@@ -32,6 +35,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -41,6 +45,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+import models.CrawlerModel.CrawlControllerState;
 import models.DublinCoreData;
 import models.Gatherconf;
 import models.Globals;
@@ -54,6 +59,7 @@ import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
 import org.apache.commons.codec.binary.Base64;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.json.JSONObject;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
@@ -210,56 +216,60 @@ public class Read extends RegalAction {
 	 * @return node
 	 */
 	public Node getLastlyCreatedChildOrNull(Node node, String contentType) {
-		play.Logger.debug("BEGIN getLastlyCreatedChildOrNull for pid: "
-				+ node.getPid() + "; contentType: " + contentType);
+		/*
+		 * play.Logger.debug("BEGIN getLastlyCreatedChildOrNull for pid: " +
+		 * node.getPid() + "; contentType: " + contentType);
+		 */
 		if (contentType == null || contentType.isEmpty()) {
 			return null;
 		}
-		Node oldestNode = null;
+		Node newestNode = null;
 		for (Node n : getParts(node)) {
-			play.Logger.debug("found child with pid: " + n.getPid()
-					+ "; contentType: " + n.getContentType());
+			/*
+			 * play.Logger.debug("found child with pid: " + n.getPid() +
+			 * "; contentType: " + n.getContentType());
+			 */
 			if (contentType.equals(n.getContentType())) {
-				oldestNode = compareCreationDates(n, oldestNode);
-				play.Logger.debug("oldest node is now: pid: " + oldestNode.getPid());
+				newestNode = compareCreationDates(n, newestNode);
+				// play.Logger.debug("newest node is now: pid: " + newestNode.getPid());
 			}
 		}
-		if (oldestNode == null)
+		if (newestNode == null)
 			return null;
-		play.Logger.debug("returning oldest node with pid: " + oldestNode.getPid());
-		return oldestNode;
+		play.Logger.debug("returning newest node with pid: " + newestNode.getPid());
+		return newestNode;
 	}
 
-	private static Node compareCreationDates(Node currentNode, Node oldestNode) {
+	private static Node compareCreationDates(Node currentNode, Node newestNode) {
 		Date currentNodeDate = currentNode.getCreationDate();
 		if (currentNodeDate == null)
 			currentNodeDate = currentNode.getObjectTimestamp();
 		if (currentNodeDate == null)
 			currentNodeDate = currentNode.getLastModified();
 		currentNode.setCreationDate(currentNodeDate);
-		if (oldestNode != null) {
-			Date oldestNodeDate = oldestNode.getCreationDate();
-			if (oldestNodeDate == null)
-				oldestNodeDate = oldestNode.getObjectTimestamp();
-			if (oldestNodeDate == null)
-				oldestNodeDate = oldestNode.getLastModified();
-			oldestNode.setCreationDate(oldestNodeDate);
-			if (currentNodeDate.after(oldestNodeDate)) {
-				oldestNode = currentNode;
+		if (newestNode != null) {
+			Date newestNodeDate = newestNode.getCreationDate();
+			if (newestNodeDate == null)
+				newestNodeDate = newestNode.getObjectTimestamp();
+			if (newestNodeDate == null)
+				newestNodeDate = newestNode.getLastModified();
+			newestNode.setCreationDate(newestNodeDate);
+			if (currentNodeDate.after(newestNodeDate)) {
+				newestNode = currentNode;
 			}
 			// Special case: Since input has not to be sorted in any way, we
 			// need a condition to prefer child nodes over parent nodes.
 			// If both nodes have the same timestamp, the currentNode
 			// will win, if it is NOT a parent the oldest.
-			if (currentNodeDate.equals(oldestNodeDate)) {
-				if (!currentNode.getPid().equals(oldestNode.getParentPid())) {
-					oldestNode = currentNode;
+			if (currentNodeDate.equals(newestNodeDate)) {
+				if (!currentNode.getPid().equals(newestNode.getParentPid())) {
+					newestNode = currentNode;
 				}
 			}
 		} else {
 			return currentNode;
 		}
-		return oldestNode;
+		return newestNode;
 	}
 
 	/**
@@ -843,14 +853,25 @@ public class Read extends RegalAction {
 	private Map<String, Object> getGatherStatus(Node node) {
 		Map<String, Object> entries = new HashMap<String, Object>();
 		try {
-			// if ("version".equals(node.getContentType())) {
-			//
-			// new java.io.File(Gatherconf.create(node.getConf())
-			// .getLocalDir() + "/reports/crawl-report.txt"))
-			// .as("text/plain");
-			// } else
-			if ("webpage".equals(node.getContentType())) {
-				Gatherconf conf = Gatherconf.create(node.getConf());
+			Gatherconf conf = Gatherconf.create(node.getConf());
+			entries.put("lastLaunch", Webgatherer.getLastLaunch(node) == null ? ""
+					: Webgatherer.getLastLaunch(node));
+			if ("version".equals(node.getContentType())) {
+				if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.btrix)) {
+					BtrixWebclient btrixWebclient = new BtrixWebclient();
+					btrixWebclient.setBtrixWorkflowId(conf.getBtrixWorkflowId());
+					btrixWebclient.setCrawlId(conf.getLastCrawlId());
+					JSONObject crawlConfig = btrixWebclient.getCrawlOut();
+					entries.put("crawlExitStatus", crawlConfig.getString("state"));
+					entries.put("crawlFileSize", WebgatherUtils.humanReadableByteCount(
+							Long.parseLong(crawlConfig.getString("fileSize"))));
+					entries.put("crawlDuration",
+							WebgatherUtils.humanReadableDuration(Duration.ofSeconds(
+									Long.parseLong(crawlConfig.getString("crawlExecSeconds")))));
+					entries.put("crawlStarted", crawlConfig.getString("started"));
+				}
+			} else if ("webpage".equals(node.getContentType())) {
 				if (conf.getCrawlerSelection()
 						.equals(Gatherconf.CrawlerSelection.heritrix)) {
 					String hertrixXmlResponse =
@@ -859,22 +880,35 @@ public class Read extends RegalAction {
 					entries = xmlMapper.readValue(hertrixXmlResponse, Map.class);
 				} else if (conf.getCrawlerSelection()
 						.equals(Gatherconf.CrawlerSelection.wpull)) {
+					WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
 					entries.put("crawlControllerState",
-							WpullCrawl.getCrawlControllerState(node));
-					entries.put("crawlExitStatus", WpullCrawl.getCrawlExitStatus(node) < 0
-							? "" : WpullCrawl.getCrawlExitStatus(node));
+							wpullCrawl.getCrawlControllerState());
+					entries.put("crawlExitStatus",
+							wpullCrawl.getCrawlExitStatus() < 0 ? ""
+									: wpullCrawl.getCrawlExitStatus());
+				} else if (conf.getCrawlerSelection()
+						.equals(Gatherconf.CrawlerSelection.btrix)) {
+					if (conf.getBtrixWorkflowId() != null) {
+						BtrixWebclient btrixWebclient = new BtrixWebclient();
+						btrixWebclient.setBtrixWorkflowId(conf.getBtrixWorkflowId());
+						JSONObject crawlConfig = btrixWebclient.getCrawlConfigOut();
+						if (crawlConfig.getBoolean("isCrawlRunning")) {
+							entries.put("crawlControllerState", CrawlControllerState.RUNNING);
+						}
+						entries.put("crawlExitStatus",
+								crawlConfig.getString("lastCrawlState"));
+						entries.put("launchCount", crawlConfig.getString("crawlCount"));
+						entries.put("lastCrawlSize", WebgatherUtils.humanReadableByteCount(
+								Long.parseLong(crawlConfig.getString("lastCrawlSize"))));
+						entries.put("lastLaunch",
+								crawlConfig.getString("lastCrawlStartTime"));
+					}
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
-				 * überschreibt launchCount von Heritrix
+				 * überschreibt launchCount von Heritrix und Browsertrix
 				 */
 				entries.put("launchCount", Webgatherer.getLaunchCount(node));
-				/*
-				 * call of getLastLaunch may be omitted for heritrix, as also determined
-				 * by heritrixXmlResponse
-				 */
-				entries.put("lastLaunch", Webgatherer.getLastLaunch(node) == null ? ""
-						: Webgatherer.getLastLaunch(node));
 				entries.put("nextLaunch", Webgatherer.nextLaunch(node));
 			} // end if webpage
 		} catch (Exception e) {

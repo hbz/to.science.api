@@ -18,14 +18,21 @@ package helper;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.IDN;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import com.ibm.icu.text.StringCharacterIterator;
 
 import actions.Create;
 import helper.mail.Mail;
@@ -145,6 +152,7 @@ public class WebgatherUtils {
 	 * 
 	 * @param node must be of type webpage: Die Webpage
 	 */
+	@SuppressWarnings("null")
 	public void startCrawl(Node node) {
 		Gatherconf conf = null;
 		File crawlDir = null;
@@ -155,8 +163,8 @@ public class WebgatherUtils {
 						+ " is not supported. Operation works only on regalType:\"webpage\"");
 			}
 			WebgatherLogger.debug("Starte Webcrawl für PID: " + node.getPid());
+			WebgatherLogger.debug("Gatherer-Konfiguration: " + node.getConf());
 			conf = Gatherconf.create(node.getConf());
-			WebgatherLogger.debug("Gatherer-Konfiguration: " + conf.toString());
 			conf.setName(node.getPid());
 			if (conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.heritrix)) {
@@ -196,11 +204,11 @@ public class WebgatherUtils {
 			} else if (conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.wpull)) {
 				WpullCrawl wpullCrawl = new WpullCrawl(node, conf);
-				wpullCrawl.createJob();
+				wpullCrawl.createCrawl();
 				/**
 				 * Startet Job in neuem Thread, einschließlich CDN-Precrawl
 				 */
-				wpullCrawl.startJob();
+				wpullCrawl.startCrawl();
 				crawlDir = wpullCrawl.getCrawlDir();
 				// localpath = wpullCrawl.getLocalpath();
 				if (wpullCrawl.getExitState() != 0) {
@@ -209,6 +217,11 @@ public class WebgatherUtils {
 				}
 				WebgatherLogger
 						.debug("Path to WARC (crawldir):" + crawlDir.getAbsolutePath());
+			} else if (conf.getCrawlerSelection()
+					.equals(Gatherconf.CrawlerSelection.btrix)) {
+				BtrixWebclient btrixWorkflow = new BtrixWebclient(node, conf);
+				btrixWorkflow.createCrawl();
+				btrixWorkflow.startCrawl();
 			} else {
 				throw new RuntimeException(
 						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
@@ -277,6 +290,80 @@ public class WebgatherUtils {
 	public static String getDomain(String url) {
 		return url.replaceAll("^http://", "").replaceAll("^https://", "")
 				.replaceAll("/.*$", "");
+	}
+
+	/**
+	 * Diese Methode entpackt ein ZIP-Archiv. Sie macht dasselbe wie der
+	 * Unix/Linux-Befehl unzip. Quelle:
+	 * https://www.geeksforgeeks.org/java/how-to-zip-and-unzip-files-in-java/
+	 * 
+	 * @author I. Kuss, hbz
+	 * @date 2026-04-23
+	 * @param zipFile der volle Pfadname eines ZIP-Archivs (Dateiendung .zip)
+	 * @param destFolder der volle Pfadname eines Dateiordners, in dem das
+	 *          ZIP-Archiv ausgepackt werden soll
+	 * @throws IOException eine Ausnahmebehandlung
+	 */
+	public static void unzip(String zipFile, String destFolder)
+			throws IOException {
+		try (
+				ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+			ZipEntry entry;
+			byte[] buffer = new byte[1024];
+			while ((entry = zis.getNextEntry()) != null) {
+				File newFile = new File(destFolder + File.separator + entry.getName());
+				if (entry.isDirectory()) {
+					newFile.mkdirs();
+				} else {
+					new File(newFile.getParent()).mkdirs();
+					try (FileOutputStream fos = new FileOutputStream(newFile)) {
+						int length;
+						while ((length = zis.read(buffer)) > 0) {
+							fos.write(buffer, 0, length);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Diese Methode konvertiert eine Integer-Angabe für Bytes in eine
+	 * Zeichenkette der Form %d,%1d GiB (MiB oder KiB). Also auf die führende
+	 * Mengenangabe mit einer Stelle hinter dem Komma. Quelle:
+	 * https://stackoverflow.com/questions/3758606/how-can-i-convert-byte-size-into-a-human-readable-format-in-java
+	 * 
+	 * @param bytes die Anzahl Bytes als long integer
+	 * @return eine Zeichenkette in menschenlesbarem Format für eine Dateigröße
+	 */
+	@SuppressWarnings("deprecation")
+	public static String humanReadableByteCount(long bytes) {
+		long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+		if (absB < 1024) {
+			return bytes + " B";
+		}
+		long value = absB;
+		CharacterIterator ci = new StringCharacterIterator("KMGTPE");
+		for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
+			value >>= 10;
+			ci.next();
+		}
+		value *= Long.signum(bytes);
+		return String.format("%.1f %ciB", value / 1024.0, ci.current());
+	}
+
+	/**
+	 * Diese Funktion konvertiert eine Integer-Angabe für Sekunden in eine
+	 * Zeichenkette der Form %d h %d m %d s. Quelle:
+	 * https://stackoverflow.com/questions/3471397/how-can-i-pretty-print-a-duration-in-java
+	 * 
+	 * @param duration eine Java-"Duration", z.B. Duration duration = new
+	 *          Duration(Zeit in Millisekunden);
+	 * @return eine menschenlesbare Zeichenkette für eine Zeitdauer
+	 */
+	public static String humanReadableDuration(Duration duration) {
+		return duration.toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ")
+				.toLowerCase();
 	}
 
 }

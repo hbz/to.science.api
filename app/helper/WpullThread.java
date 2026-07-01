@@ -1,18 +1,17 @@
 package helper;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Process;
 import java.lang.ProcessBuilder;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 import actions.Create;
+import models.CrawlerModel;
 import models.Gatherconf;
 import models.Globals;
 import models.Node;
-import models.Gatherconf.RobotsPolicy;
 import models.Gatherconf.CrawlSubdomains;
 import play.Logger;
 
@@ -25,10 +24,12 @@ import play.Logger;
  */
 public class WpullThread extends Thread {
 
+	private WpullCrawl wpullCrawl = null;
 	private Node node = null;
 	private Gatherconf conf = null;
 	private List<String> title = null;
 	private File crawlDir = null;
+	private File finishedDir = null;
 	private File outDir = null;
 	private String warcFilename = null;
 	private String host = null; /* = domain */
@@ -38,12 +39,10 @@ public class WpullThread extends Thread {
 	 * "%20" durch Leerzeichen ersetzt für Ausgabe ins Log
 	 */
 	private String executeCommandRepl = null;
-	private ProcessBuilder pbCDN = null;
+	private ArrayList<String> domains = null;
 	private ProcessBuilder pb = null;
-	private File logFileCDN = null;
 	private File logFile = null;
 	private int exitState = 0;
-	private int CDNGathererExitState = 0;
 	private String msg = "";
 	/**
 	 * Der wievielte Versuch ist es, diesen Crawl zu starten ?
@@ -57,13 +56,13 @@ public class WpullThread extends Thread {
 	/**
 	 * Der Konstruktor für diese Klasse.
 	 * 
-	 * @param pbCDN Ein Objekt der Klasse ProcessBuilder mit Aufrufinformationen
-	 *          für den CDN-Crawl.
+	 * @param model a Crawler Model for this wpull crawl
 	 * @param attempt Der wievielte Versuch es ist, diesen Webschnitt zu sammeln.
 	 */
-	public WpullThread(ProcessBuilder pbCDN, int attempt) {
-		this.pbCDN = pbCDN;
+	public WpullThread(WpullCrawl model, int attempt) {
+		this.wpullCrawl = model;
 		this.attempt = attempt;
+		WebgatherLogger.debug("Instantiating attempt No. " + attempt);
 		exitState = 0;
 	}
 
@@ -94,6 +93,16 @@ public class WpullThread extends Thread {
 	 */
 	public void setCrawlDir(File crawlDir) {
 		this.crawlDir = crawlDir;
+	}
+
+	/**
+	 * Die Methode, um den Parameter finishedDir zu setzen.
+	 * 
+	 * @param finishedDir Das Verzeichnis (absoluter Pfad), in das wpull seine
+	 *          fertigen Webarchive (per --warc-move) verschiebt.
+	 */
+	public void setFinishedDir(File finishedDir) {
+		this.finishedDir = finishedDir;
 	}
 
 	/**
@@ -140,21 +149,23 @@ public class WpullThread extends Thread {
 	}
 
 	/**
+	 * Die Methode, um die Liste "domains" zu setzen. Die Liste "domains" stammt
+	 * aus der Gatherconf, kann aber durch den Precrawl angereichert worden sein.
+	 * 
+	 * @param domains die Liste "domains" mit zusätzlichen Domains, die auch
+	 *          gecrwalt werden sollen.
+	 */
+	public void setDomains(ArrayList<String> domains) {
+		this.domains = domains;
+	}
+
+	/**
 	 * Die Methode, um das Aufrufkommando (wpull) für den Hauptcrawl zu setzen
 	 * 
 	 * @param executeCommand das Aufrufkommando für den Hauptcrawl
 	 */
 	public void setExecuteCommand(String executeCommand) {
 		this.executeCommand = executeCommand;
-	}
-
-	/**
-	 * Die Methode, um den Parameter logFileCDN zu setzen.
-	 * 
-	 * @param logFileCDN Die Logdatei für den CDN-Crawl; Objekttyp 'File'
-	 */
-	public void setLogFileCDN(File logFileCDN) {
-		this.logFileCDN = logFileCDN;
 	}
 
 	/**
@@ -171,38 +182,12 @@ public class WpullThread extends Thread {
 	 */
 	@Override
 	public void run() {
+		WebgatherLogger.debug("Start runnig Wpull Crawl.");
 		try {
-			// 1. Ausführung des CDN-Precrawls
-			Process proc = pbCDN.start();
-			assert pbCDN.redirectInput() == ProcessBuilder.Redirect.PIPE;
-			assert pbCDN.redirectOutput().file() == logFileCDN;
-			assert proc.getInputStream().read() == -1;
-			CDNGathererExitState = proc.waitFor();
-			/**
-			 * Exit-Status: 0 = Crawl erfolgreich beendet
-			 */
-			WebgatherLogger.info("CDN-Crawl für " + conf.getName()
-					+ " wurde beendet mit Exit-Status " + CDNGathererExitState);
-
-			// 2. Auslesen der vom cdnparse angelegten Datei hostnames.txt
-			// cdnparse ist der 1. Schritt des CDN-Precrawls und ein Python-Programm
-			ArrayList<String> domains = conf.getDomains();
-			// Add hostnames from cdn precrawl textfile
-			List<String> hostnames = new ArrayList<>();
-			WebgatherLogger.info("Adding hostnames from file " + crawlDir.toString()
-					+ "/hostnames.txt");
-			try {
-				hostnames = Files.readAllLines(
-						new File(crawlDir.toString() + "/hostnames.txt").toPath());
-			} catch (IOException e) {
-				WebgatherLogger.warn("File hostnames.txt can not be opened!",
-						e.toString());
-			}
-			domains.addAll(hostnames);
 			boolean noParent = true;
 			String zusDomain = null;
 			String zusHost = null;
-			if (domains.size() > 0
+			if ((domains != null && domains.size() > 0)
 					|| conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
 				executeCommand += " --span-hosts";
 				if (conf.getCrawlSubdomains().equals(CrawlSubdomains.domains)) {
@@ -210,16 +195,18 @@ public class WpullThread extends Thread {
 				} else {
 					executeCommand += " --hostnames=" + host;
 				}
-				for (int i = 0; i < domains.size(); i++) {
-					zusDomain = domains.get(i);
-					zusHost = WebgatherUtils.getDomain(zusDomain);
-					WebgatherLogger.debug("zusHost=" + zusHost);
-					if (zusHost.equalsIgnoreCase(host)) {
-						WebgatherLogger.debug("Es soll von der gesamten Domain " + host
-								+ " eingesammelt werden, die Option --no-parent wird entfernt.");
-						noParent = false;
-					} else {
-						executeCommand += "," + zusHost;
+				if (domains != null) {
+					for (int i = 0; i < domains.size(); i++) {
+						zusDomain = domains.get(i);
+						zusHost = WebgatherUtils.getDomain(zusDomain);
+						WebgatherLogger.debug("zusHost=" + zusHost);
+						if (zusHost.equalsIgnoreCase(host)) {
+							WebgatherLogger.debug("Es soll von der gesamten Domain " + host
+									+ " eingesammelt werden, die Option --no-parent wird entfernt.");
+							noParent = false;
+						} else {
+							executeCommand += "," + zusHost;
+						}
 					}
 				}
 			}
@@ -236,7 +223,7 @@ public class WpullThread extends Thread {
 			executeCommandRepl = new String(executeCommand);
 			executeCommandRepl = executeCommandRepl.replaceAll("%20", " ");
 			WebgatherLogger.info("Executing command " + executeCommandRepl);
-			// andere Logdatei für den Hauptcrawl anlegen
+			// Logdatei für den Hauptcrawl anlegen
 			logFile = new File(crawlDir.toString() + "/crawl.log");
 			logFile.createNewFile();
 			WebgatherLogger.info("Logfile = " + crawlDir.toString() + "/crawl.log");
@@ -246,10 +233,11 @@ public class WpullThread extends Thread {
 			pb.redirectErrorStream(true);
 			pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
 
-			proc = pb.start();
+			Process proc = pb.start();
 			assert pb.redirectInput() == ProcessBuilder.Redirect.PIPE;
 			assert pb.redirectOutput().file() == logFile;
-			assert proc.getInputStream().read() == -1;
+			InputStream inputStream = proc.getInputStream();
+			assert inputStream.read() == -1;
 			exitState = proc.waitFor();
 			/**
 			 * Exit-Status: 0 = Crawl erfolgreich beendet
@@ -264,16 +252,19 @@ public class WpullThread extends Thread {
 				 * daher legen wir ab jetzt auch einen Webschnitt an. IK20250205 für
 				 * TOS-1182 und TOS-1224
 				 */
-				String versionPid = null;
-				new Create().createWebpageVersion(node, conf, warcFilename, outDir,
-						localpath, versionPid);
-				WebgatherLogger
-						.info("WebpageVersion für " + conf.getName() + "wurde angelegt.");
+				/**
+				 * Die Anlage des Webschnitts wird in einen Cronjob ausgelagert.
+				 * KS20260511 siehe TOSDEV-46.
+				 */
+				WebgatherLogger.info("Webpage " + host + " mit PID " + conf.getName()
+						+ " wurde erfolgreich eingesammelt. Finished-Dir: "
+						+ finishedDir.toString() + ", Dateiname: " + warcFilename);
+
 				/**
 				 * Hier eine Mail schicken, falls nichts eingesammelt wurde. Für
 				 * TOS-1326
 				 */
-				if (WpullCrawl.isWpullCrawlEmpty(node)) {
+				if (wpullCrawl.isWpullCrawlEmpty()) {
 					title = node.getDublinCoreData().getTitle();
 					msg =
 							"Für die Website " + conf.getName() + ", Titel: " + title + "\n";
@@ -313,17 +304,17 @@ public class WpullThread extends Thread {
 			}
 			WebgatherLogger.info("Webcrawl for " + conf.getName()
 					+ " wird erneut angestoßen. " + attempt + ". Versuch.");
-			pbCDN.directory(crawlDir);
-			pbCDN.redirectErrorStream(true);
-			WpullThread wpullThread = new WpullThread(pbCDN, attempt);
+			pb.directory(crawlDir);
+			pb.redirectErrorStream(true);
+			WpullThread wpullThread = new WpullThread(wpullCrawl, attempt);
 			wpullThread.setNode(node);
 			wpullThread.setConf(conf);
 			wpullThread.setCrawlDir(crawlDir);
+			wpullThread.setFinishedDir(finishedDir);
 			wpullThread.setOutDir(outDir);
 			wpullThread.setWarcFilename(warcFilename);
 			wpullThread.setLocalPath(localpath);
 			wpullThread.setExecuteCommand(executeCommand);
-			wpullThread.setLogFileCDN(logFileCDN);
 			wpullThread.start(); // rekursiver Aufruf
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());

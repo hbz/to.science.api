@@ -1310,6 +1310,7 @@ public class Resource extends MyController {
 			play.Logger.debug("Starting Resource.createVersion()");
 			Node node = readNodeOrNull(pid);
 			Gatherconf conf = Gatherconf.create(node.getConf());
+			play.Logger.debug("Gatherconf conf=" + conf.toString());
 			if (conf.hasUrlMoved(node)) {
 				return Promise.promise(() -> {
 					return JsonMessage(WebgatherUtils.createInvalidUrlMessage(conf));
@@ -1348,7 +1349,8 @@ public class Resource extends MyController {
 			@QueryParam("filename") String filename) {
 		return new ModifyAction().call(pid, userId -> {
 			Node node = readNodeOrNull(pid);
-			Node result = create.postWebpageVersion(node, versionPid,
+			String lastCrawlId = null;
+			Node result = create.postWebpageVersion(node, versionPid, lastCrawlId,
 					crawlerSelection, timestamp, filename);
 			return getJsonResult(result);
 		});

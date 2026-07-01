@@ -50,7 +50,7 @@ public class Gatherconf {
 	@SuppressWarnings("javadoc")
 	public enum Interval {
 		annually, halfYearly, quarterly, monthly, weekly, daily, once
-	};
+	}
 
 	@SuppressWarnings("javadoc")
 	public enum RobotsPolicy {
@@ -95,7 +95,7 @@ public class Gatherconf {
 					put(AgentIdSelection.Googlebot,
 							"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)");
 					put(AgentIdSelection.Toscience,
-							"to.science%20(https://github.com/hbz/to.science.api;mailto:toscience@hbz-nrw.de)");
+							"Mozilla/5.0%20(compatible;%20to.science.bot%20+https://toscience.hbz-nrw.de/crawler)");
 				}
 			};
 
@@ -115,6 +115,8 @@ public class Gatherconf {
 	Interval interval;
 	String notices;
 	CrawlerSelection crawlerSelection;
+	String btrixWorkflowId;
+	String lastCrawlId;
 	QuotaUnitSelection quotaUnitSelection;
 	AgentIdSelection agentIdSelection;
 	ArrayList<String> urlsExcluded;
@@ -139,7 +141,7 @@ public class Gatherconf {
 		httpResponseCode = 0;
 		invalidUrl = false;
 		urlNew = null;
-		domains = new ArrayList<String>();
+		domains = new ArrayList<>();
 		crawlSubdomains = CrawlSubdomains.hostnames;
 		cookie = null;
 		active = true;
@@ -148,9 +150,11 @@ public class Gatherconf {
 		interval = Interval.halfYearly;
 		notices = null;
 		crawlerSelection = CrawlerSelection.wpull;
+		btrixWorkflowId = null;
+		lastCrawlId = null;
 		quotaUnitSelection = QuotaUnitSelection.GB;
 		agentIdSelection = AgentIdSelection.Toscience;
-		urlsExcluded = new ArrayList<String>();
+		urlsExcluded = new ArrayList<>();
 		startDate = null;
 		localDir = null;
 		name = null;
@@ -186,6 +190,16 @@ public class Gatherconf {
 	 */
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	/**
+	 * Setter für Domains
+	 * 
+	 * @param myDomains eine Liste von Domains, die für diese Webpage gecrawlt
+	 *          werden sollen
+	 */
+	public void setDomains(ArrayList<String> myDomains) {
+		this.domains = myDomains;
 	}
 
 	/**
@@ -314,6 +328,34 @@ public class Gatherconf {
 	 */
 	public void setCrawlerSelection(CrawlerSelection crawlerSelection) {
 		this.crawlerSelection = crawlerSelection;
+	}
+
+	/**
+	 * @return a browsertrix workflow id
+	 */
+	public String getBtrixWorkflowId() {
+		return btrixWorkflowId;
+	}
+
+	/**
+	 * @param btrixWorkflowId a browsertrix workflow id
+	 */
+	public void setBtrixWorkflowId(String btrixWorkflowId) {
+		this.btrixWorkflowId = btrixWorkflowId;
+	}
+
+	/**
+	 * @return a browsertrix last crawl_id
+	 */
+	public String getLastCrawlId() {
+		return lastCrawlId;
+	}
+
+	/**
+	 * @param lastCrawlId a browsertrix workflow id
+	 */
+	public void setLastCrawlId(String lastCrawlId) {
+		this.lastCrawlId = lastCrawlId;
 	}
 
 	/**
