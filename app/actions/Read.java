@@ -740,11 +740,16 @@ public class Read extends RegalAction {
 	 */
 	public String readTree(Node node) {
 		try {
+			play.Logger.debug("Beginn readTree");
 			return node.getTreeHtml();
 		} catch (UrlConnectionException e) {
+			play.Logger.debug("readTree 404 Exception");
 			throw new HttpArchiveException(404, e);
 		} catch (Exception e) {
-			throw new HttpArchiveException(500, e);
+			play.Logger.debug(
+					"Baum-HTML konnte nicht gelesen werden, pid = " + node.getPid());
+			return null;
+			// throw new HttpArchiveException(500, e);
 		}
 	}
 
