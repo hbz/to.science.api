@@ -16,6 +16,7 @@
 package helper;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -534,8 +535,9 @@ public class BtrixWebclient extends CrawlerModel {
 			 */
 			JSONArray exclude = new JSONArray();
 			for (String urlExcluded : conf.getUrlsExcluded()) {
-				exclude.put(urlExcluded);
+				exclude.put(".*" + urlExcluded.trim());
 			}
+
 			config.put("exclude", exclude);
 			config.put("depth", conf.getDeepness());
 			config.put("extraHops", 1);
