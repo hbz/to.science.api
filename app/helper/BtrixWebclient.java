@@ -542,11 +542,15 @@ public class BtrixWebclient extends CrawlerModel {
 			config.put("lang", "de");
 			config.put("blockAds", true);
 			// Limits amount of time to wait for a page to load; in Sekunden
-			// nimm default Wert
-			// config.put("pageLoadTimeout", 120);
+			config.put("pageLoadTimeout", conf.getWaitRetry());
 			// Delay Before Next Page; in Sekunden
-			config.put("pageExtraDelay", conf.getWaitSecBtRequests());
+			// config.put("pageExtraDelay", conf.getWaitSecBtRequests());
+			// Anpassung an LAV Settings "delay after page load" KS 07.07.2026 für
+			// TOS-1369
+			config.put("postLoadedDelay", conf.getWaitSecBtRequests());
 			config.put("useSitemap", true);
+			// KS Anpassung an LAV:
+			config.put("behaviors", "autoscroll,autoclick,autoplay,autofetch");
 			config.put("userAgent",
 					Gatherconf.agentTable.get(conf.getAgentIdSelection()));
 			data.put("config", config);
