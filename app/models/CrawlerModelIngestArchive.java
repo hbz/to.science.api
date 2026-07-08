@@ -186,8 +186,8 @@ public class CrawlerModelIngestArchive extends Thread {
 					.info("WebpageVersion für " + getToscienceId() + "wurde angelegt.");
 		} catch (Exception e) {
 			WebgatherLogger.error("WebpageVersion für " + getToscienceId()
-					+ "konnte nicht angelegt werden!");
-			WebgatherLogger.error(e.getMessage());
+					+ " konnte nicht angelegt werden!");
+			WebgatherLogger.error(e.getMessage(), e);
 		}
 	}
 
