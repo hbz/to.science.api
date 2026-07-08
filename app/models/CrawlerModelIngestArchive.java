@@ -173,15 +173,16 @@ public class CrawlerModelIngestArchive extends Thread {
 	 * @date 2026-05-11
 	 */
 	public void postWebpageVersion() {
-		/**
-		 *
-		 */
+
+		WebgatherLogger.debug("Beginn erzeuge WebpageVersion für PID "
+				+ getToscienceId() + ", Zeitstempel " + getDatetime());
 		String versionPid = null;
 		Node n = new Read().readNode(getToscienceId());
 		new Create().postWebpageVersion(n, versionPid, getLastCrawlId(),
 				getCrawler().toString(), getDatetime(),
 				new File(getFilename()).getName());
-		WebgatherLogger.info("WebpageVersion für " + getToscienceId() + "wurde angelegt.");
+		WebgatherLogger
+				.info("WebpageVersion für " + getToscienceId() + "wurde angelegt.");
 	}
 
 }

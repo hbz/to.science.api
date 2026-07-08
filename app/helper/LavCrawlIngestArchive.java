@@ -31,6 +31,7 @@ public class LavCrawlIngestArchive extends CrawlerModelIngestArchive {
 		/**
 		 * Anlage eines Webschnittes
 		 */
+		play.Logger.debug("Creating a WebpageVersion for pid " + getToscienceId());
 		postWebpageVersion();
 
 		return;
