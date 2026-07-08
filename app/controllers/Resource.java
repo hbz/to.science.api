@@ -1389,8 +1389,10 @@ public class Resource extends MyController {
 			@QueryParam("crawlSubdomains") boolean crawlSubdomains) {
 		return new CreateAction().call(userId -> {
 			try {
+				play.Logger.debug("BEGINN endpoint createWebpage");
 				Gatherconf conf = MyController.mapper
 						.readValue(request().body().asJson().toString(), Gatherconf.class);
+				play.Logger.debug("Gatherconf created");
 				Node result = create.createWebpage(namespace, url, title, intervall,
 						pid, crawlSubdomains, conf);
 				response().setHeader("Location", read.getHttpUriOfResource(result));
