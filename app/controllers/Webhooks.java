@@ -41,6 +41,7 @@ import actions.Read;
 import authenticate.BasicAuth;
 import helper.BtrixCrawlIngestArchive;
 import helper.BtrixWebclient;
+import helper.LavCrawlIngestArchive;
 import helper.WebgatherUtils;
 import helper.WpullCrawl;
 import helper.WpullCrawlIngestArchive;
@@ -203,6 +204,51 @@ public class Webhooks extends MyController {
 			moveArchive.setFilenameBase(warcFilenameBase);
 			moveArchive.setDatetime(crawldir);
 			moveArchive.start();
+
+			return ok();
+		});
+	}
+
+	/**
+	 * Dieser Endpoint legt für eine vom LAV (Landesarchiv NRW) bereitgestellte
+	 * Archivdatei einen Webschnitt an (Endung .warc.gz). Es kann auch eine
+	 * Archivdatei stellvertretend für mehrere Archivdateien stehen, für die aber
+	 * nur gemeinsam ein Webschnitt angelegt wird (für alle Archivdateien in einem
+	 * vom LAV gelieferten Verzeichnis).
+	 * 
+	 * @author I. Kuss
+	 * @date 2026-07-07
+	 * @return
+	 */
+	public static Promise<Result> lavCrawlIngest() {
+
+		return Promise.promise(() -> {
+
+			/**
+			 * Entgegennahme der POST-Parameter
+			 */
+			JsonNode body = request().body().asJson();
+			play.Logger.debug("LAV Crawl sent body: " + body);
+			String pid = body.findValue("pid").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("webpage pid: " + pid);
+			String crawldir =
+					body.findValue("crawldir").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("crawldir: " + crawldir);
+			String warcFilenameBase = body.findValue("warcFilenameBase").toString()
+					.replaceAll("^\"|\"$", "");
+			play.Logger.debug("warcFilenameBase: " + warcFilenameBase);
+
+			/*
+			 * Ab hier wird die Verarbeitung an einen Thread übergeben. In dem Thread
+			 * wird ein Webschnitt angelegt.
+			 */
+			LavCrawlIngestArchive ingestArchive = new LavCrawlIngestArchive();
+			ingestArchive.setCrawler(Gatherconf.CrawlerSelection.lav);
+			ingestArchive.setToscienceId(pid);
+			ingestArchive.setFilename(warcFilenameBase + ".warc.gz");
+			ingestArchive.setFilenameBase(warcFilenameBase);
+			ingestArchive.setDatetime(crawldir);
+			ingestArchive.start();
 
 			return ok();
 		});

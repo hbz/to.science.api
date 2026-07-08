@@ -168,3 +168,4 @@ POST /context.json 					controllers.Context.updateContext()
 
 POST /webhooks/btrixCrawlFinished	controllers.Webhooks.btrixCrawlFinished()
 POST /webhooks/wpullCrawlFinished	controllers.Webhooks.wpullCrawlFinished()
+POST /webhooks/lavCrawlIngest		controllers.Webhooks.lavCrawlIngest()

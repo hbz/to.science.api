@@ -961,16 +961,17 @@ public class Create extends RegalAction {
 	 * @param intervall Das Sammelintervall
 	 * @param pid Die PID (persistenter Identifier) für die Webpage. Falls null
 	 *          oder leer, wird ein neuer PID angelegt.
-	 * @param object ToScienceObject für die neue Webpage
+	 * @param crawlSubdomains boolscher Parameter "mit Subdomains"
+	 * @param conf Gatherconf für die neue Webpage
 	 * @return Der modifizierte Node vom contentType webpage
 	 */
 	public Node createWebpage(String namespace, String url, String title,
-			String intervall, String pid, ToScienceObject object,
-			boolean crawlSubdomains) {
+			String intervall, String pid, boolean crawlSubdomains, Gatherconf conf) {
 		try {
 			ApplicationLogger.debug("Create Webpage for url: " + url + ", title: "
 					+ title + ", intervall: " + intervall + ", pid: " + pid);
 
+			ToScienceObject object = new ToScienceObject();
 			object.setContentType("webpage");
 			object.setAccessScheme("restricted");
 			Node node = null;
@@ -990,7 +991,6 @@ public class Create extends RegalAction {
 			/*
 			 * Erzeuge eine Konfigurationsdatei für das Crawling (Gatherconf)
 			 */
-			Gatherconf conf = new Gatherconf();
 			conf.setUrl(WebgatherUtils.convertUnicodeURLToAscii(url));
 			conf.setName(node.getPid());
 			if (intervall == null || intervall.length() == 0) {

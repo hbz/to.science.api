@@ -132,6 +132,10 @@ regal-api.btrix.outDir="/opt/toscience/btrix-data"
 #--- importHome: diese Variable auf den angemounteten btrix.outDir Pfad eines Testsystems setzen.
 regal-api.btrix.importHome="/data-test/btrix-data"
 
+#-----LAV-Crawls (Crawls vom Landesarchiv NRW)------
+# Hierhin werden die gelieferten LAV-Crawls gestellt:
+regal-api.lav.outDir="/opt/toscience/lav-data"
+
 #-------------CDN Gatherer--------------------------                            
 regal-api.cdntools.cdn="/opt/toscience/bin/cdn"
 
