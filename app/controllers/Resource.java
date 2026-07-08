@@ -1388,12 +1388,16 @@ public class Resource extends MyController {
 			@QueryParam("interval") String intervall, @QueryParam("pid") String pid,
 			@QueryParam("crawlSubdomains") boolean crawlSubdomains) {
 		return new CreateAction().call(userId -> {
-			Gatherconf conf = MyController.mapper
-					.readValue(request().body().asJson().toString(), Gatherconf.class);
-			Node result = create.createWebpage(namespace, url, title, intervall, pid,
-					crawlSubdomains, conf);
-			response().setHeader("Location", read.getHttpUriOfResource(result));
-			return getJsonResult(result);
+			try {
+				Gatherconf conf = MyController.mapper
+						.readValue(request().body().asJson().toString(), Gatherconf.class);
+				Node result = create.createWebpage(namespace, url, title, intervall,
+						pid, crawlSubdomains, conf);
+				response().setHeader("Location", read.getHttpUriOfResource(result));
+				return getJsonResult(result);
+			} catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			}
 		});
 	}
 
