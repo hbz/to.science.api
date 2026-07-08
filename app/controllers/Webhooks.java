@@ -242,12 +242,14 @@ public class Webhooks extends MyController {
 			 * Ab hier wird die Verarbeitung an einen Thread übergeben. In dem Thread
 			 * wird ein Webschnitt angelegt.
 			 */
+			play.Logger.debug("Instantiating LavCrawlIngestArchive()");
 			LavCrawlIngestArchive ingestArchive = new LavCrawlIngestArchive();
 			ingestArchive.setCrawler(Gatherconf.CrawlerSelection.lav);
 			ingestArchive.setToscienceId(pid);
 			ingestArchive.setFilename(warcFilenameBase + ".warc.gz");
 			ingestArchive.setFilenameBase(warcFilenameBase);
 			ingestArchive.setDatetime(crawldir);
+			play.Logger.debug("Starting to run LavCrawlIngestArchive in a Thread");
 			ingestArchive.start();
 
 			return ok();
