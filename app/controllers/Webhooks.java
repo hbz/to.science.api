@@ -263,7 +263,7 @@ public class Webhooks extends MyController {
 				result = new Create().postWebpageVersion(n, versionPid, lastCrawlId,
 						Gatherconf.CrawlerSelection.lav.toString(), crawldir,
 						new File(warcFilenameBase + ".warc.gz").getName());
-				play.Logger.info("WebpageVersion für " + pid + "wurde angelegt.");
+				play.Logger.info("WebpageVersion für " + pid + " wurde angelegt.");
 			} catch (Exception e) {
 				play.Logger.error(
 						"WebpageVersion für " + pid + " konnte nicht angelegt werden!");
