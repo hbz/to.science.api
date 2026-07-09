@@ -11,9 +11,10 @@
         <title>View @viewerInfo.pid</title>
         <script src="@controllers.routes.Assets.at("javascripts/jquery-3.2.1.min.js")"></script>
         <link rel="stylesheet" media="screen" href="@controllers.routes.Assets.at("stylesheets/toscience.css")">
+        <link rel="stylesheet" media="print" href="@controllers.routes.Assets.at("stylesheets/toscience_print.css")">
     </head>
 
-    <body tabindex="0" class="pdfjs">
+    <body tabindex="0" class="pdfjs" oncontextmenu="return false;" >
 	<script type="text/javascript">
         $(document).ready(function() {
           const url = new URL(window.location.href);
