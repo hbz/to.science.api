@@ -17,10 +17,6 @@
 package controllers;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -42,12 +38,8 @@ import authenticate.BasicAuth;
 import helper.BtrixCrawlIngestArchive;
 import helper.BtrixWebclient;
 import helper.HttpArchiveException;
-import helper.LavCrawlIngestArchive;
-import helper.WebgatherUtils;
-import helper.WpullCrawl;
 import helper.WpullCrawlIngestArchive;
 import models.Gatherconf;
-import models.Gatherconf.CrawlerSelection;
 import models.Message;
 import models.Node;
 import play.libs.F.Promise;
@@ -238,20 +230,6 @@ public class Webhooks extends MyController {
 			String warcFilenameBase = body.findValue("warcFilenameBase").toString()
 					.replaceAll("^\"|\"$", "");
 			play.Logger.debug("warcFilenameBase: " + warcFilenameBase);
-
-			/*
-			 * Ab hier wird die Verarbeitung an einen Thread übergeben. In dem Thread
-			 * wird ein Webschnitt angelegt.
-			 */
-			// play.Logger.debug("Instantiating LavCrawlIngestArchive()");
-			// LavCrawlIngestArchive ingestArchive = new LavCrawlIngestArchive();
-			// ingestArchive.setCrawler(Gatherconf.CrawlerSelection.lav);
-			// ingestArchive.setToscienceId(pid);
-			// ingestArchive.setFilename(warcFilenameBase + ".warc.gz");
-			// ingestArchive.setFilenameBase(warcFilenameBase);
-			// ingestArchive.setDatetime(crawldir);
-			// play.Logger.debug("Starting to run LavCrawlIngestArchive in a Thread");
-			// ingestArchive.start();
 
 			play.Logger.debug("Beginn erzeuge WebpageVersion für PID " + pid
 					+ ", Zeitstempel " + crawldir);
