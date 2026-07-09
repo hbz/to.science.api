@@ -41,6 +41,7 @@ import actions.Read;
 import authenticate.BasicAuth;
 import helper.BtrixCrawlIngestArchive;
 import helper.BtrixWebclient;
+import helper.HttpArchiveException;
 import helper.LavCrawlIngestArchive;
 import helper.WebgatherUtils;
 import helper.WpullCrawl;
@@ -242,17 +243,35 @@ public class Webhooks extends MyController {
 			 * Ab hier wird die Verarbeitung an einen Thread übergeben. In dem Thread
 			 * wird ein Webschnitt angelegt.
 			 */
-			play.Logger.debug("Instantiating LavCrawlIngestArchive()");
-			LavCrawlIngestArchive ingestArchive = new LavCrawlIngestArchive();
-			ingestArchive.setCrawler(Gatherconf.CrawlerSelection.lav);
-			ingestArchive.setToscienceId(pid);
-			ingestArchive.setFilename(warcFilenameBase + ".warc.gz");
-			ingestArchive.setFilenameBase(warcFilenameBase);
-			ingestArchive.setDatetime(crawldir);
-			play.Logger.debug("Starting to run LavCrawlIngestArchive in a Thread");
-			ingestArchive.start();
+			// play.Logger.debug("Instantiating LavCrawlIngestArchive()");
+			// LavCrawlIngestArchive ingestArchive = new LavCrawlIngestArchive();
+			// ingestArchive.setCrawler(Gatherconf.CrawlerSelection.lav);
+			// ingestArchive.setToscienceId(pid);
+			// ingestArchive.setFilename(warcFilenameBase + ".warc.gz");
+			// ingestArchive.setFilenameBase(warcFilenameBase);
+			// ingestArchive.setDatetime(crawldir);
+			// play.Logger.debug("Starting to run LavCrawlIngestArchive in a Thread");
+			// ingestArchive.start();
 
-			return ok();
+			play.Logger.debug("Beginn erzeuge WebpageVersion für PID " + pid
+					+ ", Zeitstempel " + crawldir);
+			String versionPid = null;
+			Node result = null;
+			try {
+				Node n = new Read().readNode(pid);
+				String lastCrawlId = "";
+				result = new Create().postWebpageVersion(n, versionPid, lastCrawlId,
+						Gatherconf.CrawlerSelection.lav.toString(), crawldir,
+						new File(warcFilenameBase + ".warc.gz").getName());
+				play.Logger.info("WebpageVersion für " + pid + "wurde angelegt.");
+			} catch (Exception e) {
+				play.Logger.error(
+						"WebpageVersion für " + pid + " konnte nicht angelegt werden!");
+				play.Logger.error(e.getMessage(), e);
+				// throw new HttpArchiveException(500, e);
+			}
+
+			return getJsonResult(result);
 		});
 	}
 
