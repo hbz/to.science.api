@@ -295,6 +295,7 @@ public class FedoraFacade {
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8");
 			node.setObjectTimestamp(Globals.dateFormat.parse(objectTimestamp));
 		} catch (Exception e) {
+			// Datenstrom "objectTimestamp" muss nicht notwendigerweise vorhanden sein.
 		}
 	}
 
@@ -305,7 +306,7 @@ public class FedoraFacade {
 			node.setSeq(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
-			// datastream with name metadata is optional
+			// datastream with name seq is optional
 		}
 	}
 
@@ -316,7 +317,7 @@ public class FedoraFacade {
 			node.setTreeHtml(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
-			// datastream with name metadata is optional
+			// Datenstrom "tree" muss nicht notwendigerweise vorhanden sein.
 		}
 	}
 
@@ -327,7 +328,7 @@ public class FedoraFacade {
 			node.setConf(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
-			// datastream with name conf is optional
+			// Datenstrom "conf" muss nicht notwendigerweise vorhanden sein.
 		}
 	}
 

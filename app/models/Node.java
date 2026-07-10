@@ -335,6 +335,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Setze SeqFile
 	 * @param seqFile The absolutepath to a file that provides ordering
 	 *          information for the object's children
 	 */
@@ -343,6 +344,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Setze TreeFile
 	 * @param treeFile The absolutepath to a file that provides an html
 	 *          representation of the navigation tree
 	 */
@@ -648,6 +650,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Hole Seq-Datenstrom (Reihenfolge der Kind-Elemente)
 	 * @return the content of seq data stream in a string
 	 */
 	@JsonIgnore()
@@ -656,6 +659,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Hole TreeHtml
 	 * @return the content of tree_html data stream in a string
 	 */
 	@JsonIgnore()
@@ -664,6 +668,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Setze Seq-Datenstrom (Reihenfolge der Kind-Elemente)
 	 * @param seq data stream as string
 	 * @return this
 	 */
@@ -673,6 +678,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Setze TreeHtml
 	 * @param treeHtml data stream as string
 	 * @return this
 	 */
@@ -682,6 +688,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Setze Conf-Datenstrom (Crawler-Settings)
 	 * @param conf datastream as string
 	 * @return this
 	 */
@@ -691,6 +698,7 @@ public class Node implements java.io.Serializable {
 	}
 
 	/**
+	 * Hole Conf-Datenstrom (Crawler-Settings)
 	 * @return the content of conf datastream in a string
 	 */
 	@JsonIgnore()

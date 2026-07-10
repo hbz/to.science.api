@@ -733,6 +733,7 @@ public class Read extends RegalAction {
 	}
 
 	/**
+	 * Diese Methode holt einen Baum von einem Node und gibt ihn aus.
 	 * @author Ingolf Kuss
 	 * @date 2026-06-26
 	 * @param node the pid of the object
@@ -748,8 +749,8 @@ public class Read extends RegalAction {
 		} catch (Exception e) {
 			play.Logger.debug(
 					"Baum-HTML konnte nicht gelesen werden, pid = " + node.getPid());
-			return null;
 			// throw new HttpArchiveException(500, e);
+			return null;
 		}
 	}
 

@@ -418,27 +418,20 @@ public class MyController extends Controller {
 				try {
 					Node node = null;
 					if (pid != null) {
-						// play.Logger.debug("ReadMetadataAction Beginn readNode");
 						node = read.readNode(pid);
-						// play.Logger.debug("ReadMetadataAction Ende readNode");
 						Role role = Role.valueOf(ctx().session().get("role"));
-						// play.Logger.debug("ReadMetadataAction read role");
 						String publishScheme = node.getPublishScheme();
 						if (!readMetadata_accessIsAllowed(publishScheme, role)) {
 							return AccessDenied();
 						}
 					}
-					// play.Logger.debug("ReadMetadataAction Beginn node.exec(node)");
 					return ca.exec(node);
 				} catch (HttpArchiveException e) {
-					// play.Logger.debug("ReadMetadataAction caught
-					// HttpArchiveException");
 					if (request().accepts("text/html")) {
 						return HtmlMessage(new Message(e, e.getCode()));
 					}
 					return JsonMessage(new Message(e, e.getCode()));
 				} catch (HttpArchiveError e) {
-					// play.Logger.debug("ReadMetadataAction caught HttpArchiveError");
 					if (request().accepts("text/html")) {
 						return HtmlMessage(new Message(e, e.getCode()));
 					}

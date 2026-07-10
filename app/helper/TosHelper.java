@@ -243,15 +243,6 @@ public class TosHelper {
 			Elements octiconElems = doc.getElementsByClass("octicon");
 			octiconElems.remove();
 			// Remove all attributes "isHtml"
-			// Elements withAttrIsHtml = new Elements();
-			// for (Element element : doc.getAllElements()) {
-			// for (Attribute attribute : element.attributes()) {
-			// if (attribute.getValue().equalsIgnoreCase("isHtml")) {
-			// withAttrIsHtml.add(element);
-			// }
-			// }
-			// }
-			// withAttrIsHtml.removeAttr("ishtml");
 			doc.getAllElements().removeAttr("ishtml");
 			play.Logger.debug("Bereinigtes treeHtml: " + doc.html());
 			return doc.html();
