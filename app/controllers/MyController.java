@@ -437,7 +437,6 @@ public class MyController extends Controller {
 					}
 					return JsonMessage(new Message(e, e.getCode()));
 				} catch (Exception e) {
-					// play.Logger.debug("ReadMetadataAction caught general Exception");
 					if (request().accepts("text/html")) {
 						return HtmlMessage(new Message(e, 500));
 					}
