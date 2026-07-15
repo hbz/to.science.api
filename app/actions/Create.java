@@ -54,6 +54,7 @@ import models.Node;
 import models.ResearchDataResource;
 import models.ToScienceObject;
 import models.Gatherconf.CrawlSubdomains;
+import models.Gatherconf.CrawlerSelection;
 import models.Gatherconf.Interval;
 import models.Gatherconf.RobotsPolicy;
 import models.ToScienceObject.Provenience;
@@ -314,7 +315,11 @@ public class Create extends RegalAction {
 	 * 
 	 * @param n Der Knoten der Website
 	 * @param conf Die Gatherconf der Website
-	 * @param warcFilename der Dateiname der WARC-Datei, ohne die Endung .warc.gz
+	 * @param collection der Name des für diesen Crawl verwendeten Webcrawlers,
+	 *          wie er in outDir enthalten ist und in localDir enthalten sein
+	 *          soll. Daraus erfolgt die Zuordnung zu einer Collection in Wayback.
+	 * @param warcFilenameLocal der Dateiname der WARC-Datei, ohne die Endung
+	 *          .warc.gz
 	 * @param outDir Das Verzeichnis, in dem die endgültige, fertig gecrawlte
 	 *          Version des neuen Webschnitts liegt.
 	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
@@ -323,8 +328,9 @@ public class Create extends RegalAction {
 	 *          PID vom System vergeben.
 	 * @return Der Knoten der neuen Webpage-Version
 	 */
-	public Node createWebpageVersion(Node n, Gatherconf conf, String warcFilename,
-			File outDir, String localpath, String versionPid) {
+	public Node createWebpageVersion(Node n, Gatherconf conf, String collection,
+			String warcFilenameLocal, File outDir, String localpath,
+			String versionPid) {
 		try {
 			/* Das Label, das auf dem Link "Zum Webschnitt" angezeigt werden soll */
 			/*
@@ -346,8 +352,8 @@ public class Create extends RegalAction {
 					.withZoneSameInstant(ZoneOffset.UTC);
 			String owDatestamp =
 					DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(startdateUTC);
-			return createWebpageVersion(n, conf, warcFilename, outDir, localpath,
-					versionPid, label, owDatestamp);
+			return createWebpageVersion(n, conf, collection, warcFilenameLocal,
+					outDir, localpath, versionPid, label, owDatestamp);
 		} catch (Exception e) {
 			WebgatherLogger.warn("Anlage einer Webpage-Version zu PID,URL "
 					+ n.getPid() + "," + conf.getUrl()
@@ -363,7 +369,11 @@ public class Create extends RegalAction {
 	 * 
 	 * @param n must be of type webpage: Die Webpage
 	 * @param conf die Gatherconf zu der Webpage
-	 * @param warcFilename der Dateiname der WARC-Datei, ohne die Endung .warc.gz
+	 * @param collection der Name des für diesen Crawl verwendeten Webcrawlers,
+	 *          wie er in outDir enthalten ist und in localDir enthalten sein
+	 *          soll. Daraus erfolgt die Zuordnung zu einer Collection in Wayback.
+	 * @param warcFilenameLocal der Dateiname der WARC-Datei, ohne die Endung
+	 *          .warc.gz
 	 * @param outDir Das Verzeichnis, in dem die endgültige, fertig gecrawlte
 	 *          Version des neuen Webschnitts liegt.
 	 * @param localpath Die URI, unter der die Webpage-Version lokal gespeichert
@@ -377,9 +387,9 @@ public class Create extends RegalAction {
 	 *          Wayback, z.B. "20200728"
 	 * @return Der Knoten der neuen Webpage-Version
 	 */
-	public Node createWebpageVersion(Node n, Gatherconf conf, String warcFilename,
-			File outDir, String localpath, String versionPid, String label,
-			String owDatestamp) {
+	public Node createWebpageVersion(Node n, Gatherconf conf, String collection,
+			String warcFilenameLocal, File outDir, String localpath,
+			String versionPid, String label, String owDatestamp) {
 		try {
 			// Erzeuge ein Fedora-Objekt mit ungemanagtem Inhalt,
 			// das auf den entsprechenden WARC-Container zeigt.
@@ -417,10 +427,10 @@ public class Create extends RegalAction {
 			String waybackCollectionLink = null;
 			if (n.getAccessScheme().equals("public")) {
 				waybackCollectionLink = Play.application().configuration()
-						.getString("regal-api.wayback.weltweitLink");
+						.getString("regal-api.wayback.collection.public");
 			} else {
 				waybackCollectionLink = Play.application().configuration()
-						.getString("regal-api.wayback.lesesaalLink");
+						.getString("regal-api.wayback.collection." + collection);
 			}
 			conf.setOpenWaybackLink(
 					waybackCollectionLink + owDatestamp + "/" + conf.getUrl());
@@ -511,13 +521,14 @@ public class Create extends RegalAction {
 			String warcPath = warcDir.listFiles()[0].getAbsolutePath();
 			ApplicationLogger.debug("Path to WARC " + warcPath);
 			String uriPath = Globals.wget.getUriPath(warcPath);
-			String warcFilename = new File(warcPath).getName();
+			String warcFilenameLocal = new File(warcPath).getName();
 			ApplicationLogger.debug("WARC file name: " + warcFilename);
 			String localpath = Globals.wgetData + "/wget-data" + uriPath;
 			ApplicationLogger.debug("URI-Path to WARC " + localpath);
 
-			return createWebpageVersion(n, conf, warcFilename, crawlDir, localpath,
-					versionPid, label, crawlDateTimestamp);
+			return createWebpageVersion(n, conf, CrawlerSelection.wget.toString(),
+					warcFilenameLocal, crawlDir, localpath, versionPid, label,
+					crawlDateTimestamp);
 
 		} catch (Exception e) {
 			ApplicationLogger.error(
@@ -670,8 +681,9 @@ public class Create extends RegalAction {
 	 *          leer (Pid wird generiert)
 	 * @param lastCrawlId eine ID für diese Crawl, z.B. Browsertrix' last_crawl_id
 	 *          oder null
-	 * @param crawlerSelection der Name des für diesen Crawl verwendeten
-	 *          Webcrawlers gem. Aufzählung in der Klasse Gatherconf
+	 * @param collection der Name des für diesen Crawl verwendeten Webcrawlers,
+	 *          wie er in outDir enthalten ist und in localDir enthalten sein
+	 *          soll.
 	 * @param timestamp Der Zeitstempel des Crawl. Ist auch Name des
 	 *          Unterverzeichnisses für den Crawl. Aus dem Datum wird der
 	 *          Bezeichner (Label auf der UI) für den Webschnitt generiert.
@@ -680,7 +692,7 @@ public class Create extends RegalAction {
 	 * @return a new website version pointing to the posted crawl.
 	 */
 	public Node postWebpageVersion(Node n, String versionPid, String lastCrawlId,
-			String crawlerSelection, String timestamp, String filename) {
+			String collection, String timestamp, String filename) {
 		Gatherconf conf = null;
 		try {
 			if (!"webpage".equals(n.getContentType())) {
@@ -703,7 +715,7 @@ public class Create extends RegalAction {
 			ApplicationLogger.debug("Crawl Startdate: " + startDate);
 
 			String dataDir = Play.application().configuration()
-					.getString("regal-api." + crawlerSelection + ".outDir");
+					.getString("regal-api." + collection + ".outDir");
 			ApplicationLogger.debug("dataDir: " + dataDir);
 			// hier auf ein bestehendes WARC in dataDir verweisen
 			File outDir = new File(dataDir + "/" + conf.getName() + "/" + timestamp);
@@ -728,7 +740,7 @@ public class Create extends RegalAction {
 					filenameFound.replaceAll(".warc.gz$", "").replaceAll(".wacz$", "");
 			ApplicationLogger.debug("WARC file name base: " + warcFilenameBase);
 
-			return createWebpageVersion(n, conf, warcFilenameBase, outDir,
+			return createWebpageVersion(n, conf, collection, warcFilenameBase, outDir,
 					localDataUrl, versionPid);
 
 		} catch (Exception e) {

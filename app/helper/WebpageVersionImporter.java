@@ -187,8 +187,8 @@ public class WebpageVersionImporter extends Thread {
 			 * Anlegen einer lokalen WebpageVersion (FedoraObjekt); gleicher Aufruf
 			 * für alle Crawler
 			 */
-			create.createWebpageVersion(node, conf, warcFilename, localfile,
-					localDataUrl, versionPid);
+			create.createWebpageVersion(node, conf, conf.getCollection(),
+					warcFilename, localfile, localDataUrl, versionPid);
 
 			if (this.deleteQuellserverWebschnitt == true) {
 				/*

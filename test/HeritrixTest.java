@@ -51,8 +51,9 @@ public class HeritrixTest {
 						Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
 				String versionPid = null;
 				String warcFilename = new File(warcPath).getName();
-				Node webpageVersion = create.createWebpageVersion(webpage, conf,
-						warcFilename, crawlDir, localpath, versionPid);
+				Node webpageVersion =
+						create.createWebpageVersion(webpage, conf, conf.getCollection(),
+								warcFilename, crawlDir, localpath, versionPid);
 			}
 		});
 	}

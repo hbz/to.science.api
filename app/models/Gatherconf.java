@@ -27,7 +27,8 @@ import java.util.Date;
 
 import java.util.List;
 import java.util.Map.Entry;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Hashtable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -64,7 +65,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum CrawlerSelection {
-		heritrix, wpull, wget, btrix, lav
+		heritrix, wpull, wget, btrix
 	}
 
 	@SuppressWarnings("javadoc")
@@ -482,10 +483,37 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @return a localDir with information stored by heritrix
+	 * Getter für localDir
+	 * 
+	 * @return localDir: Das Verzeichnis, in dem die Webarchive physikalisch
+	 *         liegen und langzeitarchiviert sind.
 	 */
 	public String getLocalDir() {
 		return localDir;
+	}
+
+	/**
+	 * Diese Methode ermittelt eine Collection aus dem localDir
+	 * 
+	 * @author Ingolf Kuss
+	 * @data 2026-07-15
+	 * @return eine Collection = ein Cralwer-Name oder ein Kürzel für einen
+	 *         externen Einlieferer, falls nicht selber gecrawlt wurde.
+	 */
+	public String getCollection() {
+		String collection = "";
+		String regExp = "^.*/(.*)-data/.*$";
+		Pattern pattern = Pattern.compile(regExp);
+		Matcher matcher = pattern.matcher(this.localDir);
+		if (matcher.find()) {
+			collection = matcher.group(1);
+			play.Logger.debug("collection=" + collection);
+		} else {
+			throw new RuntimeException(
+					"Collection can not be determined from localDir \"" + this.localDir
+							+ "\"");
+		}
+		return collection;
 	}
 
 	/**

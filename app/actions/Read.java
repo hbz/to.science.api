@@ -64,6 +64,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
 import play.Logger;
+import play.Play;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
@@ -615,7 +616,9 @@ public class Read extends RegalAction {
 	}
 
 	/**
-	 * @param node
+	 * Liest Gatherconf von Node
+	 * 
+	 * @param node ein Node (Webpage oder Webschnitt)
 	 * @return a webgather configuration
 	 */
 	public String readConf(Node node) {
@@ -629,8 +632,10 @@ public class Read extends RegalAction {
 					|| conf.getOpenWaybackLink().isEmpty()) {
 				String owDatestamp =
 						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
-				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
-						+ "/" + conf.getUrl());
+				String collection = conf.getCollection();
+				conf.setOpenWaybackLink(Play.application().configuration()
+						.getString("regal-api.wayback.collection." + collection)
+						+ owDatestamp + "/" + conf.getUrl());
 			}
 			return conf.toString();
 		} catch (UrlConnectionException e) {

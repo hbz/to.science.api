@@ -213,7 +213,7 @@ public class Webhooks extends MyController {
 	 * @date 2026-07-07
 	 * @return
 	 */
-	public static Promise<Result> lavCrawlIngest() {
+	public static Promise<Result> externalCrawlIngest() {
 
 		return Promise.promise(() -> {
 
@@ -224,6 +224,9 @@ public class Webhooks extends MyController {
 			play.Logger.debug("LAV Crawl sent body: " + body);
 			String pid = body.findValue("pid").toString().replaceAll("^\"|\"$", "");
 			play.Logger.debug("webpage pid: " + pid);
+			String collection =
+					body.findValue("collection").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("collection: " + collection);
 			String crawldir =
 					body.findValue("crawldir").toString().replaceAll("^\"|\"$", "");
 			play.Logger.debug("crawldir: " + crawldir);
@@ -232,14 +235,14 @@ public class Webhooks extends MyController {
 			play.Logger.debug("warcFilenameBase: " + warcFilenameBase);
 
 			play.Logger.debug("Beginn erzeuge WebpageVersion für PID " + pid
-					+ ", Zeitstempel " + crawldir);
+					+ ",Collection: " + collection + ", Zeitstempel " + crawldir);
 			String versionPid = null;
 			Node result = null;
 			try {
 				Node n = new Read().readNode(pid);
 				String lastCrawlId = "";
 				result = new Create().postWebpageVersion(n, versionPid, lastCrawlId,
-						Gatherconf.CrawlerSelection.lav.toString(), crawldir,
+						collection, crawldir,
 						new File(warcFilenameBase + ".warc.gz").getName());
 				play.Logger.info("WebpageVersion für " + pid + " wurde angelegt.");
 			} catch (Exception e) {

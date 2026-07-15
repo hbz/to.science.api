@@ -83,7 +83,6 @@ regal-api.heritrix.outDir="/opt/toscience/heritrix-data"
 #--- importHome: diese Variable auf den angemounteten heritrix.home Pfad eines Testsystems setzen.
 regal-api.heritrix.importHome="/data-test/heritrix-data"
 regal-api.heritrix.dataUrl="https://localhost:8443"
-regal-api.heritrix.openwaybackLink="https://api.localhost/wayback/"
 regal-api.heritrix.crawlsPerNight=10
 
 #-------------wget --------------------------------
@@ -132,16 +131,22 @@ regal-api.btrix.outDir="/opt/toscience/btrix-data"
 #--- importHome: diese Variable auf den angemounteten btrix.outDir Pfad eines Testsystems setzen.
 regal-api.btrix.importHome="/data-test/btrix-data"
 
-#-----LAV-Crawls (Crawls vom Landesarchiv NRW)------
-# Hierhin werden die gelieferten LAV-Crawls gestellt:
-regal-api.lav.outDir="/opt/toscience/lav-data"
+# outDir's für weitere Crawler oder Institutionen:
+# regal-api.***.outDir="/opt/toscience/***-data"
+# ------- Add more ----
 
 #-------------CDN Gatherer--------------------------                            
 regal-api.cdntools.cdn="/opt/toscience/bin/cdn"
 
-#-------------Openwayback---------------------------
-regal-api.wayback.lesesaalLink="http://localhost:9080/wayback/"
-regal-api.wayback.weltweitLink="http://localhost:9080/weltweit/"
+#----------Openwayback-Collections-- ---------------
+regal-api.wayback.collection.wget="http://localhost:9080/wayback/"
+regal-api.wayback.collection.wpull="http://localhost:9080/wayback/"
+regal-api.wayback.collection.heritrix="http://localhost:9080/wayback/"
+regal-api.wayback.collection.btrix="http://localhost:9080/wayback/"
+regal-api.wayback.collection.public="http://localhost:9080/public/"
+#------ Collections für weitere Crawler oder Institutionen ----
+#regal-api.wayback.collection.***="http://localhost:9080/******/"
+#----------- Add more as needed --------------------
 
 #--------------------------------------------------
 #---             Forschungsdaten                ---

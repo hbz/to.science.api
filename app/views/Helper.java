@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -164,10 +166,16 @@ public class Helper {
 			String waybackCollectionLink = null;
 			if (node.getAccessScheme().equals("public")) {
 				waybackCollectionLink = Play.application().configuration()
-						.getString("regal-api.wayback.weltweitLink");
+						.getString("regal-api.wayback.collection.public");
 			} else {
+				/**
+				 * Die Collection bei nicht-öffentlichem Zugriff richtet sich nach dem
+				 * localDir (dieses enthält den Namen des Webcrawlers oder der
+				 * crawlenden Institution als Zuordnungsmerkmal zu einer Collection)
+				 */
+				String collection = conf.getCollection();
 				waybackCollectionLink = Play.application().configuration()
-						.getString("regal-api.wayback.lesesaalLink");
+						.getString("regal-api.wayback.collection." + collection);
 			}
 			play.Logger.debug("waybackCollectionLink=" + waybackCollectionLink);
 
@@ -203,9 +211,10 @@ public class Helper {
 			conf.setOpenWaybackLink(waybackLink);
 			return waybackLink;
 		} catch (Exception e) {
+			play.Logger
+					.error("Wayback Link for pid " + pid + " could not be generated!");
 			play.Logger.error("", e);
 			return "../" + pid;
-
 		}
 	}
 
