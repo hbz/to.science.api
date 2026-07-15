@@ -624,23 +624,30 @@ public class Read extends RegalAction {
 	public String readConf(Node node) {
 		try {
 			String confstring = node.getConf();
+			play.Logger.debug("confstring: " + confstring);
 			if (confstring == null)
 				return "";
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
 			if (conf.getOpenWaybackLink() == null
 					|| conf.getOpenWaybackLink().isEmpty()) {
+				play.Logger.debug("conf.openWaybackLink is empty");
 				String owDatestamp =
 						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+				play.Logger.debug("owDatestamp: " + owDatestamp);
 				String collection = conf.fetchCollection();
+				play.Logger.debug("collection: " + collection);
 				conf.setOpenWaybackLink(Play.application().configuration()
 						.getString("regal-api.wayback.collection." + collection)
 						+ owDatestamp + "/" + conf.getUrl());
 			}
 			return conf.toString();
 		} catch (UrlConnectionException e) {
+			play.Logger.error("Url Connection Exception", e);
 			throw new HttpArchiveException(404, e);
 		} catch (Exception e) {
+			play.Logger.error("Gatherconf for Node with pid " + node.getPid()
+					+ " could not be read!", e);
 			throw new HttpArchiveException(500, e);
 		}
 	}
