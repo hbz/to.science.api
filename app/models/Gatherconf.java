@@ -500,7 +500,7 @@ public class Gatherconf {
 	 * @return eine Collection = ein Cralwer-Name oder ein Kürzel für einen
 	 *         externen Einlieferer, falls nicht selber gecrawlt wurde.
 	 */
-	public String getCollection() {
+	public String fetchCollection() {
 		String collection = "";
 		String regExp = "^.*/(.*)-data/.*$";
 		Pattern pattern = Pattern.compile(regExp);

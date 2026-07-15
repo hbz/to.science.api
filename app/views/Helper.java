@@ -173,7 +173,7 @@ public class Helper {
 				 * localDir (dieses enthält den Namen des Webcrawlers oder der
 				 * crawlenden Institution als Zuordnungsmerkmal zu einer Collection)
 				 */
-				String collection = conf.getCollection();
+				String collection = conf.fetchCollection();
 				waybackCollectionLink = Play.application().configuration()
 						.getString("regal-api.wayback.collection." + collection);
 			}

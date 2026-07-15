@@ -1003,6 +1003,7 @@ public class Create extends RegalAction {
 			/*
 			 * Erzeuge eine Konfigurationsdatei für das Crawling (Gatherconf)
 			 */
+			ApplicationLogger.debug("Gatherconf: " + conf.toString());
 			conf.setUrl(WebgatherUtils.convertUnicodeURLToAscii(url));
 			conf.setName(node.getPid());
 			if (intervall == null || intervall.length() == 0) {
@@ -1022,6 +1023,7 @@ public class Create extends RegalAction {
 				conf.setCrawlSubdomains(CrawlSubdomains.domains);
 			}
 			// node.setConf(conf.toString()); braucht man das ?
+			ApplicationLogger.debug("modified Gatherconf: " + conf.toString());
 			new actions.Modify().updateConf(node, conf.toString());
 			// node = updateResource(node); braucht man das ?
 

@@ -52,7 +52,7 @@ public class HeritrixTest {
 				String versionPid = null;
 				String warcFilename = new File(warcPath).getName();
 				Node webpageVersion =
-						create.createWebpageVersion(webpage, conf, conf.getCollection(),
+						create.createWebpageVersion(webpage, conf, conf.fetchCollection(),
 								warcFilename, crawlDir, localpath, versionPid);
 			}
 		});

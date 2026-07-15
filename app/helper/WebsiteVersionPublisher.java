@@ -514,7 +514,7 @@ public class WebsiteVersionPublisher {
 			WebgatherLogger.debug("localDir=" + localDir);
 			String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
 			WebgatherLogger.debug("dateStamp=" + dateStamp);
-			String collection = conf.getCollection();
+			String collection = conf.fetchCollection();
 			WebgatherLogger.debug("collection=" + collection);
 			String url = conf.getUrl();
 			String publicOpenWaybackLink =
@@ -549,7 +549,7 @@ public class WebsiteVersionPublisher {
 			WebgatherLogger.debug("localDir=" + localDir);
 			String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
 			WebgatherLogger.debug("dateStamp=" + dateStamp);
-			String collection = conf.getCollection();
+			String collection = conf.fetchCollection();
 			WebgatherLogger.debug("collection=" + collection);
 			String url = conf.getUrl();
 			String openWaybackLink = new String(Play.application().configuration()

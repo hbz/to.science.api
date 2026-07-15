@@ -632,7 +632,7 @@ public class Read extends RegalAction {
 					|| conf.getOpenWaybackLink().isEmpty()) {
 				String owDatestamp =
 						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
-				String collection = conf.getCollection();
+				String collection = conf.fetchCollection();
 				conf.setOpenWaybackLink(Play.application().configuration()
 						.getString("regal-api.wayback.collection." + collection)
 						+ owDatestamp + "/" + conf.getUrl());
