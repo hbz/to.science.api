@@ -1387,6 +1387,7 @@ public class Resource extends MyController {
 	public static Promise<Result> createWebpage(
 			@PathParam("namespace") String namespace, @QueryParam("url") String url,
 			@QueryParam("title") String title,
+			@QueryParam("createdBy") String createdBy,
 			@QueryParam("interval") String intervall, @QueryParam("pid") String pid,
 			@QueryParam("crawlSubdomains") boolean crawlSubdomains) {
 		return new CreateAction().call(userId -> {
@@ -1395,8 +1396,8 @@ public class Resource extends MyController {
 				Gatherconf conf = MyController.mapper
 						.readValue(request().body().asJson().toString(), Gatherconf.class);
 				play.Logger.debug("Gatherconf created");
-				Node result = create.createWebpage(namespace, url, title, intervall,
-						pid, crawlSubdomains, conf);
+				Node result = create.createWebpage(namespace, url, title, createdBy,
+						intervall, pid, crawlSubdomains, conf);
 				response().setHeader("Location", read.getHttpUriOfResource(result));
 				return getJsonResult(result);
 			} catch (IOException e) {

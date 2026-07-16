@@ -973,6 +973,8 @@ public class Create extends RegalAction {
 	 * @param namespace Der Namensraum, in der die PID angelegt werden soll
 	 * @param url Die URL, die gesammelt werdn soll
 	 * @param title Der vorläufige Titel der Webpage
+	 * @param createdBy Eine Drupal-UserId (Klarname), die als Ersteller für diese
+	 *          Webpage angezeigt werden soll.
 	 * @param intervall Das Sammelintervall
 	 * @param pid Die PID (persistenter Identifier) für die Webpage. Falls null
 	 *          oder leer, wird ein neuer PID angelegt.
@@ -981,7 +983,8 @@ public class Create extends RegalAction {
 	 * @return Der modifizierte Node vom contentType webpage
 	 */
 	public Node createWebpage(String namespace, String url, String title,
-			String intervall, String pid, boolean crawlSubdomains, Gatherconf conf) {
+			String createdBy, String intervall, String pid, boolean crawlSubdomains,
+			Gatherconf conf) {
 		try {
 			ApplicationLogger.debug("Create Webpage for url: " + url + ", title: "
 					+ title + ", intervall: " + intervall + ", pid: " + pid);
@@ -989,6 +992,11 @@ public class Create extends RegalAction {
 			ToScienceObject object = new ToScienceObject();
 			object.setContentType("webpage");
 			object.setAccessScheme("restricted");
+			Provenience prov = object.getIsDescribedBy();
+			prov.setCreatedBy(createdBy);
+			prov.setName(conf.getName());
+			prov.setImportedFrom(conf.getUrl());
+			object.setIsDescribedBy(prov);
 			Node node = null;
 			if (pid == null || pid.length() == 0) {
 				node = createResource(namespace, object);
