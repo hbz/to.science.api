@@ -106,6 +106,7 @@ public class Create extends RegalAction {
 	 * @return the updated node
 	 */
 	public Node updateResource(Node node, ToScienceObject object) {
+		play.Logger.debug("BEGINN updateResource");
 		new Index().remove(node);
 		overrideNodeMembers(node, object);
 		return updateResource(node);
@@ -224,6 +225,7 @@ public class Create extends RegalAction {
 	}
 
 	private void overrideNodeMembers(Node node, ToScienceObject object) {
+		play.Logger.debug("object.getContentType: " + object.getContentType());
 		setNodeType(object.getContentType(), node);
 		node.setAccessScheme(object.getAccessScheme());
 		node.setPublishScheme(object.getPublishScheme());
@@ -231,6 +233,7 @@ public class Create extends RegalAction {
 			linkWithParent(object.getParentPid(), node);
 		}
 		if (object.getIsDescribedBy() != null) {
+			play.Logger.debug("Overriding object.getIsDescribedBy");
 			node.setCreatedBy(object.getIsDescribedBy().getCreatedBy());
 			node.setImportedFrom(object.getIsDescribedBy().getImportedFrom());
 			node.setLegacyId(object.getIsDescribedBy().getLegacyId());
