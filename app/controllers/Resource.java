@@ -470,6 +470,8 @@ public class Resource extends MyController {
 				String tosWithRoles = null;
 
 				play.Logger.debug("toscienceJson will be mapped");
+				play.Logger
+						.debug("request().body().asText(): " + request().body().asText());
 
 				Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode,
 						RDFFormat.NTRIPLES, request().body().asText());
