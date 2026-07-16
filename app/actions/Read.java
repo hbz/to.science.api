@@ -629,6 +629,30 @@ public class Read extends RegalAction {
 				return "";
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
+			if (node.getContentType().equals("version")
+					&& (conf.getOpenWaybackLink() == null
+							|| conf.getOpenWaybackLink().isEmpty())) {
+				play.Logger
+						.debug("conf.openWaybackLink is empty for WebpageVersion with pid "
+								+ node.getPid());
+				play.Logger.debug("Creating an openWaybackLink for the start date.");
+				String owDatestamp =
+						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
+				play.Logger.debug("owDatestamp: " + owDatestamp);
+				String collection = conf.fetchCollection();
+				if (collection == null || collection.isEmpty()) {
+					play.Logger.debug(
+							"Collection can not be determined. Creating an openWaybackLink in the standard collection (wpull)");
+					conf.setOpenWaybackLink(Play.application().configuration()
+							.getString("regal-api.wayback.collection.wpull") + owDatestamp
+							+ "/" + conf.getUrl());
+				} else {
+					play.Logger.debug("collection: " + collection);
+					conf.setOpenWaybackLink(Play.application().configuration()
+							.getString("regal-api.wayback.collection." + collection)
+							+ owDatestamp + "/" + conf.getUrl());
+				}
+			}
 			return conf.toString();
 		} catch (UrlConnectionException e) {
 			play.Logger.error("Url Connection Exception", e);

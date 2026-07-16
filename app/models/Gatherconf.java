@@ -504,6 +504,11 @@ public class Gatherconf {
 		String collection = "";
 		String regExp = "^.*/(.*)-data/.*$";
 		Pattern pattern = Pattern.compile(regExp);
+		if (this.localDir == null || this.localDir.isEmpty()) {
+			throw new RuntimeException(
+					"Collection can not be determined from localDir \"" + this.localDir
+							+ "\"");
+		}
 		Matcher matcher = pattern.matcher(this.localDir);
 		if (matcher.find()) {
 			collection = matcher.group(1);
