@@ -100,6 +100,7 @@ regal-api.restrictedweb.dataDir="/data/restrictedweb"
 regal-api.restrictedweb.dataUrl="http://localhost/restrictedweb"
 
 #-------------wpull (Crawler)-----------------------                            
+regal-api.start_and_disconnect="/opt/toscience/bin/start_and_disconnect.sh"
 regal-api.wpull.crawler="/usr/local/bin/wpull3"
 # Das Arbeitsverzeichnis für die CDN-Precrawls:
 regal-api.wpull.jobDir="/opt/toscience/cdn-data"

@@ -46,7 +46,8 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.dataformat" %"jackson-dataformat-xml" %"2.6.3",
   "javax.mail" % "mail" % "1.4.2",
   "org.apache.lucene" % "lucene-core" % "4.7.2",  
-  "mysql" % "mysql-connector-java" % "8.0.23"
+  "mysql" % "mysql-connector-java" % "8.0.23",
+  "org.jsoup" % "jsoup" % "1.18.3"
 )
 
 val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)

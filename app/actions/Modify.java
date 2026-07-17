@@ -179,6 +179,48 @@ public class Modify extends RegalAction {
 	}
 
 	/**
+	 * Updates the HTML representation of a tree view.
+	 * 
+	 * @author Ingolf Kuss
+	 * @date 2026-06-23
+	 * 
+	 * @param pid the node's pid
+	 * @param content the tree in the format text/html
+	 * @return a message
+	 */
+	public String updateTree(String pid, String content) {
+		try {
+			if (content == null) {
+				throw new HttpArchiveException(406,
+						pid + " You've tried to upload an empty string."
+								+ " This action is not supported."
+								+ " Use HTTP DELETE instead.\n");
+			}
+			play.Logger.info("Write tree html to fedora \n\t" + content);
+			/**
+			 * Aus dem HTML müssen alle Elemente entfernt werden, die class="...
+			 * octicon ..." haben. Außerdem sollten alle Attribute "isHtml" entfernt
+			 * werden.
+			 */
+			String treeHtml = new TosHelper().cleanupTreeHtml(content);
+			File file = CopyUtils.copyStringToFile(treeHtml);
+			Node node = new Read().readNode(pid);
+			if (node != null) {
+				play.Logger.debug("Setting tree file " + file.getAbsolutePath());
+				node.setTreeFile(file.getAbsolutePath());
+				Globals.fedora.updateNode(node);
+			}
+			// durch den updateIndex wird auch der Node im Cache aktualisiert.
+			updateIndex(node.getPid());
+			return pid + " tree html representation updated!";
+		} catch (RdfException e) {
+			throw new HttpArchiveException(400, e);
+		} catch (IOException e) {
+			throw new UpdateNodeException(e);
+		}
+	}
+
+	/**
 	 * @param pid The pid that must be updated
 	 * @param content The metadata as rdf string
 	 * @return a short message
@@ -219,7 +261,7 @@ public class Modify extends RegalAction {
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(String pid,
 			int embargoDuration, String deepgreenId, RDFFormat format,
-			Document content) {
+			org.w3c.dom.Document content) {
 		try {
 			Node node = new Read().readNode(pid);
 			return updateLobidify2AndEnrichDeepGreenData(node, embargoDuration,
@@ -299,8 +341,8 @@ public class Modify extends RegalAction {
 				String toscienceMetadata =
 						TosHelper.getToPersistTosMd(allMetadata.toString(), pid);
 
-				toscienceJson = TosHelper
-						.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
+				toscienceJson =
+						TosHelper.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
 				if (Helper.mdStreamExists(pid, "ktbl")) {
 					toscienceJson = TosHelper.getPrefLabelsResolved(new JSONObject(
@@ -352,7 +394,7 @@ public class Modify extends RegalAction {
 	 */
 	public String updateLobidify2AndEnrichDeepGreenData(Node node,
 			int embargoDuration, String deepgreenId, RDFFormat format,
-			Document content) {
+			org.w3c.dom.Document content) {
 
 		try {
 			play.Logger.debug("Start updateLobidify2AndEnrichDeepGreenData");
