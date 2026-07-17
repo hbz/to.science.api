@@ -1688,13 +1688,13 @@ public class Resource extends MyController {
 			@PathParam("pid") String pid) {
 		return new ModifyAction().call(pid, node -> {
 
-			play.Logger.debug("*****uploadUpdateMetadata has been called*****");
+			play.Logger.debug("START uploadUpdateMetadata");
 			try {
 				Node readNode = readNodeOrNull(pid);
 				JSONObject tosJson = null;
 				String result1 = null, result2 = null, result3 = null, content = null;
 				LinkedHashMap<String, Object> rdf = null;
-				String conType = readNode.getContentType();
+				String contentType = readNode.getContentType();
 
 				MultipartFormData body = request().body().asMultipartFormData();
 				if (body == null) {
@@ -1706,70 +1706,84 @@ public class Resource extends MyController {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
 
-				if (!conType.contains("file") && !conType.contains("part")) {
-					content = KTBLMapperHelper.getFileData(data);
+				if (contentType.contains("file") || contentType.contains("part")) {
+					return JsonMessage(new Message(
+							"files and parts are not applicable for upload metadata.", 400));
+				}
 
-					if (!TosHelper.isValidJson(content)) {
-						play.Logger.debug("Invalid content");
-						return (Result) JsonMessage(new Message("Invalid content", 400));
-					}
+				content = TosHelper.getFileData(data);
 
-					// Monographs
-					if ("monograph".equals(conType)) {
-						tosJson =
-								TosHelper.getLobidMonographAsJson(content, readNode.getPid());
+				if (!TosHelper.isValidJson(content)) {
+					play.Logger.debug("Invalid content");
+					return (Result) JsonMessage(new Message("Invalid content", 400));
+				}
 
-						if (tosJson == null) {
-							play.Logger.debug("Invalid" + conType + " MD");
-							return (Result) JsonMessage(new Message("Invalid MD", 400));
-						}
-
-						tosJson = TosHelper.validateJsonStructure(tosJson, readNode);
-						tosJson = TosHelper.getPrefLabelsResolved(tosJson);
-						result1 = modify.updateMetadata("toscience", readNode,
-								tosJson.toString());
-
-						// KTBL, Article and ResearchData
-					} else {
-						content = TosHelper.updateConent(content);
-						if (content == null || !TosHelper.isValidJson(content)) {
-							play.Logger.debug("Invalid" + conType + " MD");
-							return (Result) JsonMessage(new Message("Invalid MD", 400));
-						}
-
-						// Data streams (Persist or update)
-
-						/**
-						 * toscience
-						 */
-						String tosMd =
-								TosHelper.getToPersistTosMd(content, readNode.getPid());
-						tosJson = new JSONObject(tosMd);
-						tosJson = TosHelper.getPrefLabelsResolved(tosJson);
-						result1 = modify.updateMetadata("toscience", readNode,
-								tosJson.toString());
-					}
-
-					/**
-					 * KTBL
+				/**
+				 * toscience
+				 */
+				if (contentType.equals("article") || contentType.equals("researchData")
+						|| contentType.equals("ktbl")) {
+					/*
+					 * Das scheint mir speziell für diese Content Types zu sein, und damit
+					 * speziell für frl
 					 */
-					if (KTBLMapperHelper.containsKtblBlock(content)) {
-						String ktblMd =
-								KTBLMapperHelper.getToPersistKtblMd(content, readNode.getPid());
-						result2 = modify.updateMetadata("ktbl", readNode, ktblMd);
+					content = TosHelper.updateConent(content);
+
+					if (content == null || !TosHelper.isValidJson(content)) {
+						play.Logger.debug("Invalid" + contentType + " MD");
+						return (Result) JsonMessage(new Message("Invalid MD", 400));
 					}
 
-					/**
-					 * Metadata2
-					 */
-					rdf = Metadata2Helper.getRdfFromTos(tosJson, readNode);
-					String rdfMd = modify.rdfToString(
-							(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
-					result3 = modify.updateMetadata("metadata2", readNode, rdfMd);
-					Enrich.enrichMetadata2(readNode);
+					// Data streams (Persist or update)
+
+					String tosMd =
+							TosHelper.getToPersistTosMd(content, readNode.getPid());
+					tosJson = new JSONObject(tosMd);
+
+				} else {
+					// Standard-Behandlung, für alle anderen Content Types
+
+					tosJson =
+							TosHelper.getLobidMonographAsJson(content, readNode.getPid());
+
+					if (tosJson == null) {
+						play.Logger.debug("Invalid" + contentType + " MD");
+						return (Result) JsonMessage(new Message("Invalid MD", 400));
+					}
+
+					tosJson = TosHelper.validateJsonStructure(tosJson, readNode);
 
 				}
-				return JsonMessage(new Message(result1 + result2 + result3));
+
+				tosJson = TosHelper.getPrefLabelsResolved(tosJson);
+				result1 =
+						modify.updateMetadata("toscience", readNode, tosJson.toString());
+
+				/**
+				 * KTBL
+				 */
+				if (KTBLMapperHelper.containsKtblBlock(content)) {
+					String ktblMd =
+							KTBLMapperHelper.getToPersistKtblMd(content, readNode.getPid());
+					result2 = modify.updateMetadata("ktbl", readNode, ktblMd);
+				}
+
+				/**
+				 * Metadata2
+				 */
+				rdf = Metadata2Helper.getRdfFromTos(tosJson, readNode);
+				String rdfMd = modify.rdfToString(
+						(Map<String, Object>) rdf.get("metadata2"), RDFFormat.NTRIPLES);
+				result3 = modify.updateMetadata("metadata2", readNode, rdfMd);
+				Enrich.enrichMetadata2(readNode);
+
+				String msg = result1;
+				if (result2 != null)
+					msg = msg + result2;
+				if (result3 != null)
+					msg = msg + result3;
+				return JsonMessage(new Message(msg));
+
 			} catch (Exception e) {
 				throw new HttpArchiveException(500, e);
 			}

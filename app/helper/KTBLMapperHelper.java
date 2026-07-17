@@ -23,45 +23,6 @@ import org.json.JSONArray;
 public class KTBLMapperHelper {
 
 	/**
-	 * This method gets the content of a FilePart(Json File) and returns it as a
-	 * string
-	 * 
-	 * @param fp
-	 * @return the content of the file as a string
-	 */
-	static public String getFileData(FilePart fp) {
-		StringBuilder ktblMetadata = null;
-		BufferedReader br = null;
-
-		try {
-			ktblMetadata = new StringBuilder();
-			if (fp != null) {
-				File file = (File) fp.getFile();
-				br = new BufferedReader(new FileReader(file));
-				String line;
-				while ((line = br.readLine()) != null) {
-					ktblMetadata.append(line);
-				}
-			}
-		} catch (FileNotFoundException e) {
-			play.Logger.debug("Exception in getFileData(), File not found");
-			return null;
-		} catch (IOException e) {
-			play.Logger.debug("Exception in getFileData()" + e);
-			return null;
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-		play.Logger.debug("ktblMetadata.toString()=" + ktblMetadata.toString());
-		return ktblMetadata.toString();
-	}
-
-	/**
 	 * The method gets the required KTBL metadata from the json file and returns
 	 * it as a string
 	 * 

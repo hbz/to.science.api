@@ -7,6 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +29,8 @@ import models.Node;
 import java.util.stream.Collectors;
 import org.json.JSONException;
 import play.Play;
+import play.mvc.Http.MultipartFormData.FilePart;
+
 import org.eclipse.rdf4j.rio.RDFFormat;
 import views.Helper;
 
@@ -1581,4 +1588,44 @@ public class TosHelper {
 	public static boolean isLike(JSONObject j1, JSONObject j2) {
 		return j1.toString().equals(j2.toString());
 	}
+
+	/**
+	 * This method gets the content of a FilePart (Json File) and returns it as a
+	 * string
+	 * 
+	 * @param fp a FilePart
+	 * @return the content of the file as a string
+	 */
+	static public String getFileData(FilePart fp) {
+		StringBuilder metadata = null;
+		BufferedReader br = null;
+
+		try {
+			metadata = new StringBuilder();
+			if (fp != null) {
+				File file = (File) fp.getFile();
+				br = new BufferedReader(new FileReader(file));
+				String line;
+				while ((line = br.readLine()) != null) {
+					metadata.append(line);
+				}
+			}
+		} catch (FileNotFoundException e) {
+			play.Logger.debug("Exception in getFileData(), File not found");
+			return null;
+		} catch (IOException e) {
+			play.Logger.debug("Exception in getFileData()" + e);
+			return null;
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		play.Logger.debug("metadata.toString()=" + metadata.toString());
+		return metadata.toString();
+	}
+
 }
