@@ -1721,12 +1721,22 @@ public class Resource extends MyController {
 				/**
 				 * toscience
 				 */
-				if (contentType.equals("article") || contentType.equals("researchData")
-						|| contentType.equals("ktbl")) {
-					/*
-					 * Das scheint mir speziell für diese Content Types zu sein, und damit
-					 * speziell für frl
-					 */
+				if (contentType.equals("monograph") || contentType.equals("journal")
+						|| contentType.equals("webpage")) {
+
+					tosJson =
+							TosHelper.getLobidMonographAsJson(content, readNode.getPid());
+
+					if (tosJson == null) {
+						play.Logger.debug("Invalid" + contentType + " MD");
+						return (Result) JsonMessage(new Message("Invalid MD", 400));
+					}
+
+					tosJson = TosHelper.validateJsonStructure(tosJson, readNode);
+
+				} else {
+					/* z.B. Article, researchData, ktbl, WebsiteVersion */
+
 					content = TosHelper.updateConent(content);
 
 					if (content == null || !TosHelper.isValidJson(content)) {
@@ -1739,19 +1749,6 @@ public class Resource extends MyController {
 					String tosMd =
 							TosHelper.getToPersistTosMd(content, readNode.getPid());
 					tosJson = new JSONObject(tosMd);
-
-				} else {
-					// Standard-Behandlung, für alle anderen Content Types
-
-					tosJson =
-							TosHelper.getLobidMonographAsJson(content, readNode.getPid());
-
-					if (tosJson == null) {
-						play.Logger.debug("Invalid" + contentType + " MD");
-						return (Result) JsonMessage(new Message("Invalid MD", 400));
-					}
-
-					tosJson = TosHelper.validateJsonStructure(tosJson, readNode);
 
 				}
 
