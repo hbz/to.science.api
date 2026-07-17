@@ -1706,7 +1706,8 @@ public class Resource extends MyController {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
 
-				if (contentType.contains("file") || contentType.contains("part")) {
+				if (contentType.contains("file") || contentType.contains("part")
+						|| contentType.contains("version")) {
 					return JsonMessage(new Message(
 							"files and parts are not applicable for upload metadata.", 400));
 				}
@@ -1735,7 +1736,7 @@ public class Resource extends MyController {
 					tosJson = TosHelper.validateJsonStructure(tosJson, readNode);
 
 				} else {
-					/* z.B. Article, researchData, ktbl, WebsiteVersion */
+					/* article, researchData, ktbl */
 
 					content = TosHelper.updateConent(content);
 
