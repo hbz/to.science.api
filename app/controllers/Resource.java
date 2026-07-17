@@ -600,7 +600,7 @@ public class Resource extends MyController {
 				 * 1.KTBL(Json)***************************************
 				 */
 
-				String content = KTBLMapperHelper.getFileData(data);
+				String content = TosHelper.getFileData(data);
 
 				if (KTBLMapperHelper.containsKtblBlock(content)) {
 					play.Logger.debug("Starting KTBL Mapping");
