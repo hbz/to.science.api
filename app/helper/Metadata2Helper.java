@@ -166,7 +166,7 @@ public class Metadata2Helper {
 			}
 
 			if (jo.has("abstractText")) {
-				currentKey = "abstracttext";
+				currentKey = "abstractText";
 				rdf.put("abstractText",
 						getQuotedValues(jo.get("abstractText").toString()));
 			}

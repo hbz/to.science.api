@@ -1694,31 +1694,34 @@ public class Resource extends MyController {
 				JSONObject tosJson = null;
 				String result1 = null, result2 = null, result3 = null, content = null;
 				LinkedHashMap<String, Object> rdf = null;
-				MultipartFormData body = request().body().asMultipartFormData();
-				FilePart data = body.getFile("data");
+				String conType = readNode.getContentType();
 
+				MultipartFormData body = request().body().asMultipartFormData();
+				if (body == null) {
+					return (Result) JsonMessage(new Message("Invalid request", 400));
+				}
+
+				FilePart data = body.getFile("data");
 				if (data == null) {
 					return (Result) JsonMessage(new Message("Missing File.", 400));
 				}
 
-				if (!readNode.getContentType().contains("file")
-						&& !readNode.getContentType().contains("part")) {
+				if (!conType.contains("file") && !conType.contains("part")) {
 					content = KTBLMapperHelper.getFileData(data);
 
-					// play.Logger.debug("uploadUpdateMetadata received content=" +
-					// content);
-
-					if (TosHelper.isValidJson(content) == false) {
-						play.Logger.debug("Invalid JSON structure or no content provided.");
+					if (!TosHelper.isValidJson(content)) {
+						play.Logger.debug("Invalid content");
+						return (Result) JsonMessage(new Message("Invalid content", 400));
 					}
 
 					// Monographs
-					if ("monograph".equals(readNode.getContentType())) {
+					if ("monograph".equals(conType)) {
 						tosJson =
 								TosHelper.getLobidMonographAsJson(content, readNode.getPid());
+
 						if (tosJson == null) {
-							play.Logger
-									.debug("Invalid monograph metadata or no content provided");
+							play.Logger.debug("Invalid" + conType + " MD");
+							return (Result) JsonMessage(new Message("Invalid MD", 400));
 						}
 
 						tosJson = TosHelper.validateJsonStructure(tosJson, readNode);
@@ -1729,10 +1732,12 @@ public class Resource extends MyController {
 						// KTBL, Article and ResearchData
 					} else {
 						content = TosHelper.updateConent(content);
-						if (content == null || TosHelper.isValidJson(content) == false) {
-							play.Logger
-									.debug("Invalid JSON structure or no content provided");
+						if (content == null || !TosHelper.isValidJson(content)) {
+							play.Logger.debug("Invalid" + conType + " MD");
+							return (Result) JsonMessage(new Message("Invalid MD", 400));
 						}
+
+						// Data streams (Persist or update)
 
 						/**
 						 * toscience

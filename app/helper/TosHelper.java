@@ -1497,8 +1497,9 @@ public class TosHelper {
 
 		allMd = TosHelper.getPrefLabelsResolved(allMd);
 
-		if (!original.similar(allMd)) {
+		if (!isLike(original, allMd)) {
 			modify.updateMetadata("toscience", node, allMd.toString());
+			// Refresh json2 after the toscience datastream was normalized.
 			node.getLd2();
 		}
 	}
@@ -1537,7 +1538,7 @@ public class TosHelper {
 	/**
 	 * This method is an extension of the `persistAndNormalizeToScienceMetadata`
 	 * method. It handles child objects if they exist.
-	 * 
+	 *
 	 * @param pid
 	 * @param node
 	 */
@@ -1575,5 +1576,9 @@ public class TosHelper {
 	public static void persistAndNormalizeToscienceMetadataWithParts(String pid,
 			Node node) {
 		ensureTosMdForRead(pid, node);
+	}
+
+	public static boolean isLike(JSONObject j1, JSONObject j2) {
+		return j1.toString().equals(j2.toString());
 	}
 }

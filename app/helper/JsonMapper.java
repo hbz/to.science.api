@@ -1145,12 +1145,21 @@ public class JsonMapper {
 				rdf.remove("joinedFunding");
 			}
 			if (!rdf.containsKey("almaMmsId") && jo.has("almaMmsId")) {
-				JSONArray almaMmsIds = jo.getJSONArray("almaMmsId");
+				JSONArray almaMmsIds = jo.optJSONArray("almaMmsId");
 				List<String> values = new ArrayList<>();
-				for (int i = 0; i < almaMmsIds.length(); i++) {
-					values.add(String.valueOf(almaMmsIds.get(i)));
+				if (almaMmsIds != null) {
+					for (int i = 0; i < almaMmsIds.length(); i++) {
+						values.add(String.valueOf(almaMmsIds.get(i)));
+					}
+				} else {
+					String value = jo.optString("almaMmsId").trim();
+					if (!value.isEmpty()) {
+						values.add(value);
+					}
 				}
-				rdf.put("almaMmsId", values);
+				if (!values.isEmpty()) {
+					rdf.put("almaMmsId", values);
+				}
 			}
 
 			// According to Lara(ZBMED), publicationYear must be removed at monographs
