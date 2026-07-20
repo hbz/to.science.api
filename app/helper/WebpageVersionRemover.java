@@ -66,11 +66,25 @@ public class WebpageVersionRemover extends Thread {
 		try {
 			conf = Gatherconf.create(node.getConf());
 			localpath = conf.getLocalDir();
+			File localpathFileObj = new File(localpath);
 			WebgatherLogger.debug("Lösche Verzeichnis: " + localpath);
 			FileUtils.deleteDirectory(new File(localpath));
 			WebgatherLogger.info(
 					"Verzeichnis wurde samt Inhalt und Unterverzeichnissen gelöscht: "
 							+ localpath);
+			/*
+			 * Falls ein Webarchiv gelöscht wurde, muss auch die CDX-Datei im
+			 * darüberliegenden Verzeichnis gelöscht werden, damit beim nächsten Crawl
+			 * wieder alles von vorne eingesammelt wird.
+			 */
+			// Code-Zeile übernommen aus Create.createWebpageVersion() :
+			File cdxFileSave = new File(localpathFileObj.getParent() + "/WEB-"
+					+ WebgatherUtils.getDomain(conf.getUrl()) + ".cdx");
+			if (cdxFileSave.exists()) {
+				cdxFileSave.delete();
+				WebgatherLogger
+						.debug("CDX-Datei " + cdxFileSave.toString() + " gelöscht.");
+			}
 		} catch (Exception e) {
 			WebgatherLogger.error(e.toString());
 			throw new RuntimeException("WebpageVersion's " + node.getPid()
