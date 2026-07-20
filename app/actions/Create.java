@@ -412,7 +412,7 @@ public class Create extends RegalAction {
 				webpageVersion = createResource(n.getNamespace(), regalObject);
 			}
 
-			new Modify().updateLobidifyAndEnrichMetadata(webpageVersion,
+			new Modify().updateLobidify2AndEnrichMetadata(webpageVersion,
 					"<" + webpageVersion.getPid()
 							+ "> <http://purl.org/dc/terms/title> \"" + label + "\" .");
 			if (localpath != null) {

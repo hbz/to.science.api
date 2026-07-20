@@ -118,9 +118,6 @@ import views.Helper;
 @SuppressWarnings("javadoc")
 public class Resource extends MyController {
 
-	private static final Logger.ALogger WebgatherLogger =
-			Logger.of("webgatherer");
-
 	@ApiOperation(produces = "application/json", nickname = "listUrn", value = "listUrn", notes = "Returns infos about urn", httpMethod = "GET")
 	public static Promise<Result> listUrn(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, (Node node) -> {
@@ -697,13 +694,9 @@ public class Resource extends MyController {
 			@QueryParam("keepWebarchives") boolean keepWebarchives,
 			@QueryParam("purge") boolean purge) {
 		return new BulkActionAccessor().call((userId) -> {
-			WebgatherLogger
-					.debug("delete Resource: keepWebarchives: " + keepWebarchives);
 			List<Node> list = Globals.fedora.listComplexObject(pid);
 			for (Node n : list) {
 				n.setKeepWebarchives(keepWebarchives);
-				WebgatherLogger.debug("PID, n.getKeepWebarchives: " + n.getPid() + ", "
-						+ n.getKeepWebarchives());
 			}
 			BulkAction bulk = new BulkAction();
 			bulk.executeOnNodes(list, userId, nodes -> {
