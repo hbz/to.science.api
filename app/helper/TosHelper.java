@@ -354,7 +354,8 @@ public class TosHelper {
 				normalizeLobidArray(lobid.optJSONArray("medium")));
 		putIfNotEmpty(mapped, "natureOfContent",
 				normalizeLobidArray(lobid.optJSONArray("natureOfContent")));
-		putIfNotEmpty(mapped, "license", mapLicensesFromDescribedBy(lobid));
+		putIfNotEmpty(mapped, "license",
+				normalizeLobidArray(lobid.optJSONArray("license")));
 		putIfNotEmpty(mapped, "rdftype",
 				mapMonographRdfTypes(lobid.optJSONArray("type")));
 		putIfNotEmpty(mapped, "catalogLink", mapCatalogLinks(lobid));
