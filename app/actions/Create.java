@@ -1009,8 +1009,8 @@ public class Create extends RegalAction {
 			/* Erzeuge Metadaten mit einem Titel */
 			new actions.Modify().updateLobidify2AndEnrichMetadata(node, "<"
 					+ node.getPid()
-					+ "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/lobid/lv#ArchivedWebPage> ."
-					+ " " + "<" + node.getPid() + "> <http://purl.org/dc/terms/title> \""
+					+ "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/lobid/lv#ArchivedWebPage> .\n"
+					+ "<" + node.getPid() + "> <http://purl.org/dc/terms/title> \""
 					+ title + "\" .");
 
 			/*
