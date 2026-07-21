@@ -1007,9 +1007,11 @@ public class Create extends RegalAction {
 					.debug("INFO Webpage mit PID " + node.getPid() + " erzeugt.");
 
 			/* Erzeuge Metadaten mit einem Titel */
-			new actions.Modify().updateLobidify2AndEnrichMetadata(node,
-					"<" + node.getPid() + "> <http://purl.org/dc/terms/title> \"" + title
-							+ "\" .");
+			new actions.Modify().updateLobidify2AndEnrichMetadata(node, "<"
+					+ node.getPid()
+					+ "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/lobid/lv#ArchivedWebPage> ."
+					+ " " + "<" + node.getPid() + "> <http://purl.org/dc/terms/title> \""
+					+ title + "\" .");
 
 			/*
 			 * Erzeuge eine Konfigurationsdatei für das Crawling (Gatherconf)
