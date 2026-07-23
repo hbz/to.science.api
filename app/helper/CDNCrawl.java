@@ -29,6 +29,8 @@ public class CDNCrawl extends Thread {
 	private Thread mainCrawl = null;
 	private boolean wait = false;
 
+	final static private String start_and_disconnect = Play.application()
+			.configuration().getString("regal-api.start_and_disconnect");
 	final static private String cdn =
 			Play.application().configuration().getString("regal-api.cdntools.cdn");
 
@@ -101,8 +103,8 @@ public class CDNCrawl extends Thread {
 					waitParam = "wait=0";
 				}
 			}
-			String executeCommand = new String(cdn + " " + crawlerModel.getUrlAscii()
-					+ " " + crawlerModel.getWarcFilename());
+			String executeCommand = new String(start_and_disconnect + " " + cdn + " "
+					+ crawlerModel.getUrlAscii() + " " + crawlerModel.getWarcFilename());
 			AgentIdSelection agentId = conf.getAgentIdSelection();
 			executeCommand =
 					executeCommand.concat(" " + Gatherconf.agentTable.get(agentId));

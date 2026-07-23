@@ -225,6 +225,9 @@ public class FedoraFacade {
 			if (node.getSeqFile() != null) {
 				utils.createSeqStream(node);
 			}
+			if (node.getTreeFile() != null) {
+				utils.createTreeStream(node);
+			}
 			if (node.getConfFile() != null) {
 				utils.createConfStream(node);
 			}
@@ -276,6 +279,7 @@ public class FedoraFacade {
 		getMetadataFromFedora(metadata2, node);
 		getMetadataFromFedora(toscience, node);
 		getDataFromFedora(pid, node);
+		getTreeFromFedora(pid, node);
 		getConfFromFedora(pid, node);
 		getUrlHistFromFedora(pid, node);
 		getObjectTimestampFromFedora(node);
@@ -291,6 +295,7 @@ public class FedoraFacade {
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8");
 			node.setObjectTimestamp(Globals.dateFormat.parse(objectTimestamp));
 		} catch (Exception e) {
+			// Datenstrom "objectTimestamp" muss nicht notwendigerweise vorhanden sein.
 		}
 	}
 
@@ -301,7 +306,18 @@ public class FedoraFacade {
 			node.setSeq(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
-			// datastream with name metadata is optional
+			// datastream with name seq is optional
+		}
+	}
+
+	private void getTreeFromFedora(String pid, Node node) {
+		try {
+			FedoraResponse response =
+					new GetDatastreamDissemination(pid, "tree").execute();
+			node.setTreeHtml(
+					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
+		} catch (Exception e) {
+			// Datenstrom "tree" muss nicht notwendigerweise vorhanden sein.
 		}
 	}
 
@@ -312,7 +328,7 @@ public class FedoraFacade {
 			node.setConf(
 					CopyUtils.copyToString(response.getEntityInputStream(), "utf-8"));
 		} catch (Exception e) {
-			// datastream with name conf is optional
+			// Datenstrom "conf" muss nicht notwendigerweise vorhanden sein.
 		}
 	}
 
@@ -407,6 +423,9 @@ public class FedoraFacade {
 
 		if (node.getSeqFile() != null) {
 			utils.updateSeqStream(node);
+		}
+		if (node.getTreeFile() != null) {
+			utils.updateTreeStream(node);
 		}
 		if (node.getConfFile() != null) {
 			play.Logger.info("Write conf file to fedora");

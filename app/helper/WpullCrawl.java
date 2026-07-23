@@ -47,6 +47,8 @@ import org.apache.commons.io.FileUtils;
  */
 public class WpullCrawl extends CrawlerModel {
 
+	final static String start_and_disconnect = Play.application().configuration()
+			.getString("regal-api.start_and_disconnect");
 	final static String crawler =
 			Play.application().configuration().getString("regal-api.wpull.crawler");
 	final static String tempJobDir = Play.application().configuration()
@@ -217,7 +219,7 @@ public class WpullCrawl extends CrawlerModel {
 	 */
 	private String buildExecCommand() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(crawler + " " + getUrlAscii());
+		sb.append(start_and_disconnect + " " + crawler + " " + getUrlAscii());
 
 		if (getConf().getCookie() != null && !getConf().getCookie().isEmpty()) {
 			sb.append(" --header=Cookie:%20"

@@ -450,6 +450,17 @@ public class Resource extends MyController {
 		});
 	}
 
+	@ApiOperation(produces = "application/json", nickname = "updateTree", value = "updateTree", notes = "Updates the HTML representation of a a tree view.", response = Message.class, httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
+	public static Promise<Result> updateTree(@PathParam("pid") String pid) {
+		return new ModifyAction().call(pid, node -> {
+			String result =
+					modify.updateTree(pid, request().body().asText().toString());
+			return JsonMessage(new Message(result));
+		});
+	}
+
 	@ApiOperation(produces = "application/json", nickname = "updateMetadata", value = "updateMetadata", notes = "Updates the metadata of the resource using n-triples.", response = Message.class, httpMethod = "PUT")
 	@ApiImplicitParams({
 			@ApiImplicitParam(value = "Metadata", required = true, dataType = "string", paramType = "body") })
@@ -935,11 +946,24 @@ public class Resource extends MyController {
 		});
 	}
 
-	@ApiOperation(produces = "applicatio/json", nickname = "listSeq", value = "listSeq", notes = "Shows seq data for ordered print of parts.", response = play.mvc.Result.class, httpMethod = "GET")
+	@ApiOperation(produces = "application/json", nickname = "listSeq", value = "listSeq", notes = "Shows seq data for ordered print of parts.", response = play.mvc.Result.class, httpMethod = "GET")
 	public static Promise<Result> listSeq(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readSeq(node);
+			return ok(result);
+		});
+	}
+
+	@ApiOperation(produces = "text/html", nickname = "listTree", value = "listTree", notes = "Shows html data for tree view.", response = play.mvc.Result.class, httpMethod = "GET")
+	public static Promise<Result> listTree(@PathParam("pid") String pid) {
+		return new ReadMetadataAction().call(pid, node -> {
+			response().setHeader("Access-Control-Allow-Origin", "*");
+			String result = read.readTree(node);
+			if (result == null) {
+				return JsonMessage(new Message(
+						pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.", 404));
+			}
 			return ok(result);
 		});
 	}
