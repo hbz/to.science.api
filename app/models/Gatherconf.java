@@ -27,7 +27,8 @@ import java.util.Date;
 
 import java.util.List;
 import java.util.Map.Entry;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Hashtable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -74,7 +75,7 @@ public class Gatherconf {
 
 	@SuppressWarnings("javadoc")
 	public enum AgentIdSelection {
-		Undefined, Chrome, Edge, IE, Firefox, Safari, Googlebot, Toscience;
+		Undefined, Chrome, Edge, IE, Firefox, Safari, Googlebot, Toscience, LAV_Heritrix, Wget, LAV_Browsertrix;
 	}
 
 	@SuppressWarnings("javadoc")
@@ -96,6 +97,11 @@ public class Gatherconf {
 							"Mozilla/5.0%20(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html)");
 					put(AgentIdSelection.Toscience,
 							"Mozilla/5.0%20(compatible;%20to.science.bot%20+https://toscience.hbz-nrw.de/crawler)");
+					put(AgentIdSelection.LAV_Heritrix,
+							"Mozilla/5.0%20(compatible;%20heritrix/3.6.0%20+https://www.archive.nrw.de/landesarchiv-nrw/ueber-uns/kontakt)");
+					put(AgentIdSelection.Wget, "Wget/1.25.0");
+					put(AgentIdSelection.LAV_Browsertrix,
+							"Mozilla/5.0%20(X11;%20Linux%20x86_64)%20AppleWebKit/537.36%20(KHTML,%20like Gecko)%20Chrome/140.1.82.170%20Safari/537.36");
 				}
 			};
 
@@ -477,10 +483,42 @@ public class Gatherconf {
 	}
 
 	/**
-	 * @return a localDir with information stored by heritrix
+	 * Getter für localDir
+	 * 
+	 * @return localDir: Das Verzeichnis, in dem die Webarchive physikalisch
+	 *         liegen und langzeitarchiviert sind.
 	 */
 	public String getLocalDir() {
 		return localDir;
+	}
+
+	/**
+	 * Diese Methode ermittelt eine Collection aus dem localDir
+	 * 
+	 * @author Ingolf Kuss
+	 * @data 2026-07-15
+	 * @return eine Collection = ein Cralwer-Name oder ein Kürzel für einen
+	 *         externen Einlieferer, falls nicht selber gecrawlt wurde.
+	 */
+	public String fetchCollection() {
+		String collection = "";
+		String regExp = "^.*/(.*)-data/.*$";
+		Pattern pattern = Pattern.compile(regExp);
+		if (this.localDir == null || this.localDir.isEmpty()) {
+			throw new RuntimeException(
+					"Collection can not be determined from localDir \"" + this.localDir
+							+ "\"");
+		}
+		Matcher matcher = pattern.matcher(this.localDir);
+		if (matcher.find()) {
+			collection = matcher.group(1);
+			play.Logger.debug("collection=" + collection);
+		} else {
+			throw new RuntimeException(
+					"Collection can not be determined from localDir \"" + this.localDir
+							+ "\"");
+		}
+		return collection;
 	}
 
 	/**

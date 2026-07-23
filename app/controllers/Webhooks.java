@@ -17,10 +17,6 @@
 package controllers;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -41,11 +37,9 @@ import actions.Read;
 import authenticate.BasicAuth;
 import helper.BtrixCrawlIngestArchive;
 import helper.BtrixWebclient;
-import helper.WebgatherUtils;
-import helper.WpullCrawl;
+import helper.HttpArchiveException;
 import helper.WpullCrawlIngestArchive;
 import models.Gatherconf;
-import models.Gatherconf.CrawlerSelection;
 import models.Message;
 import models.Node;
 import play.libs.F.Promise;
@@ -205,6 +199,60 @@ public class Webhooks extends MyController {
 			moveArchive.start();
 
 			return ok();
+		});
+	}
+
+	/**
+	 * Dieser Endpoint legt für eine vom LAV (Landesarchiv NRW) bereitgestellte
+	 * Archivdatei einen Webschnitt an (Endung .warc.gz). Es kann auch eine
+	 * Archivdatei stellvertretend für mehrere Archivdateien stehen, für die aber
+	 * nur gemeinsam ein Webschnitt angelegt wird (für alle Archivdateien in einem
+	 * vom LAV gelieferten Verzeichnis).
+	 * 
+	 * @author I. Kuss
+	 * @date 2026-07-07
+	 * @return
+	 */
+	public static Promise<Result> externalCrawlIngest() {
+
+		return Promise.promise(() -> {
+
+			/**
+			 * Entgegennahme der POST-Parameter
+			 */
+			JsonNode body = request().body().asJson();
+			play.Logger.debug("LAV Crawl sent body: " + body);
+			String pid = body.findValue("pid").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("webpage pid: " + pid);
+			String collection =
+					body.findValue("collection").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("collection: " + collection);
+			String crawldir =
+					body.findValue("crawldir").toString().replaceAll("^\"|\"$", "");
+			play.Logger.debug("crawldir: " + crawldir);
+			String warcFilenameBase = body.findValue("warcFilenameBase").toString()
+					.replaceAll("^\"|\"$", "");
+			play.Logger.debug("warcFilenameBase: " + warcFilenameBase);
+
+			play.Logger.debug("Beginn erzeuge WebpageVersion für PID " + pid
+					+ ",Collection: " + collection + ", Zeitstempel " + crawldir);
+			String versionPid = null;
+			Node result = null;
+			try {
+				Node n = new Read().readNode(pid);
+				String lastCrawlId = "";
+				result = new Create().postWebpageVersion(n, versionPid, lastCrawlId,
+						collection, crawldir,
+						new File(warcFilenameBase + ".warc.gz").getName());
+				play.Logger.info("WebpageVersion für " + pid + " wurde angelegt.");
+			} catch (Exception e) {
+				play.Logger.error(
+						"WebpageVersion für " + pid + " konnte nicht angelegt werden!");
+				play.Logger.error(e.getMessage(), e);
+				// throw new HttpArchiveException(500, e);
+			}
+
+			return getJsonResult(result);
 		});
 	}
 

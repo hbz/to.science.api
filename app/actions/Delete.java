@@ -43,6 +43,7 @@ import models.Gatherconf;
 import models.Globals;
 import models.Node;
 import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
+import play.Logger;
 
 /**
  * @author Jan Schnasse
@@ -50,6 +51,9 @@ import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
  */
 @IgnoreSizeOf
 public class Delete extends RegalAction {
+
+	private static final Logger.ALogger WebgatherLogger =
+			Logger.of("webgatherer");
 
 	/**
 	 * Deletes only this single node. Child objects will remain.
@@ -92,6 +96,9 @@ public class Delete extends RegalAction {
 	}
 
 	private static void removeWebpageVersion(Node n) {
+		WebgatherLogger.debug("Starting removeWepageVersion");
+		WebgatherLogger.debug("n.getContentType: " + n.getContentType());
+		WebgatherLogger.debug("n.getKeepWebarchives: " + n.getKeepWebarchives());
 		if (n.getContentType().equals("version") && !n.getKeepWebarchives()) {
 			/*
 			 * für WebpageVersions (Webschnitte) werden auch die Webarchive auf der

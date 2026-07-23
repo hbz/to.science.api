@@ -228,12 +228,8 @@ public class WpullCrawl extends CrawlerModel {
 
 		sb.append(" --recursive");
 		ArrayList<String> urlsExcluded = getConf().getUrlsExcluded();
-		if (urlsExcluded.size() > 0) {
-			sb.append(" --reject-regex=.*" + urlsExcluded.get(0).trim());
-			for (int i = 1; i < urlsExcluded.size(); i++) {
-				sb.append("|" + urlsExcluded.get(i).trim());
-			}
-			sb.append(".*");
+		for (int i = 0; i < urlsExcluded.size(); i++) {
+			sb.append(" --reject-regex=.*" + urlsExcluded.get(i).trim());
 		}
 
 		int level = getConf().getDeepness();

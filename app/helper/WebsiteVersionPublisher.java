@@ -18,6 +18,8 @@ package helper;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import actions.Modify;
 import actions.Modify.UpdateNodeException;
@@ -230,11 +232,11 @@ public class WebsiteVersionPublisher {
 	}
 
 	/**
-	 * Ermittelt subDir und ergänzt ggfs. localDir. sudDir sind die
+	 * Ermittelt subDir und ergänzt ggfs. localDir. subDir sind die
 	 * Unterverzeichnisse, unter denen das WARC-Archiv dieses Webschnitts liegt.
-	 * Das localDir wird aus dem gewählten Crawler ermittelt. Bei heritrix- und
-	 * wget-Crawls muss das subDir um das Unterverzeichnis warcs/ ergänzt werdem,
-	 * um die WARC-Datei zu finden.
+	 * Das localDir wird aus dem gewählten Crawler oder der Collection ermittelt.
+	 * Bei heritrix- und wget-Crawls muss das subDir um das Unterverzeichnis
+	 * warcs/ ergänzt werdem, um die WARC-Datei zu finden.
 	 * 
 	 * @param node der Knoten des Webschnitts
 	 * @param conf die Gatherconf des Webschnitts
@@ -252,7 +254,7 @@ public class WebsiteVersionPublisher {
 			 * 
 			 * Man erhält subDir aus dem Feld "localDir" in der Gatherconf, wobei für
 			 * Heritrix- und wget-Crawls ein Unterverzeichnisname "/warcs" an den Wert
-			 * von "localDir" angehänt werden muss.
+			 * von "localDir" angehängt werden muss.
 			 */
 			int indexOfName = localDir.indexOf(conf.getName());
 			if (indexOfName < 0) {
@@ -265,41 +267,43 @@ public class WebsiteVersionPublisher {
 							+ subDir);
 			/**
 			 * Füge nun das richtige Wurzelverzeichnis hinzu, unter dem die Webarchive
-			 * stehen. Die Angabe in "localDir" muss nicht stimmen, da sie für alte WS
-			 * z.B. noch "/opt/regal" enthält. Hole daher die Angaben aus der
-			 * aktuellen application.conf. Schreibe das korrigierte localDir zurück in
-			 * die conf:
+			 * stehen. Die Angabe in "localDir" muss nicht stimmen, da sie für alte
+			 * Webschnitte z.B. noch "/opt/regal" als Heimatverzeichnis enthält. Hole
+			 * daher die Angaben aus der aktuellen application.conf. Schreibe das
+			 * korrigierte localDir zurück in die conf:
 			 */
 			/**
 			 * Die Angaben in conf.getCrawlerSelection() stimmen nicht, es steht für
 			 * ältere Webschnitte generell "wpull" darin, auch wenn es z.B. "wget"
-			 * ist. Hole daher die crawlerSelecion ebenfalls aus localDir.
+			 * ist. Hole daher die crawlerSelecion ebenfalls aus localDir und nenne es
+			 * "Collection".
 			 */
-			if (localDir.matches("(.*)/wget-data/(.*)")) {
-				localDir = Play.application().configuration().getString(
-						"regal-api.wget.dataDir") + "/" + conf.getName() + "/" + subDir;
+			String regExp = "^.*/(.*)-data/.*$";
+			Pattern pattern = Pattern.compile(regExp);
+			Matcher matcher = pattern.matcher(localDir);
+			String collection = "";
+			if (matcher.find()) {
+				collection = matcher.group(1);
+				play.Logger.debug("collection=" + collection);
+				localDir = Play.application().configuration()
+						.getString("regal-api." + collection + ".outDir") + "/"
+						+ conf.getName() + "/" + subDir;
 				conf.setLocalDir(localDir);
-				subDir = subDir.concat("/warcs");
-				localDir = localDir.concat("/warcs");
-			} else if (localDir.matches("(.*)/heritrix-data/(.*)")) {
-				localDir = Play.application().configuration().getString(
-						"regal-api.heritrix.jobDir") + "/" + conf.getName() + "/" + subDir;
-				conf.setLocalDir(localDir);
-				subDir = subDir.concat("/warcs");
-				localDir = localDir.concat("/warcs");
-			} else if (localDir.matches("(.*)/wpull-data/(.*)")) {
-				localDir = Play.application().configuration().getString(
-						"regal-api.wpull.outDir") + "/" + conf.getName() + "/" + subDir;
-				conf.setLocalDir(localDir);
-			} else if (localDir.matches("(.*)/btrix-data/(.*)")) {
-				localDir = Play.application().configuration().getString(
-						"regal-api.btrix.outDir") + "/" + conf.getName() + "/" + subDir;
-				conf.setLocalDir(localDir);
-				subDir = subDir.concat("/archive");
-				localDir = localDir.concat("/archive");
 			} else {
 				throw new RuntimeException(
-						"Unknown crawler selection " + conf.getCrawlerSelection() + "!");
+						"Unknown crawler selection or collection for localDir " + localDir
+								+ "!");
+			}
+			/*
+			 * Festlegung der Unterverzeichnisse innerhalb des Crawl-Verzeichnisses je
+			 * nach Crawler oder Collection
+			 */
+			if (collection.equals("wget") || collection.equals("heritrix")) {
+				subDir = subDir.concat("/warcs");
+				localDir = localDir.concat("/warcs");
+			} else if (collection.equals("btrix")) {
+				subDir = subDir.concat("/archive");
+				localDir = localDir.concat("/archive");
 			}
 		} catch (Exception e) {
 			WebgatherLogger.error("localDir und subDir für Webschnitt "
@@ -313,7 +317,7 @@ public class WebsiteVersionPublisher {
 	 * Ermittelt Speicherort der Webarchiv-Datei (WARC) und legt einen Softlink
 	 * unterhalb von public-data/ an, der auf diese Webarchiv-Datei zeigt. Dadurch
 	 * wird das Webarchiv zur Openwayback-Kollektion "weltweit" hinzugefügt und
-	 * subsequent im Openwayback-Zugriffspunkt "weltweit" indexiert, also
+	 * nachfolgend im Openwayback-Zugriffspunkt "weltweit" indexiert, also
 	 * veröffentlicht.
 	 *
 	 * @param node Der Knoten des Webschnittes
@@ -508,24 +512,14 @@ public class WebsiteVersionPublisher {
 		try {
 			String localDir = conf.getLocalDir();
 			WebgatherLogger.debug("localDir=" + localDir);
-			String openWaybackLink = conf.getOpenWaybackLink();
-			if (openWaybackLink == null) {
-				// Baue Openwayback-Link selber neu zusammen
-				// Datumsstempel, 8stellig, aus localDir ermitteln
-				String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
-				WebgatherLogger.debug("dateStamp=" + dateStamp);
-				String openwaybackBaseLink = Play.application().configuration()
-						.getString("regal-api.heritrix.openwaybackLink");
-				String url = conf.getUrl();
-				openWaybackLink =
-						new String(openwaybackBaseLink + dateStamp + "/" + url);
-			}
-			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
-			play.Logger.debug("openWaybackLink=" + openWaybackLink);
+			String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
+			WebgatherLogger.debug("dateStamp=" + dateStamp);
+			String collection = conf.fetchCollection();
+			WebgatherLogger.debug("collection=" + collection);
+			String url = conf.getUrl();
 			String publicOpenWaybackLink =
-					openWaybackLink.replace("/wayback/", "/weltweit/");
-			publicOpenWaybackLink =
-					publicOpenWaybackLink.replace("/lesesaal/", "/weltweit/");
+					new String(Play.application().configuration().getString(
+							"regal-api.wayback.collection.public") + dateStamp + "/" + url);
 			conf.setOpenWaybackLink(publicOpenWaybackLink);
 			play.Logger.debug("publicOpenWaybackLink=" + publicOpenWaybackLink);
 			msg = new Modify().updateConf(node, conf.toString());
@@ -541,7 +535,7 @@ public class WebsiteVersionPublisher {
 
 	/**
 	 * Ändert den Openwayback-Link in der Gatherconf des Webschnittes, so dass er
-	 * auf den zugriffsbeschränkten Zugriffspunkt zeigt. Tut er dies schon, wird
+	 * auf die zugriffsbeschränkte Collection zeigt. Tut er dies schon, wird
 	 * nichts gemacht.
 	 * 
 	 * @param node der Knoten des Webschnitts
@@ -553,43 +547,21 @@ public class WebsiteVersionPublisher {
 		try {
 			String localDir = conf.getLocalDir();
 			WebgatherLogger.debug("localDir=" + localDir);
-			String restrictedAccessPoint = Play.application().configuration()
-					.getString("regal-api.heritrix.openwaybackLink");
-			String openWaybackLink = conf.getOpenWaybackLink();
-			String restrictedOpenWaybackLink = null;
-			if (openWaybackLink == null) {
-				// Baue Openwayback-Link selber neu zusammen
-				// Datumsstempel, 8stellig, aus localDir ermitteln
-				String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
-				WebgatherLogger.debug("dateStamp=" + dateStamp);
-				String url = conf.getUrl();
-				restrictedOpenWaybackLink =
-						new String(restrictedAccessPoint + dateStamp + "/" + url);
-				WebgatherLogger.debug("openWaybackLink=" + restrictedOpenWaybackLink);
-			} else {
-				WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
-				play.Logger.debug("openWaybackLink=" + openWaybackLink);
-				if (openWaybackLink.startsWith(restrictedAccessPoint)) {
-					WebgatherLogger
-							.info("openWaybackLink steht schon auf beschränktem Zugriff.");
-					return;
-				}
-				// vorhandener OpenWaybackLink wird auf "zugriffsbeschränkt"
-				// umgeschrieben
-				int startIndex = openWaybackLink.indexOf("weltweit/");
-				if (startIndex < 0) {
-					throw new RuntimeException(
-							"Unbekannter Zugriffspunkt in OpenwaybackLink " + openWaybackLink
-									+ " !");
-				}
-				restrictedOpenWaybackLink =
-						restrictedAccessPoint + openWaybackLink.substring(startIndex + 9);
-				WebgatherLogger
-						.info("Neuer Openwayback-Link: " + restrictedOpenWaybackLink);
+			String dateStamp = localDir.replaceAll("^.*/([0-9]{8})[0-9]*$", "$1");
+			WebgatherLogger.debug("dateStamp=" + dateStamp);
+			String collection = conf.fetchCollection();
+			WebgatherLogger.debug("collection=" + collection);
+			String url = conf.getUrl();
+			String openWaybackLink = new String(Play.application().configuration()
+					.getString("regal-api.wayback.collection." + collection) + dateStamp
+					+ "/" + url);
+			WebgatherLogger.debug("openWaybackLink=" + openWaybackLink);
+			if (conf.getOpenWaybackLink().equals(openWaybackLink)) {
+				WebgatherLogger.info(
+						"openWaybackLink steht schon auf beschränktem Zugriff. Nichts zu tun.");
+				return;
 			}
-			conf.setOpenWaybackLink(restrictedOpenWaybackLink);
-			play.Logger
-					.debug("restrictedOpenWaybackLink=" + restrictedOpenWaybackLink);
+			conf.setOpenWaybackLink(openWaybackLink);
 			msg = new Modify().updateConf(node, conf.toString());
 			WebgatherLogger.info(
 					"Openwayback-Link wurde auf \"lesesaal|wayback\" gesetzt für Webschnitt "
@@ -673,8 +645,8 @@ public class WebsiteVersionPublisher {
 	/**
 	 * Erzeugt eine weiche Verknüpfung (Softlink) in einem Unterverzeichnis von
 	 * public-data/ auf eine eingesammelte WARC-Datei in einem der
-	 * Crawler-Verzeichnisse. Macht nichts, falls diese weiche Verknüpfung schon
-	 * existiert.
+	 * Crawler-Verzeichnisse. Es wird nichts gemacht, falls diese weiche
+	 * Verknüpfung schon existiert.
 	 * 
 	 * @param publicCrawlDir Das Verzeichnis public-data/ mit Unterverzeichnissen,
 	 *          in denen der Softlink angelegt werden soll.

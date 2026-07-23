@@ -314,6 +314,7 @@ public class Modify extends RegalAction {
 	public String updateLobidify2AndEnrichMetadata(Node node, String content) {
 
 		String pid = node.getPid();
+		play.Logger.debug("BEGINN updateLobidify2AndEnrichMetadata");
 		if (content == null) {
 			throw new HttpArchiveException(406,
 					pid + " You've tried to upload an empty string."
@@ -338,18 +339,24 @@ public class Modify extends RegalAction {
 				play.Logger.debug("rdf=" + rdf.toString());
 				allMetadata = new JSONObject(new JSONObject(rdf).toString());
 
+				play.Logger.debug("allMetadata=" + allMetadata.toString());
 				String toscienceMetadata =
 						TosHelper.getToPersistTosMd(allMetadata.toString(), pid);
 
+				play.Logger.debug("toscienceMetadata=" + toscienceMetadata);
 				toscienceJson =
 						TosHelper.getPrefLabelsResolved(new JSONObject(toscienceMetadata));
 
+				play.Logger.debug("toscienceJson=" + toscienceJson.toString());
 				if (Helper.mdStreamExists(pid, "ktbl")) {
 					toscienceJson = TosHelper.getPrefLabelsResolved(new JSONObject(
 							new Read().readNode(pid).getMetadata("toscience")));
+					play.Logger.debug("toscienceJson=" + toscienceJson.toString());
 				}
 
 				updateMetadataJson(node, toscienceJson.toString());
+				play.Logger
+						.debug("INFO metadataJson has been created/updated for PID " + pid);
 
 			}
 		} catch (JSONException e) {

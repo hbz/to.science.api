@@ -37,6 +37,7 @@ import com.ibm.icu.text.StringCharacterIterator;
 import actions.Create;
 import helper.mail.Mail;
 import models.Gatherconf;
+import models.Gatherconf.CrawlerSelection;
 import models.Globals;
 import models.Message;
 import models.Node;
@@ -199,7 +200,8 @@ public class WebgatherUtils {
 				localpath = Globals.heritrixData + "/heritrix-data" + "/" + uriPath;
 				WebgatherLogger.debug("Path to WARC " + localpath);
 				String versionPid = null;
-				new Create().createWebpageVersion(node, conf, warcFilename, crawlDir,
+				new Create().createWebpageVersion(node, conf,
+						CrawlerSelection.heritrix.toString(), warcFilename, crawlDir,
 						localpath, versionPid);
 			} else if (conf.getCrawlerSelection()
 					.equals(Gatherconf.CrawlerSelection.wpull)) {

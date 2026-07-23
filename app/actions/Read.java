@@ -64,6 +64,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.w3c.dom.Element;
 
 import play.Logger;
+import play.Play;
 import archive.fedora.FedoraVocabulary;
 import archive.fedora.RdfUtils;
 import archive.fedora.UrlConnectionException;
@@ -615,27 +616,50 @@ public class Read extends RegalAction {
 	}
 
 	/**
-	 * @param node
+	 * Liest Gatherconf von Node
+	 * 
+	 * @param node ein Node (Webpage oder Webschnitt)
 	 * @return a webgather configuration
 	 */
 	public String readConf(Node node) {
 		try {
 			String confstring = node.getConf();
+			play.Logger.debug("confstring: " + confstring);
 			if (confstring == null)
 				return "";
 			ObjectMapper mapper = JsonUtil.mapper();
 			Gatherconf conf = mapper.readValue(confstring, Gatherconf.class);
-			if (conf.getOpenWaybackLink() == null
-					|| conf.getOpenWaybackLink().isEmpty()) {
+			if (node.getContentType().equals("version")
+					&& (conf.getOpenWaybackLink() == null
+							|| conf.getOpenWaybackLink().isEmpty())) {
+				play.Logger
+						.debug("conf.openWaybackLink is empty for WebpageVersion with pid "
+								+ node.getPid());
+				play.Logger.debug("Creating an openWaybackLink for the start date.");
 				String owDatestamp =
 						new SimpleDateFormat("yyyyMMdd").format(conf.getStartDate());
-				conf.setOpenWaybackLink(Globals.heritrix.openwaybackLink + owDatestamp
-						+ "/" + conf.getUrl());
+				play.Logger.debug("owDatestamp: " + owDatestamp);
+				String collection = conf.fetchCollection();
+				if (collection == null || collection.isEmpty()) {
+					play.Logger.debug(
+							"Collection can not be determined. Creating an openWaybackLink in the standard collection (wpull)");
+					conf.setOpenWaybackLink(Play.application().configuration()
+							.getString("regal-api.wayback.collection.wpull") + owDatestamp
+							+ "/" + conf.getUrl());
+				} else {
+					play.Logger.debug("collection: " + collection);
+					conf.setOpenWaybackLink(Play.application().configuration()
+							.getString("regal-api.wayback.collection." + collection)
+							+ owDatestamp + "/" + conf.getUrl());
+				}
 			}
 			return conf.toString();
 		} catch (UrlConnectionException e) {
+			play.Logger.error("Url Connection Exception", e);
 			throw new HttpArchiveException(404, e);
 		} catch (Exception e) {
+			play.Logger.error("Gatherconf for Node with pid " + node.getPid()
+					+ " could not be read!", e);
 			throw new HttpArchiveException(500, e);
 		}
 	}

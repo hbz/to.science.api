@@ -77,6 +77,7 @@ import models.Message;
 import models.Node;
 import models.ToScienceObject;
 import models.UrlHist;
+import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.libs.F.Function0;
@@ -481,6 +482,8 @@ public class Resource extends MyController {
 				String tosWithRoles = null;
 
 				play.Logger.debug("toscienceJson will be mapped");
+				play.Logger
+						.debug("request().body().asText(): " + request().body().asText());
 
 				Map<String, Object> rdf = RdfHelper.getRdfAsMap(readNode,
 						RDFFormat.NTRIPLES, request().body().asText());
@@ -1409,14 +1412,22 @@ public class Resource extends MyController {
 	public static Promise<Result> createWebpage(
 			@PathParam("namespace") String namespace, @QueryParam("url") String url,
 			@QueryParam("title") String title,
+			@QueryParam("createdBy") String createdBy,
 			@QueryParam("interval") String intervall, @QueryParam("pid") String pid,
 			@QueryParam("crawlSubdomains") boolean crawlSubdomains) {
 		return new CreateAction().call(userId -> {
-			ToScienceObject object = getRegalObject(request().body().asJson());
-			Node result = create.createWebpage(namespace, url, title, intervall, pid,
-					object, crawlSubdomains);
-			response().setHeader("Location", read.getHttpUriOfResource(result));
-			return getJsonResult(result);
+			try {
+				play.Logger.debug("BEGINN endpoint createWebpage");
+				Gatherconf conf = MyController.mapper
+						.readValue(request().body().asJson().toString(), Gatherconf.class);
+				play.Logger.debug("Gatherconf created");
+				Node result = create.createWebpage(namespace, url, title, createdBy,
+						intervall, pid, crawlSubdomains, conf);
+				response().setHeader("Location", read.getHttpUriOfResource(result));
+				return getJsonResult(result);
+			} catch (IOException e) {
+				throw new HttpArchiveException(500, e);
+			}
 		});
 	}
 

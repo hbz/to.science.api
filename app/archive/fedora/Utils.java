@@ -819,6 +819,7 @@ public class Utils {
 	void updateRelsExt(Node node) {
 		String pid = node.getPid();
 		// String type = node.getContentType();
+		play.Logger.debug("node.getContentType: " + node.getContentType());
 		if (!dataStreamExists(pid, "RELS-EXT")) {
 			createFedoraXmlForRelsExt(pid);
 		}

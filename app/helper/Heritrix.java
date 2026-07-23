@@ -52,7 +52,7 @@ public class Heritrix {
 	private String url_no_https = null;
 
 	public static String openwaybackLink = Play.application().configuration()
-			.getString("regal-api.heritrix.openwaybackLink");
+			.getString("regal-api.wayback.collection.heritrix");
 
 	final static String warcFilenamePrefix = "WEB"; // this is fix in heritrix
 
