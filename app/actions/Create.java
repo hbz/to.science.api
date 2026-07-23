@@ -40,7 +40,7 @@ import org.apache.commons.io.FileUtils;
 
 // import javax.activation.MimetypesFileTypeMap;
 import com.fasterxml.jackson.databind.JsonNode;
-
+import org.json.JSONObject;
 import controllers.MyController;
 import helper.HttpArchiveException;
 import helper.WebgatherUtils;
@@ -265,6 +265,17 @@ public class Create extends RegalAction {
 		if (title == null && parentTitle != null) {
 			new Modify().addMetadataField(to, getUriFromJsonName("title"),
 					parentTitle);
+			new Modify().updateMetadata("toscience", to, new JSONObject()
+					.put("title", new String[] { parentTitle }).toString());
+
+			// persist title to toscience md
+			try {
+				new Modify().updateMetadata("toscience", to, new JSONObject()
+						.put("title", new String[] { parentTitle }).toString());
+			} catch (Exception e) {
+				play.Logger.debug("Exception in inheritTitle()" + e);
+			}
+
 		}
 	}
 
