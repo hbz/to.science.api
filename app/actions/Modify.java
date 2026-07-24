@@ -196,7 +196,7 @@ public class Modify extends RegalAction {
 								+ " This action is not supported."
 								+ " Use HTTP DELETE instead.\n");
 			}
-			play.Logger.info("Write tree html to fedora \n\t" + content);
+			// play.Logger.debug("Write tree html to fedora \n\t" + content);
 			/**
 			 * Aus dem HTML müssen alle Elemente entfernt werden, die class="...
 			 * octicon ..." haben. Außerdem sollten alle Attribute "isHtml" entfernt
