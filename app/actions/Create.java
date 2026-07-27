@@ -265,11 +265,11 @@ public class Create extends RegalAction {
 		if (title == null && parentTitle != null) {
 			new Modify().addMetadataField(to, getUriFromJsonName("title"),
 					parentTitle);
-			new Modify().updateMetadata("toscience", to, new JSONObject()
-					.put("title", new String[] { parentTitle }).toString());
-
-			// persist title to toscience md
 			try {
+				new Modify().updateMetadata("toscience", to, new JSONObject()
+						.put("title", new String[] { parentTitle }).toString());
+
+				// persist title to toscience md
 				new Modify().updateMetadata("toscience", to, new JSONObject()
 						.put("title", new String[] { parentTitle }).toString());
 			} catch (Exception e) {
