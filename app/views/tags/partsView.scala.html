@@ -44,8 +44,8 @@ case _ =>{ }
 								src="/public/images/pdf.svg"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
 								<div class="dc:label">@views.Helper.getTitle(fileMap)</div>
-								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
+								<i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 							</a>
 						  
 						</td>
@@ -59,12 +59,12 @@ case _ =>{ }
 				<table>
 					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr>
@@ -106,8 +106,8 @@ case _ =>{ }
 							<a href="@Helper.getWaybackLink(fileMap.get("@id").toString())" target="_blank" ><img
 								src="/public/images/webschnitt.png" style="width: 80px;"></img></a>
 							<a href="/resource/@fileMap.get("@id")">
-								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
+								<i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 							</a>
 						  
 						</td>
@@ -120,12 +120,12 @@ case _ =>{ }
 				<table>
 					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr>
@@ -160,8 +160,8 @@ case _ =>{ }
 								<div class="dc:label">
 								@views.Helper.getTitle(fileMap)
 								</div>
-								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
+								<i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 						   </a>
 						  
 						</td>
@@ -174,12 +174,12 @@ case _ =>{ }
 				<table>
 					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr class="identifier">
@@ -205,8 +205,8 @@ case _ =>{ }
 								<div class="dc:label">
 								@views.Helper.getTitle(fileMap)
 								</div>
-								<span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
-								<span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+								<i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
+								<i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 						   </a>
 						  
 						</td>
@@ -219,12 +219,12 @@ case _ =>{ }
 				<table>
 					<tr class="publishSchemeSummary">
 						<td>Metadata</td>
-						<td><span class="publishSchemeSummary @fileMap.get("publishScheme")-access" aria-hidden="true"></span>
+						<td><i class="fa @schemeIcon(fileMap.get("publishScheme")) publishSchemeSummary" style="color:@schemeColor(fileMap.get("publishScheme"));" aria-hidden="true"></i>
 							@fileMap.get("publishScheme")</td>
 					</tr>
 					<tr>
 							<td>Data</td>
-							<td><span class="accessSchemeSummary @fileMap.get("accessScheme")-access" aria-hidden="true"></span>
+							<td><i class="fa @schemeIcon(fileMap.get("accessScheme")) accessSchemeSummary" style="color:@schemeColor(fileMap.get("accessScheme"));" aria-hidden="true"></i>
 								@fileMap.get("accessScheme")</td>
 					</tr>
 					<tr class="identifier">
@@ -237,6 +237,9 @@ case _ =>{ }
 				</div>
 			
 } 
+
+@schemeIcon(value:Object) = @{ if ("public" == value) "fa-unlock" else "fa-lock" }
+@schemeColor(value:Object) = @{ if ("public" == value) "green" else if ("restricted" == value) "orange" else "red" }
 
 @addLastModified(lm:Map[String,String])={
 <div class="lastModifiedLabel" style="text-align:right;"><a href=/resource/@lm.get("id")>@lm.get("title")</a></div>
