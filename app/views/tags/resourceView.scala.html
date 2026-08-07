@@ -71,14 +71,94 @@
 	@tags.ktblView(node,node.getLd2WithParts(),Helper.getOrderedListOfKeysFromContext(Globals.profile.getContext().get("@context").asInstanceOf[Map[String,Object]]))
 } else {
 
-	@context match{
-		case list : List[String] => {
-			@for(k<-context){
-				@tableRow(k,hit)
-			}
-		}
-		case _ => {}
+@*According to ZBMED, display of the creators should be disabled.*@
+@*
+    @if(views.Helper.getToscienceObjectArray(node, "creator")!=null && !views.Helper.getToscienceObjectArray(node, "creator").isEmpty()){
+    <tr class="creatorRow">
+        <td style="display:none;">@getWeight("creator")</td>
+        <td class="field-label creatorRow">Autor:innen</td>
+        <td class="field-item">
+        @for(rDs <- views.Helper.getToscienceObjectArray(node, "creator")){
+        <a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+            @rDs.get("prefLabel") </a>
+            @if(rDs.get("roles")!=null){
+            <span class="separator">|</span>
+            @rDs.get("roles")
+            }
+            <br/>
+        }
+        </td>
+    </tr>
+    }
+*@
+
+    @if(views.Helper.getToscienceObjectArray(node, "contributor")!=null && !views.Helper.getToscienceObjectArray(node, "contributor").isEmpty() && !"monograph".equals(hit.get("contentType"))){
+    <tr class="contributorRow">
+        <td style="display:none;">@getWeight("contributor")</td>
+        <td class="field-label contributorRow">Mitwirkende</td>
+        <td class="field-item">
+        @for(rDs <- views.Helper.getToscienceObjectArray(node, "contributor")){
+        <a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+            @rDs.get("prefLabel") </a>
+            @if(rDs.get("roles")!=null){
+            <span class="separator">|</span>
+            @rDs.get("roles")
+            }
+            <br/>
+        }
+        </td>
+    </tr>
+    }
+	
+	@if(views.Helper.getToscienceObjectArray(node, "editor")!=null && !views.Helper.getToscienceObjectArray(node, "editor").isEmpty() && !"monograph".equals(hit.get("contentType"))){
+	<tr class="other">
+	    <td style="display:none;">@getWeight("other")</td>
+	    <td class="field-label other">(Akademische)Editoren</td>
+	    <td class="field-item">
+	    @for(rDs <- views.Helper.getToscienceObjectArray(node, "editor")){
+	    <a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+	        @rDs.get("prefLabel") </a>
+	        @if(rDs.get("roles")!=null){
+	        <span class="separator">|</span>
+	        @rDs.get("roles")
+	        }
+	        <br/>
+	    }
+	    </td>
+	</tr>
 	}
+
+    @if(views.Helper.getToscienceObjectArray(node, "other")!=null && !views.Helper.getToscienceObjectArray(node, "other").isEmpty() && !"monograph".equals(hit.get("contentType"))){
+    <tr class="other">
+        <td style="display:none;">@getWeight("other")</td>
+        <td class="field-label other">Sonstige</td>
+        <td class="field-item">
+        @for(rDs <- views.Helper.getToscienceObjectArray(node, "other")){
+        <a href="/resource?query[0][term]=%22@rDs.get("id")%22">
+            @rDs.get("prefLabel") </a>
+            @if(rDs.get("roles")!=null){
+            <span class="separator">|</span>
+            @rDs.get("roles")
+            }
+            <br/>
+        }
+        </td>
+    </tr>
+    }
+
+
+
+	@* Skip these fields (creator, contributor, other , editor)to avoid duplicate output. *@
+    @context match{
+        case list : List[String] => {
+            @for(k<-context){
+                @if(k != "creator" && k != "contributor" && k != "other" && k != "editor"){
+                    @tableRow(k,hit)
+                }
+            }
+        }
+        case _ => {}
+    }
 
 }
 
@@ -301,25 +381,6 @@
 				}
 			}
 		}
-		case "other"=>{
-			@values match {
-				case nullCase if nullCase == null =>{}
-				case _ =>{
-				<tr class="@key">
-					<td style="display:none;">@getWeight(key)</td>
-					<td class="field-label @key">@getLabel(key)</td>
-					<td>
-					<table>
-					@for(other <-views.Helper.getOthers(node)){
-						@other <br />
-						}
-					</table>
-					</td>
-				</tr>
-				}
-			}
-		}
-				
 		case "inSeries"=>{
 			@values match {
 			case nullCase if nullCase == null =>{}

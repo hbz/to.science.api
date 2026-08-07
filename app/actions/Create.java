@@ -266,9 +266,6 @@ public class Create extends RegalAction {
 			new Modify().addMetadataField(to, getUriFromJsonName("title"),
 					parentTitle);
 			try {
-				new Modify().updateMetadata("toscience", to, new JSONObject()
-						.put("title", new String[] { parentTitle }).toString());
-
 				// persist title to toscience md
 				new Modify().updateMetadata("toscience", to, new JSONObject()
 						.put("title", new String[] { parentTitle }).toString());
