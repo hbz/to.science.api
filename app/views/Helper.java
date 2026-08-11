@@ -866,8 +866,10 @@ public class Helper {
 				valueHash.put("id", cardNode.get(i).findValues("@id").toString()
 						.replace("[", "").replace("]", "").replace("\"", ""));
 				if (cardNode.get(i).has("role")) {
-					valueHash.put("roles", cardNode.get(i).findValues("role").toString()
-							.replace("[", "").replace("]", "").replace("\"", ""));
+					valueHash.put("roles",
+							cardNode.get(i).findValues("role").toString().replace("[", "")
+									.replace("]", "").replace("\"", "").replace(",", ", ")
+									.replace("_", " "));
 				}
 				valueList.add(valueHash);
 			}
