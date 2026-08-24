@@ -83,7 +83,7 @@
             @rDs.get("prefLabel") </a>
             @if(rDs.get("roles")!=null){
             <span class="separator">|</span>
-            @rDs.get("roles")
+            @formatRoleLabel(rDs.get("roles"))
             }
             <br/>
         }
@@ -102,7 +102,7 @@
             @rDs.get("prefLabel") </a>
             @if(rDs.get("roles")!=null){
             <span class="separator">|</span>
-            @rDs.get("roles")
+            @formatRoleLabel(rDs.get("roles"))
             }
             <br/>
         }
@@ -120,7 +120,7 @@
 	        @rDs.get("prefLabel") </a>
 	        @if(rDs.get("roles")!=null){
 	        <span class="separator">|</span>
-	        @rDs.get("roles")
+	        @formatRoleLabel(rDs.get("roles"))
 	        }
 	        <br/>
 	    }
@@ -138,7 +138,7 @@
             @rDs.get("prefLabel") </a>
             @if(rDs.get("roles")!=null){
             <span class="separator">|</span>
-            @rDs.get("roles")
+            @formatRoleLabel(rDs.get("roles"))
             }
             <br/>
         }
@@ -697,6 +697,14 @@
 </tr>		
 }					
 }
+@formatRoleLabel(role: Any) = @{
+	val value = role.toString
+	if ("article".equals(hit.get("contentType"))) {
+		value.split("\\s+").filter(_.nonEmpty).map { word => word.substring(0, 1).toUpperCase + word.substring(1) }.mkString(" ")
+	} else {
+		value
+	}
+}
 @displayContributions(id:String,label:String,roleId:String,roleName:String)={
 		<tr class=@roleId>
 			
@@ -706,7 +714,7 @@
 	                       }else{
 	                       <a title="Ähnliche Objekte suchen" href="@models.Globals.rechercheUrlPrefix@helper.urlEncode(label)@models.Globals.rechercheUrlSuffix">
 	                       }
-	                       @label <span style="font-size:smaller;">(@roleName)</span>
+	                       @label <span style="font-size:smaller;">(@formatRoleLabel(roleName))</span>
 	                       </a> <span class="separator">|</span>
 	                       @if(id.startsWith("https://orcid.org")||id.toString().startsWith("http://orcid.org")){
 	                       <a href=@Helper.getLinkAdressOrNull(id)  target="_blank">
