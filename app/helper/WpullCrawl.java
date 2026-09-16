@@ -58,7 +58,6 @@ public class WpullCrawl extends CrawlerModel {
 			.getString("regal-api.wpull.finishedDir");
 	private File finishedFile = null;
 	private File logAnalysesDir = null;
-	private BufferedReader buf;
 
 	/**
 	 * Konstruktor zu WpullCrawl
@@ -386,7 +385,7 @@ public class WpullCrawl extends CrawlerModel {
 		if (isWpullCrawlRunning()) {
 			return CrawlControllerState.RUNNING;
 		}
-		buf = null;
+		BufferedReader buf = null;
 		String regExp = "^INFO FINISHED.";
 		Pattern pattern = Pattern.compile(regExp);
 		try {
@@ -433,7 +432,7 @@ public class WpullCrawl extends CrawlerModel {
 					+ " nicht gefunden.");
 			return true;
 		}
-		buf = null;
+		BufferedReader buf = null;
 		String regExp = "^INFO Downloaded: 0 files, 0.0 B.";
 		Pattern pattern = Pattern.compile(regExp);
 		boolean isEmpty = false;
@@ -478,7 +477,7 @@ public class WpullCrawl extends CrawlerModel {
 	 * @return boolean Crawl läuft
 	 */
 	public boolean isWpullCrawlRunning() {
-		buf = null;
+		BufferedReader buf = null;
 		String cmd = "ps -eaf";
 		String regExp1 =
 				Play.application().configuration().getString("regal-api.wpull.crawler");
