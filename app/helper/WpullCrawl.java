@@ -442,7 +442,7 @@ public class WpullCrawl extends CrawlerModel {
 			String line = null;
 			while ((line = buf.readLine()) != null) {
 				Matcher matcher = pattern.matcher(line);
-				WebgatherLogger.info("log line: " + line);
+				// WebgatherLogger.info("log line: " + line);
 				if (matcher.find()) {
 					WebgatherLogger.info("Crawl is empty");
 					isEmpty = true;
