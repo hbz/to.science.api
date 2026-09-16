@@ -437,7 +437,7 @@ public class WpullCrawl extends CrawlerModel {
 		Pattern pattern = Pattern.compile(regExp);
 		boolean isEmpty = false;
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(5000);
 			buf = new BufferedReader(new FileReader(logfile));
 			String line = null;
 			while ((line = buf.readLine()) != null) {
