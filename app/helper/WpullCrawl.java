@@ -58,7 +58,6 @@ public class WpullCrawl extends CrawlerModel {
 			.getString("regal-api.wpull.finishedDir");
 	private File finishedFile = null;
 	private File logAnalysesDir = null;
-	private BufferedReader buf;
 
 	/**
 	 * Konstruktor zu WpullCrawl
@@ -386,7 +385,7 @@ public class WpullCrawl extends CrawlerModel {
 		if (isWpullCrawlRunning()) {
 			return CrawlControllerState.RUNNING;
 		}
-		buf = null;
+		BufferedReader buf = null;
 		String regExp = "^INFO FINISHED.";
 		Pattern pattern = Pattern.compile(regExp);
 		try {
@@ -423,6 +422,7 @@ public class WpullCrawl extends CrawlerModel {
 	 */
 	public boolean isWpullCrawlEmpty() {
 		File logfile = findLatestLogFile();
+		WebgatherLogger.info("logfile: " + logfile.getPath());
 		/**
 		 * Kein Crawl-Verzeichnis mit crawl.log vorhanden => wird wie "leer"
 		 * behandelt
@@ -432,21 +432,30 @@ public class WpullCrawl extends CrawlerModel {
 					+ " nicht gefunden.");
 			return true;
 		}
-		buf = null;
+		BufferedReader buf = null;
 		String regExp = "^INFO Downloaded: 0 files, 0.0 B.";
 		Pattern pattern = Pattern.compile(regExp);
 		boolean isEmpty = false;
 		try {
+			Thread.sleep(5000);
 			buf = new BufferedReader(new FileReader(logfile));
 			String line = null;
 			while ((line = buf.readLine()) != null) {
 				Matcher matcher = pattern.matcher(line);
+				// WebgatherLogger.info("log line: " + line);
 				if (matcher.find()) {
+					WebgatherLogger.info("Crawl is empty");
 					isEmpty = true;
 					break;
 				}
 			}
-		} catch (IOException e) {
+			if (isEmpty == false) {
+				WebgatherLogger.info("Crawl was not empty");
+			} else {
+				WebgatherLogger
+						.info("Found line \"^INFO Downloaded: 0 files, 0.0 B.\"");
+			}
+		} catch (IOException | InterruptedException e) {
 			WebgatherLogger.warn("Logfile " + logfile.getAbsolutePath()
 					+ " can not be parsed or read. Assuming empty.", e.toString());
 			isEmpty = true;
@@ -468,7 +477,7 @@ public class WpullCrawl extends CrawlerModel {
 	 * @return boolean Crawl läuft
 	 */
 	public boolean isWpullCrawlRunning() {
-		buf = null;
+		BufferedReader buf = null;
 		String cmd = "ps -eaf";
 		String regExp1 =
 				Play.application().configuration().getString("regal-api.wpull.crawler");
