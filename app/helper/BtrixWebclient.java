@@ -346,9 +346,10 @@ public class BtrixWebclient extends CrawlerModel {
 	 * @return a JSON Object with the found Crawl Config
 	 */
 	public JSONObject getCrawlConfigOut() {
+		CloseableHttpResponse myresponse = null;
 		try {
-			response = getCrawlConfigOutHttpResponse();
-			String responseJson = getResponseJson(response);
+			myresponse = getCrawlConfigOutHttpResponse();
+			String responseJson = getResponseJson(myresponse);
 			WebgatherLogger.debug("received response: " + responseJson);
 			JSONObject responseJsonObject = new JSONObject(responseJson);
 			return responseJsonObject;
@@ -358,7 +359,7 @@ public class BtrixWebclient extends CrawlerModel {
 			throw new RuntimeException(e);
 		} finally {
 			try {
-				response.close();
+				myresponse.close();
 			} catch (Exception e) {
 				WebgatherLogger.warn("httpResponse kann nicht geschlossen werden.",
 						e.toString());
