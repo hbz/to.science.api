@@ -163,6 +163,7 @@ public class BtrixWebclient extends CrawlerModel {
 					throw new RuntimeException(e);
 				} finally {
 					try {
+						httpClient.close();
 						response.close();
 					} catch (Exception e) {
 						WebgatherLogger.warn("httpResponse kann nicht geschlossen werden.",
