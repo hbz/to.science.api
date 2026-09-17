@@ -663,6 +663,7 @@ public class BtrixWebclient extends CrawlerModel {
 	public String getResponseJson(CloseableHttpResponse myresponse) {
 		try {
 			int statusCode = myresponse.getStatusLine().getStatusCode();
+			WebgatherLogger.debug("statusCode: " + statusCode);
 			if (statusCode == 200) {
 				String responseJson = EntityUtils.toString(myresponse.getEntity());
 				return responseJson;
