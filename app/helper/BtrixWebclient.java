@@ -145,6 +145,30 @@ public class BtrixWebclient extends CrawlerModel {
 			if (conf.getBtrixWorkflowId() != null) {
 				this.btrixWorkflowId = conf.getBtrixWorkflowId();
 				WebgatherLogger.debug("btrixWorkflowId: " + btrixWorkflowId);
+				/*
+				 * Prüfung, ob die btrixWorkflowId in Browsertrix existiert.
+				 */
+				try {
+					response = getCrawlConfigOutHttpResponse();
+					int statusCode = response.getStatusLine().getStatusCode();
+					if (statusCode == 404) {
+						this.btrixWorkflowId = null;
+						WebgatherLogger.debug(
+								"btrixWorkflowId existiert nicht in Browsertrix. Workflow wird neu angelegt.");
+					}
+				} catch (Exception e) {
+					setMsg(
+							"Could not get Crawl Config for WorkflowId " + btrixWorkflowId);
+					WebgatherLogger.error(getMsg(), e.getMessage());
+					throw new RuntimeException(e);
+				} finally {
+					try {
+						response.close();
+					} catch (Exception e) {
+						WebgatherLogger.warn("httpResponse kann nicht geschlossen werden.",
+								e.toString());
+					}
+				}
 			}
 			/*
 			 * Wenn es noch keine Worfkflow ID in der conf gibt, wird jetzt eine
@@ -152,8 +176,9 @@ public class BtrixWebclient extends CrawlerModel {
 			 */
 			updateCrawlerConfig();
 		} catch (Exception e) {
-			WebgatherLogger.error("Browsertrix-Workflow für PID " + node.getPid()
-					+ " URL " + conf.getUrl() + " kann nicht angelegt werden !");
+			WebgatherLogger
+					.error("Browsertrix-Workflow für PID " + node.getPid() + " URL "
+							+ conf.getUrl() + " kann nicht angelegt oder gelesen werden !");
 			throw new RuntimeException(e);
 		}
 	}
@@ -322,13 +347,7 @@ public class BtrixWebclient extends CrawlerModel {
 	 */
 	public JSONObject getCrawlConfigOut() {
 		try {
-			httpClient = HttpClientBuilder.create().build();
-			request = new HttpGet(btrix_api_url + "/orgs/" + btrix_orgid
-					+ "/crawlconfigs/" + this.btrixWorkflowId);
-			WebgatherLogger.debug("request = " + request.toString());
-			request.addHeader("Authorization", "Bearer " + this.bearerToken);
-			request.addHeader("Accept", "application/json");
-			response = httpClient.execute(request);
+			response = getCrawlConfigOutHttpResponse();
 			String responseJson = getResponseJson(response);
 			WebgatherLogger.debug("received response: " + responseJson);
 			JSONObject responseJsonObject = new JSONObject(responseJson);
@@ -339,8 +358,30 @@ public class BtrixWebclient extends CrawlerModel {
 			throw new RuntimeException(e);
 		} finally {
 			try {
-				httpClient.close();
 				response.close();
+			} catch (Exception e) {
+				WebgatherLogger.warn("httpResponse kann nicht geschlossen werden.",
+						e.toString());
+			}
+		}
+	}
+
+	private CloseableHttpResponse getCrawlConfigOutHttpResponse() {
+		try {
+			httpClient = HttpClientBuilder.create().build();
+			request = new HttpGet(btrix_api_url + "/orgs/" + btrix_orgid
+					+ "/crawlconfigs/" + this.btrixWorkflowId);
+			WebgatherLogger.debug("request = " + request.toString());
+			request.addHeader("Authorization", "Bearer " + this.bearerToken);
+			request.addHeader("Accept", "application/json");
+			return httpClient.execute(request);
+		} catch (Exception e) {
+			setMsg("Could not get Crawl Config for WorkflowId " + btrixWorkflowId);
+			WebgatherLogger.error(getMsg(), e.getMessage());
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				httpClient.close();
 			} catch (Exception e) {
 				WebgatherLogger.warn("httpClient kann nicht geschlossen werden.",
 						e.toString());
