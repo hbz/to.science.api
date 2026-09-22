@@ -75,6 +75,8 @@ import com.wordnik.swagger.core.util.JsonUtil;
 @IgnoreSizeOf
 public class Read extends RegalAction {
 
+	private static final int maxPartLabels = 100;
+
 	/**
 	 * @param pid the will be read to the node
 	 * @return a Node containing the data from the repository
@@ -282,6 +284,8 @@ public class Read extends RegalAction {
 
 	void addLabelsForParts(Node n) {
 		List<Link> rels = n.getRelsExt();
+		if (rels.size() > maxPartLabels)
+			return;
 		for (Link l : rels) {
 			if (HAS_PART.equals(l.getPredicate())
 					|| IS_PART_OF.equals(l.getPredicate())) {
@@ -866,7 +870,7 @@ public class Read extends RegalAction {
 				}
 				/*
 				 * Launch Count als Summe der Launches über alle Crawler ermitteln -
-				 * überschreibt launchCount von Heritrix
+				 * überschreibt launchCount von Heritrix und Browsertrix
 				 */
 				entries.put("launchCount", Webgatherer.getLaunchCount(node));
 				/*
