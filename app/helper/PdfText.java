@@ -52,10 +52,9 @@ public class PdfText {
 			PDFTextStripper stripper = new PDFTextStripper();
 			String text = stripper.getText(doc);
 			return text;
-		} catch (IOException e) {
-			throw new HttpArchiveException(500, e);
-		} catch (Exception e) {
-			throw new HttpArchiveException(500, e);
+		} catch (Exception | LinkageError e) {
+			logger.warn("PDF text extraction failed", e);
+			return "";
 		} finally {
 			if (doc != null) {
 				try {

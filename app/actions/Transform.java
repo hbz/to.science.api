@@ -225,8 +225,11 @@ public class Transform {
 		try {
 			URL url = new URL(getInternalDataUri(node));
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setConnectTimeout(10000);
+			connection.setReadTimeout(10000);
 			PdfText pdf = new PdfText();
-			result.addFulltext(pdf.toString(connection.getInputStream()));
+			content = connection.getInputStream();
+			result.addFulltext(pdf.toString(content));
 		} catch (MalformedURLException e) {
 			throw new HttpArchiveException(500, e);
 		} catch (IOException e) {
