@@ -244,6 +244,12 @@ public class TosHelper {
 			octiconElems.remove();
 			// Remove all attributes "isHtml"
 			doc.getAllElements().removeAttr("ishtml");
+			/**
+			 * Entferne list items mit leerem Attribut "data-curie" . Für TOS-1390.
+			 */
+			Elements elemsWithEmptyDataCurie =
+					doc.getElementsByAttributeValue("data-curie", "");
+			elemsWithEmptyDataCurie.remove();
 			play.Logger.debug("Bereinigtes treeHtml: " + doc.html());
 			return doc.html();
 		} catch (Exception e) {
