@@ -247,9 +247,13 @@ public class TosHelper {
 			/**
 			 * Entferne list items mit leerem Attribut "data-curie" . Für TOS-1390.
 			 */
-			Elements elemsWithEmptyDataCurie =
-					doc.getElementsByAttributeValue("data-curie", "");
-			elemsWithEmptyDataCurie.remove();
+			Elements elemsWithDataCurie = doc.getElementsByAttribute("data-curie");
+			for (Element elem : elemsWithDataCurie) {
+				Attribute attr = elem.attribute("data-curie");
+				if (attr.getValue().isEmpty()) {
+					elem.remove();
+				}
+			}
 			play.Logger.debug("Bereinigtes treeHtml: " + doc.html());
 			return doc.html();
 		} catch (Exception e) {
