@@ -77,6 +77,7 @@ import models.Message;
 import models.Node;
 import models.ToScienceObject;
 import models.UrlHist;
+import models.Urn;
 import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -122,6 +123,10 @@ public class Resource extends MyController {
 	public static Promise<Result> listUrn(@PathParam("pid") String pid) {
 		return new ReadMetadataAction().call(pid, (Node node) -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
+			Urn urn = read.getUrnStatus(node);
+			if (urn == null) {
+				return JsonMessage(new Message(pid + " hat keine URN", 204));
+			}
 			return getJsonResult(read.getUrnStatus(node));
 		});
 	}
@@ -951,7 +956,8 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readSeq(node);
-			return ok(result);
+			return noContentOrOk(result,
+					pid + " hat keinen SEQ-Datenstrom (ordered print of parts)");
 		});
 	}
 
@@ -960,12 +966,22 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readTree(node);
-			if (result == null) {
-				return JsonMessage(new Message(
-						pid + " Baum-Ansicht noch nicht vorhanden; wird generiert.", 404));
-			}
-			return ok(result);
+			// play.Logger.debug("tree result: " + result);
+			return noContentOrOk(result, pid + " Baum-Ansicht noch nicht vorhanden.");
 		});
+
+	}
+
+	private static Result noContentOrOk(String result, String msg) {
+		/**
+		 * Wenn man Leerstrings über "200 - ok" zurückgibt, erzeugt das einen
+		 * allgemeinen Server-Fehler (500). Um das zu umgehen, wird bei Leerstrings
+		 * stattdessen eine 204 (No Content) zurück gegeben.
+		 */
+		if (result == null) {
+			return JsonMessage(new Message(msg, 204));
+		}
+		return ok(result);
 	}
 
 	@ApiOperation(produces = "application/json", nickname = "listParents", value = "listParents", notes = "Shows resources linkes with isPartOf", response = play.mvc.Result.class, httpMethod = "GET")
@@ -1320,7 +1336,7 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readConf(node);
-			return ok(result);
+			return noContentOrOk(result, pid + " Gatherconf nicht vorhanden.");
 		});
 	}
 
@@ -1328,7 +1344,7 @@ public class Resource extends MyController {
 		return new ReadMetadataAction().call(pid, node -> {
 			response().setHeader("Access-Control-Allow-Origin", "*");
 			String result = read.readUrlHist(node);
-			return ok(result);
+			return noContentOrOk(result, pid + " Url-Historie nicht vorhanden.");
 		});
 	}
 

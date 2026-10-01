@@ -119,8 +119,8 @@ public class MyController extends Controller {
 	public static Result AccessDenied() {
 		// ctx().session().put("CURRENT_PAGE", request().uri());
 		Message msg = new Message("Access Denied!", 401);
-		play.Logger.debug(
-				"\nResponse: " + msg.toString() + "\nSession " + ctx().session());
+		// play.Logger.debug("\nResponse: " + msg.toString() + "\nSession " +
+		// ctx().session());
 		if (request().accepts("text/html")) {
 			flash("message", "You must be logged in to perform this action!");
 			// return redirect(routes.Forms.getLoginForm());
@@ -419,9 +419,12 @@ public class MyController extends Controller {
 					Node node = null;
 					if (pid != null) {
 						node = read.readNode(pid);
+						// play.Logger.debug("Read node for pid: " + pid);
 						Role role = Role.valueOf(ctx().session().get("role"));
+						// play.Logger.debug("role: " + role.toString());
 						String publishScheme = node.getPublishScheme();
 						if (!readMetadata_accessIsAllowed(publishScheme, role)) {
+							// play.Logger.debug("Access denied");
 							return AccessDenied();
 						}
 					}
@@ -481,7 +484,7 @@ public class MyController extends Controller {
 		if (roleString == null || roleString.isEmpty()) {
 			roleString = Role.GUEST.toString();
 		}
-		play.Logger.debug("Access with role " + roleString);
+		// play.Logger.debug("Access with role " + roleString);
 		return Role.valueOf(roleString);
 	}
 
