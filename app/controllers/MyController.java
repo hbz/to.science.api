@@ -83,6 +83,10 @@ public class MyController extends Controller {
 	 */
 	public final static String DATA_ACCESSOR_PUBLIC = "public";
 	/**
+	 * campus data is visible to everyone situated on campus
+	 */
+	public final static String DATA_ACCESSOR_CAMPUS = "campus";
+	/**
 	 * private data is visible to admins and editors
 	 */
 	public final static String DATA_ACCESSOR_PRIVATE = "private";
@@ -322,6 +326,13 @@ public class MyController extends Controller {
 			Role role) {
 		if (!Role.ADMIN.equals(role)) {
 			if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
+				return true;
+			} else if (DATA_ACCESSOR_CAMPUS.equals(accessScheme)) {
+				/**
+				 * Campus Data ist jedem zugänglich, der vom Campus aus zugreift. Eine
+				 * weitere Einschränkung muss über die Apache-Conf erfolgen (allowed IP
+				 * ranges). Hier wird generell "true" zurück gegeben.
+				 */
 				return true;
 			} else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
 				if (isWhitelisted(request().remoteAddress())) {
