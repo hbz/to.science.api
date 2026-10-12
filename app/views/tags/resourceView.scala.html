@@ -26,7 +26,7 @@
 				@if(ViewerInfo.Style.EMBEDDED.equals(viewerInfo.style)){
 				   @mediaViewers.standardViewer(viewerInfo)
 				} else{
-					@if("public".equals(viewerInfo.accessScheme)){
+					@if("public".equals(viewerInfo.accessScheme) || "campus".equals(viewerInfo.accessScheme)){
 						@if(ViewerInfo.ViewerType.DEEPZOOM.equals(viewerInfo.viewertype)){
 				   			<div id="thumbnail" class="thumb">
 							<a href=@viewerInfo.getViewerLink()  target="_blank">
@@ -55,11 +55,12 @@
 
 @createViewerLink(viewerInfo:ViewerInfo)={
  	@if("public".equals(viewerInfo.accessScheme)){
-	        <a class="public-download" href=@viewerInfo.dataLink><b>Download <i class="fa fa-download"></i></b><br/> @viewerInfo.label @views.Helper.getPrettySize(viewerInfo.filesize+"")</a>
+	        <a class="public-download" href=@viewerInfo.viewerAdress><b>Download <i class="fa fa-download"></i></b><br/> @viewerInfo.label @views.Helper.getPrettySize(viewerInfo.filesize+"")</a>
 		<i class="fa fa-unlock" style="color:green;"></i>
  	}else {
-	        <a class="private-download" href=@viewerInfo.dataLink><b>Download <i class="fa fa-download"></i></b><br/> @viewerInfo.label @views.Helper.getPrettySize(viewerInfo.filesize+"")</a>
+	        <a class="private-download" href=@viewerInfo.viewerAdress><b>Download <i class="fa fa-download"></i></b><br/> @viewerInfo.label @views.Helper.getPrettySize(viewerInfo.filesize+"")</a>
 		<i class="fa fa-lock" style="color:red;"></i>
+		}
 	}
 }
 
