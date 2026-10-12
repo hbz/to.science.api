@@ -329,11 +329,18 @@ public class MyController extends Controller {
 				return true;
 			} else if (DATA_ACCESSOR_CAMPUS.equals(accessScheme)) {
 				/**
-				 * Campus Data ist jedem zugänglich, der vom Campus aus zugreift. Eine
-				 * weitere Einschränkung muss über die Apache-Conf erfolgen (allowed IP
-				 * ranges). Hier wird generell "true" zurück gegeben.
+				 * Campus Data ist jedem zugänglich, der vom Campus aus zugreift. Die
+				 * Campus IP-Adressen müssen in die IP-Whiteliste in der
+				 * application.conf eingetragen sein.
 				 */
-				return true;
+				if (isWhitelisted(request().remoteAddress())) {
+					play.Logger.info("IP " + request().remoteAddress()
+							+ " is white listed. Access to Campus data granted.");
+					return true;
+				}
+				if (Role.EDITOR.equals(role)) {
+					return true;
+				}
 			} else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
 				if (isWhitelisted(request().remoteAddress())) {
 					play.Logger.info("IP " + request().remoteAddress()
