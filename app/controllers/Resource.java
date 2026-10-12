@@ -318,6 +318,7 @@ public class Resource extends MyController {
 		return new ReadDataAction().call(pid, node -> {
 			HttpURLConnection connection = null;
 			try {
+				play.Logger.debug("start listData");
 				response().setHeader("Access-Control-Allow-Origin", "*");
 				URL url = new URL(Globals.fedoraIntern + "/objects/" + pid
 						+ "/datastreams/" + datastream + "/content");
