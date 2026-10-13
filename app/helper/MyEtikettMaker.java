@@ -22,6 +22,8 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -45,6 +47,8 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	private static final String PREF_LABEL = "prefLabel";
 	private static final String TYPE = "@type";
 	private static final String ID = "@id";
+	private static final ConcurrentMap<String, String> labelCache =
+			new ConcurrentHashMap<>();
 	EtikettMaker maker;
 
 	public MyEtikettMaker() {
@@ -217,27 +221,59 @@ public class MyEtikettMaker implements EtikettMakerInterface {
 	}
 
 	public static String getLabelFromEtikettWs(String uri) {
+		if (uri == null || uri.isEmpty()) {
+			return uri;
+		}
+		if (skipLabelLookup(uri)) {
+			return uri;
+		}
+		String content = labelCache.get(uri);
+		if (content != null) {
+			return content;
+		}
 		try {
-			uri = uri.replaceAll("#", "%23");
-			play.Logger.debug("Etikett url: " + Globals.etikettUrl + "?url=" + uri
-					+ "&column=label");
-			WSResponse response = play.libs.ws.WS
-					.url(Globals.etikettUrl + "?url=" + uri + "&column=label")
+			String requestUrl = Globals.etikettUrl + "?url="
+					+ uri.replaceAll("#", "%23") + "&column=label";
+			play.Logger.debug("Etikett url: " + requestUrl);
+			WSResponse response = play.libs.ws.WS.url(requestUrl)
 					.setAuth(Globals.etikettUser, Globals.etikettPwd, WSAuthScheme.BASIC)
-					.setFollowRedirects(true).get().get(20000);
+					.setFollowRedirects(true).get().get(2000);
 			InputStream input = response.getBodyAsStream();
-			String content =
-					CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
+			content = CharStreams.toString(new InputStreamReader(input, Charsets.UTF_8));
 			Closeables.closeQuietly(input);
 			// fetch annoying errors from etikett service
 			if (response.getStatus() != 200) {
-				play.Logger.error("Etikett Service request fails for " + uri
+				play.Logger.error("Etikett Service request fails for " + requestUrl
 						+ "\nUse URI for setting Label now!");
 				content = uri;
 			}
+			if (content == null || content.trim().isEmpty()) {
+				content = uri;
+			}
+			if (labelCache.size() < 10000) {
+				labelCache.putIfAbsent(uri, content);
+			}
 			return content;
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			play.Logger.warn("Could not resolve label for " + uri, e);
+			if (labelCache.size() < 10000) {
+				labelCache.putIfAbsent(uri, uri);
+			}
+			return uri;
 		}
+	}
+
+	private static boolean skipLabelLookup(String uri) {
+		return uri.startsWith("https://doi.org/")
+				|| uri.startsWith("http://doi.org/")
+				|| uri.startsWith("http://lobid.org/items/")
+				|| uri.startsWith("http://lobid.org/resources/")
+				|| uri.startsWith("http://lobid.org/organisations/")
+				|| uri.startsWith("https://nbn-resolving.org/")
+				|| uri.startsWith("http://nbn-resolving.org/")
+				|| uri.startsWith("https:/nbn-resolving.org/")
+				|| uri.startsWith("https://www.ncbi.nlm.nih.gov/")
+				|| uri.startsWith("https://hub.culturegraph.org/")
+				|| uri.startsWith("http://worldcat.org/");
 	}
 }
