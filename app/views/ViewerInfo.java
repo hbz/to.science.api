@@ -13,7 +13,7 @@ public class ViewerInfo {
 	}
 
 	public enum ViewerType {
-		SEC_PDF, VIDEO, AUDIO, DEEPZOOM, IMAGE, UNDEFINED
+		SEC_PDF, CAMPUS, VIDEO, AUDIO, DEEPZOOM, IMAGE, UNDEFINED
 	}
 
 	public String pid = null;
@@ -62,6 +62,9 @@ public class ViewerInfo {
 		if ("restricted".equals(n.getAccessScheme()) && mt.is(MediaType.PDF)) {
 			return ViewerType.SEC_PDF;
 		}
+		if ("campus".equals(n.getAccessScheme()) && mt.is(MediaType.PDF)) {
+			return ViewerType.CAMPUS;
+		}
 		return ViewerType.UNDEFINED;
 	}
 
@@ -77,6 +80,9 @@ public class ViewerInfo {
 		}
 		if (ViewerType.SEC_PDF.equals(viewertype)) {
 			return "/viewers/pdf/" + n.getPid() + "/data";
+		}
+		if (ViewerType.CAMPUS.equals(viewertype)) {
+			return "/viewers/campus/" + n.getPid() + "/data";
 		}
 
 		return dataLink;
@@ -96,6 +102,10 @@ public class ViewerInfo {
 			return thumbyLink(n);
 		}
 		if (ViewerType.SEC_PDF.equals(viewertype)) {
+			style = Style.LINKED;
+			return thumbyLink(n);
+		}
+		if (ViewerType.CAMPUS.equals(viewertype)) {
 			style = Style.LINKED;
 			return thumbyLink(n);
 		}

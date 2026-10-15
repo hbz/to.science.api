@@ -83,6 +83,10 @@ public class MyController extends Controller {
 	 */
 	public final static String DATA_ACCESSOR_PUBLIC = "public";
 	/**
+	 * campus data is visible to everyone situated on campus
+	 */
+	public final static String DATA_ACCESSOR_CAMPUS = "campus";
+	/**
 	 * private data is visible to admins and editors
 	 */
 	public final static String DATA_ACCESSOR_PRIVATE = "private";
@@ -323,6 +327,20 @@ public class MyController extends Controller {
 		if (!Role.ADMIN.equals(role)) {
 			if (DATA_ACCESSOR_PUBLIC.equals(accessScheme)) {
 				return true;
+			} else if (DATA_ACCESSOR_CAMPUS.equals(accessScheme)) {
+				/**
+				 * Campus Data ist jedem zugänglich, der vom Campus aus zugreift. Die
+				 * Campus IP-Adressen müssen in die IP-Whiteliste in der
+				 * application.conf eingetragen sein.
+				 */
+				if (isWhitelisted(request().remoteAddress())) {
+					play.Logger.info("IP " + request().remoteAddress()
+							+ " is white listed. Access to Campus data granted.");
+					return true;
+				}
+				if (Role.EDITOR.equals(role)) {
+					return true;
+				}
 			} else if (DATA_ACCESSOR_RESTRICTED.equals(accessScheme)) {
 				if (isWhitelisted(request().remoteAddress())) {
 					play.Logger.info("IP " + request().remoteAddress()
