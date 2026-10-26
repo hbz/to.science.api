@@ -489,9 +489,6 @@ public class JsonMapper {
 						fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
 								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
 
-						play.Logger.debug("ID2=" + ID2 + ", " + Globals.server
-								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
-
 						fundingJoinedMap.put(PREF_LABEL, funding);
 						play.Logger.debug("PREF_LABEL" + PREF_LABEL);
 						fundingId.add(fundingJoinedMap);
@@ -533,8 +530,6 @@ public class JsonMapper {
 					for (String funding : fundings) {
 						Map<String, Object> fundingJoinedMap = new LinkedHashMap<>();
 						fundingJoinedMap.put(ID2, Globals.protocol + Globals.server
-								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
-						play.Logger.debug("ID2=" + ID2 + ", " + Globals.server
 								+ "/adhoc/uri/" + helper.MyURLEncoding.encode(funding));
 
 						fundingJoinedMap.put(PREF_LABEL, funding);
@@ -914,23 +909,13 @@ public class JsonMapper {
 		Collection<Link> ls = node.getRelsExt();
 		Map<String, Object> m2 = null;
 
-		// Map<String, Object> m = getDescriptiveMetadata2();
-
-		// play.Logger.debug("*******************m****************");
-		// TosHelper.logObjectInfo(m);
-
 		m2 = getDescriptiveToscience(node.getMetadata("toscience"));
 		if (m2 != null) {
 			m2.put("@context", profile.getContext().get("@context"));
-			play.Logger.debug("********************m2***************");
-			TosHelper.logObjectInfo(m2);
 		}
 
-		// Map<String, Object> rdf = m == null ? new HashMap<>() : m;
 		Map<String, Object> rdf = m2 == null ? new HashMap<>() : m2;
 		changeDcIsPartOfToRegalIsPartOf(rdf);
-		// rdf.remove("describedby");
-		// rdf.remove("sameAs");
 
 		rdf.put(ID2, node.getPid());
 		rdf.put(primaryTopic, node.getPid());
@@ -953,7 +938,6 @@ public class JsonMapper {
 		rdf.put(transformer, node.getTransformer().stream().map(t -> t.getId())
 				.collect(Collectors.toList()));
 		rdf.put(catalogId, node.getCatalogId());
-		// rdf.put(embargoTime, node.getEmbargoTime());
 
 		if (node.getFulltext() != null)
 			rdf.put(fulltext_ocr, node.getFulltext());
@@ -991,6 +975,7 @@ public class JsonMapper {
 		aboutMap.put(describes, node.getAggregationUri());
 
 		rdf.put(isDescribedBy, aboutMap);
+
 		if (node.getDoi() != null) {
 			rdf.put(doi, node.getDoi());
 		}
@@ -1032,8 +1017,8 @@ public class JsonMapper {
 
 		String issuedValue = getFirstValue(rdf.get("issued"));
 		if (issuedValue != null && !issuedValue.isEmpty()) {
-			play.Logger.debug("issued =" + issuedValue);
-			return issuedValue;
+			// play.Logger.debug("issued =" + issuedValue);
+			return getYear(issuedValue);
 		}
 
 		String publicationYear = getFirstValue(rdf.get("publicationYear"));
@@ -1041,7 +1026,7 @@ public class JsonMapper {
 			play.Logger.debug("publicationYear =" + publicationYear);
 
 			if (new JsonMapperHelper().isDateValid(publicationYear)) {
-				return publicationYear;
+				return getYear(publicationYear);
 			}
 		}
 
@@ -1067,6 +1052,10 @@ public class JsonMapper {
 			return it.hasNext() ? getFirstValue(it.next()) : null;
 		}
 		return value == null ? null : value.toString();
+	}
+
+	private static String getYear(String value) {
+		return value != null && value.length() > 4 ? value.substring(0, 4) : value;
 	}
 
 	private static Collection<Map<String, Object>> getType(

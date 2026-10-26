@@ -196,19 +196,12 @@ public class TosHelper {
 			while (keys.hasNext()) {
 				String key = keys.next();
 				Object value = allJsonObjects.get(key);
-				play.Logger.debug(" key=" + key + " ,value=" + value.toString()
-						+ " ,artOfObject=" + value.getClass().getName());
 				if (value.toString().contains("prefLabel")) {
-					play.Logger.debug("value contains prefLabel");
 					if (value instanceof JSONObject) {
-						play.Logger.debug("value instanceof JSONObject");
 						JSONObject jsObject = allJsonObjects.getJSONObject(key);
-						play.Logger.debug("jsObject=" + jsObject.toString());
 						resolvePrefLabel(jsObject);
 					} else if (value instanceof JSONArray) {
-						play.Logger.debug("value instanceof JSONArray");
 						JSONArray jsArray = allJsonObjects.getJSONArray(key);
-						play.Logger.debug("jsArray=" + jsArray.toString());
 						for (int j = 0; j < jsArray.length(); j++) {
 							JSONObject jsObject = jsArray.getJSONObject(j);
 							if (jsObject.has("prefLabel")) {
@@ -242,10 +235,8 @@ public class TosHelper {
 				return;
 			}
 
-			play.Logger.debug("oldPrefLabel=" + oldPrefLabelString);
 			String newPrefLabel =
 					MyEtikettMaker.getLabelFromEtikettWs(oldPrefLabelString);
-			play.Logger.debug("newPrefLabel=" + newPrefLabel);
 			if (newPrefLabel != null && !newPrefLabel.trim().isEmpty()) {
 				jsObject.put("prefLabel", newPrefLabel);
 			} else {
