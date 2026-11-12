@@ -560,6 +560,7 @@ public class JsonMapper {
 			return;
 		Read read = new Read();
 		List<Map<String, Object>> children = new ArrayList<>(parts.size());
+		play.Logger.debug("parts.size=" + parts.size());
 		for (Link part : parts) {
 			String id = part.getObject();
 			if (id == null)
