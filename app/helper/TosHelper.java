@@ -1554,7 +1554,27 @@ public class TosHelper {
 		for (Node child : parts) {
 			if (child != null && child.getPid() != null) {
 				persistAndNormalizeTosMd(child.getPid(), child);
+				persistMissingTitle(child);
 			}
+		}
+	}
+
+	private static void persistMissingTitle(Node node) {
+		try {
+			JSONObject toscience = new JSONObject(node.getMetadata("toscience"));
+			JSONArray titles = toscience.optJSONArray("title");
+
+			if (titles != null && titles.length() > 0) {
+				return;
+			}
+
+			String title = new Read().readMetadata2(node, "title");
+			if (title != null && !title.trim().isEmpty()) {
+				toscience.put("title", new JSONArray().put(title));
+				modify.updateMetadata("toscience", node, toscience.toString());
+			}
+		} catch (Exception e) {
+			play.Logger.debug("Exception in persistMissingTitle() " + e);
 		}
 	}
 
