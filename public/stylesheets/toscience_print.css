@@ -1,4 +1,12 @@
-div {
-    display: none;
-}
+@media print {
+    body,
+    #viewerContainer,
+    .pdfViewer,
+    .page {
+        background: white !important;
+    }
 
+    .page {
+        box-shadow: none !important;
+    }
+}
